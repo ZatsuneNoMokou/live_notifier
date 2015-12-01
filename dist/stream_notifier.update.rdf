@@ -12,7 +12,7 @@
                               <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
                               <em:minVersion>38.0a1</em:minVersion>
                               <em:maxVersion>43.0</em:maxVersion>
-                              <em:updateLink>https://github.com/ZatsuneNoMokou/stream_notifier/raw/master/dist/stream_notifier.xpi</em:updateLink>
+                              <em:updateLink>https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.xpi</em:updateLink>
 </Description>
 </em:targetApplication>
 
@@ -21,7 +21,7 @@
                               <em:id>{aa3c5121-dab2-40e2-81ca-7ea25febc110}</em:id>
                               <em:minVersion>38.0a1</em:minVersion>
                               <em:maxVersion>43.0</em:maxVersion>
-                              <em:updateLink>https://github.com/ZatsuneNoMokou/stream_notifier/raw/master/dist/stream_notifier.xpi</em:updateLink>
+                              <em:updateLink>https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.xpi</em:updateLink>
 </Description>
 </em:targetApplication>
 
