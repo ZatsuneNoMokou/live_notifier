@@ -153,18 +153,18 @@ function handleChange(state) {
 //Affichage des notifications en ligne / hors ligne
 var notifications = require("sdk/notifications");
 
-function doNotif(tittle,message,url) {
+function doNotif(title,message,url) {
 	notifications.notify({
-		title: tittle,
+		title: title,
 		text: message,
 		iconURL: myIconURL128,
 		onClick: function(){tabs.open(url);}
 	});
 }
 
-function doNotifNoLink(tittle,message) {
+function doNotifNoLink(title,message) {
 	notifications.notify({
-		title: tittle,
+		title: title,
 		text: message,
 		iconURL: myIconURL128
 	});
@@ -254,7 +254,7 @@ function checkLives(){
 			let request_overrideMimeType;
 			switch(website){
 				case "dailymotion":
-					request_url = "https://api.dailymotion.com/video/" + id + "?fields=title,onair?_=" + new Date().getTime();
+					request_url = "https://api.dailymotion.com/video/" + id + "?fields=title,owner,onair?_=" + new Date().getTime();
 					request_overrideMimeType = "text/plain; charset=latin1";
 					break;
 				case "hitbox":
@@ -279,7 +279,11 @@ function checkLives(){
 						liveStatus[website][id] = {"online": false, "streamName": "", "streamStatus": ""};
 					}
 					if(checkLiveStatus[website](id,data)){
-						doNotifOnline(website,id);
+						if(typeof seconderyInfo[website] == "function"){
+							seconderyInfo[website](id,data);
+						} else {
+							doNotifOnline(website,id);
+						}
 					} else {
 						doNotifOffline(website,id);
 					}
@@ -325,6 +329,26 @@ checkLiveStatus = {
 				}
 				return false;
 			}
+		}
+}
+seconderyInfo = {
+	"dailymotion":
+		function(id,data){
+			let user_api_url = "https://api.dailymotion.com/user/" + data.owner + "?fields=id,screenname";
+			Request({
+				url: user_api_url,
+				overrideMimeType: "text/plain; charset=latin1",
+				onComplete: function (response) {
+					data = response.json;
+					console.log("dailymotion" + " - " + id + " (" + user_api_url + ")\n" + JSON.stringify(data));
+					if(typeof data.screenname == "string"){
+						liveStatus["dailymotion"][id].streamStatus = liveStatus["dailymotion"][id].streamName;
+						liveStatus["dailymotion"][id].streamName = data.screenname;
+					}
+					doNotifOnline("dailymotion",id);
+				}
+			}).get();
+			setIcon();
 		}
 }
 
