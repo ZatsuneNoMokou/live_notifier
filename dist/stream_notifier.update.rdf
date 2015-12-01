@@ -1,30 +1,39 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
-  <rdf:Description rdf:about="urn:mozilla:stream_notifier@zatsunenomokou.eu">
-    <em:updates>
-      <rdf:Seq>
-        <rdf:li>
-          <rdf:Description>
-            <em:version>2.2.0</em:version>
-            <em:targetApplication>
-              <rdf:Description>
-                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-                <em:minVersion>38.0a1</em:minVersion>
-                <em:maxVersion>43.0</em:maxVersion>
-                <em:updateLink>https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.xpi</em:updateLink>
-              </rdf:Description>
-            </em:targetApplication>
-            <em:targetApplication>
-                <rdf:Description>
-                  <em:id>{aa3c5121-dab2-40e2-81ca-7ea25febc110}</em:id>
-                  <em:minVersion>38.0a1</em:minVersion>
-                  <em:maxVersion>43.0</em:maxVersion>
-                  <em:updateLink>https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.xpi</em:updateLink>
-                </rdf:Description>
-            </em:targetApplication>
-          </rdf:Description>
-        </rdf:li>
-      </rdf:Seq>
-    </em:updates>
-  </rdf:Description>
-</rdf:RDF>
+<?xml version="1.0" encoding="utf-8"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+    <Description about="urn:mozilla:stream_notifier@zatsunenomokou.eu">
+        <em:updates>
+            <Seq>
+                <li>
+                    <Description>
+                          <em:version>2.2.0</em:version>
+
+                          <em:targetApplication>
+                            <Description>
+                              <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                              <em:minVersion>38.0a1</em:minVersion>
+                              <em:maxVersion>43.0</em:maxVersion>
+                              <em:updateLink>https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.xpi</em:updateLink>
+</Description>
+</em:targetApplication>
+
+                          <em:targetApplication>
+                            <Description>
+                              <em:id>{aa3c5121-dab2-40e2-81ca-7ea25febc110}</em:id>
+                              <em:minVersion>38.0a1</em:minVersion>
+                              <em:maxVersion>43.0</em:maxVersion>
+                              <em:updateLink>https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.xpi</em:updateLink>
+</Description>
+</em:targetApplication>
+
+
+                    </Description>
+
+                </li>
+
+            </Seq>
+
+        </em:updates>
+
+    </Description>
+
+</RDF>
