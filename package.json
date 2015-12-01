@@ -65,6 +65,6 @@
 			"value": false
 		}
 	],
-	"updateLink": "https://github.com/ZatsuneNoMokou/stream_notifier/raw/master/dist/stream_notifier.xpi",
-	"updateURL": "https://github.com/ZatsuneNoMokou/stream_notifier/raw/master/dist/stream_notifier.update.rdf"
+	"updateLink": "https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.xpi",
+	"updateURL": "https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.update.rdf"
 }
