@@ -1,4 +1,5 @@
 stream_notifier@zatsunenomokou.eu*.rdf
+.gitignore
 *.xpi
 dist/
 .git/
