@@ -1,0 +1,4 @@
+stream_notifier@zatsunenomokou.eu*.rdf
+*.xpi
+dist/
+.git/
