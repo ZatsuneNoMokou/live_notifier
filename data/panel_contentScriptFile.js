@@ -1,5 +1,5 @@
 function unloadListeners() {
-	var refreshStreamsButton = document.getElementById("refreshStreams");
+	var refreshStreamsButton = document.querySelector("#refreshStreams");
 	refreshStreamsButton.removeEventListener("click",refreshButtonClick);
 	
 	self.port.removeListener('initList', initList);
@@ -11,7 +11,7 @@ function unloadListeners() {
 
 self.port.on('unloadListeners', unloadListeners);
 
-var refreshStreamsButton = document.getElementById("refreshStreams");
+var refreshStreamsButton = document.querySelector("#refreshStreams");
 function refreshButtonClick(){
 	self.port.emit("refreshStreams","");
 }
@@ -32,12 +32,12 @@ function removeAllChildren(node){
 	}
 }
 
-var nodeListOnline = {"dailymotion": document.getElementById("dailymotionOnlineList"),
-	"hitbox": document.getElementById("hitboxOnlineList"),
-	"twitch": document.getElementById("twitchOnlineList")};
-var nodeListOffline = {"dailymotion": document.getElementById("dailymotionOfflineList"),
-	"hitbox": document.getElementById("hitboxOfflineList"),
-	"twitch": document.getElementById("twitchOfflineList")};
+var nodeListOnline = {"dailymotion": document.querySelector("#dailymotionOnlineList"),
+	"hitbox": document.querySelector("#hitboxOnlineList"),
+	"twitch": document.querySelector("#twitchOnlineList")};
+var nodeListOffline = {"dailymotion": document.querySelector("#dailymotionOfflineList"),
+	"hitbox": document.querySelector("#hitboxOfflineList"),
+	"twitch": document.querySelector("#twitchOfflineList")};
 
 function initList(showOffline){
 	for(i in nodeListOnline){
@@ -46,7 +46,7 @@ function initList(showOffline){
 	for(i in nodeListOnline){
 		removeAllChildren(nodeListOffline[i]);
 	}
-	document.getElementById("streamListOffline").className = (showOffline)? "" : "hide";
+	document.querySelector("#streamListOffline").className = (showOffline)? "" : "hide";
 }
 
 function showNonEmptySitesBlocks(){
@@ -58,8 +58,8 @@ function showNonEmptySitesBlocks(){
 	}
 }
 
-var streamOnlineCountNode = document.getElementById("streamOnlineCountLabel");
-var streamOfflineCountNode = document.getElementById("streamOfflineCountLabel");
+var streamOnlineCountNode = document.querySelector("#streamOnlineCountLabel");
+var streamOfflineCountNode = document.querySelector("#streamOfflineCountLabel");
 
 function listenerOnlineCount(data){
 	removeAllChildren(streamOnlineCountNode);
