@@ -247,7 +247,7 @@ function checkLives(){
 	for(i in websites){
 		let website = websites[i];
 		let streamList = getStreamList(website);
-		console.log(JSON.stringify(streamList));
+		if(simplePrefs["show_debug_info"]){console.log(JSON.stringify(streamList));}
 		for(id in streamList){
 			let request_id = id;
 			let request_url;
@@ -274,7 +274,7 @@ function checkLives(){
 				onComplete: function (response) {
 					let id = request_id;
 					data = response.json;
-					console.log(website + " - " + id + " (" + request_url + ")\n" + JSON.stringify(data));
+					if(simplePrefs["show_debug_info"]){console.log(website + " - " + id + " (" + request_url + ")\n" + JSON.stringify(data));}
 					if(typeof liveStatus[website][id] == "undefined"){
 						liveStatus[website][id] = {"online": false, "streamName": "", "streamStatus": ""};
 					}
@@ -340,7 +340,7 @@ seconderyInfo = {
 				overrideMimeType: "text/plain; charset=latin1",
 				onComplete: function (response) {
 					data = response.json;
-					console.log("dailymotion" + " - " + id + " (" + user_api_url + ")\n" + JSON.stringify(data));
+					if(simplePrefs["show_debug_info"]){console.log("dailymotion" + " - " + id + " (" + user_api_url + ")\n" + JSON.stringify(data));}
 					if(typeof data.screenname == "string"){
 						liveStatus["dailymotion"][id].streamStatus = liveStatus["dailymotion"][id].streamName;
 						liveStatus["dailymotion"][id].streamName = data.screenname;
