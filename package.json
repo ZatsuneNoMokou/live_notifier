@@ -2,7 +2,7 @@
 	"title": "Streams notifier",
 	"id": "stream_notifier@zatsunenomokou.eu",
 	"name": "streamnotifier",
-	"version": "2.3.1",
+	"version": "2.3.3",
 	"description": "Be notified of streams from Dailymotion, Hitbox and Twitch",
 	"main": "index.js",
 	"author": "Zatsune No Mokou",
@@ -63,13 +63,6 @@
 			"description": "Shown when checked",
 			"type": "bool",
 			"value": false
-		},
-		{
-			"name": "show_debug_info",
-			"title": "Show debug in console",
-			"type": "bool",
-			"value": false,
-			"hidden": true
 		}
 	],
 	"updateLink": "https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.xpi",

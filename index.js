@@ -244,10 +244,14 @@ function setIcon() {
 };
 
 function checkLives(){
+	console.group();
+	
 	for(i in websites){
 		let website = websites[i];
 		let streamList = getStreamList(website);
-		if(simplePrefs["show_debug_info"]){console.log(JSON.stringify(streamList));}
+		
+		console.log(JSON.stringify(streamList));
+		
 		for(id in streamList){
 			let request_id = id;
 			let request_url;
@@ -268,13 +272,20 @@ function checkLives(){
 				default:
 					return;
 			}
+			
+			console.time(id);
+			
 			Request({
 				url: request_url,
 				overrideMimeType: request_overrideMimeType,
 				onComplete: function (response) {
 					let id = request_id;
 					data = response.json;
-					if(simplePrefs["show_debug_info"]){console.log(website + " - " + id + " (" + request_url + ")\n" + JSON.stringify(data));}
+					
+					console.group();
+					console.log(website + " - " + id + " (" + request_url + ")");
+					console.dir(data);
+					
 					if(typeof liveStatus[website][id] == "undefined"){
 						liveStatus[website][id] = {"online": false, "streamName": "", "streamStatus": ""};
 					}
@@ -288,10 +299,16 @@ function checkLives(){
 						doNotifOffline(website,id);
 					}
 					setIcon();
+					
+					console.timeEnd(id);
+					console.groupEnd();
 				}
 			}).get();
 		}
 	}
+	
+	console.groupEnd();
+	
 	clearInterval(interval);
 	interval = setInterval(checkLives, simplePrefs['dailymotion_check_delay'] * 60000);
 }
@@ -340,7 +357,10 @@ seconderyInfo = {
 				overrideMimeType: "text/plain; charset=latin1",
 				onComplete: function (response) {
 					data = response.json;
-					if(simplePrefs["show_debug_info"]){console.log("dailymotion" + " - " + id + " (" + user_api_url + ")\n" + JSON.stringify(data));}
+					
+					console.log("dailymotion" + " - " + id + " (" + user_api_url + ")");
+					console.dir(data);
+					
 					if(typeof data.screenname == "string"){
 						liveStatus["dailymotion"][id].streamStatus = liveStatus["dailymotion"][id].streamName;
 						liveStatus["dailymotion"][id].streamName = data.screenname;
