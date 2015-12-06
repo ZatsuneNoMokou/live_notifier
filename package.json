@@ -7,6 +7,8 @@
 	"main": "index.js",
 	"author": "Zatsune No Mokou",
 	"homepage": "https://github.com/ZatsuneNoMokou/stream_notifier",
+	"updateLink": "https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.xpi",
+	"updateURL": "https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.update.rdf",
 	"engines": {
 		"firefox": ">=38.0a1",
 		"fennec": ">=38.0a1"
@@ -64,7 +66,5 @@
 			"type": "bool",
 			"value": false
 		}
-	],
-	"updateLink": "https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.xpi",
-	"updateURL": "https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.update.rdf"
+	]
 }

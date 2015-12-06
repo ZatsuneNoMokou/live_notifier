@@ -1,5 +1,7 @@
 stream_notifier@zatsunenomokou.eu*.rdf
+dailymotionsstream@zatsunenomokou.eu*.xpi
 .gitignore
 *.xpi
 dist/
 .git/
+tmp/
