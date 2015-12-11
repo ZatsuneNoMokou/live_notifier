@@ -350,20 +350,22 @@ checkLiveStatus = {
 }
 seconderyInfo = {
 	"dailymotion":
-		function(id,data){
-			let user_api_url = "https://api.dailymotion.com/user/" + data.owner + "?fields=id,screenname";
+		function(id,data_previous){
+			//let user_api_url = "https://api.dailymotion.com/user/" + data_previous.owner + "?fields=id,screenname";
+			let user_api_url = "https://api.dailymotion.com/video/" + id + "?fields=id,user.screenname,game.title";
 			Request({
 				url: user_api_url,
 				overrideMimeType: "text/plain; charset=latin1",
 				onComplete: function (response) {
 					data = response.json;
-					
 					console.log("dailymotion" + " - " + id + " (" + user_api_url + ")");
 					console.dir(data);
 					
-					if(typeof data.screenname == "string"){
-						liveStatus["dailymotion"][id].streamStatus = liveStatus["dailymotion"][id].streamName;
-						liveStatus["dailymotion"][id].streamName = data.screenname;
+					//if(typeof data.screenname == "string"){
+					if(data.hasOwnProperty("user.screenname")){
+						liveStatus["dailymotion"][id].streamStatus = liveStatus["dailymotion"][id].streamName + ((data["game.title"] !== null)? (" (" + data["game.title"] + ")") : "");
+						//liveStatus["dailymotion"][id].streamName = data.screenname;
+						liveStatus["dailymotion"][id].streamName = data["user.screenname"];
 					}
 					doNotifOnline("dailymotion",id);
 				}
