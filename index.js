@@ -250,7 +250,7 @@ function checkLives(){
 		let website = websites[i];
 		let streamList = getStreamList(website);
 		
-		console.log(JSON.stringify(streamList));
+		console.info(JSON.stringify(streamList));
 		
 		for(id in streamList){
 			let request_id = id;
@@ -283,21 +283,27 @@ function checkLives(){
 					data = response.json;
 					
 					console.group();
-					console.log(website + " - " + id + " (" + request_url + ")");
+					console.info(website + " - " + id + " (" + request_url + ")");
 					console.dir(data);
 					
 					if(typeof liveStatus[website][id] == "undefined"){
 						liveStatus[website][id] = {"online": false, "streamName": "", "streamStatus": ""};
 					}
-					if(checkLiveStatus[website](id,data)){
-						if(typeof seconderyInfo[website] == "function"){
-							seconderyInfo[website](id,data);
+					let liveState = checkLiveStatus[website](id,data);
+					if(liveState !== null){
+						if(liveState){
+							if(typeof seconderyInfo[website] == "function"){
+								seconderyInfo[website](id,data);
+							} else {
+								doNotifOnline(website,id);
+							}
 						} else {
-							doNotifOnline(website,id);
+							doNotifOffline(website,id);
 						}
 					} else {
-						doNotifOffline(website,id);
+						console.warn("Unable to get stream state.");
 					}
+
 					setIcon();
 					
 					console.timeEnd(id);
@@ -320,31 +326,41 @@ checkLiveStatus = {
 			liveStatus["dailymotion"][dailymotion_key].streamName = data.title;
 			if(typeof data.onair == "boolean"){
 				return data.onair;
+			} else {
+				return null;
 			}
 		},
 	"hitbox":
 		function(hitbox_key, data){
-			data = data["livestream"][0];
-			liveStatus["hitbox"][hitbox_key].streamName = data["media_user_name"];
-			liveStatus["hitbox"][hitbox_key].streamStatus = data["media_status"];
-			if(data["media_is_live"] == "1"){
-				return true;
+			if(typeof data["livestream"][0] == "object"){
+				data = data["livestream"][0];
+				liveStatus["hitbox"][hitbox_key].streamName = data["media_user_name"];
+				liveStatus["hitbox"][hitbox_key].streamStatus = data["media_status"];
+				if(data["media_is_live"] == "1"){
+					return true;
+				} else {
+					return false
+				}
 			} else {
-				return false
+				return null;
 			}
 		},
 	"twitch":
 		function(twitch_key, data){
-			data = data["stream"];
-			if(data != null){
-				liveStatus["twitch"][twitch_key].streamName = data["channel"]["display_name"];
-				liveStatus["twitch"][twitch_key].streamStatus = data["channel"]["status"];
-				return true;
-			} else {
-				if(liveStatus["twitch"][twitch_key].streamName == ""){
-					liveStatus["twitch"][twitch_key].streamName = twitch_key;
+			if(data.hasOwnProperty("stream")){
+				data = data["stream"];
+				if(data != null){
+					liveStatus["twitch"][twitch_key].streamName = data["channel"]["display_name"];
+					liveStatus["twitch"][twitch_key].streamStatus = data["channel"]["status"];
+					return true;
+				} else {
+					if(liveStatus["twitch"][twitch_key].streamName == ""){
+						liveStatus["twitch"][twitch_key].streamName = twitch_key;
+					}
+					return false;
 				}
-				return false;
+			} else {
+				return null;
 			}
 		}
 }
@@ -358,7 +374,7 @@ seconderyInfo = {
 				overrideMimeType: "text/plain; charset=latin1",
 				onComplete: function (response) {
 					data = response.json;
-					console.log("dailymotion" + " - " + id + " (" + user_api_url + ")");
+					console.info("dailymotion" + " - " + id + " (" + user_api_url + ")");
 					console.dir(data);
 					
 					//if(typeof data.screenname == "string"){
