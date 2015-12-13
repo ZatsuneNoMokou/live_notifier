@@ -3,8 +3,6 @@
 var { ToggleButton } = require('sdk/ui/button/toggle');
 var panels = require("sdk/panel");
 
-var ui = require("sdk/ui/button/action");
-
 var Request = require("sdk/request").Request;
 
 var simplePrefs = require('sdk/simple-prefs').prefs;
@@ -18,7 +16,10 @@ var myIconURL64 = self.data.url("icon.png");
 var _ = require("sdk/l10n").get;
 
 var websites = ["dailymotion","hitbox","twitch"];
-var liveStatus = {"dailymotion":{},"hitbox":{},"twitch":{}};
+var liveStatus = {};
+for(i in websites){
+	liveStatus[websites[i]] = {};
+}
 
 function makeSettingObjectFromString(txt){
 	var obj={};
@@ -86,8 +87,8 @@ function getStreamURL(website,id){
 }
 
 //Définition du bouton icon: self.data.url("logo.svg")
-var action_button = ui.ActionButton({
-	id: "dailymotion_button",
+var firefox_button = ToggleButton({
+	id: "streamnotifier_button",
 	label: _("Stream offline"),
 	icon: { 
 		"16": "./live_offline_16.png",
@@ -122,7 +123,7 @@ function updatePanelData(){
 	panel.port.emit("initList", simplePrefs["show_offline_in_panel"]);
 	
 	//Update online steam count in the panel
-	panel.port.emit("updateOnlineCount", (action_button.state("window").badge == 0)? _("No stream online") :  _("%d stream(s) online",action_button.state("window").badge) + ":");
+	panel.port.emit("updateOnlineCount", (firefox_button.state("window").badge == 0)? _("No stream online") :  _("%d stream(s) online",firefox_button.state("window").badge) + ":");
 	
 	if(simplePrefs["show_offline_in_panel"]){
 		var offlineCount = getOfflineCount();
@@ -146,7 +147,7 @@ function handleChange(state) {
 	setIcon();
 	updatePanelData();
 	panel.show({
-		position: action_button
+		position: firefox_button
 	});
 }
 
@@ -218,7 +219,7 @@ function setIcon() {
 	}
 	
 	if (onlineCount > 0){
-		action_button.state("window", {
+		firefox_button.state("window", {
 			"label": _("%d stream(s) online",onlineCount),
 			"icon": {
 				"16": "./live_online_16.png",
@@ -230,7 +231,7 @@ function setIcon() {
 		});
 	}
 	else {
-		action_button.state("window", {
+		firefox_button.state("window", {
 			"label": _("No stream online"),
 			"icon": {
 				"16": "./live_offline_16.png",
