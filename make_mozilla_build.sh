@@ -29,6 +29,7 @@ sed		-e 's/\"id\"\: \"stream_notifier\@zatsunenomokou\.eu\"/\"id\"\: \"dailymoti
 		package.json > package_new.json
 mv package_new.json package.json
 
+echo "Ready to build xpi"
 read -p "Appuyer sur enter pour continuer ..."
 
 jpm xpi

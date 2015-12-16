@@ -136,7 +136,7 @@ function updatePanelData(){
 		var streamList = getStreamList(website);
 		for(i in liveStatus[website]){
 			if(streamList.hasOwnProperty(i) && (liveStatus[website][i].online || (simplePrefs["show_offline_in_panel"] && !liveStatus[website][i].online))){
-				let streamInfo = {"id": i, "online": liveStatus[website][i].online, "website": website, "streamName": liveStatus[website][i].streamName, "streamStatus": liveStatus[website][i].streamStatus, "streamUrl": getStreamURL(website,i)}
+				let streamInfo = {"id": i, "online": liveStatus[website][i].online, "website": website, "streamName": liveStatus[website][i].streamName, "streamStatus": liveStatus[website][i].streamStatus, "streamGame": liveStatus[website][i].streamGame, "streamUrl": getStreamURL(website,i)}
 				panel.port.emit("updateData", streamInfo);
 			}
 		}
@@ -173,7 +173,7 @@ function doNotifNoLink(title,message) {
 
 function doNotifOnline(website,id){
 	let streamName = liveStatus[website][id].streamName;
-	let streamStatus = liveStatus[website][id].streamStatus;
+	let streamStatus = liveStatus[website][id].streamStatus + ((liveStatus[website][id].streamGame != "")? (" (" + liveStatus[website][id].streamGame + ")") : "");
 	if(simplePrefs["notify_online"] && liveStatus[website][id].online == false){
 		if(streamStatus.length > 0 && streamStatus.length < 60){
 			doNotif(_("Stream online"), streamName + ": " + streamStatus,getStreamURL(website,id));
@@ -288,7 +288,7 @@ function checkLives(){
 					console.dir(data);
 					
 					if(typeof liveStatus[website][id] == "undefined"){
-						liveStatus[website][id] = {"online": false, "streamName": "", "streamStatus": ""};
+						liveStatus[website][id] = {"online": false, "streamName": "", "streamStatus": "", "streamGame": ""};
 					}
 					let liveState = checkLiveStatus[website](id,data);
 					if(liveState !== null){
@@ -337,6 +337,7 @@ checkLiveStatus = {
 				data = data["livestream"][0];
 				liveStatus["hitbox"][hitbox_key].streamName = data["media_user_name"];
 				liveStatus["hitbox"][hitbox_key].streamStatus = data["media_status"];
+				liveStatus["hitbox"][hitbox_key].streamGame = data["category_name"];
 				if(data["media_is_live"] == "1"){
 					return true;
 				} else {
@@ -353,6 +354,7 @@ checkLiveStatus = {
 				if(data != null){
 					liveStatus["twitch"][twitch_key].streamName = data["channel"]["display_name"];
 					liveStatus["twitch"][twitch_key].streamStatus = data["channel"]["status"];
+					liveStatus["twitch"][twitch_key].streamGame = (data["game"] !== null && typeof data["game"] == "string")? data["game"] : "";
 					return true;
 				} else {
 					if(liveStatus["twitch"][twitch_key].streamName == ""){
@@ -380,7 +382,8 @@ seconderyInfo = {
 					
 					//if(typeof data.screenname == "string"){
 					if(data.hasOwnProperty("user.screenname")){
-						liveStatus["dailymotion"][id].streamStatus = liveStatus["dailymotion"][id].streamName + ((data["game.title"] !== null)? (" (" + data["game.title"] + ")") : "");
+						liveStatus["dailymotion"][id].streamStatus = liveStatus["dailymotion"][id].streamName;
+						liveStatus["dailymotion"][id].streamGame = (data["game.title"] !== null && typeof data["game.title"] == "string")? data["game.title"] : "";
 						//liveStatus["dailymotion"][id].streamName = data.screenname;
 						liveStatus["dailymotion"][id].streamName = data["user.screenname"];
 					}

@@ -84,7 +84,7 @@ function listener(data){
 		if(data.streamStatus != ""){
 			var statusLine = document.createElement("span");
 			statusLine.className = "streamStatus";
-			statusLine.appendChild(document.createTextNode(data.streamStatus));
+			statusLine.appendChild(document.createTextNode(data.streamStatus + ((data.streamGame.length > 0)? (" (" + data.streamGame + ")") : "")));
 			newLine.appendChild(statusLine);
 		}
 		
