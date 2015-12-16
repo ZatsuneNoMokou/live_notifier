@@ -74,6 +74,10 @@ function listenerOfflineCount(data){
 function listener(data){
 	var newLine = document.createElement("div");
 	newLine.id = data.website + '/' + data.id;
+	if(data.online && typeof data.streamLogo == "string" && data.streamLogo != ""){
+		newLine.style.backgroundImage = "url('" + data.streamLogo + "')";
+		newLine.className = "streamLogo";
+	}
 	var titleLine = document.createElement("span");
 	titleLine.className = "streamTitle";
 	var link = newLink(data.streamName,data.streamUrl);
@@ -88,10 +92,10 @@ function listener(data){
 			newLine.appendChild(statusLine);
 		}
 		
-		newLine.className = "item-stream onlineItem";
+		newLine.className += " item-stream onlineItem";
 		nodeListOnline[data.website].appendChild(newLine);
 	} else {
-		newLine.className = "item-stream offlineItem";
+		newLine.className += " item-stream offlineItem";
 		nodeListOffline[data.website].appendChild(newLine);
 	}
 	showNonEmptySitesBlocks();
