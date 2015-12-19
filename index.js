@@ -136,7 +136,7 @@ function updatePanelData(){
 		var streamList = getStreamList(website);
 		for(i in liveStatus[website]){
 			if(streamList.hasOwnProperty(i) && (liveStatus[website][i].online || (simplePrefs["show_offline_in_panel"] && !liveStatus[website][i].online))){
-				let streamInfo = {"id": i, "online": liveStatus[website][i].online, "website": website, "streamName": liveStatus[website][i].streamName, "streamStatus": liveStatus[website][i].streamStatus, "streamGame": liveStatus[website][i].streamGame, "streamLogo": liveStatus[website][i].streamLogo, "streamUrl": getStreamURL(website,i)}
+				let streamInfo = {"id": i, "online": liveStatus[website][i].online, "website": website, "streamName": liveStatus[website][i].streamName, "streamStatus": liveStatus[website][i].streamStatus, "streamGame": liveStatus[website][i].streamGame, "streamOwnerLogo": liveStatus[website][i].streamOwnerLogo, "streamCategoryLogo": liveStatus[website][i].streamCategoryLogo, "streamUrl": getStreamURL(website,i)}
 				panel.port.emit("updateData", streamInfo);
 			}
 		}
@@ -154,11 +154,11 @@ function handleChange(state) {
 //Affichage des notifications en ligne / hors ligne
 var notifications = require("sdk/notifications");
 
-function doNotif(title,message,url) {
+function doNotif(title,message,url,imgurl) {
 	notifications.notify({
 		title: title,
 		text: message,
-		iconURL: myIconURL128,
+		iconURL: ((typeof imgurl == "string" && imgurl != "")? imgurl : myIconURL128),
 		onClick: function(){tabs.open(url);}
 	});
 }
@@ -173,19 +173,40 @@ function doNotifNoLink(title,message) {
 
 function doStreamNotif(website,id,isStreamOnline){
 	let streamName = liveStatus[website][id].streamName;
+	let streamOwnerLogo = liveStatus[website][id].streamOwnerLogo;
+	let streamCategoryLogo = liveStatus[website][id].streamCategoryLogo;
+	let streamLogo = "";
+
+	if(typeof streamOwnerLogo == "string" && streamOwnerLogo != ""){
+		streamLogo  = streamOwnerLogo;
+	}
+	
 	if(isStreamOnline){
 		if(simplePrefs["notify_online"] && liveStatus[website][id].online == false){
 				console.log(isStreamOnline);
 			let streamStatus = liveStatus[website][id].streamStatus + ((liveStatus[website][id].streamGame != "")? (" (" + liveStatus[website][id].streamGame + ")") : "");
 			if(streamStatus.length > 0 && streamStatus.length < 60){
-				doNotif(_("Stream online"), streamName + ": " + streamStatus,getStreamURL(website,id));
+				if(streamLogo != ""){
+					doNotif(_("Stream online"), streamName + ": " + streamStatus, getStreamURL(website,id), streamLogo);
+				} else {
+					doNotif(_("Stream online"), streamName + ": " + streamStatus, getStreamURL(website,id));
+				}
+				
 			} else {
-				doNotif(_("Stream online"), streamName,getStreamURL(website,id));
+				if(streamLogo != ""){
+					doNotif(_("Stream online"), streamName, getStreamURL(website,id), streamLogo);
+				} else {
+					doNotif(_("Stream online"), streamName, getStreamURL(website,id));
+				}
 			}
 		}
 	} else {
 		if(simplePrefs["notify_offline"] && liveStatus[website][id].online){
-			doNotifNoLink(_("Stream offline"),streamName);
+			if(streamLogo != ""){
+				doNotifNoLink(_("Stream offline"),streamName, streamLogo);
+			} else {
+				doNotifNoLink(_("Stream offline"),streamName);
+			}
 		}
 	}
 	liveStatus[website][id].online = isStreamOnline;
@@ -287,7 +308,7 @@ function checkLives(){
 					console.dir(data);
 					
 					if(typeof liveStatus[website][id] == "undefined"){
-						liveStatus[website][id] = {"online": false, "streamName": "", "streamStatus": "", "streamGame": "", "streamLogo": ""};
+						liveStatus[website][id] = {"online": false, "streamName": "", "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": ""};
 					}
 					let liveState = checkLiveStatus[website](id,data);
 					if(liveState !== null){
@@ -334,11 +355,18 @@ checkLiveStatus = {
 				liveStatus["hitbox"][hitbox_key].streamStatus = data["media_status"];
 				liveStatus["hitbox"][hitbox_key].streamGame = data["category_name"];
 				if(data["category_logo_large"] !== null){
-					liveStatus["hitbox"][hitbox_key].streamLogo = "http://edge.sf.hitbox.tv" + data["category_logo_large"];
+					liveStatus["hitbox"][hitbox_key].streamCategoryLogo = "http://edge.sf.hitbox.tv" + data["category_logo_large"];
 				} else if(data["category_logo_small"] !== null){
-					liveStatus["hitbox"][hitbox_key].streamLogo = "http://edge.sf.hitbox.tv" + data["category_logo_small"];
+					liveStatus["hitbox"][hitbox_key].streamCategoryLogo = "http://edge.sf.hitbox.tv" + data["category_logo_small"];
 				} else {
-					liveStatus["hitbox"][hitbox_key].streamLogo = "";
+					liveStatus["hitbox"][hitbox_key].streamCategoryLogo = "";
+				}
+				if(data.channel["user_logo"] !== null){
+					liveStatus["hitbox"][hitbox_key].streamOwnerLogo = "http://edge.sf.hitbox.tv" + data.channel["user_logo"];
+				} else if(data["user_logo_small"] !== null){
+					liveStatus["hitbox"][hitbox_key].streamOwnerLogo = "http://edge.sf.hitbox.tv" + data.channel["user_logo_small"];
+				} else {
+					liveStatus["hitbox"][hitbox_key].streamOwnerLogo = "";
 				}
 				if(data["media_is_live"] == "1"){
 					return true;
@@ -358,7 +386,7 @@ checkLiveStatus = {
 					liveStatus["twitch"][twitch_key].streamStatus = data["channel"]["status"];
 					liveStatus["twitch"][twitch_key].streamGame = (data["game"] !== null && typeof data["game"] == "string")? data["game"] : "";
 					if(typeof data.channel["logo"] == "string" && data.channel["logo"] != "") {
-						liveStatus["twitch"][twitch_key].streamLogo = data.channel["logo"];
+						liveStatus["twitch"][twitch_key].streamOwnerLogo = data.channel["logo"];
 					}
 					return true;
 				} else {
@@ -390,9 +418,9 @@ seconderyInfo = {
 						if(isStreamOnline){
 							liveStatus["dailymotion"][id].streamStatus = liveStatus["dailymotion"][id].streamName;
 							liveStatus["dailymotion"][id].streamGame = (data["game.title"] !== null && typeof data["game.title"] == "string")? data["game.title"] : "";
-							if(typeof data["user.avatar_720_url"] == "string" && data["user.avatar_720_url"] != ""){
-								liveStatus["dailymotion"][id].streamLogo = data["user.avatar_720_url"];
-							}
+						}
+						if(typeof data["user.avatar_720_url"] == "string" && data["user.avatar_720_url"] != ""){
+							liveStatus["dailymotion"][id].streamOwnerLogo = data["user.avatar_720_url"];
 						}
 						//liveStatus["dailymotion"][id].streamName = data.screenname;
 						liveStatus["dailymotion"][id].streamName = data["user.screenname"];

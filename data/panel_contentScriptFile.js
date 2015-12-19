@@ -74,8 +74,19 @@ function listenerOfflineCount(data){
 function listener(data){
 	var newLine = document.createElement("div");
 	newLine.id = data.website + '/' + data.id;
-	if(data.online && typeof data.streamLogo == "string" && data.streamLogo != ""){
-		newLine.style.backgroundImage = "url('" + data.streamLogo + "')";
+	
+	let streamOwnerLogo = data.streamOwnerLogo;
+	let streamCategoryLogo = data.streamCategoryLogo;
+	let streamLogo = ""
+	
+	if(data.online && typeof streamCategoryLogo == "string" && streamCategoryLogo != ""){
+		streamLogo  = streamCategoryLogo;
+	} else if(typeof streamOwnerLogo == "string" && streamOwnerLogo != ""){
+		streamLogo  = streamOwnerLogo;
+	}
+	
+	if(typeof streamLogo == "string" && streamLogo != ""){
+		newLine.style.backgroundImage = "url('" + streamLogo + "')";
 		newLine.className = "streamLogo";
 	}
 	var titleLine = document.createElement("span");

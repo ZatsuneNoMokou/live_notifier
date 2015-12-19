@@ -77,12 +77,38 @@ header button {
 	padding-left: 4.2em;
 	background-size: 3.5em auto;
 }
+.item-stream.onlineItem .streamTitle{
+	padding-left: 0.6em;
+	font-size: 1.1em;
+}
+.item-stream.streamLogo::before{
+	transform: scale(0.21);
+	height: 0px;
+	z-index: 10;
+	display:block;
+	position:relative;
+	left: -4.9em;
+	top: -1em;
+}
+.item-stream.streamLogo.onlineItem::before{
+	content: url("online-stream.svg");
+}
+.item-stream.streamLogo.offlineItem::before{
+	content: url("offline-stream.svg");
+}
+.item-stream.onlineItem:not(.streamLogo) {
+	background-image: url("online-stream.svg");
+}
+.item-stream.offlineItem:not(.streamLogo) {
+	background-image: url("offline-stream.svg");
+}
 .item-stream > span{
 	display: block;
 }
 .item-stream > span.streamStatus{
 	max-height: 3.7em;
 	overflow: hidden;
+	text-overflow: ellipsis;
 }
 #streamListOnline, #streamListOffline{
 	margin-top: 2px;
@@ -91,12 +117,6 @@ header button {
 #streamListOnline > div, #streamListOffline > div{
 	margin-top: 4px;
 	margin-bottom: 4px;
-}
-.item-stream.onlineItem:not(.streamLogo) {
-	background-image: url("online-stream.svg");
-}
-.item-stream.offlineItem:not(.streamLogo) {
-	background-image: url("offline-stream.svg");
 }
 .item-stream a{
 	font-weight: bold;
