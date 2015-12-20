@@ -81,19 +81,21 @@ header button {
 	padding-left: 0.6em;
 	font-size: 1.1em;
 }
-.item-stream.streamLogo::before{
+.item-stream.streamLogo .streamTitle::before{
 	transform: scale(0.21);
 	height: 0px;
 	z-index: 10;
 	display:block;
-	position:relative;
-	left: -4.9em;
+	position: relative;
+	/*left: -4.9em;*/
+	left: -84px;
 	top: -1em;
 }
-.item-stream.streamLogo.onlineItem::before{
+.item-stream.streamLogo.onlineItem .streamTitle::before{
 	content: url("online-stream.svg");
 }
-.item-stream.streamLogo.offlineItem::before{
+.item-stream.streamLogo.offlineItem .streamTitle::before{
+	left: -77px;
 	content: url("offline-stream.svg");
 }
 .item-stream.onlineItem:not(.streamLogo) {
