@@ -163,11 +163,11 @@ function doNotif(title,message,url,imgurl) {
 	});
 }
 
-function doNotifNoLink(title,message) {
+function doNotifNoLink(title,message,imgurl) {
 	notifications.notify({
 		title: title,
 		text: message,
-		iconURL: myIconURL128
+		iconURL: ((typeof imgurl == "string" && imgurl != "")? imgurl : myIconURL128)
 	});
 }
 
