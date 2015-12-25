@@ -9,36 +9,17 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.0"
    width="100"
    height="100"
-   viewBox="0 0 100 99.999998"
-   id="svg3365"
-   version="1.1"
+   viewBox="-18 -6 12 5.6666667"
+   id="Olympic Rings"
+   sodipodi:version="0.32"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="online-stream.svg">
-  <defs
-     id="defs3367" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="4"
-     inkscape:cx="55.361264"
-     inkscape:cy="47.106728"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     units="px"
-     inkscape:window-width="933"
-     inkscape:window-height="803"
-     inkscape:window-x="47"
-     inkscape:window-y="65"
-     inkscape:window-maximized="0" />
+   sodipodi:docname="online-stream.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
   <metadata
-     id="metadata3370">
+     id="metadata20">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
@@ -49,28 +30,53 @@
       </cc:Work>
     </rdf:RDF>
   </metadata>
-  <g
-     inkscape:label="Calque 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(0,-952.36219)">
-    <path
-       sodipodi:type="star"
-       style="opacity:0.8;fill:#007300;fill-opacity:1;fill-rule:nonzero;stroke:#0062c6;stroke-width:7.54399443;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="path3375"
-       sodipodi:sides="3"
-       sodipodi:cx="26.071428"
-       sodipodi:cy="985.57648"
-       sodipodi:r1="111.4745"
-       sodipodi:r2="52.522163"
-       sodipodi:arg1="0.5239916"
-       sodipodi:arg2="1.5711892"
-       inkscape:flatsided="true"
-       inkscape:rounded="0"
-       inkscape:randomized="0"
-       d="m 122.58928,1041.3516 -193.07949,-0.076 96.605428,-167.17382 z"
-       inkscape:transform-center-x="0.30296798"
-       inkscape:transform-center-y="-14.7219"
-       transform="matrix(0.49844751,0,0,0.57210376,37.015675,454.44303)" />
-  </g>
+  <sodipodi:namedview
+     inkscape:window-height="843"
+     inkscape:window-width="1161"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     guidetolerance="10.0"
+     gridtolerance="10.0"
+     objecttolerance="10.0"
+     borderopacity="1.0"
+     bordercolor="#666666"
+     pagecolor="#ffffff"
+     id="base"
+     showgrid="false"
+     inkscape:zoom="3.2933334"
+     inkscape:cx="15.388962"
+     inkscape:cy="52.513899"
+     inkscape:window-x="108"
+     inkscape:window-y="51"
+     inkscape:current-layer="Olympic Rings"
+     inkscape:window-maximized="0" />
+  <defs
+     id="defs3">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 150 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="300 : 150 : 1"
+       inkscape:persp3d-origin="150 : 100 : 1"
+       id="perspective22" />
+    <clipPath
+       id="clip_white">
+      <path
+         d="M 0,0 -10,-5 -10,5 0,0 Z m 0,0 0.1,-10 8,0 L 0,0 Z"
+         id="path6"
+         inkscape:connector-curvature="0" />
+    </clipPath>
+    <clipPath
+       id="clip_color">
+      <path
+         d="M 0,0 -10,-10 -10,10 0,0 Z M 0,0 0,-10 10,-10 0,0 Z"
+         id="path9"
+         inkscape:connector-curvature="0" />
+    </clipPath>
+  </defs>
+  <path
+     d="m -6.2421507,-3.1653523 a 5.7578493,5.7578516 0 0 1 -11.5156983,0 5.7578493,5.7578517 0 1 1 11.5156983,0 z"
+     style="opacity:0.8;fill:#007300;fill-opacity:1;stroke:#0062c6;stroke-width:0.48430216;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     id="path3708"
+     inkscape:connector-curvature="0" />
 </svg>
