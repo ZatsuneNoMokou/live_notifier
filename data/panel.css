@@ -41,6 +41,9 @@ header button {
 	display: none !important;
 	visibility: hidden !important;
 }
+.cursor{
+	cursor: pointer;
+}
 #steamList {
 	overflow: auto;
 	flex: 1;
@@ -68,6 +71,11 @@ header button {
 	justify-content: space-between;
 	flex-direction: column;
 	box-shadow: 0px 0px 5px 0px #212121;
+}
+.item-stream .streamTitle{
+	font-weight: bold;
+	color: #0062BD;
+	color: rgba(50, 159, 255, 0.8);
 }
 .item-stream:not(.streamLogo){
 	padding-left: 35px;

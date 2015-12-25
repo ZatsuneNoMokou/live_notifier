@@ -117,6 +117,7 @@ function refreshStreamsFromPanel(){
 	var intervalRefreshPanel = setInterval(waitToUpdatePanel, 5000);
 }
 panel.port.on("refreshStreams", refreshStreamsFromPanel);
+panel.port.on("openTab", openTabIfNotExist);
 
 function updatePanelData(){
 	//Clear stream list in the panel
@@ -154,12 +155,24 @@ function handleChange(state) {
 //Affichage des notifications en ligne / hors ligne
 var notifications = require("sdk/notifications");
 
+function openTabIfNotExist(url){
+	for(let tab of tabs){
+		if(tab.url.toLowerCase() == url.toLowerCase()){ // Mean the url was already opened in a tab
+			tab.activate() // Show the already opened tab
+			return true; // Return true to stop the function as the tab is already opened
+		}
+	}
+	// If the function is still running, it mean that the url isn't detected to be opened, so, we can open it
+	tabs.open(url);
+	return false; // Return false because the url wasn't already in a tab
+}
+
 function doNotif(title,message,url,imgurl) {
 	notifications.notify({
 		title: title,
 		text: message,
 		iconURL: ((typeof imgurl == "string" && imgurl != "")? imgurl : myIconURL128),
-		onClick: function(){tabs.open(url);}
+		onClick: function(){openTabIfNotExist(url);}
 	});
 }
 
@@ -440,5 +453,6 @@ checkLives();
 exports.onUnload = function (reason) {
 	clearInterval(interval);
 	panel.port.removeListener('refreshStreams', refreshStreamsFromPanel);
+	panel.port.removeListener("openTab", openTabIfNotExist);
 	panel.port.emit('unloadListeners', "");
 }

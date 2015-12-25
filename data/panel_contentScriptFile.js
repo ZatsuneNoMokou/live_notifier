@@ -9,6 +9,34 @@ function unloadListeners() {
 	self.port.removeListener('unloadListeners', unloadListeners);
 }
 
+// Event managing function from https://stackoverflow.com/questions/4386300/javascript-dom-how-to-remove-all-events-of-a-dom-object/4386514#4386514
+var _eventHandlers = {}; // somewhere global
+function addEvent(node, event, handler, capture) {
+	if(!(node in _eventHandlers)) {
+		// _eventHandlers stores references to nodes
+		_eventHandlers[node] = {};
+	}
+	if(!(event in _eventHandlers[node])) {
+		// each entry contains another entry for each event type
+		_eventHandlers[node][event] = [];
+	}
+	// capture reference
+	_eventHandlers[node][event].push([handler, capture]);
+	node.addEventListener(event, handler, capture);
+ }
+function removeNodeEvents(node, event) {
+	if(node in _eventHandlers) {
+		var handlers = _eventHandlers[node];
+		if(event in handlers) {
+			var eventHandlers = handlers[event];
+			for(var i = eventHandlers.length; i--;) {
+				var handler = eventHandlers[i];
+				node.removeEventListener(event, handler[0], handler[1]);
+			}
+		}
+	}
+}
+
 self.port.on('unloadListeners', unloadListeners);
 
 var refreshStreamsButton = document.querySelector("#refreshStreams");
@@ -20,14 +48,15 @@ refreshStreamsButton.addEventListener("click",refreshButtonClick,false);
 function newLink(text,link){
 	var node = document.createElement("a");
 	node.appendChild(document.createTextNode(text));
-	node.href = link;
-	node.target = "_blank";
+	node.href = "javascript:void(0)";
+	addEvent(node,"click",function(){self.port.emit("openTab",link);},false);
 	return node;
 }
 
 function removeAllChildren(node){
 	// Taken from https://stackoverflow.com/questions/683366/remove-all-the-children-dom-elements-in-div
 	while (node.hasChildNodes()) {
+		removeNodeEvents(node.lastChild, "click");
 		node.removeChild(node.lastChild);
 	}
 }
@@ -91,10 +120,11 @@ function listener(data){
 	}
 	var titleLine = document.createElement("span");
 	titleLine.className = "streamTitle";
-	var link = newLink(data.streamName,data.streamUrl);
-	titleLine.appendChild(link);
-	
+	titleLine.appendChild(document.createTextNode(data.streamName));
+	//var link = newLink(data.streamName,data.streamUrl);
+	//titleLine.appendChild(link);
 	newLine.appendChild(titleLine);
+	
 	if(data.online){
 		if(data.streamStatus != ""){
 			var statusLine = document.createElement("span");
@@ -109,6 +139,8 @@ function listener(data){
 		newLine.className += " item-stream offlineItem";
 		nodeListOffline[data.website].appendChild(newLine);
 	}
+	newLine.className += " cursor";
+	addEvent(newLine,"click",function(){self.port.emit("openTab",data.streamUrl);},false);
 	showNonEmptySitesBlocks();
 }
 
