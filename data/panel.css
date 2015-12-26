@@ -85,7 +85,7 @@ header button {
 	padding-left: 4.2em;
 	background-size: 3.5em auto;
 }
-.item-stream.onlineItem .streamTitle{
+.item-stream .streamTitle{
 	padding-left: 0.6em;
 	font-size: 1.1em;
 }

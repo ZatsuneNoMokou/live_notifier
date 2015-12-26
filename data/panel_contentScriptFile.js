@@ -45,14 +45,6 @@ function refreshButtonClick(){
 }
 refreshStreamsButton.addEventListener("click",refreshButtonClick,false);
 
-function newLink(text,link){
-	var node = document.createElement("a");
-	node.appendChild(document.createTextNode(text));
-	node.href = "javascript:void(0)";
-	addEvent(node,"click",function(){self.port.emit("openTab",link);},false);
-	return node;
-}
-
 function removeAllChildren(node){
 	// Taken from https://stackoverflow.com/questions/683366/remove-all-the-children-dom-elements-in-div
 	while (node.hasChildNodes()) {
@@ -121,8 +113,6 @@ function listener(data){
 	var titleLine = document.createElement("span");
 	titleLine.className = "streamTitle";
 	titleLine.appendChild(document.createTextNode(data.streamName));
-	//var link = newLink(data.streamName,data.streamUrl);
-	//titleLine.appendChild(link);
 	newLine.appendChild(titleLine);
 	
 	if(data.online){
