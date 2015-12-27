@@ -52,11 +52,11 @@ header button {
 	padding: 0px;
 }
 .item-stream {
-	max-height: 5.3em;
+	/*max-height: 5.3em;*/
 	margin: 0.5em 0px;
 	padding: 1em;
 	background: #424242 no-repeat 3px center;
-	display: flex;
+	/*display: flex;*/
 	justify-content: space-between;
 	flex-direction: column;
 }
@@ -110,7 +110,7 @@ header button {
 	display: block;
 }
 .item-stream > span.streamStatus{
-	max-height: 3.7em;
+	max-height: 3.9em;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
