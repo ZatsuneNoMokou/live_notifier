@@ -1,0 +1,37 @@
+body {
+	background-color: #303030;
+}
+header {
+	background-color: #212121;
+	box-shadow: 0px 0px 5px 0px #212121;
+}
+header button {
+	background: #4A4A4A;
+	color: #FFFFFF;
+}
+#streamOnlineCountLabel, #streamOfflineCountLabel{
+	color: #FFFFFF;
+}
+.item-stream {
+	background: #424242 no-repeat 3px center;
+	color: #FFFFFF;
+	color: rgba(255, 255, 255, 0.8);
+	box-shadow: 0px 0px 5px 0px #212121;
+}
+.item-stream .streamTitle{
+	color: #0062BD;
+	color: rgba(50, 159, 255, 0.8);
+}
+.item-stream .streamCurrentViewers{
+	color: #FFFFFF;
+}
+a {
+	color: #0062BD;
+	color: rgba(50, 159, 255, 0.8);
+}
+footer {
+	background-color: #212121;
+	color: #FFFFFF;
+	color: rgba(255, 255, 255, 0.3);
+	box-shadow: 0px 0px 5px 0px #212121;
+}

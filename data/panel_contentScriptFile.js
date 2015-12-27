@@ -110,10 +110,28 @@ function listener(data){
 		newLine.style.backgroundImage = "url('" + streamLogo + "')";
 		newLine.className = "streamLogo";
 	}
+
 	var titleLine = document.createElement("span");
 	titleLine.className = "streamTitle";
+	if(typeof streamLogo == "string" && streamLogo != ""){
+		var imgStreamStatusLogo = document.createElement("img");
+		imgStreamStatusLogo.className = "streamStatusLogo";
+		imgStreamStatusLogo.src = (data.online)? "online-stream.svg" : "offline-stream.svg";
+		titleLine.appendChild(imgStreamStatusLogo);
+	}
 	titleLine.appendChild(document.createTextNode(data.streamName));
 	newLine.appendChild(titleLine);
+	
+	if(data.online && typeof data.streamCurrentViewers == "number"){
+		var viewerCountNode = document.createElement("span");
+		viewerCountNode.className = "streamCurrentViewers";
+		viewerCountNode.appendChild(document.createTextNode(data.streamCurrentViewers));
+		var viewerCountLogoNode = document.createElement("img");
+		viewerCountLogoNode.className = "viewerCountLogo";
+		viewerCountLogoNode.src = "eye_logo_white.svg";
+		viewerCountNode.appendChild(viewerCountLogoNode);
+		titleLine.appendChild(viewerCountNode);
+	}
 	
 	if(data.online){
 		if(data.streamStatus != ""){

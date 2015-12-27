@@ -4,24 +4,19 @@ html {
 	height: 100%;
 	width: 100%;
 	overflow: hidden;
-	/*font-family: 'Roboto', sans-serif;*/
 	font-weight: 300;
 }
 body {
 	margin: 0px;
-	/*padding: 5px;*/
 	height: 100%;
 	width: 100%;
 	display: flex;
 	flex-direction: column;
-	background-color: #303030;
 }
 header {
 	display: flex;
 	flex-direction: row;
 	padding: 5px 5px;
-	background-color: #212121;
-	box-shadow: 0px 0px 5px 0px #212121;
 }
 header button {
 	height: 36px;
@@ -30,11 +25,9 @@ header button {
 	border: 0px none;
 	border-radius: 1px;
 	margin-left: 5px;
-	background: #4A4A4A;
-	color: #FFFFFF;
 	font-weight: 700;
 }
-#vide {
+#vide, .vide {
 	flex: 1;
 }
 .hide{
@@ -57,25 +50,18 @@ header button {
 #streamOnlineCountLabel, #streamOfflineCountLabel{
 	margin: 0px;
 	padding: 0px;
-	color: #FFFFFF;
 }
 .item-stream {
 	max-height: 5.3em;
 	margin: 0.5em 0px;
 	padding: 1em;
 	background: #424242 no-repeat 3px center;
-	color: #FFFFFF;
-	color: rgba(255, 255, 255, 0.8);
-	/*flex-grow: 1;*/
 	display: flex;
 	justify-content: space-between;
 	flex-direction: column;
-	box-shadow: 0px 0px 5px 0px #212121;
 }
 .item-stream .streamTitle{
 	font-weight: bold;
-	color: #0062BD;
-	color: rgba(50, 159, 255, 0.8);
 }
 .item-stream:not(.streamLogo){
 	padding-left: 35px;
@@ -86,25 +72,33 @@ header button {
 	background-size: 3.5em auto;
 }
 .item-stream .streamTitle{
-	padding-left: 0.6em;
 	font-size: 1.1em;
 }
-.item-stream.streamLogo .streamTitle::before{
-	transform: scale(0.21);
-	height: 0px;
-	z-index: 10;
-	display:block;
+.item-stream.streamLogo .streamTitle{
 	position: relative;
-	/*left: -4.9em;*/
-	left: -84px;
-	top: -1em;
+	left: -15px;
+	top: -5px;
 }
-.item-stream.streamLogo.onlineItem .streamTitle::before{
-	content: url("online-stream.svg");
+.item-stream .streamCurrentViewers{
+	position: relative;
+	right: -10px;
+	top: -3px;
+	float: right;
+	text-align: right;
+	font-size: 0.9em;
+	font-weight: normal;
 }
-.item-stream.streamLogo.offlineItem .streamTitle::before{
-	left: -77px;
-	content: url("offline-stream.svg");
+.item-stream .viewerCountLogo{
+	height: 0.9em;
+	padding-left: 0.2em;
+}
+.item-stream.streamLogo .streamStatus{
+	position: relative;
+	top: -5px;
+}
+.item-stream .streamTitle img.streamStatusLogo{
+	height: 21px;
+	position: relative;
 }
 .item-stream.onlineItem:not(.streamLogo) {
 	background-image: url("online-stream.svg");
@@ -131,10 +125,6 @@ header button {
 .item-stream a{
 	font-weight: bold;
 }
-a {
-	color: #0062BD;
-	color: rgba(50, 159, 255, 0.8);
-}
 .item-stream h1 {
 	margin: 0px;
 	padding: 0px;
@@ -149,10 +139,6 @@ a {
 }
 footer {
 	white-space: pre-line;
-	background-color: #212121;
-	color: #FFFFFF;
-	color: rgba(255, 255, 255, 0.3);
 	text-align: center;
 	font-size: 0.8em;
-	box-shadow: 0px 0px 5px 0px #212121;
 }
