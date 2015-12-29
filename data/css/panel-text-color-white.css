@@ -1,34 +1,18 @@
-body {
-	background-color: hsl(0, 0%, 87%); /*#303030;*/
-}
-header, footer {
-	background-color: hsl(0, 0%, 74%); /*#212121;*/
-}
-header button, .item-stream {
-	background-color: hsl(0, 0%, 81%); /*#424242;*/
-}
-
 /*			---- Primary text / Icons ----			*/
 header button, #streamOnlineCountLabel, #streamOfflineCountLabel{
 	color: #FFFFFF;
-	color: rgba(0, 0, 0, 0.8);
 }
 /*		--- Secondary text / Base Color ----		*/
 .item-stream, .item-stream .streamStatus, .item-stream .streamCurrentViewers{
 	color: #FFFFFF;
-	color: rgba(0, 0, 0, 0.5);
+	color: rgba(255, 255, 255, 0.8);
 }
 /*			---- Disabled / Hint text ----			*/
 footer{
 	color: #FFFFFF;
-	color: rgba(0, 0, 0, 0.4);
+	color: rgba(255, 255, 255, 0.3);
 }
-
-/*				---- Box shadow ----				*/
-header, .item-stream, footer{
-	box-shadow: 0px 0px 5px 0px hsl(0, 0%, 87%); /*#212121;*/
-}
-
+/*			---- Stream Title / Links ----			*/
 .item-stream .streamTitle, a{
 	color: #0062BD;
 	color: rgba(50, 159, 255, 0.8);

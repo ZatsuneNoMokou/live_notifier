@@ -1,0 +1,16 @@
+@import "panel-text-color-white.css";
+
+body {
+	background-color: hsl(0, 0%, 19%); /*#303030;*/
+}
+header, footer {
+	background-color: hsl(0, 0%, 13%); /*#212121;*/
+}
+header button, .item-stream {
+	background-color: hsl(0, 0%, 26%); /*#424242;*/
+}
+
+/*				---- Box shadow ----				*/
+header, .item-stream, footer{
+	box-shadow: 0px 0px 5px 0px hsl(0, 0%, 13%); /*#212121;*/
+}

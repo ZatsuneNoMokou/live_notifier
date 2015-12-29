@@ -147,7 +147,7 @@ function updatePanelData(){
 		}
 	}
 	
-	panel.port.emit("panel_theme", simplePrefs["panel_theme"]);
+	panel.port.emit("panel_theme", {"theme": simplePrefs["panel_theme"], "custom_background_color": simplePrefs["custom_background_color"]});
 }
 
 function handleChange(state) {

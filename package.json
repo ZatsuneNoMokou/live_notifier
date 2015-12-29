@@ -2,7 +2,7 @@
 	"title": "Streams notifier",
 	"id": "stream_notifier@zatsunenomokou.eu",
 	"name": "streamnotifier",
-	"version": "2.11.0",
+	"version": "2.12.0",
 	"description": "Be notified of streams from Dailymotion, Hitbox and Twitch",
 	"main": "index.js",
 	"author": "Zatsune No Mokou",
@@ -82,6 +82,13 @@
 						"label": "Light"
 					}
 				]
+		},
+		{
+			"name": "background_color",
+			"title": "Panel background color",
+			"description": "Choose background color",
+			"type": "color",
+			"value": "#000000"
 		}
 	]
 }

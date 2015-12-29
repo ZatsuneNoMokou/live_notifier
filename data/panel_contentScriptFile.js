@@ -154,23 +154,75 @@ function listener(data){
 	showNonEmptySitesBlocks();
 }
 
-function theme_update(data){
-	let panelColorStylesheet = document.createElement("link");
-	panelColorStylesheet.id = "panel-color-stylesheet"
-	panelColorStylesheet.rel = "stylesheet";
-	panelColorStylesheet.type = "text/css";
-	panelColorStylesheet.media = "all";
-	
-	switch(data){
-		case "dark":
-			panelColorStylesheet.href = "css/panel-color-dark.css";
-			break;
-		
-		case "light":
-			panelColorStylesheet.href = "css/panel-color-light.css";
-			break;
+function hexToRGB(hexColorCode){
+	let hexToDec = function(h){return parseInt(h,16);}
+	let getCodes =  /^#([\da-fA-F]{2,2})([\da-fA-F]{2,2})([\da-fA-F]{2,2})$/;
+	if(getCodes.test(hexColorCode)){
+		let result = getCodes.exec(hexColorCode);
+		return {"R": hexToDec(result[1]), "G": hexToDec(result[2]), "B": hexToDec(result[3])};
+	} else {
+		return false;
 	}
-	if(typeof panelColorStylesheet.href == "string" && panelColorStylesheet.href != ""){
+}
+function color(hexColorCode) {
+	let getCodes =  /^#([\da-fA-F]{2,2})([\da-fA-F]{2,2})([\da-fA-F]{2,2})$/;
+	if(getCodes.test(hexColorCode)){
+		let result = getCodes.exec(hexColorCode);
+		this.R= parseInt(result[1],16);
+		this.G= parseInt(result[2],16);
+		this.B= parseInt(result[3],16);
+	}
+	this.rgbCode = function(){
+		return "rgb(" + this.R + ", " + this.G + ", " + this.B + ")";
+	}
+	/* RGB to HSL function from https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion/9493060#9493060 */
+	this.getHSL = function(){
+		let r = this.R;let g = this.G;let b = this.B;
+		
+		r /= 255, g /= 255, b /= 255;
+		var max = Math.max(r, g, b), min = Math.min(r, g, b);
+		var h, s, l = (max + min) / 2;
+
+		if(max == min){
+			h = s = 0; // achromatic
+		}else{
+			var d = max - min;
+			s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+			switch(max){
+				case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+				case g: h = (b - r) / d + 2; break;
+				case b: h = (r - g) / d + 4; break;
+			}
+			h /= 6;
+		}
+		return {"H": h * 360, "S": s * 100 + "%", "L": l * 100 + "%"};
+	}
+}
+
+function theme_update(data){
+	let panelColorStylesheet;
+	let baseColor = new color(data.custom_background_color);
+	if(typeof baseColor != "object"){return null;}
+	panelColorStylesheet = document.createElement("style");
+	panelColorStylesheet.id = "panel-color-stylesheet";
+	baseColor_hsl = baseColor.getHSL();
+	if(data.theme == "dark"){
+		var custom_stylesheet = "@import url(css/panel-text-color-white.css);\n";
+		values = ["19%","13%","26%","13%"];
+	} else if(data.theme == "light"){
+		var custom_stylesheet = "@import url(css/panel-text-color-dark.css);\n";
+		values = ["87%","74%","81%","87%"];
+	}
+	custom_stylesheet += "body {background-color: hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[0] + ");}\n";
+	custom_stylesheet += "header, footer {background-color: hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[1] + ");}\n";
+	custom_stylesheet += "header button, .item-stream {background-color: hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[2] + ");}\n";
+	custom_stylesheet += "header, .item-stream, footer{box-shadow: 0px 0px 5px 0px hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + values[3] + ");}";
+	console.log(custom_stylesheet);
+	panelColorStylesheet.appendChild(document.createTextNode(custom_stylesheet));
+	console.log(baseColor.rgbCode());
+	console.log("hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + baseColor_hsl.L + ")");
+	
+	if(typeof panelColorStylesheet == "object"){
 		let currentThemeNode = document.querySelector("#panel-color-stylesheet");
 		currentThemeNode.parentNode.removeChild(currentThemeNode);
 		
