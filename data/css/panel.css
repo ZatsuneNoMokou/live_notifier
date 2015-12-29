@@ -27,7 +27,7 @@ header button {
 	margin-left: 5px;
 	font-weight: 700;
 }
-#vide, .vide {
+#vide{
 	flex: 1;
 }
 .hide{
@@ -55,7 +55,8 @@ header button {
 	/*max-height: 5.3em;*/
 	margin: 0.5em 0px;
 	padding: 1em;
-	background: #424242 no-repeat 3px center;
+	background-repeat: no-repeat;
+	background-position: 3px center;
 	/*display: flex;*/
 	justify-content: space-between;
 	flex-direction: column;
@@ -64,7 +65,7 @@ header button {
 	font-weight: bold;
 }
 .item-stream:not(.streamLogo){
-	padding-left: 35px;
+	padding-left: 45px;
 	background-size: auto 30px;
 }
 .item-stream.streamLogo{
@@ -73,6 +74,9 @@ header button {
 }
 .item-stream .streamTitle{
 	font-size: 1.1em;
+}
+.item-stream:not(.streamLogo) .streamTitle{
+	padding-left: 7px;
 }
 .item-stream.streamLogo .streamTitle{
 	position: relative;
@@ -88,9 +92,13 @@ header button {
 	font-size: 0.9em;
 	font-weight: normal;
 }
-.item-stream .viewerCountLogo{
-	height: 0.9em;
+.item-stream:not(.streamLogo) .streamCurrentViewers{
+	right: 5px !important;
+}
+.item-stream .streamCurrentViewers .material-icons{
 	padding-left: 0.2em;
+	font-size: 1em;
+	font-weight: normal;
 }
 .item-stream.streamLogo .streamStatus{
 	position: relative;
@@ -100,11 +108,11 @@ header button {
 	height: 21px;
 	position: relative;
 }
-.item-stream.onlineItem:not(.streamLogo) {
-	background-image: url("online-stream.svg");
+.item-stream.onlineItem:not(.streamLogo){
+	background-image: url("../online-stream.svg");
 }
-.item-stream.offlineItem:not(.streamLogo) {
-	background-image: url("offline-stream.svg");
+.item-stream.offlineItem:not(.streamLogo){
+	background-image: url("../offline-stream.svg");
 }
 .item-stream > span{
 	display: block;

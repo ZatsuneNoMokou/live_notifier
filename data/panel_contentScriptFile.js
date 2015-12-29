@@ -6,6 +6,7 @@ function unloadListeners() {
 	self.port.removeListener('updateOnlineCount', listenerOnlineCount);
 	self.port.removeListener('updateOfflineCount', listenerOfflineCount);
 	self.port.removeListener('updateData', listener);
+	self.port.removeListener('panel_theme', theme_update);
 	self.port.removeListener('unloadListeners', unloadListeners);
 }
 
@@ -40,6 +41,7 @@ function removeNodeEvents(node, event) {
 self.port.on('unloadListeners', unloadListeners);
 
 var refreshStreamsButton = document.querySelector("#refreshStreams");
+
 function refreshButtonClick(){
 	self.port.emit("refreshStreams","");
 }
@@ -126,9 +128,9 @@ function listener(data){
 		var viewerCountNode = document.createElement("span");
 		viewerCountNode.className = "streamCurrentViewers";
 		viewerCountNode.appendChild(document.createTextNode(data.streamCurrentViewers));
-		var viewerCountLogoNode = document.createElement("img");
-		viewerCountLogoNode.className = "viewerCountLogo";
-		viewerCountLogoNode.src = "eye_logo_white.svg";
+		var viewerCountLogoNode = document.createElement("i");
+		viewerCountLogoNode.className = "material-icons";
+		viewerCountLogoNode.appendChild(document.createTextNode("visibility"));
 		viewerCountNode.appendChild(viewerCountLogoNode);
 		titleLine.appendChild(viewerCountNode);
 	}
@@ -152,7 +154,32 @@ function listener(data){
 	showNonEmptySitesBlocks();
 }
 
+function theme_update(data){
+	let panelColorStylesheet = document.createElement("link");
+	panelColorStylesheet.id = "panel-color-stylesheet"
+	panelColorStylesheet.rel = "stylesheet";
+	panelColorStylesheet.type = "text/css";
+	panelColorStylesheet.media = "all";
+	
+	switch(data){
+		case "dark":
+			panelColorStylesheet.href = "css/panel-color-dark.css";
+			break;
+		
+		case "light":
+			panelColorStylesheet.href = "css/panel-color-light.css";
+			break;
+	}
+	if(typeof panelColorStylesheet.href == "string" && panelColorStylesheet.href != ""){
+		let currentThemeNode = document.querySelector("#panel-color-stylesheet");
+		currentThemeNode.parentNode.removeChild(currentThemeNode);
+		
+		document.querySelector("head").appendChild(panelColorStylesheet);
+	}
+}
+
 self.port.on('initList', initList);
 self.port.on('updateOnlineCount', listenerOnlineCount);
 self.port.on('updateOfflineCount', listenerOfflineCount);
 self.port.on('updateData', listener);
+self.port.on('panel_theme', theme_update);

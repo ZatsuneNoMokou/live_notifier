@@ -146,6 +146,8 @@ function updatePanelData(){
 			}
 		}
 	}
+	
+	panel.port.emit("panel_theme", simplePrefs["panel_theme"]);
 }
 
 function handleChange(state) {

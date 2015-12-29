@@ -2,7 +2,7 @@
 	"title": "Streams notifier",
 	"id": "stream_notifier@zatsunenomokou.eu",
 	"name": "streamnotifier",
-	"version": "2.10.1",
+	"version": "2.11.0",
 	"description": "Be notified of streams from Dailymotion, Hitbox and Twitch",
 	"main": "index.js",
 	"author": "Zatsune No Mokou",
@@ -65,6 +65,23 @@
 			"description": "Shown when checked",
 			"type": "bool",
 			"value": false
+		},
+		{
+			"name": "panel_theme",
+			"title": "Panel theme",
+			"description": "Choose the panel of the panel",
+			"type": "menulist",
+			"value": "dark",
+			"options": [
+					{
+						"value": "dark",
+						"label": "Dark"
+					},
+					{
+						"value": "light",
+						"label": "Light"
+					}
+				]
 		}
 	]
 }
