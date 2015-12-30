@@ -146,8 +146,12 @@ function updatePanelData(){
 			}
 		}
 	}
-	
-	panel.port.emit("panel_theme", {"theme": simplePrefs["panel_theme"], "background_color": simplePrefs["background_color"]});
+	if((typeof current_panel_theme != "string" && typeof current_background_color != "string") || current_panel_theme != simplePrefs["panel_theme"] || current_background_color != simplePrefs["background_color"]){
+		console.log("Sending panel theme data");
+		panel.port.emit("panel_theme", {"theme": simplePrefs["panel_theme"], "background_color": simplePrefs["background_color"]});
+	}
+	current_panel_theme = simplePrefs["panel_theme"];
+	current_background_color = simplePrefs["background_color"];
 }
 
 function handleChange(state) {

@@ -206,12 +206,21 @@ function theme_update(data){
 	panelColorStylesheet = document.createElement("style");
 	panelColorStylesheet.id = "panel-color-stylesheet";
 	baseColor_hsl = baseColor.getHSL();
+	let baseColor_L = JSON.parse(baseColor_hsl.L.replace("%",""))/100;
 	if(data.theme == "dark"){
 		var custom_stylesheet = "@import url(css/panel-text-color-white.css);\n";
-		values = ["19%","13%","26%","13%"];
+		if(baseColor_L > 0.5 || baseColor_L < 0.1){
+			values = ["19%","13%","26%","13%"];
+		} else {
+			values = [(baseColor_L + 0.06) * 100 + "%", baseColor_L * 100 + "%", (baseColor_L + 0.13) * 100 + "%", baseColor_L * 100 + "%"];
+		}
 	} else if(data.theme == "light"){
-		var custom_stylesheet = "@import url(css/panel-text-color-dark.css);\n";
-		values = ["87%","74%","81%","87%"];
+		var custom_stylesheet = "@import url(css/panel-text-color-black.css);\n";
+		if(baseColor_L < 0.5 /*|| baseColor_L > 0.9*/){
+			values = ["87%","74%","81%","87%"];
+		} else {
+			values = [baseColor_L * 100 + "%", (baseColor_L - 0.13) * 100 + "%", (baseColor_L - 0.06) * 100 + "%", baseColor_L * 100 + "%"];
+		}
 	}
 	custom_stylesheet += "body {background-color: hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[0] + ");}\n";
 	custom_stylesheet += "header, footer {background-color: hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[1] + ");}\n";
