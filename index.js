@@ -120,7 +120,58 @@ function refreshStreamsFromPanel(){
 	}
 	var intervalRefreshPanel = setInterval(waitToUpdatePanel, 5000);
 }
+function addStreamFromPanel(){
+	var active_tab_url = tabs.activeTab.url;
+	console.info("Current active tab: " + active_tab_url);
+	var active_tab_title = tabs.activeTab.title;
+	var patterns = {"dailymotion": [/^(?:http|https):\/\/games\.dailymotion\.com\/live\/([a-zA-Z0-9]*).*$/, /^(?:http|https):\/\/www\.dailymotion\.com\/video\/([a-zA-Z0-9]*).*$/],
+					"hitbox": [/^(?:http|https):\/\/www\.hitbox\.tv\/([^\/\?\&]*).*$/],
+					"twitch": [/^(?:http|https):\/\/www\.twitch\.tv\/([^\/\?\&]*).*$/]};
+	for(website in patterns){
+		var streamList = getStreamList(website);
+		for(let pattern of patterns[website]){
+			let id = "";
+			if(pattern.test(active_tab_url)){
+				id = pattern.exec(active_tab_url)[1];
+				var existingStream = false;
+				for(i in streamList){
+					if(i.toLowerCase() == id.toLowerCase()){
+						existingStream = true;
+					}
+				}
+				if(existingStream){
+					doNotifNoLink("Stream Notifier", id + " " + _("is already configured."));
+					return true;
+				} else {
+					switch(website){
+						case "hitbox":
+							if(active_tab_title.indexOf(" - hitbox") == -1){
+								doNotifNoLink("Stream Notifier", id + " " + _("wasn't configured, but not detected as channel."));
+								return false;
+							}
+							break;
+						case "twitch":
+							let twitch_test_title = id + " - Twitch"
+							if(active_tab_title.toLowerCase() != twitch_test_title.toLowerCase()){
+								doNotifNoLink("Stream Notifier", id + " " + _("wasn't configured, but not detected as channel."));
+								return false;
+							}
+							break;
+					}
+					doNotifNoLink("Stream Notifier", id + " " + _("wasn't configured, and have been added."));
+					simplePrefs[website + '_keys_list'] += ((simplePrefs[website + '_keys_list'] == "")? "" : ",") + id;
+					
+					// Update the panel for the new stream added
+					refreshStreamsFromPanel();
+					return true;
+				}
+			}
+		}
+	}
+	doNotifNoLink("Stream Notifier", _("No supported stream detected in the current tab, so, nothing to add."));
+}
 panel.port.on("refreshStreams", refreshStreamsFromPanel);
+panel.port.on("addStream",addStreamFromPanel)
 panel.port.on("openTab", openTabIfNotExist);
 
 function updatePanelData(){

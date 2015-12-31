@@ -2,6 +2,9 @@ function unloadListeners() {
 	var refreshStreamsButton = document.querySelector("#refreshStreams");
 	refreshStreamsButton.removeEventListener("click",refreshButtonClick);
 	
+	var addStreamButton = document.querySelector("#addStream");
+	addStreamButton.removeEventListener("click",addStreamButtonClick);
+	
 	self.port.removeListener('initList', initList);
 	self.port.removeListener('updateOnlineCount', listenerOnlineCount);
 	self.port.removeListener('updateOfflineCount', listenerOfflineCount);
@@ -46,6 +49,13 @@ function refreshButtonClick(){
 	self.port.emit("refreshStreams","");
 }
 refreshStreamsButton.addEventListener("click",refreshButtonClick,false);
+
+var addStreamButton = document.querySelector("#addStream");
+
+function addStreamButtonClick(){
+	self.port.emit("addStream","");
+}
+addStreamButton.addEventListener("click",addStreamButtonClick,false);
 
 function removeAllChildren(node){
 	// Taken from https://stackoverflow.com/questions/683366/remove-all-the-children-dom-elements-in-div
