@@ -171,7 +171,7 @@ function addStreamFromPanel(){
 	doNotifNoLink("Stream Notifier", _("No supported stream detected in the current tab, so, nothing to add."));
 }
 panel.port.on("refreshStreams", refreshStreamsFromPanel);
-panel.port.on("addStream",addStreamFromPanel)
+panel.port.on("addStream",addStreamFromPanel);
 panel.port.on("openTab", openTabIfNotExist);
 
 function updatePanelData(){
@@ -523,6 +523,7 @@ checkLives();
 exports.onUnload = function (reason) {
 	clearInterval(interval);
 	panel.port.removeListener('refreshStreams', refreshStreamsFromPanel);
+	panel.port.removeListener("addStream",addStreamFromPanel);
 	panel.port.removeListener("openTab", openTabIfNotExist);
 	panel.port.emit('unloadListeners', "");
 }
