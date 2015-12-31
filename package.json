@@ -2,7 +2,7 @@
 	"title": "Streams notifier",
 	"id": "stream_notifier@zatsunenomokou.eu",
 	"name": "streamnotifier",
-	"version": "2.13.1",
+	"version": "2.13.2",
 	"description": "Be notified of streams from Dailymotion, Hitbox and Twitch",
 	"main": "index.js",
 	"author": "Zatsune No Mokou",

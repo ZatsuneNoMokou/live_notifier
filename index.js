@@ -171,7 +171,7 @@ function addStreamFromPanel(){
 	doNotifNoLink("Stream Notifier", _("No supported stream detected in the current tab, so, nothing to add."));
 }
 panel.port.on("refreshStreams", refreshStreamsFromPanel);
-panel.port.on("addStream",addStreamFromPanel);
+panel.port.on("addStream", addStreamFromPanel);
 panel.port.on("openTab", openTabIfNotExist);
 
 function updatePanelData(){
@@ -229,20 +229,23 @@ function openTabIfNotExist(url){
 }
 
 function doNotif(title,message,url,imgurl) {
+	console.info("Notification " + ((url == "")? "(no link)" : "") + ": " + message);
 	notifications.notify({
 		title: title,
 		text: message,
 		iconURL: ((typeof imgurl == "string" && imgurl != "")? imgurl : myIconURL128),
-		onClick: function(){openTabIfNotExist(url);}
+		onClick: function(){
+			if(typeof url == "string" && url != ""){
+				openTabIfNotExist(url);
+			} else {
+				void(0);
+			}
+		}
 	});
 }
 
 function doNotifNoLink(title,message,imgurl) {
-	notifications.notify({
-		title: title,
-		text: message,
-		iconURL: ((typeof imgurl == "string" && imgurl != "")? imgurl : myIconURL128)
-	});
+	doNotif(title,message,"",imgurl)
 }
 
 function doStreamNotif(website,id,isStreamOnline){
@@ -375,6 +378,10 @@ function checkLives(){
 				onComplete: function (response) {
 					let id = request_id;
 					data = response.json;
+					if(data == null){
+						console.warn("Unable to get stream state (no connection).");
+						return null;
+					}
 					
 					console.group();
 					console.info(website + " - " + id + " (" + request_url + ")");
