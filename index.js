@@ -120,55 +120,77 @@ function refreshStreamsFromPanel(){
 	}
 	var intervalRefreshPanel = setInterval(waitToUpdatePanel, 5000);
 }
-function addStreamFromPanel(){
-	var active_tab_url = tabs.activeTab.url;
+let addStreamFromPanel_pageListener = new Array();
+function addStreamFromPanel(embed_list){
+	let current_tab = tabs.activeTab;
+	let active_tab_url = current_tab.url;
 	console.info("Current active tab: " + active_tab_url);
-	var active_tab_title = tabs.activeTab.title;
-	var patterns = {"dailymotion": [/^(?:http|https):\/\/games\.dailymotion\.com\/live\/([a-zA-Z0-9]*).*$/, /^(?:http|https):\/\/www\.dailymotion\.com\/video\/([a-zA-Z0-9]*).*$/],
-					"hitbox": [/^(?:http|https):\/\/www\.hitbox\.tv\/([^\/\?\&]*).*$/],
-					"twitch": [/^(?:http|https):\/\/www\.twitch\.tv\/([^\/\?\&]*).*$/]};
-	for(website in patterns){
-		var streamList = getStreamList(website);
-		for(let pattern of patterns[website]){
-			let id = "";
-			if(pattern.test(active_tab_url)){
-				id = pattern.exec(active_tab_url)[1];
-				var existingStream = false;
-				for(i in streamList){
-					if(i.toLowerCase() == id.toLowerCase()){
-						existingStream = true;
+	let active_tab_title = current_tab.title;
+	let type;
+	let patterns = {"dailymotion": [/^(?:http|https):\/\/games\.dailymotion\.com\/live\/([a-zA-Z0-9]*).*$/, /^(?:http|https):\/\/www\.dailymotion\.com\/(?:embed\/)?video\/([a-zA-Z0-9]*).*$/],
+					"hitbox": [/^(?:http|https):\/\/www\.hitbox\.tv\/(?:embedchat\/)?([^\/\?\&]*).*$/],
+					"twitch": [/^(?:http|https):\/\/www\.twitch\.tv\/([^\/\?\&]*).*$/,/^(?:http|https):\/\/player\.twitch\.tv\/\?channel\=([\w\-]*).*$/]};
+	let url_list;
+	if(typeof embed_list == "object"){
+		url_list = embed_list;
+		for(i of addStreamFromPanel_pageListener){
+			i.port.removeListener('refreshStreams', refreshStreamsFromPanel);
+		}
+		type = "embed";
+	} else {
+		url_list = [active_tab_url];
+	}
+	for(let url of url_list){
+		for(website in patterns){
+			var streamList = getStreamList(website);
+			for(let pattern of patterns[website]){
+				let id = "";
+				if(pattern.test(url)){
+					id = pattern.exec(url)[1];
+					var existingStream = false;
+					for(i in streamList){
+						if(i.toLowerCase() == id.toLowerCase()){
+							existingStream = true;
+						}
 					}
-				}
-				if(existingStream){
-					doNotifNoLink("Stream Notifier", id + " " + _("is already configured."));
-					return true;
-				} else {
-					switch(website){
-						case "hitbox":
-							if(active_tab_title.indexOf(" - hitbox") == -1){
-								doNotifNoLink("Stream Notifier", id + " " + _("wasn't configured, but not detected as channel."));
-								return false;
+					if(existingStream){
+						doNotifNoLink("Stream Notifier",`${id} ${_("is already configured.")}`);
+						return true;
+					} else {
+						let id_toChecked = id;
+						let current_API = new API(website, id);
+						Request({
+							url: current_API.url,
+							overrideMimeType: current_API.overrideMimeType,
+							onComplete: function (response) {
+								let id = id_toChecked;
+								data = response.json;
+								if(isValidResponse(website, data) == false){
+									doNotifNoLink("Stream Notifier", `${id} ${_("wasn't configured, but not detected as channel.")}`);
+									return null;
+								} else {
+									doNotifNoLink("Stream Notifier", `${id} ${_("wasn't configured, and have been added.")}`);
+									simplePrefs[website + '_keys_list'] += ((simplePrefs[website + '_keys_list'] == "")? "" : ",") + id + ((type == "embed")? " " + active_tab_url : "" );
+									// Update the panel for the new stream added
+									refreshStreamsFromPanel();
+								}
 							}
-							break;
-						case "twitch":
-							let twitch_test_title = id + " - Twitch"
-							if(active_tab_title.toLowerCase() != twitch_test_title.toLowerCase()){
-								doNotifNoLink("Stream Notifier", id + " " + _("wasn't configured, but not detected as channel."));
-								return false;
-							}
-							break;
+						}).get();
+						return true;
 					}
-					doNotifNoLink("Stream Notifier", id + " " + _("wasn't configured, and have been added."));
-					simplePrefs[website + '_keys_list'] += ((simplePrefs[website + '_keys_list'] == "")? "" : ",") + id;
-					
-					// Update the panel for the new stream added
-					refreshStreamsFromPanel();
-					return true;
 				}
 			}
 		}
 	}
-	doNotifNoLink("Stream Notifier", _("No supported stream detected in the current tab, so, nothing to add."));
+	if(typeof embed_list != "object"){
+		let page_port = current_tab.attach({
+			contentScriptFile: self.data.url("page_getEmbedList.js")
+		});
+		addStreamFromPanel_pageListener.push(page_port);
+		page_port.port.on("addStream", addStreamFromPanel);
+	} else {
+		doNotifNoLink("Stream Notifier", _("No supported stream detected in the current tab, so, nothing to add."));
+	}
 }
 panel.port.on("refreshStreams", refreshStreamsFromPanel);
 panel.port.on("addStream", addStreamFromPanel);
@@ -191,7 +213,7 @@ function updatePanelData(){
 	for(website in liveStatus){
 		var streamList = getStreamList(website);
 		for(i in liveStatus[website]){
-			if(streamList.hasOwnProperty(i) && (liveStatus[website][i].online || (simplePrefs["show_offline_in_panel"] && !liveStatus[website][i].online))){
+			if(i in streamList && (liveStatus[website][i].online || (simplePrefs["show_offline_in_panel"] && !liveStatus[website][i].online))){
 				let streamInfo = {"id": i, "online": liveStatus[website][i].online, "website": website, "streamName": liveStatus[website][i].streamName, "streamStatus": liveStatus[website][i].streamStatus, "streamGame": liveStatus[website][i].streamGame, "streamOwnerLogo": liveStatus[website][i].streamOwnerLogo, "streamCategoryLogo": liveStatus[website][i].streamCategoryLogo, "streamCurrentViewers": liveStatus[website][i].streamCurrentViewers, "streamUrl": getStreamURL(website,i)}
 				panel.port.emit("updateData", streamInfo);
 			}
@@ -245,7 +267,7 @@ function doNotif(title,message,url,imgurl) {
 }
 
 function doNotifNoLink(title,message,imgurl) {
-	doNotif(title,message,"",imgurl)
+	doNotif(title,message,"",imgurl);
 }
 
 function doStreamNotif(website,id,isStreamOnline){
@@ -340,51 +362,80 @@ function setIcon() {
 	}
 };
 
+function API(website, id){
+	switch(website){
+		case "dailymotion":
+			this.url = `https://api.dailymotion.com/video/${id}?fields=title,owner,audience,url,mode,onair?_= ${new Date().getTime()}`;
+			this.overrideMimeType = "text/plain; charset=latin1";
+			break;
+		case "hitbox":
+			this.url = `https://api.hitbox.tv/media/live/${id}`;
+			this.overrideMimeType = "text/plain; charset=utf-8";
+			break;
+		case "twitch":
+			this.url = `https://api.twitch.tv/kraken/streams/${id}`;
+			this.overrideMimeType = "text/plain; charset=utf-8";
+			break;
+	}
+}
+function isValidResponse(website, data){
+	if(data == null){
+		console.warn("Unable to get stream state (no connection).");
+		return false;
+	}
+	switch(website){
+		case "dailymotion":
+			if(data.mode != "live"){
+				console.warn(`[${website}] Unable to get stream state (not a stream).`);
+				return false;
+			}
+			if(typeof data.error == "object"){
+				console.warn(`[${website}] Unable to get stream state (error detected).`);
+				return false;
+			}
+			break;
+		case "hitbox":
+			if(data.error == "live"){
+				console.warn(`[${website}] Unable to get stream state (error detected).`);
+				return false;
+			}
+			break;
+		case "twitch":
+			if(data.error == "Not Found"){
+				console.warn(`[${website}] Unable to get stream state (error detected).`);
+				return false;
+			}
+			break;
+	}
+	return true;
+}
 function checkLives(){
 	console.group();
 	
-	for(i in websites){
+	for(let i in websites){
 		let website = websites[i];
 		let streamList = getStreamList(website);
 		
 		console.info(JSON.stringify(streamList));
 		
-		for(id in streamList){
+		for(let id in streamList){
 			let request_id = id;
-			let request_url;
-			let request_overrideMimeType;
-			switch(website){
-				case "dailymotion":
-					request_url = "https://api.dailymotion.com/video/" + id + "?fields=title,owner,audience,url,onair?_=" + new Date().getTime();
-					request_overrideMimeType = "text/plain; charset=latin1";
-					break;
-				case "hitbox":
-					request_url = "https://api.hitbox.tv/media/live/" + id;
-					request_overrideMimeType = "text/plain; charset=utf-8";
-					break;
-				case "twitch":
-					request_url = "https://api.twitch.tv/kraken/streams/" + id;
-					request_overrideMimeType = "text/plain; charset=utf-8";
-					break;
-				default:
-					return;
-			}
+			let current_API = new API(website, id);
 			
 			console.time(id);
 			
 			Request({
-				url: request_url,
-				overrideMimeType: request_overrideMimeType,
+				url: current_API.url,
+				overrideMimeType: current_API.overrideMimeType,
 				onComplete: function (response) {
 					let id = request_id;
 					data = response.json;
-					if(data == null){
-						console.warn("Unable to get stream state (no connection).");
+					if(isValidResponse(website, data) == false){
 						return null;
 					}
 					
 					console.group();
-					console.info(website + " - " + id + " (" + request_url + ")");
+					console.info(`${website} - ${id} (${current_API.url})`);
 					console.dir(data);
 					
 					if(typeof liveStatus[website][id] == "undefined"){
@@ -493,7 +544,6 @@ checkLiveStatus = {
 seconderyInfo = {
 	"dailymotion":
 		function(id,data_previous,isStreamOnline){
-			//let user_api_url = "https://api.dailymotion.com/user/" + data_previous.owner + "?fields=id,screenname";
 			let user_api_url = "https://api.dailymotion.com/video/" + id + "?fields=id,user.screenname,game.title,user.avatar_720_url";
 			Request({
 				url: user_api_url,
@@ -503,7 +553,6 @@ seconderyInfo = {
 					console.info("dailymotion" + " - " + id + " (" + user_api_url + ")");
 					console.dir(data);
 					
-					//if(typeof data.screenname == "string"){
 					if(data.hasOwnProperty("user.screenname")){
 						if(isStreamOnline){
 							liveStatus["dailymotion"][id].streamStatus = liveStatus["dailymotion"][id].streamName;
@@ -512,7 +561,6 @@ seconderyInfo = {
 						if(typeof data["user.avatar_720_url"] == "string" && data["user.avatar_720_url"] != ""){
 							liveStatus["dailymotion"][id].streamOwnerLogo = data["user.avatar_720_url"];
 						}
-						//liveStatus["dailymotion"][id].streamName = data.screenname;
 						liveStatus["dailymotion"][id].streamName = data["user.screenname"];
 					}
 					
