@@ -164,16 +164,6 @@ function listener(data){
 	showNonEmptySitesBlocks();
 }
 
-function hexToRGB(hexColorCode){
-	let hexToDec = function(h){return parseInt(h,16);}
-	let getCodes =  /^#([\da-fA-F]{2,2})([\da-fA-F]{2,2})([\da-fA-F]{2,2})$/;
-	if(getCodes.test(hexColorCode)){
-		let result = getCodes.exec(hexColorCode);
-		return {"R": hexToDec(result[1]), "G": hexToDec(result[2]), "B": hexToDec(result[3])};
-	} else {
-		return false;
-	}
-}
 function color(hexColorCode) {
 	let getCodes =  /^#([\da-fA-F]{2,2})([\da-fA-F]{2,2})([\da-fA-F]{2,2})$/;
 	if(getCodes.test(hexColorCode)){

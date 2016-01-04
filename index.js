@@ -197,6 +197,13 @@ panel.port.on("addStream", addStreamFromPanel);
 panel.port.on("openTab", openTabIfNotExist);
 
 function updatePanelData(){
+	if((typeof current_panel_theme != "string" && typeof current_background_color != "string") || current_panel_theme != simplePrefs["panel_theme"] || current_background_color != simplePrefs["background_color"]){
+		console.log("Sending panel theme data");
+		panel.port.emit("panel_theme", {"theme": simplePrefs["panel_theme"], "background_color": simplePrefs["background_color"]});
+	}
+	current_panel_theme = simplePrefs["panel_theme"];
+	current_background_color = simplePrefs["background_color"];
+	
 	//Clear stream list in the panel
 	panel.port.emit("initList", simplePrefs["show_offline_in_panel"]);
 	
@@ -219,12 +226,6 @@ function updatePanelData(){
 			}
 		}
 	}
-	if((typeof current_panel_theme != "string" && typeof current_background_color != "string") || current_panel_theme != simplePrefs["panel_theme"] || current_background_color != simplePrefs["background_color"]){
-		console.log("Sending panel theme data");
-		panel.port.emit("panel_theme", {"theme": simplePrefs["panel_theme"], "background_color": simplePrefs["background_color"]});
-	}
-	current_panel_theme = simplePrefs["panel_theme"];
-	current_background_color = simplePrefs["background_color"];
 }
 
 function handleChange(state) {
