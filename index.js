@@ -105,8 +105,8 @@ var firefox_button = ToggleButton({
 });
 
 var panel = panels.Panel({
-	height: 300,
-	width: 250,
+	height: 350,
+	width: 275,
 	contentScriptFile: require("sdk/self").data.url("panel_contentScriptFile.js"),
 	contentURL: self.data.url("panel.html"),
 });

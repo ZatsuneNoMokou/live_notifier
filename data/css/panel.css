@@ -13,6 +13,9 @@ body {
 	display: flex;
 	flex-direction: column;
 }
+*{
+	font-size: 14px;
+}
 header {
 	display: flex;
 	flex-direction: row;
@@ -52,17 +55,16 @@ header button {
 	padding: 0px;
 }
 .item-stream {
-	/*max-height: 5.3em;*/
 	margin: 0.5em 0px;
 	padding: 1em;
 	background-repeat: no-repeat;
 	background-position: 3px center;
-	/*display: flex;*/
 	justify-content: space-between;
 	flex-direction: column;
 }
 .item-stream .streamTitle{
 	font-weight: bold;
+	font-size: 1.1em;
 }
 .item-stream:not(.streamLogo){
 	padding-left: 45px;
@@ -72,27 +74,28 @@ header button {
 	padding-left: 4.2em;
 	background-size: 3.5em auto;
 }
-.item-stream .streamTitle{
-	font-size: 1.1em;
-}
 .item-stream:not(.streamLogo) .streamTitle{
 	padding-left: 7px;
 }
 .item-stream.streamLogo .streamTitle{
 	position: relative;
 	left: -15px;
-	top: -5px;
+	margin-top: -5px;
 }
 .item-stream .streamCurrentViewers{
 	position: relative;
 	right: -10px;
-	top: -3px;
+	margin-right: -15px;
 	float: right;
 	text-align: right;
 	font-size: 0.9em;
 	font-weight: normal;
 }
+.item-stream.streamLogo .streamCurrentViewers{
+	top: -0.7em;
+}
 .item-stream:not(.streamLogo) .streamCurrentViewers{
+	top: -1em;
 	right: 5px !important;
 }
 .item-stream .streamCurrentViewers .material-icons{
@@ -101,8 +104,7 @@ header button {
 	font-weight: normal;
 }
 .item-stream.streamLogo .streamStatus{
-	position: relative;
-	top: -5px;
+	margin-top: 6px;
 }
 .item-stream .streamTitle img.streamStatusLogo{
 	height: 21px;
