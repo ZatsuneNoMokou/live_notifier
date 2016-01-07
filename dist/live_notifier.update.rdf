@@ -3,19 +3,19 @@
 <RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 
-  <RDF:Description about="urn:mozilla:extension:stream_notifier@zatsunenomokou.eu">
+  <RDF:Description about="urn:mozilla:extension:live_notifier@zatsunenomokou.eu">
     <em:updates>
       <RDF:Seq>
 
         <RDF:li>
           <RDF:Description>
-            <em:version>2.14.2</em:version>
+            <em:version>2.15.1</em:version>
             <em:targetApplication>
               <RDF:Description>
                 <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
                 <em:minVersion>38.0a1</em:minVersion>
                 <em:maxVersion>43.*</em:maxVersion>
-                <em:updateLink>https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.xpi</em:updateLink>
+                <em:updateLink>https://raw.github.com/ZatsuneNoMokou/live_notifier/master/dist/live_notifier.xpi</em:updateLink>
               </RDF:Description>
             </em:targetApplication>
             <em:targetApplication>
@@ -23,7 +23,7 @@
                 <em:id>{aa3c5121-dab2-40e2-81ca-7ea25febc110}</em:id>
                 <em:minVersion>38.0a1</em:minVersion>
                 <em:maxVersion>43.*</em:maxVersion>
-                <em:updateLink>https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.xpi</em:updateLink>
+                <em:updateLink>https://raw.github.com/ZatsuneNoMokou/live_notifier/master/dist/live_notifier.xpi</em:updateLink>
               </RDF:Description>
             </em:targetApplication>
           </RDF:Description>

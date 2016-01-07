@@ -154,7 +154,7 @@ function addStreamFromPanel(embed_list){
 						}
 					}
 					if(existingStream){
-						doNotifNoLink("Stream Notifier",`${id} ${_("is already configured.")}`);
+						doNotif("Stream Notifier",`${id} ${_("is already configured.")}`);
 						return true;
 					} else {
 						let id_toChecked = id;
@@ -166,13 +166,23 @@ function addStreamFromPanel(embed_list){
 								let id = id_toChecked;
 								data = response.json;
 								if(isValidResponse(website, data) == false){
-									doNotifNoLink("Stream Notifier", `${id} ${_("wasn't configured, but not detected as channel.")}`);
+									doNotif("Stream Notifier", `${id} ${_("wasn't configured, but not detected as channel.")}`);
 									return null;
 								} else {
-									doNotifNoLink("Stream Notifier", `${id} ${_("wasn't configured, and have been added.")}`);
-									simplePrefs[website + '_keys_list'] += ((simplePrefs[website + '_keys_list'] == "")? "" : ",") + id + ((type == "embed")? " " + active_tab_url : "" );
-									// Update the panel for the new stream added
-									refreshStreamsFromPanel();
+									if(simplePrefs["confirm_addStreamFromPanel"]){
+										let addstreamNotifAction = new notifAction("function", function(){
+											simplePrefs[website + '_keys_list'] += ((simplePrefs[website + '_keys_list'] == "")? "" : ",") + id + ((type == "embed")? " " + active_tab_url : "" );
+											doNotif("Stream Notifier", `${id} ${_("have been added.")}`);
+											// Update the panel for the new stream added
+											refreshStreamsFromPanel();
+											})
+										doActionNotif(`Stream Notifier (${_("click to confirm")})`, `${id} ${_("wasn't configured, and can be added.")}`, addstreamNotifAction);
+									} else {
+										doNotif("Stream Notifier", `${id} ${_("wasn't configured, and have been added.")}`);
+										simplePrefs[website + '_keys_list'] += ((simplePrefs[website + '_keys_list'] == "")? "" : ",") + id + ((type == "embed")? " " + active_tab_url : "" );
+										// Update the panel for the new stream added
+										refreshStreamsFromPanel();
+									}
 								}
 							}
 						}).get();
@@ -189,14 +199,14 @@ function addStreamFromPanel(embed_list){
 		addStreamFromPanel_pageListener.push(page_port);
 		page_port.port.on("addStream", addStreamFromPanel);
 	} else {
-		doNotifNoLink("Stream Notifier", _("No supported stream detected in the current tab, so, nothing to add."));
+		doNotif("Stream Notifier", _("No supported stream detected in the current tab, so, nothing to add."));
 	}
 }
 panel.port.on("refreshStreams", refreshStreamsFromPanel);
 panel.port.on("addStream", addStreamFromPanel);
 panel.port.on("openTab", openTabIfNotExist);
 
-function updatePanelData(){
+function updatePanelData(){	
 	if((typeof current_panel_theme != "string" && typeof current_background_color != "string") || current_panel_theme != simplePrefs["panel_theme"] || current_background_color != simplePrefs["background_color"]){
 		console.log("Sending panel theme data");
 		panel.port.emit("panel_theme", {"theme": simplePrefs["panel_theme"], "background_color": simplePrefs["background_color"]});
@@ -251,24 +261,42 @@ function openTabIfNotExist(url){
 	return false; // Return false because the url wasn't already in a tab
 }
 
-function doNotif(title,message,url,imgurl) {
-	console.info("Notification " + ((url == "")? "(no link)" : "") + ": " + message);
+function doNotif(title, message, imgurl) {
+	doActionNotif(title,message,{},imgurl);
+}
+
+function doNotifUrl(title,message,url,imgurl){
+	doActionNotif(title,message,new notifAction("openUrl",url),imgurl);
+}
+
+
+function notifAction(type,data){
+	this.type = type;
+	this.data = data;
+}
+function doActionNotif(title, message, action, imgurl){
+	console.info("Notification (" + ((typeof action.type == "string")? action.type : "Unknown/No action" ) + '): "' + message + '"');
 	notifications.notify({
 		title: title,
 		text: message,
 		iconURL: ((typeof imgurl == "string" && imgurl != "")? imgurl : myIconURL128),
 		onClick: function(){
-			if(typeof url == "string" && url != ""){
-				openTabIfNotExist(url);
-			} else {
-				void(0);
+			switch(action.type){
+				case "openUrl":
+					// Notification with openUrl action
+					openTabIfNotExist(action.data);
+					console.info(`Notification (openUrl): "${message}" (${action.data})`);
+					break;
+				case "function":
+					// Notification with custom function as action
+					action.data();
+					break;
+				default:
+					// Nothing - Unknown action
+					void(0);
 			}
 		}
 	});
-}
-
-function doNotifNoLink(title,message,imgurl) {
-	doNotif(title,message,"",imgurl);
 }
 
 function doStreamNotif(website,id,isStreamOnline){
@@ -286,16 +314,16 @@ function doStreamNotif(website,id,isStreamOnline){
 			let streamStatus = liveStatus[website][id].streamStatus + ((liveStatus[website][id].streamGame != "")? (" (" + liveStatus[website][id].streamGame + ")") : "");
 			if(streamStatus.length > 0 && streamStatus.length < 60){
 				if(streamLogo != ""){
-					doNotif(_("Stream online"), streamName + ": " + streamStatus, getStreamURL(website,id), streamLogo);
+					doNotifUrl(_("Stream online"), streamName + ": " + streamStatus, getStreamURL(website,id), streamLogo);
 				} else {
-					doNotif(_("Stream online"), streamName + ": " + streamStatus, getStreamURL(website,id));
+					doNotifUrl(_("Stream online"), streamName + ": " + streamStatus, getStreamURL(website,id));
 				}
 				
 			} else {
 				if(streamLogo != ""){
-					doNotif(_("Stream online"), streamName, getStreamURL(website,id), streamLogo);
+					doNotifUrl(_("Stream online"), streamName, getStreamURL(website,id), streamLogo);
 				} else {
-					doNotif(_("Stream online"), streamName, getStreamURL(website,id));
+					doNotifUrl(_("Stream online"), streamName, getStreamURL(website,id));
 				}
 			}
 		}

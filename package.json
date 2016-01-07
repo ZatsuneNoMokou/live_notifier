@@ -1,14 +1,14 @@
 {
-	"title": "Streams notifier",
-	"id": "stream_notifier@zatsunenomokou.eu",
-	"name": "streamnotifier",
-	"version": "2.14.2",
+	"title": "Live notifier",
+	"id": "live_notifier@zatsunenomokou.eu",
+	"name": "livenotifier",
+	"version": "2.15.1",
 	"description": "Be notified of streams from Dailymotion, Hitbox and Twitch",
 	"main": "index.js",
 	"author": "Zatsune No Mokou",
-	"homepage": "https://github.com/ZatsuneNoMokou/stream_notifier",
-	"updateLink": "https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.xpi",
-	"updateURL": "https://raw.github.com/ZatsuneNoMokou/stream_notifier/master/dist/stream_notifier.update.rdf",
+	"homepage": "https://github.com/ZatsuneNoMokou/live_notifier",
+	"updateLink": "https://raw.github.com/ZatsuneNoMokou/live_notifier/master/dist/live_notifier.xpi",
+	"updateURL": "https://raw.github.com/ZatsuneNoMokou/live_notifier/master/dist/live_notifier.update.rdf",
 	"engines": {
 		"firefox": ">=38.0a1",
 		"fennec": ">=38.0a1"
@@ -57,12 +57,19 @@
 			"title": "Show a notification when a stream finish",
 			"description": "Notification when checked",
 			"type": "bool",
-			"value": true
+			"value": false
 		},
 		{
 			"name": "show_offline_in_panel",
 			"title": "Show offline streams in the panel",
 			"description": "Shown when checked",
+			"type": "bool",
+			"value": false
+		},
+		{
+			"name": "confirm_addStreamFromPanel",
+			"title": "Confirmation to add streams",
+			"description": "Show a notification to confirm when adding a stream to config (from panel)",
 			"type": "bool",
 			"value": false
 		},
