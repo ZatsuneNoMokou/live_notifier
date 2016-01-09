@@ -330,9 +330,9 @@ function doStreamNotif(website,id,isStreamOnline){
 	} else {
 		if(simplePrefs["notify_offline"] && liveStatus[website][id].online){
 			if(streamLogo != ""){
-				doNotifNoLink(_("Stream offline"),streamName, streamLogo);
+				doNotif(_("Stream offline"),streamName, streamLogo);
 			} else {
-				doNotifNoLink(_("Stream offline"),streamName);
+				doNotif(_("Stream offline"),streamName);
 			}
 		}
 	}
