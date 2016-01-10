@@ -21,52 +21,44 @@ for(i in websites){
 	liveStatus[websites[i]] = {};
 }
 
-function makeSettingObjectFromString(txt){
-	var obj={};
-	var myTable = txt.split(",");
-	var reg= /\s*([^\s]+)\s*(.*)/;
-	var reg_removeSpaces= /\s*([^\s]+)\s*/;
-	if(myTable.length != 0){
-		for(i in myTable){
-			if(reg.test(myTable[i])){
-				var result=reg.exec(myTable[i]);
-				obj[result[1]]=result[2];
-			} else {
-				let somethingElseThanSpaces = /[^\s]+/;
-				if(somethingElseThanSpaces.test(myTable[i]) == true){
-					obj[reg_removeSpaces.exec(myTable[i])[1]]="";
+function streamListFromSetting(website){
+	let somethingElseThanSpaces = /[^\s]+/;
+	let pref = simplePrefs[`${website}_keys_list`];
+	this.stringData = pref;
+	let obj = {};
+	if(pref.length > 0 && somethingElseThanSpaces.test(pref)){
+		let myTable = pref.split(",");
+		let reg= /\s*([^\s]+)\s*(.*)/;
+		let reg_removeSpaces= /\s*([^\s]+)\s*/;
+		if(myTable.length > 0){
+			for(i in myTable){
+				if(reg.test(myTable[i])){
+					let result=reg.exec(myTable[i]);
+					obj[result[1]]=result[2];
+				} else {
+					let somethingElseThanSpaces = /[^\s]+/;
+					if(somethingElseThanSpaces.test(myTable[i]) == true){
+						obj[reg_removeSpaces.exec(myTable[i])[1]]="";
+					}
 				}
 			}
 		}
 	}
-	return obj;
-}
-
-function getStreamList(website){
-	var somethingElseThanSpaces = /[^\s]+/;
-	switch(website){
-		case "dailymotion":
-			var pref = simplePrefs['dailymotion_keys_list'];
-			break;
-		case "hitbox":
-			var pref = simplePrefs['hitbox_keys_list'];
-			break;
-		case "twitch":
-			var pref = simplePrefs['twitch_keys_list'];
-			break;
-		default:
-			return {};
-			break;
-	}
-	if(pref.length == 0 || somethingElseThanSpaces.test(pref) == false){
-		return {};
-	} else {
-		return makeSettingObjectFromString(pref);
+	this.objData = obj;
+	this.website = website;
+	this.update = function(){
+		let array = new Array();
+		for(i in this.objData){
+			array.push(i + ((this.objData[i] != "")? (" " + this.objData[i]) : ""));
+		}
+		let newSettings = array.join(",");
+		simplePrefs[`${this.website}_keys_list`] = newSettings;
+		console.log(`New settings (${this.website}): ${simplePrefs[`${this.website}_keys_list`]}`);
 	}
 }
 
 function getStreamURL(website,id){
-	var streamList = getStreamList(website);
+	var streamList = (new streamListFromSetting(website)).objData;
 	if(streamList[id] != ""){
 		return streamList[id];
 	} else {
@@ -142,7 +134,8 @@ function addStreamFromPanel(embed_list){
 	}
 	for(let url of url_list){
 		for(website in patterns){
-			var streamList = getStreamList(website);
+			let streamListSetting = new streamListFromSetting(website);
+			let streamList = streamListSetting.objData;
 			for(let pattern of patterns[website]){
 				let id = "";
 				if(pattern.test(url)){
@@ -171,15 +164,17 @@ function addStreamFromPanel(embed_list){
 								} else {
 									if(simplePrefs["confirm_addStreamFromPanel"]){
 										let addstreamNotifAction = new notifAction("function", function(){
-											simplePrefs[website + '_keys_list'] += ((simplePrefs[website + '_keys_list'] == "")? "" : ",") + id + ((type == "embed")? " " + active_tab_url : "" );
+											streamListSetting.objData[id] = (type == "embed")? active_tab_url : "";
+											streamListSetting.update();
 											doNotif("Stream Notifier", `${id} ${_("have been added.")}`);
 											// Update the panel for the new stream added
 											refreshStreamsFromPanel();
 											})
 										doActionNotif(`Stream Notifier (${_("click to confirm")})`, `${id} ${_("wasn't configured, and can be added.")}`, addstreamNotifAction);
 									} else {
+										streamListSetting.objData[id] = (type == "embed")? active_tab_url : "";
+										streamListSetting.update();
 										doNotif("Stream Notifier", `${id} ${_("wasn't configured, and have been added.")}`);
-										simplePrefs[website + '_keys_list'] += ((simplePrefs[website + '_keys_list'] == "")? "" : ",") + id + ((type == "embed")? " " + active_tab_url : "" );
 										// Update the panel for the new stream added
 										refreshStreamsFromPanel();
 									}
@@ -202,8 +197,33 @@ function addStreamFromPanel(embed_list){
 		doNotif("Stream Notifier", _("No supported stream detected in the current tab, so, nothing to add."));
 	}
 }
+function deleteStreamFromPanel(data){
+	let streamListSetting = new streamListFromSetting(data.website);
+	let streamList = streamListSetting.objData;
+	let id = data.id;
+	console.log(id in streamList);
+	if(id in streamList){
+		if(simplePrefs["confirm_deleteStreamFromPanel"]){
+			let deletestreamNotifAction = new notifAction("function", function(){
+				delete streamListSetting.objData[id];
+				streamListSetting.update();
+				doNotif("Stream Notifier", `${id} ${_("has been deleted.")}`);
+				// Update the panel for the new stream added
+				refreshStreamsFromPanel();
+				})
+			doActionNotif(`Stream Notifier (${_("click to confirm")})`, `${id} ${_("will be deleted, are you sure?")}`, deletestreamNotifAction);
+		} else {
+			delete streamListSetting.objData[id];
+			streamListSetting.update();
+			doNotif("Stream Notifier", `${id} ${_("has been deleted.")}`);
+			// Update the panel for the new stream added
+			refreshStreamsFromPanel();
+		}
+	}
+}
 panel.port.on("refreshStreams", refreshStreamsFromPanel);
 panel.port.on("addStream", addStreamFromPanel);
+panel.port.on("deleteStream", deleteStreamFromPanel);
 panel.port.on("openTab", openTabIfNotExist);
 
 function updatePanelData(){	
@@ -228,7 +248,7 @@ function updatePanelData(){
 	}
 	
 	for(website in liveStatus){
-		var streamList = getStreamList(website);
+		var streamList = (new streamListFromSetting(website)).objData;
 		for(i in liveStatus[website]){
 			if(i in streamList && (liveStatus[website][i].online || (simplePrefs["show_offline_in_panel"] && !liveStatus[website][i].online))){
 				let streamInfo = {"id": i, "online": liveStatus[website][i].online, "website": website, "streamName": liveStatus[website][i].streamName, "streamStatus": liveStatus[website][i].streamStatus, "streamGame": liveStatus[website][i].streamGame, "streamOwnerLogo": liveStatus[website][i].streamOwnerLogo, "streamCategoryLogo": liveStatus[website][i].streamCategoryLogo, "streamCurrentViewers": liveStatus[website][i].streamCurrentViewers, "streamUrl": getStreamURL(website,i)}
@@ -342,7 +362,7 @@ function doStreamNotif(website,id,isStreamOnline){
 function getOfflineCount(){
 	var offlineCount = 0;
 	for(website in liveStatus){
-		var streamList = getStreamList(website);
+		var streamList = (new streamListFromSetting(website)).objData;
 		for(i in liveStatus[website]){
 			if(!liveStatus[website][i].online && streamList.hasOwnProperty(i)){
 				offlineCount = offlineCount + 1;
@@ -357,7 +377,7 @@ function setIcon() {
 	var onlineCount = 0;
 	
 	for(website in liveStatus){
-		var streamList = getStreamList(website);
+		var streamList = (new streamListFromSetting(website)).objData;
 		for(i in liveStatus[website]){
 			if(liveStatus[website][i].online && streamList.hasOwnProperty(i)){
 				onlineCount = onlineCount + 1;
@@ -443,7 +463,7 @@ function checkLives(){
 	
 	for(let i in websites){
 		let website = websites[i];
-		let streamList = getStreamList(website);
+		let streamList = (new streamListFromSetting(website)).objData;
 		
 		console.info(JSON.stringify(streamList));
 		
@@ -460,6 +480,8 @@ function checkLives(){
 					let id = request_id;
 					data = response.json;
 					if(isValidResponse(website, data) == false){
+						console.timeEnd(id);
+						console.groupEnd();
 						return null;
 					}
 					
@@ -607,7 +629,8 @@ checkLives();
 exports.onUnload = function (reason) {
 	clearInterval(interval);
 	panel.port.removeListener('refreshStreams', refreshStreamsFromPanel);
-	panel.port.removeListener("addStream",addStreamFromPanel);
+	panel.port.removeListener("addStream", addStreamFromPanel);
+	panel.port.removeListener("deleteStream", deleteStreamFromPanel);
 	panel.port.removeListener("openTab", openTabIfNotExist);
 	panel.port.emit('unloadListeners', "");
 }

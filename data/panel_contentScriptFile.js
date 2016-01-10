@@ -1,9 +1,12 @@
 function unloadListeners() {
-	var refreshStreamsButton = document.querySelector("#refreshStreams");
+	let refreshStreamsButton = document.querySelector("#refreshStreams");
 	refreshStreamsButton.removeEventListener("click",refreshButtonClick);
 	
-	var addStreamButton = document.querySelector("#addStream");
+	let addStreamButton = document.querySelector("#addStream");
 	addStreamButton.removeEventListener("click",addStreamButtonClick);
+	
+	let deleteStreamButton = document.querySelector("#deleteStream");
+	deleteStreamButton.removeEventListener("click",deleteStreamButtonClick);
 	
 	self.port.removeListener('initList', initList);
 	self.port.removeListener('updateOnlineCount', listenerOnlineCount);
@@ -56,6 +59,23 @@ function addStreamButtonClick(){
 	self.port.emit("addStream","");
 }
 addStreamButton.addEventListener("click",addStreamButtonClick,false);
+
+let deleteStreamButton = document.querySelector("#deleteStream");
+let deleteStreamWarning = document.querySelector("#deleteStreamWarning");
+let deleteModeState = false;
+
+function deleteStreamButtonClick(){
+	if(deleteModeState){
+		deleteModeState = false;
+		deleteStreamButton.className = deleteStreamButton.className.replace(/\s*active/i,"");
+		deleteStreamWarning.className += " hide";
+	} else {
+		deleteModeState = true;
+		deleteStreamButton.className += " active";
+		deleteStreamWarning.className = deleteStreamWarning.className.replace(/\s*hide/i,"");
+	}
+}
+deleteStreamButton.addEventListener("click",deleteStreamButtonClick,false);
 
 function removeAllChildren(node){
 	// Taken from https://stackoverflow.com/questions/683366/remove-all-the-children-dom-elements-in-div
@@ -160,8 +180,16 @@ function listener(data){
 		nodeListOffline[data.website].appendChild(newLine);
 	}
 	newLine.className += " cursor";
-	addEvent(newLine,"click",function(){self.port.emit("openTab",data.streamUrl);},false);
+	addEvent(newLine,"click",function(){streamItemClick(data);},false);
 	showNonEmptySitesBlocks();
+}
+function streamItemClick(data){
+	if(deleteModeState == true){
+		self.port.emit("deleteStream",data);
+		deleteStreamButtonClick();
+	} else {
+		self.port.emit("openTab",data.streamUrl);
+	}
 }
 
 function color(hexColorCode) {

@@ -37,6 +37,15 @@ header button {
 	display: none !important;
 	visibility: hidden !important;
 }
+#deleteStream.active{
+	color: red;
+}
+#deleteStreamWarning{
+	vertical-align: middle;
+	font-weight: bold;
+	margin-top: 7px;
+	margin-bottom: 7px;
+}
 .cursor{
 	cursor: pointer;
 }
