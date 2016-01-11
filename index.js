@@ -1,22 +1,23 @@
 // Required SDK
 
-var { ToggleButton } = require('sdk/ui/button/toggle');
-var panels = require("sdk/panel");
+let { ToggleButton } = require('sdk/ui/button/toggle');
+let panels = require("sdk/panel");
 
-var Request = require("sdk/request").Request;
+let Request = require("sdk/request").Request;
 
-var simplePrefs = require('sdk/simple-prefs').prefs;
-var tabs = require("sdk/tabs");
-var self = require("sdk/self");
-var {setInterval, setTimeout, clearInterval} = require("sdk/timers");
+let sp = require('sdk/simple-prefs');
+let simplePrefs = require('sdk/simple-prefs').prefs;
+let tabs = require("sdk/tabs");
+let self = require("sdk/self");
+let {setInterval, setTimeout, clearInterval} = require("sdk/timers");
 
-var myIconURL128 = self.data.url("icon_128.png");
-var myIconURL64 = self.data.url("icon.png");
+let myIconURL128 = self.data.url("icon_128.png");
+let myIconURL64 = self.data.url("icon.png");
 
-var _ = require("sdk/l10n").get;
+let _ = require("sdk/l10n").get;
 
-var websites = ["dailymotion","hitbox","twitch"];
-var liveStatus = {};
+let websites = ["dailymotion","hitbox","twitch"];
+let liveStatus = {};
 for(i in websites){
 	liveStatus[websites[i]] = {};
 }
@@ -46,6 +47,26 @@ function streamListFromSetting(website){
 	}
 	this.objData = obj;
 	this.website = website;
+	this.streamExist = function(id){
+		for(i in this.objData){
+			if(i.toLowerCase() == id.toLowerCase()){
+				return true;
+			}
+		}
+		return false;
+	}
+	this.addStream = function(id, url){
+		if(this.streamExist(id) == false){
+			this.objData[id] = url;
+			console.log(`${id} has been added`);
+		}
+	}
+	this.deleteStream = function(id){
+		if(this.streamExist(id)){
+			delete this.objData[id];
+			console.log(`${id} has been deleted`);
+		}
+	}
 	this.update = function(){
 		let array = new Array();
 		for(i in this.objData){
@@ -140,13 +161,7 @@ function addStreamFromPanel(embed_list){
 				let id = "";
 				if(pattern.test(url)){
 					id = pattern.exec(url)[1];
-					var existingStream = false;
-					for(i in streamList){
-						if(i.toLowerCase() == id.toLowerCase()){
-							existingStream = true;
-						}
-					}
-					if(existingStream){
+					if(streamListSetting.streamExist(id)){
 						doNotif("Stream Notifier",`${id} ${_("is already configured.")}`);
 						return true;
 					} else {
@@ -164,7 +179,8 @@ function addStreamFromPanel(embed_list){
 								} else {
 									if(simplePrefs["confirm_addStreamFromPanel"]){
 										let addstreamNotifAction = new notifAction("function", function(){
-											streamListSetting.objData[id] = (type == "embed")? active_tab_url : "";
+											streamListSetting.addStream(id, ((type == "embed")? active_tab_url : ""));
+											//streamListSetting.objData[id] = (type == "embed")? active_tab_url : "";
 											streamListSetting.update();
 											doNotif("Stream Notifier", `${id} ${_("have been added.")}`);
 											// Update the panel for the new stream added
@@ -172,7 +188,8 @@ function addStreamFromPanel(embed_list){
 											})
 										doActionNotif(`Stream Notifier (${_("click to confirm")})`, `${id} ${_("wasn't configured, and can be added.")}`, addstreamNotifAction);
 									} else {
-										streamListSetting.objData[id] = (type == "embed")? active_tab_url : "";
+										streamListSetting.addStream(id, ((type == "embed")? active_tab_url : ""));
+										//streamListSetting.objData[id] = (type == "embed")? active_tab_url : "";
 										streamListSetting.update();
 										doNotif("Stream Notifier", `${id} ${_("wasn't configured, and have been added.")}`);
 										// Update the panel for the new stream added
@@ -202,7 +219,7 @@ function deleteStreamFromPanel(data){
 	let streamList = streamListSetting.objData;
 	let id = data.id;
 	console.log(id in streamList);
-	if(id in streamList){
+	if(streamListSetting.streamExist(id)){
 		if(simplePrefs["confirm_deleteStreamFromPanel"]){
 			let deletestreamNotifAction = new notifAction("function", function(){
 				delete streamListSetting.objData[id];
@@ -412,6 +429,10 @@ function setIcon() {
 };
 
 function API(website, id){
+	this.id = id;
+	this.url = "";
+	this.overrideMimeType = "";
+	
 	switch(website){
 		case "dailymotion":
 			this.url = `https://api.dailymotion.com/video/${id}?fields=title,owner,audience,url,mode,onair?_= ${new Date().getTime()}`;
@@ -424,6 +445,18 @@ function API(website, id){
 		case "twitch":
 			this.url = `https://api.twitch.tv/kraken/streams/${id}`;
 			this.overrideMimeType = "text/plain; charset=utf-8";
+			break;
+	}
+}
+function importAPI(website, id){
+	this.id = id;
+	this.url = "";
+	this.overrideMimeType = "";
+	
+	switch(website){
+		case "twitch":
+			this.url = `https://api.twitch.tv/kraken/users/${id}/follows/channels`;
+			this.overrideMimeType = "application/vnd.twitchtv.v3+json; charset=utf-8";
 			break;
 	}
 }
@@ -468,7 +501,7 @@ function checkLives(){
 		console.info(JSON.stringify(streamList));
 		
 		for(let id in streamList){
-			let request_id = id;
+			//let request_id = id;
 			let current_API = new API(website, id);
 			
 			console.time(id);
@@ -477,7 +510,7 @@ function checkLives(){
 				url: current_API.url,
 				overrideMimeType: current_API.overrideMimeType,
 				onComplete: function (response) {
-					let id = request_id;
+					let id = current_API.id;
 					data = response.json;
 					if(isValidResponse(website, data) == false){
 						console.timeEnd(id);
@@ -626,11 +659,61 @@ seconderyInfo = {
 var interval
 checkLives();
 
+function importButton(website){
+	importStreams(website, simplePrefs[`${website}_user_id`]);
+}
+function importStreams(website, id, url){
+	let current_API = new importAPI(website, id);
+	if(typeof url == "string" && url != ""){
+		current_API.url = url;
+	}
+	console.time(current_API.url);
+	Request({
+		url: current_API.url,
+		overrideMimeType: current_API.overrideMimeType,
+		onComplete: function (response) {
+			let id = current_API.id;
+			data = response.json;
+			
+			console.group();
+			console.info(`${website} - ${id} (${current_API.url})`);
+			console.dir(data);
+			
+			importStreamWebsites[website](id, data);
+			
+			setIcon();
+			
+			console.timeEnd(id);
+			console.groupEnd(current_API.url);
+		}
+	}).get();
+}
+
+let importStreamWebsites = {
+	"twitch": function(id, data){
+		let streamListSetting = new streamListFromSetting("twitch");
+		let streamList = streamListSetting.objData;
+		if(typeof data.follows == "object"){
+			let follow = data.follows;
+			for(let item of follow){
+				streamListSetting.addStream(item["channel"]["display_name"], "");
+			}
+			streamListSetting.update();
+			if(follow.length > 0 && typeof data._links.next == "string"){
+				importStreams("twitch", id, data._links.next);
+			}
+		}
+	}
+}
+function importTwitchButton(){importButton("twitch");}
+sp.on("twitch_import", importTwitchButton);
+
 exports.onUnload = function (reason) {
 	clearInterval(interval);
 	panel.port.removeListener('refreshStreams', refreshStreamsFromPanel);
 	panel.port.removeListener("addStream", addStreamFromPanel);
 	panel.port.removeListener("deleteStream", deleteStreamFromPanel);
 	panel.port.removeListener("openTab", openTabIfNotExist);
+	sp.removeListener("twitch_import", importTwitchButton);
 	panel.port.emit('unloadListeners', "");
 }
