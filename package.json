@@ -2,7 +2,7 @@
 	"title": "Live notifier",
 	"id": "live_notifier@zatsunenomokou.eu",
 	"name": "livenotifier",
-	"version": "3.2.0",
+	"version": "3.2.1",
 	"description": "Be notified of streams from Dailymotion, Hitbox and Twitch",
 	"main": "index.js",
 	"author": "Zatsune No Mokou",
