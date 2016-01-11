@@ -2,7 +2,7 @@
 	"title": "Live notifier",
 	"id": "live_notifier@zatsunenomokou.eu",
 	"name": "livenotifier",
-	"version": "3.1.0",
+	"version": "3.2.0",
 	"description": "Be notified of streams from Dailymotion, Hitbox and Twitch",
 	"main": "index.js",
 	"author": "Zatsune No Mokou",
@@ -116,6 +116,20 @@
 			"description": "Choose background color",
 			"type": "color",
 			"value": "#000000"
+		},
+		{
+			"name": "livestreamer_cmd_to_clipboard",
+			"title": "Copy Livestreamer command on stream click.",
+			"description": "Check to activate",
+			"type": "bool",
+			"value": false
+		},
+		{
+			"name": "livestreamer_cmd_quality",
+			"title": "Livestreamer quality",
+			"description": "More information on Livestreamer page.",
+			"type": "string",
+			"value": "best"
 		}
 	]
 }

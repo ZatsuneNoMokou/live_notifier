@@ -5,10 +5,13 @@ let panels = require("sdk/panel");
 
 let Request = require("sdk/request").Request;
 
+let self = require("sdk/self");
 let sp = require('sdk/simple-prefs');
 let simplePrefs = require('sdk/simple-prefs').prefs;
+let clipboard = require("sdk/clipboard");
+
 let tabs = require("sdk/tabs");
-let self = require("sdk/self");
+
 let {setInterval, setTimeout, clearInterval} = require("sdk/timers");
 
 let myIconURL128 = self.data.url("icon_128.png");
@@ -78,9 +81,9 @@ function streamListFromSetting(website){
 	}
 }
 
-function getStreamURL(website,id){
-	var streamList = (new streamListFromSetting(website)).objData;
-	if(streamList[id] != ""){
+function getStreamURL(website, id, usePrefUrl){
+	var streamList = (new streamListFromSetting(website)).objData;	
+	if(streamList[id] != "" && usePrefUrl == true){
 		return streamList[id];
 	} else {
 		if(typeof liveStatus[website][id].streamURL == "string" && liveStatus[website][id].streamURL != ""){
@@ -241,6 +244,7 @@ function deleteStreamFromPanel(data){
 panel.port.on("refreshStreams", refreshStreamsFromPanel);
 panel.port.on("addStream", addStreamFromPanel);
 panel.port.on("deleteStream", deleteStreamFromPanel);
+panel.port.on("openOnlineLive", openOnlineLive);
 panel.port.on("openTab", openTabIfNotExist);
 
 function updatePanelData(){	
@@ -261,14 +265,14 @@ function updatePanelData(){
 		var offlineCount = getOfflineCount();
 		panel.port.emit("updateOfflineCount", (offlineCount == 0)? _("No stream offline") :  _("%d stream(s) offline",offlineCount) + ":");
 	} else {
-		panel.port.emit("updateOfflineCount", "")
+		panel.port.emit("updateOfflineCount", "");
 	}
 	
 	for(website in liveStatus){
 		var streamList = (new streamListFromSetting(website)).objData;
 		for(i in liveStatus[website]){
 			if(i in streamList && (liveStatus[website][i].online || (simplePrefs["show_offline_in_panel"] && !liveStatus[website][i].online))){
-				let streamInfo = {"id": i, "online": liveStatus[website][i].online, "website": website, "streamName": liveStatus[website][i].streamName, "streamStatus": liveStatus[website][i].streamStatus, "streamGame": liveStatus[website][i].streamGame, "streamOwnerLogo": liveStatus[website][i].streamOwnerLogo, "streamCategoryLogo": liveStatus[website][i].streamCategoryLogo, "streamCurrentViewers": liveStatus[website][i].streamCurrentViewers, "streamUrl": getStreamURL(website,i)}
+				let streamInfo = {"id": i, "online": liveStatus[website][i].online, "website": website, "streamName": liveStatus[website][i].streamName, "streamStatus": liveStatus[website][i].streamStatus, "streamGame": liveStatus[website][i].streamGame, "streamOwnerLogo": liveStatus[website][i].streamOwnerLogo, "streamCategoryLogo": liveStatus[website][i].streamCategoryLogo, "streamCurrentViewers": liveStatus[website][i].streamCurrentViewers, "streamUrl": getStreamURL(website, i, true)}
 				panel.port.emit("updateData", streamInfo);
 			}
 		}
@@ -286,10 +290,20 @@ function handleChange(state) {
 //Affichage des notifications en ligne / hors ligne
 var notifications = require("sdk/notifications");
 
+function openOnlineLive(data){
+	openTabIfNotExist(data.streamUrl);
+	if(simplePrefs["livestreamer_cmd_to_clipboard"]){
+		let cmd = `livestreamer ${getStreamURL(data.website, data.id, false)} ${simplePrefs["livestreamer_cmd_quality"]}`;
+		clipboard.set(cmd, "text");
+	}
+}
+
 function openTabIfNotExist(url){
+	console.log(url);
+	let custom_url = url.toLowerCase().replace(/http(?:s)?\:\/\/(?:www\.)?/i,"");
 	for(let tab of tabs){
-		if(tab.url.toLowerCase() == url.toLowerCase()){ // Mean the url was already opened in a tab
-			tab.activate() // Show the already opened tab
+		if(tab.url.toLowerCase().indexOf(custom_url) != -1){ // Mean the url was already opened in a tab
+			tab.activate(); // Show the already opened tab
 			return true; // Return true to stop the function as the tab is already opened
 		}
 	}
@@ -351,16 +365,16 @@ function doStreamNotif(website,id,isStreamOnline){
 			let streamStatus = liveStatus[website][id].streamStatus + ((liveStatus[website][id].streamGame != "")? (" (" + liveStatus[website][id].streamGame + ")") : "");
 			if(streamStatus.length > 0 && streamStatus.length < 60){
 				if(streamLogo != ""){
-					doNotifUrl(_("Stream online"), streamName + ": " + streamStatus, getStreamURL(website,id), streamLogo);
+					doNotifUrl(_("Stream online"), streamName + ": " + streamStatus, getStreamURL(website, id, true), streamLogo);
 				} else {
-					doNotifUrl(_("Stream online"), streamName + ": " + streamStatus, getStreamURL(website,id));
+					doNotifUrl(_("Stream online"), streamName + ": " + streamStatus, getStreamURL(website, id, true));
 				}
 				
 			} else {
 				if(streamLogo != ""){
-					doNotifUrl(_("Stream online"), streamName, getStreamURL(website,id), streamLogo);
+					doNotifUrl(_("Stream online"), streamName, getStreamURL(website, id, true), streamLogo);
 				} else {
-					doNotifUrl(_("Stream online"), streamName, getStreamURL(website,id));
+					doNotifUrl(_("Stream online"), streamName, getStreamURL(website, id, true));
 				}
 			}
 		}

@@ -185,10 +185,14 @@ function listener(data){
 }
 function streamItemClick(data){
 	if(deleteModeState == true){
-		self.port.emit("deleteStream",data);
+		self.port.emit("deleteStream", data);
 		deleteStreamButtonClick();
 	} else {
-		self.port.emit("openTab",data.streamUrl);
+		if(data.online){
+			self.port.emit("openOnlineLive", data);
+		} else {
+			self.port.emit("openTab", data.streamUrl);
+		}
 	}
 }
 
