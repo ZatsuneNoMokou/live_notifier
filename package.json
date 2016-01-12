@@ -2,7 +2,7 @@
 	"title": "Live notifier",
 	"id": "live_notifier@zatsunenomokou.eu",
 	"name": "livenotifier",
-	"version": "3.2.1",
+	"version": "3.3.0",
 	"description": "Be notified of streams from Dailymotion, Hitbox and Twitch",
 	"main": "index.js",
 	"author": "Zatsune No Mokou",
@@ -32,6 +32,20 @@
 			"value": "Laet-It-Be"
 		},
 		{
+			"name": "hitbox_user_id",
+			"title": "Your Hitbox id",
+			"description": "Enter your Hitbox id to be able to import the stream(s) you follow.",
+			"type": "string",
+			"value": ""
+		},
+		{
+			"name": "hitbox_import",
+			"title": "Import the Hitbox stream(s) you follow",
+			"label": "Import",
+			"type": "control"
+		},
+
+		{
 			"name": "twitch_keys_list",
 			"title": "Twitch keys to notify",
 			"description": "Stream list in a comma separated list.",
@@ -41,13 +55,13 @@
 		{
 			"name": "twitch_user_id",
 			"title": "Your Twitch id",
-			"description": "Enter your Twitch id to be able to import your \"Follow\".",
+			"description": "Enter your Twitch id to be able to import the stream(s) you follow.",
 			"type": "string",
 			"value": ""
 		},
 		{
 			"name": "twitch_import",
-			"title": "Import your Twitch \"Follow\"",
+			"title": "Import the Twitch stream(s) you follow.",
 			"label": "Import",
 			"type": "control"
 		},

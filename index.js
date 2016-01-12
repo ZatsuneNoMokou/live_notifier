@@ -472,6 +472,10 @@ function importAPI(website, id){
 			this.url = `https://api.twitch.tv/kraken/users/${id}/follows/channels`;
 			this.overrideMimeType = "application/vnd.twitchtv.v3+json; charset=utf-8";
 			break;
+		case "hitbox":
+			this.url = `https://api.hitbox.tv/following/user?user_name=${id}`;
+			this.overrideMimeType = "text/plain; charset=utf-8";
+			break;
 	}
 }
 function isValidResponse(website, data){
@@ -676,12 +680,13 @@ checkLives();
 function importButton(website){
 	importStreams(website, simplePrefs[`${website}_user_id`]);
 }
-function importStreams(website, id, url){
+function importStreams(website, id, url, pageNumber){
 	let current_API = new importAPI(website, id);
 	if(typeof url == "string" && url != ""){
 		current_API.url = url;
+	} else {
+		console.time(current_API.id);
 	}
-	console.time(current_API.url);
 	Request({
 		url: current_API.url,
 		overrideMimeType: current_API.overrideMimeType,
@@ -693,14 +698,18 @@ function importStreams(website, id, url){
 			console.info(`${website} - ${id} (${current_API.url})`);
 			console.dir(data);
 			
-			importStreamWebsites[website](id, data);
-			
-			setIcon();
-			
-			console.timeEnd(id);
-			console.groupEnd(current_API.url);
+			if(typeof pageNumber == "number"){
+				importStreamWebsites[website](id, data, pageNumber);
+			} else {
+				importStreamWebsites[website](id, data);
+			}
+			console.groupEnd();
 		}
 	}).get();
+}
+function importStreamsEnd(id){
+	setIcon();
+	console.timeEnd(id);
 }
 
 let importStreamWebsites = {
@@ -708,19 +717,39 @@ let importStreamWebsites = {
 		let streamListSetting = new streamListFromSetting("twitch");
 		let streamList = streamListSetting.objData;
 		if(typeof data.follows == "object"){
-			let follow = data.follows;
-			for(let item of follow){
+			for(let item of data.follows){
 				streamListSetting.addStream(item["channel"]["display_name"], "");
 			}
 			streamListSetting.update();
-			if(follow.length > 0 && typeof data._links.next == "string"){
+			if(data.follows.length > 0 && typeof data._links.next == "string"){
 				importStreams("twitch", id, data._links.next);
+			} else {
+				importStreamsEnd(id);
+			}
+		}
+	},
+	"hitbox": function(id, data, pageNumber){
+		let streamListSetting = new streamListFromSetting("hitbox");
+		let streamList = streamListSetting.objData;
+		if(typeof data.following == "object"){
+			for(let item of data.following){
+				streamListSetting.addStream(item["user_name"], "");
+			}
+			streamListSetting.update();
+			if(data.following.length > 0){
+				let next_url = new importAPI("hitbox", id).url;
+				let current_pageNumber = ((typeof pageNumber == "number")? pageNumber : 1);
+				importStreams("hitbox", id, next_url + "&offset=" + current_pageNumber, current_pageNumber + 1);
+			} else {
+				importStreamsEnd(id);
 			}
 		}
 	}
 }
 function importTwitchButton(){importButton("twitch");}
 sp.on("twitch_import", importTwitchButton);
+function importHitboxButton(){importButton("hitbox");}
+sp.on("hitbox_import", importHitboxButton);
 
 exports.onUnload = function (reason) {
 	clearInterval(interval);
