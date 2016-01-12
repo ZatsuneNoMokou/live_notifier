@@ -20,6 +20,10 @@ sed -re 's/console\.(warn|info|dir|group|groupEnd|log|error|exception|time|timeE
 		index.js > index_new.js
 mv index_new.js index.js
 
+sed -n '1h;1!H;${;g;s/ else {[\s\t\n\p\r]*}//g;p;}' index.js > index_new.js
+
+mv index_new.js index.js
+
 echo "Remplacement des éléments de package.json..."
 sed		-e 's/\"id\"\: \"stream_notifier\@zatsunenomokou\.eu\"/\"id\"\: \"dailymotionsstream\@zatsunenomokou\.eu\"/g' \
 		-e 's/\"name\"\: \"streamnotifier\"/\"name\"\: \"dailymotionsstream\"/g' \
