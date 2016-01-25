@@ -14,8 +14,10 @@ let tabs = require("sdk/tabs");
 
 let {setInterval, setTimeout, clearInterval} = require("sdk/timers");
 
-let myIconURL128 = self.data.url("icon_128.png");
-let myIconURL64 = self.data.url("icon.png");
+let myIconURL = self.data.url("live_offline.svg");
+
+let myIconURL_online = self.data.url("live_online.svg");
+let myIconURL_offline = self.data.url("live_offline.svg");
 
 let _ = require("sdk/l10n").get;
 
@@ -110,12 +112,7 @@ function getStreamURL(website, id, usePrefUrl){
 var firefox_button = ToggleButton({
 	id: "streamnotifier_button",
 	label: _("Stream offline"),
-	icon: { 
-		"16": "./live_offline_16.png",
-		"32": "./live_offline_32.png",
-		"64": "./live_offline.png",
-		"64": "./icon.png"
-	},
+	icon: myIconURL,
 	badge: "",
 	onClick: handleChange
 });
@@ -330,7 +327,7 @@ function doActionNotif(title, message, action, imgurl){
 	notifications.notify({
 		title: title,
 		text: message,
-		iconURL: ((typeof imgurl == "string" && imgurl != "")? imgurl : myIconURL128),
+		iconURL: ((typeof imgurl == "string" && imgurl != "")? imgurl : myIconURL),
 		onClick: function(){
 			switch(action.type){
 				case "openUrl":
@@ -419,11 +416,7 @@ function setIcon() {
 	if (onlineCount > 0){
 		firefox_button.state("window", {
 			"label": _("%d stream(s) online",onlineCount),
-			"icon": {
-				"16": "./live_online_16.png",
-				"32": "./live_online_32.png",
-				"64": "./live_online.png",
-			},
+			"icon": myIconURL_online,
 			badge: onlineCount,
 			badgeColor: ""
 		});
@@ -431,11 +424,7 @@ function setIcon() {
 	else {
 		firefox_button.state("window", {
 			"label": _("No stream online"),
-			"icon": {
-				"16": "./live_offline_16.png",
-				"32": "./live_offline_32.png",
-				"64": "./live_offline.png",
-			},
+			"icon": myIconURL_offline,
 			badge: onlineCount,
 			badgeColor: "#424242"
 		});
