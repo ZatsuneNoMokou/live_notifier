@@ -2,6 +2,7 @@ live_notifier@zatsunenomokou.eu*.rdf
 dailymotionsstream@zatsunenomokou.eu*.xpi
 .gitignore
 .jpmignore
+CHANGELOG.md
 make_mozilla_build.sh
 *.xpi
 dist/
