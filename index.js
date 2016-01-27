@@ -14,10 +14,20 @@ let tabs = require("sdk/tabs");
 
 let {setInterval, setTimeout, clearInterval} = require("sdk/timers");
 
-let myIconURL = self.data.url("live_offline.svg");
+let myIconURL = self.data.url("live_offline_64.svg");
 
-let myIconURL_online = self.data.url("live_online.svg");
-let myIconURL_offline = self.data.url("live_offline.svg");
+let myIconURL_online = {
+	"16": "./live_online_16.svg",
+	"32": "./live_online_32.svg",
+	"64": "./live_online_64.png"
+}
+
+
+let myIconURL_offline = {
+	"16": "./live_offline_16.svg",
+	"32": "./live_offline_32.svg",
+	"64": "./live_offline_64.png"
+}
 
 let _ = require("sdk/l10n").get;
 
@@ -112,7 +122,7 @@ function getStreamURL(website, id, usePrefUrl){
 var firefox_button = ToggleButton({
 	id: "streamnotifier_button",
 	label: _("Stream offline"),
-	icon: myIconURL,
+	icon: myIconURL_offline,
 	badge: "",
 	onClick: handleChange
 });
