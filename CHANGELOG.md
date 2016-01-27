@@ -1,3 +1,6 @@
+# 4.0.4:
+* Fix: Toggle button size
+
 # 4.0.2-4.0.3
 * +: Move project to GitLab
 
