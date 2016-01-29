@@ -4,6 +4,8 @@
 	<link rel="stylesheet" type="text/css" media="all" href="css/panel.css" />
 	<link id="panel-color-stylesheet" rel="stylesheet" type="text/css" media="all" href="css/panel-color-dark.css" />
 	
+	<link rel="stylesheet" type="text/css" media="all" href="css/slimscroll.css" />
+	
 	<!-- 		Google Material Design - Icon font 		-->
 	<link rel="stylesheet" type="text/css" media="all" href="css/fonts.css" />
 </head>
@@ -18,15 +20,15 @@
 		<div id="deleteStreamWarning" class="hide"><i class="material-icons">warning</i> <span data-l10n-id="delete_stream_mode">Clicking on a stream will delete it from the settings.</span></div>
 		<p id="streamListOnline">
 			<div id="streamOnlineCountLabel">No online stream currently</div>
-			<div id="dailymotionOnlineList"></div>
-			<div id="hitboxOnlineList"></div>
-			<div id="twitchOnlineList"></div>
+			<div id="dailymotionOnlineList" class="group"></div>
+			<div id="hitboxOnlineList" class="group"></div>
+			<div id="twitchOnlineList" class="group"></div>
 		</p>
 		<p id="streamListOffline">
 			<div id="streamOfflineCountLabel">No offline stream currently</div>
-			<div id="dailymotionOfflineList"></div>
-			<div id="hitboxOfflineList"></div>
-			<div id="twitchOfflineList"></div>
+			<div id="dailymotionOfflineList" class="group"></div>
+			<div id="hitboxOfflineList" class="group"></div>
+			<div id="twitchOfflineList" class="group"></div>
 		</p>
 	</section>
 	<footer><span data-l10n-id="footer_title">Addon under GPL v3 licence</span>

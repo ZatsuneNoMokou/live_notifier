@@ -62,9 +62,10 @@ header button {
 	cursor: pointer;
 }
 #steamList {
-	overflow: auto;
+	overflow: hidden;
 	flex: 1;
-	display: flex;
+	display: inline-flex;
+	position: relative;
 	flex-direction: column;
 	align-items: stretch;
 	justify-content: space-between;
@@ -145,9 +146,9 @@ header button {
 	margin-top: 2px;
 	margin-bottom: 2px;
 }
-#streamListOnline > div, #streamListOffline > div{
-	margin-top: 4px;
-	margin-bottom: 4px;
+.group, #streamListOnline > div, #streamListOffline > div{
+	padding-top: 2px !important;
+	padding-bottom: 2px !important;
 }
 .item-stream h1{
 	margin: 0px;
