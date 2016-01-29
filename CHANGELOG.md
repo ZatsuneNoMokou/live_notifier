@@ -1,3 +1,9 @@
+# 4.0.6:
+* Fix: Scrollbar
+
+# 4.0.5:
+* +: Now using slim-scroll to fit with panel theme
+
 # 4.0.4:
 * Fix: Toggle button size
 

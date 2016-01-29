@@ -1,13 +1,13 @@
-// slimScroll (from the demo) from https://github.com/kamlekar/slim-scroll (License MIT)
+/* slimScroll (from the demo) from https://github.com/kamlekar/slim-scroll (License MIT) */
 
-.scrollbar {
+.scrollbar{
 	background-color: rgba(142, 142, 142, 0.8);
 	border-radius: 10px;
 }
-.wrapper, .scroll-wrapper {
+.wrapper, .scroll-wrapper{
 	padding: 5px;
 }
-.scroll-wrapper.mac + .scrollbarContainer{
+.scroll-wrapper.mac + .scrollBarContainer{
 	background-color: transparent;
 }
 .scrollbarContainer.animate .scrollbar{
@@ -20,7 +20,7 @@
 	transition: none;
 	-ms-transition: none;
 }
-.unselectable {
+.unselectable{
 	-webkit-user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: -moz-none;

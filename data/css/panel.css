@@ -22,7 +22,7 @@ body{
 .item-stream h1{
 	font-size: 13px;
 }
-#steamList,
+#streamList,
 .item-stream .streamCurrentViewers,
 footer, footer *{
 	font-size: 12px;
@@ -61,7 +61,7 @@ header button {
 .cursor{
 	cursor: pointer;
 }
-#steamList {
+#streamList {
 	overflow: hidden;
 	flex: 1;
 	display: inline-flex;
