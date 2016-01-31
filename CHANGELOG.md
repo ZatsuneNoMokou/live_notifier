@@ -1,5 +1,8 @@
+# 4.0.8:
+* Fix: Deleting mode text warning
+
 # 4.0.7:
-* Fix: Deleting mode text color
+* Fix: Deleting mode text warning color
 
 # 4.0.6:
 * Fix: Scrollbar

@@ -61,10 +61,11 @@ function addStreamButtonClick(){
 addStreamButton.addEventListener("click",addStreamButtonClick,false);
 
 let deleteStreamButton = document.querySelector("#deleteStream");
-let deleteStreamWarning = document.querySelector("#deleteStreamWarning");
 let deleteModeState = false;
 
 function deleteStreamButtonClick(){
+	let deleteStreamButton = document.querySelector("#deleteStream");
+	let deleteStreamWarning = document.querySelector("#deleteStreamWarning");
 	if(deleteModeState){
 		deleteModeState = false;
 		deleteStreamButton.className = deleteStreamButton.className.replace(/\s*active/i,"");
