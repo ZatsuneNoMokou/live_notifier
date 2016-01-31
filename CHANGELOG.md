@@ -1,3 +1,6 @@
+# 4.0.7:
+* Fix: Deleting mode text color
+
 # 4.0.6:
 * Fix: Scrollbar
 

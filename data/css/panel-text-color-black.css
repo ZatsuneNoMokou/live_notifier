@@ -1,5 +1,5 @@
 /*			---- Primary text / Icons ----			*/
-header button, #streamOnlineCountLabel, #streamOfflineCountLabel{
+header button, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteStreamWarning{
 	color: #FFFFFF;
 	color: rgba(0, 0, 0, 0.8);
 }
