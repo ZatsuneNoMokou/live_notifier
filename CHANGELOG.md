@@ -1,5 +1,5 @@
 # 4.1.1:
-Fix: Removed forgotten comment
+* Fix: Removed forgotten comment
 
 # 4.1.0:
 * +: Logo of offline streams from Twitch
