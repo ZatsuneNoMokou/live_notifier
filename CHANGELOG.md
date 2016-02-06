@@ -1,3 +1,6 @@
+# 4.1.0:
+* +: Logo of offline streams from Twitch
+
 # 4.0.8:
 * Fix: Deleting mode text warning
 

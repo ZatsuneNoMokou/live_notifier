@@ -461,6 +461,25 @@ function API(website, id){
 			break;
 	}
 }
+function API_second(website, id){
+	this.id = id;
+	this.url = "";
+	this.overrideMimeType = "";
+	
+	switch(website){
+		case "dailymotion":
+			this.url = `https://api.dailymotion.com/video/${id}?fields=id,user.screenname,game.title,user.avatar_720_url`;
+			this.overrideMimeType = "text/plain; charset=latin1";
+			break;
+		case "twitch":
+			this.url = `https://api.twitch.tv/kraken/users/${id}`;
+			this.overrideMimeType = "text/plain; charset=utf-8";
+			break;
+		default:
+			this.url = null;
+			this.overrideMimeType = null;
+	}
+}
 function importAPI(website, id){
 	this.id = id;
 	this.url = "";
@@ -544,8 +563,25 @@ function checkLives(){
 					}
 					let liveState = checkLiveStatus[website](id,data);
 					if(liveState !== null){
-						if(typeof seconderyInfo[website] == "function"){
-							seconderyInfo[website](id,data,liveState);
+						let second_API = new API_second(website, id);
+						
+						//if(typeof seconderyInfo[website] == "function"){
+						if(second_API.url !== null && second_API.overrideMimeType !== null){
+							Request({
+								url: second_API.url,
+								overrideMimeType: second_API.overrideMimeType,
+								onComplete: function (response) {
+									let data_second = response.json;
+									
+									console.info(website + " - " + id + " (" + second_API.url + ")");
+									console.dir(data_second);
+									
+									seconderyInfo[website](id,data_second,liveState);
+									
+									doStreamNotif(website,id,liveState);
+									setIcon();
+								}
+							}).get();
 						} else {
 							doStreamNotif(website,id,liveState);
 						}
@@ -644,31 +680,23 @@ checkLiveStatus = {
 }
 seconderyInfo = {
 	"dailymotion":
-		function(id,data_previous,isStreamOnline){
-			let user_api_url = "https://api.dailymotion.com/video/" + id + "?fields=id,user.screenname,game.title,user.avatar_720_url";
-			Request({
-				url: user_api_url,
-				overrideMimeType: "text/plain; charset=latin1",
-				onComplete: function (response) {
-					data = response.json;
-					console.info("dailymotion" + " - " + id + " (" + user_api_url + ")");
-					console.dir(data);
-					
-					if(data.hasOwnProperty("user.screenname")){
-						if(isStreamOnline){
-							liveStatus["dailymotion"][id].streamStatus = liveStatus["dailymotion"][id].streamName;
-							liveStatus["dailymotion"][id].streamGame = (data["game.title"] !== null && typeof data["game.title"] == "string")? data["game.title"] : "";
-						}
-						if(typeof data["user.avatar_720_url"] == "string" && data["user.avatar_720_url"] != ""){
-							liveStatus["dailymotion"][id].streamOwnerLogo = data["user.avatar_720_url"];
-						}
-						liveStatus["dailymotion"][id].streamName = data["user.screenname"];
-					}
-					
-					doStreamNotif("dailymotion",id,isStreamOnline);
-					setIcon();
+		function(id,data,isStreamOnline){
+			if(data.hasOwnProperty("user.screenname")){
+				if(isStreamOnline){
+					liveStatus["dailymotion"][id].streamStatus = liveStatus["dailymotion"][id].streamName;
+					liveStatus["dailymotion"][id].streamGame = (data["game.title"] !== null && typeof data["game.title"] == "string")? data["game.title"] : "";
 				}
-			}).get();
+				if(typeof data["user.avatar_720_url"] == "string" && data["user.avatar_720_url"] != ""){
+					liveStatus["dailymotion"][id].streamOwnerLogo = data["user.avatar_720_url"];
+				}
+				liveStatus["dailymotion"][id].streamName = data["user.screenname"];
+			}
+		},
+	"twitch":
+		function(id,data,isStreamOnline){
+			if(typeof data["logo"] == "string" && data["logo"] != ""){
+				liveStatus["twitch"][id].streamOwnerLogo = data["logo"];
+			}
 		}
 }
 
