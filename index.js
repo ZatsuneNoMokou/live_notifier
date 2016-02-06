@@ -565,7 +565,6 @@ function checkLives(){
 					if(liveState !== null){
 						let second_API = new API_second(website, id);
 						
-						//if(typeof seconderyInfo[website] == "function"){
 						if(second_API.url !== null && second_API.overrideMimeType !== null){
 							Request({
 								url: second_API.url,
