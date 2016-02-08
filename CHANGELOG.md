@@ -1,3 +1,7 @@
+# 4.2.0:
+* +: Theme preferences can now be changed from the panel directly
+* Fix: Default color on theme
+
 # 4.1.1:
 * Fix: Removed forgotten comment
 
@@ -27,6 +31,7 @@
 
 # 4.0.0
 * +: New addon icon (SVG). Source picture from https://pixabay.com/fr/surveiller-live-%C3%A9cran-978055/ in CC0 (Public Domain)
+* i: Début portage Chrome
 
 # 3.3.5
 * Fix: Locale

@@ -1,5 +1,5 @@
 /*			---- Primary text / Icons ----			*/
-header button, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteStreamWarning{
+body, header button, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteStreamWarning{
 	color: #FFFFFF;
 }
 /*		--- Secondary text / Base Color ----		*/

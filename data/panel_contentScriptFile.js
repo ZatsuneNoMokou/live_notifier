@@ -16,6 +16,18 @@ function unloadListeners() {
 	self.port.removeListener('unloadListeners', unloadListeners);
 }
 
+function getValueFromNode(node){
+	if(node.type == "checkbox") {
+		return node.checked;
+	} else if(node.tagName == "input" && node.type == "number"){
+		console.log("Number");
+		return parseInt(node.value);
+	} else if(typeof node.value == "string"){
+		return node.value;
+	}
+}
+
+
 // Event managing function from https://stackoverflow.com/questions/4386300/javascript-dom-how-to-remove-all-events-of-a-dom-object/4386514#4386514
 var _eventHandlers = {}; // somewhere global
 function addEvent(node, event, handler, capture) {
@@ -77,6 +89,45 @@ function deleteStreamButtonClick(){
 	}
 }
 deleteStreamButton.addEventListener("click",deleteStreamButtonClick,false);
+
+/*				---- Settings ----				*/
+let settings_button = document.querySelector("#settings");
+let setting_Enabled = false;
+function setting_Toggle(){
+	let streamList = document.querySelector("#streamList");
+	let settings_node = document.querySelector("#settings_container");
+	if(setting_Enabled){
+		setting_Enabled = false;
+		streamList.className = deleteStreamButton.className.replace(/\s*hide/i,"");
+		settings_node.className += " hide";
+	} else {
+		setting_Enabled = true;
+		streamList.className += " hide";
+		settings_node.className = deleteStreamWarning.className.replace(/\s*hide/i,"");
+	}
+	if(scrollbar !== null){
+		scrollbar.resetValues();
+	}
+}
+settings_button.addEventListener("click", setting_Toggle, false);
+
+let background_color_input = document.querySelector("#background_color");
+function background_color_input_onChange(){
+	let node = this;
+	let value = getValueFromNode(node);
+	self.port.emit("setting_Update", {settingName: "background_color", settingValue: value});
+	theme_update({"theme": panel_theme, "background_color": value});
+}
+background_color_input.addEventListener("change", background_color_input_onChange, false);
+
+let panel_theme_select = document.querySelector("#panel_theme");
+function panel_theme_select_onChange(){
+	let node = this;
+	let value = getValueFromNode(node);
+	self.port.emit("setting_Update", {settingName: "panel_theme", settingValue: value});
+	theme_update({"theme": value, "background_color": background_color});
+}
+panel_theme_select.addEventListener("change", panel_theme_select_onChange, false);
 
 function removeAllChildren(node){
 	// Taken from https://stackoverflow.com/questions/683366/remove-all-the-children-dom-elements-in-div
@@ -243,7 +294,17 @@ function color(hexColorCode) {
 	}
 }
 
+let panel_theme;
+let background_color;
 function theme_update(data){
+	panel_theme = data.theme;
+	background_color = data.background_color;
+	
+	let background_color_input = document.querySelector("#background_color");
+	let panel_theme_select = document.querySelector("#panel_theme");
+	background_color_input.value = background_color;
+	panel_theme_select.value = panel_theme;
+	
 	let panelColorStylesheet;
 	let baseColor = new color(data.background_color);
 	if(typeof baseColor != "object"){return null;}

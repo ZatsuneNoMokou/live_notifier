@@ -129,7 +129,7 @@ var firefox_button = ToggleButton({
 
 var panel = panels.Panel({
 	height: 350,
-	width: 275,
+	width: 285,
 	contentScriptFile: require("sdk/self").data.url("panel_contentScriptFile.js"),
 	contentURL: self.data.url("panel.html"),
 });
@@ -248,11 +248,20 @@ function deleteStreamFromPanel(data){
 		}
 	}
 }
+
+function settingUpdate(settingName, settingValue){
+	console.log(settingName + " - " + settingValue);
+	simplePrefs[settingName] = settingValue;
+}
+
 panel.port.on("refreshStreams", refreshStreamsFromPanel);
 panel.port.on("addStream", addStreamFromPanel);
 panel.port.on("deleteStream", deleteStreamFromPanel);
 panel.port.on("openOnlineLive", openOnlineLive);
 panel.port.on("openTab", openTabIfNotExist);
+panel.port.on("setting_Update", function(data){
+	settingUpdate(data.settingName, data.settingValue);
+});
 
 function updatePanelData(){	
 	if((typeof current_panel_theme != "string" && typeof current_background_color != "string") || current_panel_theme != simplePrefs["panel_theme"] || current_background_color != simplePrefs["background_color"]){

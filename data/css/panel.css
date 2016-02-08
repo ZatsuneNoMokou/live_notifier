@@ -61,7 +61,7 @@ header button {
 .cursor{
 	cursor: pointer;
 }
-#streamList {
+#streamList, #settings_container{
 	overflow: hidden;
 	flex: 1;
 	display: inline-flex;

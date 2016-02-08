@@ -15,6 +15,7 @@
 		<button id="addStream"><i class="material-icons">add</i></button>
 		<button id="deleteStream"><i class="material-icons">delete</i></button>
 		<button id="refreshStreams"><i class="material-icons">refresh</i></button>
+		<button id="settings"><i class="material-icons">settings</i></button>
 	</header>
 	<section id="streamList">
 		<div id="deleteStreamWarning" class="hide"><i class="material-icons">warning</i> <span data-l10n-id="delete_stream_mode">Clicking on a stream will delete it from the settings.</span></div>
@@ -29,6 +30,22 @@
 			<div id="dailymotionOfflineList" class="group"></div>
 			<div id="hitboxOfflineList" class="group"></div>
 			<div id="twitchOfflineList" class="group"></div>
+		</p>
+	</section>
+	<section id="settings_container" class="hide">
+		<p class="pref_group">
+			<label class="preference" title="Choose the panel of the panel">
+				<span id="panel_theme_title" data-l10n-id="panel_theme_title">Panel theme</span>: 
+				<select id="panel_theme">
+					<option value="dark" id="panel_theme_dark" data-l10n-id="panel_theme_options.Dark">Dark</option>
+					<option value="light" id="panel_theme_light" data-l10n-id="panel_theme_options.Light">Light</option>
+				</select>
+			</label><br>
+			
+			<label class="preference" title="Choose background color">
+				<span id="background_color_title" data-l10n-id="background_color_title">Panel background color</span>: 
+				<input type="color" id="background_color">
+			</label><br>
 		</p>
 	</section>
 	<footer><span data-l10n-id="footer_title">Addon under GPL v3 licence</span>
