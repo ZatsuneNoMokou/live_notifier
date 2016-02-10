@@ -1,3 +1,6 @@
+# 4.3.2:
+* Fix: Online stream logo
+
 # 4.3.1:
 * Fix: French locale
 

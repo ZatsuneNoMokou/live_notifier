@@ -93,7 +93,11 @@ header button {
 	padding-left: 45px;
 	background-size: auto 30px;
 }
-.item-stream.streamLogo{
+.item-stream.onlineItem.streamLogo{
+	padding-left: 58px;
+	background-size: 50px auto;
+}
+.item-stream.offlineItem.streamLogo{
 	padding-left: 58px;
 	background-size: auto 100%;
 }
