@@ -1,3 +1,9 @@
+# 4.3.1:
+* Fix: French locale
+
+# 4.3.0:
+* i: More compact lines for offlines streams
+
 # 4.2.1:
 * Fix: 64px logo in index.js
 
