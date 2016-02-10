@@ -10,6 +10,13 @@ let sp = require('sdk/simple-prefs');
 let simplePrefs = require('sdk/simple-prefs').prefs;
 let clipboard = require("sdk/clipboard");
 
+function dailymotion_check_delay_onChange(){
+	if(simplePrefs["dailymotion_check_delay"] <1){
+		simplePrefs["dailymotion_check_delay"] = 1;
+	}
+}
+sp.on("dailymotion_check_delay", dailymotion_check_delay_onChange);
+
 let tabs = require("sdk/tabs");
 
 let {setInterval, setTimeout, clearInterval} = require("sdk/timers");
@@ -788,6 +795,7 @@ sp.on("hitbox_import", importHitboxButton);
 
 exports.onUnload = function (reason) {
 	clearInterval(interval);
+	sp.removeListener("dailymotion_check_delay", dailymotion_check_delay_onChange);
 	panel.port.removeListener('refreshStreams', refreshStreamsFromPanel);
 	panel.port.removeListener("addStream", addStreamFromPanel);
 	panel.port.removeListener("deleteStream", deleteStreamFromPanel);
