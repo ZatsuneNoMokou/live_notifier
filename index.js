@@ -634,6 +634,13 @@ checkLiveStatus = {
 		},
 	"hitbox":
 		function(hitbox_key, data){
+			if(data.hasOwnProperty("livestream") == false){
+				if(data.error_msg="no_media_found"){
+					liveStatus["hitbox"][hitbox_key].online = false;
+				}
+				liveStatus["hitbox"][hitbox_key].streamName = hitbox_key;
+				return null;
+			}
 			if(typeof data["livestream"][0] == "object"){
 				data = data["livestream"][0];
 				liveStatus["hitbox"][hitbox_key].streamName = data["media_user_name"];
