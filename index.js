@@ -235,7 +235,6 @@ function deleteStreamFromPanel(data){
 	let streamListSetting = new streamListFromSetting(data.website);
 	let streamList = streamListSetting.objData;
 	let id = data.id;
-	console.log(id in streamList);
 	if(streamListSetting.streamExist(id)){
 		if(simplePrefs["confirm_deleteStreamFromPanel"]){
 			let deletestreamNotifAction = new notifAction("function", function(){

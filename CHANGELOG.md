@@ -1,3 +1,6 @@
+# 4.4.0:
+* +: Simplified stream item events from panel
+
 # 4.3.4:
 * Fix: Hitbox private channel error
 
