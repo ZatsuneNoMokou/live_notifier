@@ -11,8 +11,8 @@ let simplePrefs = require('sdk/simple-prefs').prefs;
 let clipboard = require("sdk/clipboard");
 
 function dailymotion_check_delay_onChange(){
-	if(simplePrefs["dailymotion_check_delay"] <1){
-		simplePrefs["dailymotion_check_delay"] = 1;
+	if(getPreferences("dailymotion_check_delay") <1){
+		savePreference("dailymotion_check_delay") = 1;
 	}
 }
 sp.on("dailymotion_check_delay", dailymotion_check_delay_onChange);
@@ -20,6 +20,14 @@ sp.on("dailymotion_check_delay", dailymotion_check_delay_onChange);
 let tabs = require("sdk/tabs");
 
 let {setInterval, setTimeout, clearInterval} = require("sdk/timers");
+
+function getPreferences(prefId){
+	return simplePrefs[prefId];
+}
+function savePreference(prefId, value){
+	simplePrefs[prefId] = value;
+	refreshPanel();
+}
 
 let myIconURL = self.data.url("live_offline_64.svg");
 
@@ -46,7 +54,7 @@ for(i in websites){
 
 function streamListFromSetting(website){
 	let somethingElseThanSpaces = /[^\s]+/;
-	let pref = simplePrefs[`${website}_keys_list`];
+	let pref = getPreferences(`${website}_keys_list`);
 	this.stringData = pref;
 	let obj = {};
 	if(pref.length > 0 && somethingElseThanSpaces.test(pref)){
@@ -95,8 +103,8 @@ function streamListFromSetting(website){
 			array.push(i + ((this.objData[i] != "")? (" " + this.objData[i]) : ""));
 		}
 		let newSettings = array.join(",");
-		simplePrefs[`${this.website}_keys_list`] = newSettings;
-		console.log(`New settings (${this.website}): ${simplePrefs[`${this.website}_keys_list`]}`);
+		savePreference(`${this.website}_keys_list`, newSettings);
+		console.log(`New settings (${this.website}): ${getPreferences(`${this.website}_keys_list`)}`);
 	}
 }
 
@@ -141,6 +149,9 @@ var panel = panels.Panel({
 	contentURL: self.data.url("panel.html"),
 });
 
+function refreshPanel(data){
+	updatePanelData();
+}
 function refreshStreamsFromPanel(){
 	checkLives();
 	updatePanelData();
@@ -194,7 +205,7 @@ function addStreamFromPanel(embed_list){
 									doNotif("Stream Notifier", `${id} ${_("wasn't configured, but not detected as channel.")}`);
 									return null;
 								} else {
-									if(simplePrefs["confirm_addStreamFromPanel"]){
+									if(getPreferences("confirm_addStreamFromPanel")){
 										let addstreamNotifAction = new notifAction("function", function(){
 											streamListSetting.addStream(id, ((type == "embed")? active_tab_url : ""));
 											//streamListSetting.objData[id] = (type == "embed")? active_tab_url : "";
@@ -236,7 +247,7 @@ function deleteStreamFromPanel(data){
 	let streamList = streamListSetting.objData;
 	let id = data.id;
 	if(streamListSetting.streamExist(id)){
-		if(simplePrefs["confirm_deleteStreamFromPanel"]){
+		if(getPreferences("confirm_deleteStreamFromPanel")){
 			let deletestreamNotifAction = new notifAction("function", function(){
 				delete streamListSetting.objData[id];
 				streamListSetting.update();
@@ -256,10 +267,23 @@ function deleteStreamFromPanel(data){
 }
 
 function settingUpdate(settingName, settingValue){
-	console.log(settingName + " - " + settingValue);
-	simplePrefs[settingName] = settingValue;
+	if(typeof getPreferences(settingName) == "number" && typeof settingValue == "string"){
+		settingValue = parseInt(settingValue);
+	}
+	console.log(`${settingName} - ${settingValue}`);
+	if(typeof getPreferences(settingName) != typeof settingValue){
+		console.warn(`Setting (${settingName}) type: ${typeof getPreferences(settingName)} - Incoming type: ${typeof settingValue}`);
+	}
+	savePreference(settingName, settingValue);
 }
 
+function importButton_Panel(website){
+	console.info(`Importing ${website}...`);
+	importButton(website);
+}
+
+panel.port.on("refreshPanel", refreshPanel);
+panel.port.on("importStreams", importButton_Panel);
 panel.port.on("refreshStreams", refreshStreamsFromPanel);
 panel.port.on("addStream", addStreamFromPanel);
 panel.port.on("deleteStream", deleteStreamFromPanel);
@@ -270,20 +294,20 @@ panel.port.on("setting_Update", function(data){
 });
 
 function updatePanelData(){	
-	if((typeof current_panel_theme != "string" && typeof current_background_color != "string") || current_panel_theme != simplePrefs["panel_theme"] || current_background_color != simplePrefs["background_color"]){
+	if((typeof current_panel_theme != "string" && typeof current_background_color != "string") || current_panel_theme != getPreferences("panel_theme") || current_background_color != getPreferences("background_color")){
 		console.log("Sending panel theme data");
-		panel.port.emit("panel_theme", {"theme": simplePrefs["panel_theme"], "background_color": simplePrefs["background_color"]});
+		panel.port.emit("panel_theme", {"theme": getPreferences("panel_theme"), "background_color": getPreferences("background_color")});
 	}
-	current_panel_theme = simplePrefs["panel_theme"];
-	current_background_color = simplePrefs["background_color"];
+	current_panel_theme = getPreferences("panel_theme");
+	current_background_color = getPreferences("background_color");
 	
 	//Clear stream list in the panel
-	panel.port.emit("initList", simplePrefs["show_offline_in_panel"]);
+	panel.port.emit("initList", getPreferences("show_offline_in_panel"));
 	
 	//Update online steam count in the panel
 	panel.port.emit("updateOnlineCount", (firefox_button.state("window").badge == 0)? _("No stream online") :  _("%d stream(s) online",firefox_button.state("window").badge) + ":");
 	
-	if(simplePrefs["show_offline_in_panel"]){
+	if(getPreferences("show_offline_in_panel")){
 		var offlineCount = getOfflineCount();
 		panel.port.emit("updateOfflineCount", (offlineCount == 0)? _("No stream offline") :  _("%d stream(s) offline",offlineCount) + ":");
 	} else {
@@ -293,11 +317,27 @@ function updatePanelData(){
 	for(website in liveStatus){
 		var streamList = (new streamListFromSetting(website)).objData;
 		for(i in liveStatus[website]){
-			if(i in streamList && (liveStatus[website][i].online || (simplePrefs["show_offline_in_panel"] && !liveStatus[website][i].online))){
+			if(i in streamList && (liveStatus[website][i].online || (getPreferences("show_offline_in_panel") && !liveStatus[website][i].online))){
 				let streamInfo = {"id": i, "online": liveStatus[website][i].online, "website": website, "streamName": liveStatus[website][i].streamName, "streamStatus": liveStatus[website][i].streamStatus, "streamGame": liveStatus[website][i].streamGame, "streamOwnerLogo": liveStatus[website][i].streamOwnerLogo, "streamCategoryLogo": liveStatus[website][i].streamCategoryLogo, "streamCurrentViewers": liveStatus[website][i].streamCurrentViewers, "streamUrl": getStreamURL(website, i, true)}
 				panel.port.emit("updateData", streamInfo);
 			}
 		}
+	}
+	
+	let updateSettings = [
+		"hitbox_user_id",
+		"twitch_user_id",
+		"dailymotion_check_delay",
+		"notify_online",
+		"notify_offline",
+		"show_offline_in_panel",
+		"confirm_addStreamFromPanel",
+		"confirm_deleteStreamFromPanel",
+		"livestreamer_cmd_to_clipboard",
+		"livestreamer_cmd_quality"
+	];
+	for(let i in updateSettings){
+		panel.port.emit("settingNodesUpdate", {settingName: updateSettings[i], settingValue: getPreferences(updateSettings[i])});
 	}
 }
 
@@ -314,8 +354,8 @@ var notifications = require("sdk/notifications");
 
 function openOnlineLive(data){
 	openTabIfNotExist(data.streamUrl);
-	if(simplePrefs["livestreamer_cmd_to_clipboard"]){
-		let cmd = `livestreamer ${getStreamURL(data.website, data.id, false)} ${simplePrefs["livestreamer_cmd_quality"]}`;
+	if(getPreferences("livestreamer_cmd_to_clipboard")){
+		let cmd = `livestreamer ${getStreamURL(data.website, data.id, false)} ${getPreferences("livestreamer_cmd_quality")}`;
 		clipboard.set(cmd, "text");
 	}
 }
@@ -383,7 +423,7 @@ function doStreamNotif(website,id,isStreamOnline){
 	}
 	
 	if(isStreamOnline){
-		if(simplePrefs["notify_online"] && liveStatus[website][id].online == false){
+		if(getPreferences("notify_online") && liveStatus[website][id].online == false){
 			let streamStatus = liveStatus[website][id].streamStatus + ((liveStatus[website][id].streamGame != "")? (" (" + liveStatus[website][id].streamGame + ")") : "");
 			if(streamStatus.length > 0 && streamStatus.length < 60){
 				if(streamLogo != ""){
@@ -401,7 +441,7 @@ function doStreamNotif(website,id,isStreamOnline){
 			}
 		}
 	} else {
-		if(simplePrefs["notify_offline"] && liveStatus[website][id].online){
+		if(getPreferences("notify_offline") && liveStatus[website][id].online){
 			if(streamLogo != ""){
 				doNotif(_("Stream offline"),streamName, streamLogo);
 			} else {
@@ -615,7 +655,7 @@ function checkLives(){
 	console.groupEnd();
 	
 	clearInterval(interval);
-	interval = setInterval(checkLives, simplePrefs['dailymotion_check_delay'] * 60000);
+	interval = setInterval(checkLives, getPreferences('dailymotion_check_delay') * 60000);
 }
 
 //Fonction principale : check si le live est on
@@ -726,7 +766,7 @@ var interval
 checkLives();
 
 function importButton(website){
-	importStreams(website, simplePrefs[`${website}_user_id`]);
+	importStreams(website, getPreferences(`${website}_user_id`));
 }
 function importStreams(website, id, url, pageNumber){
 	let current_API = new importAPI(website, id);
@@ -802,6 +842,8 @@ sp.on("hitbox_import", importHitboxButton);
 exports.onUnload = function (reason) {
 	clearInterval(interval);
 	sp.removeListener("dailymotion_check_delay", dailymotion_check_delay_onChange);
+	panel.port.removeListener("refreshPanel", refreshPanel);
+	panel.port.removeListener("importStreams", importButton_Panel);
 	panel.port.removeListener('refreshStreams', refreshStreamsFromPanel);
 	panel.port.removeListener("addStream", addStreamFromPanel);
 	panel.port.removeListener("deleteStream", deleteStreamFromPanel);

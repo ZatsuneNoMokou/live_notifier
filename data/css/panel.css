@@ -63,13 +63,16 @@ header button {
 }
 #streamList, #settings_container{
 	overflow: hidden;
-	flex: 1;
-	display: inline-flex;
 	position: relative;
+	display: inline-flex;
+	flex: 1;
 	flex-direction: column;
 	align-items: stretch;
 	justify-content: space-between;
 	padding: 14px;
+}
+#settings_container{
+	display: inline;
 }
 #streamOnlineCountLabel, #streamOfflineCountLabel{
 	margin: 0px;

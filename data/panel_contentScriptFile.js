@@ -64,6 +64,7 @@ deleteStreamButton.addEventListener("click",deleteStreamButtonClick,false);
 /*				---- Settings ----				*/
 let settings_button = document.querySelector("#settings");
 let setting_Enabled = false;
+let scrollbar_settings_container = null;
 function setting_Toggle(){
 	let streamList = document.querySelector("#streamList");
 	let settings_node = document.querySelector("#settings_container");
@@ -71,34 +72,115 @@ function setting_Toggle(){
 		setting_Enabled = false;
 		streamList.className = deleteStreamButton.className.replace(/\s*hide/i,"");
 		settings_node.className += " hide";
+		if(scrollbar_streamList !== null){
+			scrollbar_streamList.resetValues();
+		}
 	} else {
 		setting_Enabled = true;
 		streamList.className += " hide";
 		settings_node.className = deleteStreamWarning.className.replace(/\s*hide/i,"");
+		
+		if(scrollbar_settings_container === null){
+			settings_container_node = document.querySelector('#settings_container');
+			
+			// Apply slim scroll plugin
+			scrollbar_settings_container = new slimScroll(settings_container_node, {
+				'wrapperClass': 'scroll-wrapper unselectable mac',
+				'scrollBarContainerClass': 'scrollbarContainer',
+				'scrollBarContainerSpecialClass': 'animate',
+				'scrollBarClass': 'scrollbar',
+				'keepFocus': true
+			});
+		}
+		
+		initSettings();
+		
+		if(scrollbar_settings_container !== null){
+			scrollbar_settings_container.resetValues();
+		}
 	}
-	if(scrollbar !== null){
-		scrollbar.resetValues();
-	}
+
 }
 settings_button.addEventListener("click", setting_Toggle, false);
 
-let background_color_input = document.querySelector("#background_color");
-function background_color_input_onChange(){
-	let node = this;
-	let value = getValueFromNode(node);
-	self.port.emit("setting_Update", {settingName: "background_color", settingValue: value});
-	theme_update({"theme": panel_theme, "background_color": value});
+function initSettings(){
+	let hitbox_user_id_input = document.querySelector("#hitbox_user_id");
+	hitbox_user_id_input.addEventListener("blur", settingNode_onChange, false);
+	
+	let hitbox_import_button = document.querySelector("button#hitbox_import");
+	hitbox_import_button.addEventListener("click", function(){
+		self.port.emit("importStreams","hitbox");
+	});
+	
+	let twitch_user_id_input = document.querySelector("#twitch_user_id");
+	twitch_user_id_input.addEventListener("blur", settingNode_onChange, false);
+	
+	let twitch_import_button = document.querySelector("button#twitch_import");
+	twitch_import_button.addEventListener("click", function(){
+		self.port.emit("importStreams","twitch");
+	});
+	
+	let dailymotion_check_delay_input = document.querySelector("#dailymotion_check_delay");
+	dailymotion_check_delay_input.addEventListener("change", settingNode_onChange, false);
+	
+	let notify_online_input = document.querySelector("#notify_online");
+	notify_online_input.addEventListener("change", settingNode_onChange, false);
+	
+	let notify_offline_input = document.querySelector("#notify_offline");
+	notify_offline_input.addEventListener("change", settingNode_onChange, false);
+	
+	let show_offline_in_panel = document.querySelector("#show_offline_in_panel");
+	show_offline_in_panel.addEventListener("change", settingNode_onChange, false);
+	
+	let confirm_addStreamFromPanel_input = document.querySelector("#confirm_addStreamFromPanel");
+	confirm_addStreamFromPanel_input.addEventListener("change", settingNode_onChange, false);
+	
+	let confirm_deleteStreamFromPanel_input = document.querySelector("#confirm_deleteStreamFromPanel");
+	confirm_deleteStreamFromPanel_input.addEventListener("change", settingNode_onChange, false);
+	
+	let background_color_input = document.querySelector("#background_color");
+	background_color_input.addEventListener("change", settingNode_onChange, false);
+	
+	let panel_theme_select = document.querySelector("#panel_theme");
+	panel_theme_select.addEventListener("change", settingNode_onChange, false);
+	
+	let livestreamer_cmd_to_clipboard_input = document.querySelector("#livestreamer_cmd_to_clipboard");
+	livestreamer_cmd_to_clipboard_input.addEventListener("change", settingNode_onChange, false);
+	
+	let livestreamer_cmd_quality_input = document.querySelector("#livestreamer_cmd_quality");
+	livestreamer_cmd_quality_input.addEventListener("blur", settingNode_onChange, false);
+	
+	self.port.emit("refreshPanel","");
 }
-background_color_input.addEventListener("change", background_color_input_onChange, false);
 
-let panel_theme_select = document.querySelector("#panel_theme");
-function panel_theme_select_onChange(){
+function settingNode_onChange(){
 	let node = this;
+	let setting_Name = this.id;
 	let value = getValueFromNode(node);
-	self.port.emit("setting_Update", {settingName: "panel_theme", settingValue: value});
-	theme_update({"theme": value, "background_color": background_color});
+	if(setting_Name == "dailymotion_check_delay" && value < 1){
+		value = 1;
+	}
+	self.port.emit("setting_Update", {settingName: setting_Name, settingValue: value});
+	self.port.emit("refreshPanel", {});
 }
-panel_theme_select.addEventListener("change", panel_theme_select_onChange, false);
+
+function settingNodesUpdate(data){
+	let settingNode = document.querySelector(`#${data.settingName}`);
+	if(settingNode !== null){
+		switch(settingNode.getAttribute("data-setting-type")){
+			case "boolean":
+				settingNode.checked = data.settingValue;
+				break;
+			case "number":
+				settingNode.value = parseInt(data.settingValue);
+				break;
+			case "string":
+				settingNode.value = data.settingValue;
+				break;
+		}
+	}
+}
+/*			---- Settings end ----			*/
 
 function removeAllChildren(node){
 	// Taken from https://stackoverflow.com/questions/683366/remove-all-the-children-dom-elements-in-div
@@ -219,8 +301,8 @@ function listener(data){
 	newLine.addEventListener("click", streamItemClick);
 	
 	showNonEmptySitesBlocks();
-	if(scrollbar !== null){
-		scrollbar.resetValues();
+	if(scrollbar_streamList !== null){
+		scrollbar_streamList.resetValues();
 	}
 }
 function streamItemClick(){
@@ -330,6 +412,7 @@ self.port.on('initList', initList);
 self.port.on('updateOnlineCount', listenerOnlineCount);
 self.port.on('updateOfflineCount', listenerOfflineCount);
 self.port.on('updateData', listener);
+self.port.on('settingNodesUpdate', settingNodesUpdate);
 self.port.on('panel_theme', theme_update);
 
 
@@ -545,12 +628,12 @@ var slimScroll = function(C, payload){
 	}
 };
 
-let scrollbar = null;
+let scrollbar_streamList = null;
 window.onload = function(){
-	var element = document.querySelector('#streamList');
+	let streamList_node = document.querySelector('#streamList');
 
 	// Apply slim scroll plugin
-	scrollbar = new slimScroll(element, {
+	scrollbar_streamList = new slimScroll(streamList_node, {
 		'wrapperClass': 'scroll-wrapper unselectable mac',
 		'scrollBarContainerClass': 'scrollbarContainer',
 		'scrollBarContainerSpecialClass': 'animate',
@@ -561,6 +644,12 @@ window.onload = function(){
 	// resize example
 	// To make the resizing work, set the height of the container in PERCENTAGE
 	window.onresize = function(){
-		scrollbar.resetValues();
+		if(scrollbar_streamList !== null){
+			scrollbar_streamList.resetValues();
+		}
+		
+		if(scrollbar_settings_container !== null){
+			scrollbar_settings_container.resetValues();
+		}
 	}
 }
