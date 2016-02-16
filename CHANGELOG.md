@@ -1,3 +1,7 @@
+# 4.6.0
+* +: Added 2 buttons to streams, to delete a stream and to copy the livestreamer command
+* Fix: Blank image category for Hitbox
+
 # 4.5.0:
 * +: More settings in the panel
 * +: slimScroll in the settings, in the panel

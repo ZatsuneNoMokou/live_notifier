@@ -112,14 +112,6 @@ header button {
 	left: -12px;
 	margin-top: -5px;
 }
-.item-stream .streamCurrentViewers{
-	position: relative;
-	right: -10px;
-	margin-right: -15px;
-	float: right;
-	text-align: right;
-	font-weight: normal;
-}
 .item-stream.streamLogo .streamCurrentViewers{
 	top: -10px;
 }
@@ -175,6 +167,43 @@ header button {
 	max-height: 38px;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+#stream_right_container{
+	position: relative;
+	float: right;
+	right: -10px;
+	top: -10px;
+}
+#stream_right_container > span{
+	display: block;
+}
+.stream_control{
+	display: none;
+	visibility: hidden;
+	font-weight: normal;
+}
+.stream_control i.material-icons{
+	font-size: 17px;
+}
+.item-stream.offlineItem > .streamTitle:hover > .stream_control{
+	position: relative;
+	float: right;
+	margin-right: -5px;
+}
+.item-stream.offlineItem .stream_control span{
+	margin-left: 5px;
+}
+.item-stream.onlineItem:hover > #stream_right_container > .stream_control{
+	position: relative;
+	float: right;
+}
+.item-stream.onlineItem:hover > #stream_right_container > .stream_control > span{
+	display: block;
+	visibility: unset;
+}
+.item-stream:hover > #stream_right_container > .stream_control, .item-stream > .streamTitle:hover > .stream_control{
+	display: inline;
+	visibility: unset;
 }
 footer, footer *{
 	white-space: pre-line;

@@ -234,6 +234,91 @@ function listenerOfflineCount(data){
 	streamOfflineCountNode.appendChild(document.createTextNode(data));
 }
 
+function newDeleteStreamButton_onClick(event){
+	event.stopPropagation();
+	
+	let node = this;
+	let id = node.getAttribute("data-id");
+	let website = node.getAttribute("data-website");
+	
+	self.port.emit("deleteStream", {id: id, website: website});
+}
+function newDeleteStreamButton(id, website){
+	let node = document.createElement("span");
+	node.setAttribute("data-id", id);
+	node.setAttribute("data-website", website);
+	
+	let node_img =  document.createElement("i");
+	node_img.className = "material-icons";
+	node_img.textContent = "delete";
+	node.appendChild(node_img);
+	
+	return node;
+}
+function newCopyLivestreamerCmdButton_onClick(event){
+	event.stopPropagation();
+	
+	let node = this;
+	let id = node.getAttribute("data-id");
+	let website = node.getAttribute("data-website");
+	
+	self.port.emit("copyLivestreamerCmd", {id: id, website: website});
+}
+function newCopyLivestreamerCmdButton(id, website){
+	let node = document.createElement("span");
+	node.setAttribute("data-id", id);
+	node.setAttribute("data-website", website);
+	
+	let node_img =  document.createElement("i");
+	node_img.className = "material-icons";
+	node_img.textContent = "content_copy";
+	node.appendChild(node_img);
+	
+	return node;
+}
+function newDeleteStreamButton_onClick(event){
+	event.stopPropagation();
+	
+	let node = this;
+	let id = node.getAttribute("data-id");
+	let website = node.getAttribute("data-website");
+	
+	self.port.emit("deleteStream", {id: id, website: website});
+}
+function newDeleteStreamButton(id, website){
+	let node = document.createElement("span");
+	node.setAttribute("data-id", id);
+	node.setAttribute("data-website", website);
+	
+	let node_img =  document.createElement("i");
+	node_img.className = "material-icons";
+	node_img.textContent = "delete";
+	node.appendChild(node_img);
+	
+	return node;
+}
+function newCopyLivestreamerCmdButton_onClick(event){
+	event.stopPropagation();
+	
+	let node = this;
+	let id = node.getAttribute("data-id");
+	let website = node.getAttribute("data-website");
+	
+	self.port.emit("copyLivestreamerCmd", {id: id, website: website});
+}
+function newCopyLivestreamerCmdButton(id, website){
+	let node = document.createElement("span");
+	node.setAttribute("data-id", id);
+	node.setAttribute("data-website", website);
+	
+	let node_img =  document.createElement("i");
+	node_img.className = "material-icons";
+	node_img.textContent = "content_copy";
+	node.appendChild(node_img);
+	
+	return node;
+}
+
 function listener(data){
 	let nodeListOnline = new onlineNodes();
 	let nodeListOffline = new offlineNodes();
@@ -241,9 +326,25 @@ function listener(data){
 	var newLine = document.createElement("div");
 	newLine.id = data.website + '/' + data.id;
 	
+	let stream_right_container_node;
+	if(data.online && typeof data.streamCurrentViewers == "number"){
+		stream_right_container_node = document.createElement("span");
+		stream_right_container_node.id = "stream_right_container";
+		
+		var viewerCountNode = document.createElement("span");
+		viewerCountNode.className = "streamCurrentViewers";
+		viewerCountNode.appendChild(document.createTextNode(data.streamCurrentViewers));
+		var viewerCountLogoNode = document.createElement("i");
+		viewerCountLogoNode.className = "material-icons";
+		viewerCountLogoNode.appendChild(document.createTextNode("visibility"));
+		viewerCountNode.appendChild(viewerCountLogoNode);
+		stream_right_container_node.appendChild(viewerCountNode);
+		newLine.appendChild(stream_right_container_node);
+	}
+	
 	let streamOwnerLogo = data.streamOwnerLogo;
 	let streamCategoryLogo = data.streamCategoryLogo;
-	let streamLogo = ""
+	let streamLogo = "";
 	
 	if(data.online && typeof streamCategoryLogo == "string" && streamCategoryLogo != ""){
 		streamLogo  = streamCategoryLogo;
@@ -267,17 +368,6 @@ function listener(data){
 	titleLine.appendChild(document.createTextNode(data.streamName));
 	newLine.appendChild(titleLine);
 	
-	if(data.online && typeof data.streamCurrentViewers == "number"){
-		var viewerCountNode = document.createElement("span");
-		viewerCountNode.className = "streamCurrentViewers";
-		viewerCountNode.appendChild(document.createTextNode(data.streamCurrentViewers));
-		var viewerCountLogoNode = document.createElement("i");
-		viewerCountLogoNode.className = "material-icons";
-		viewerCountLogoNode.appendChild(document.createTextNode("visibility"));
-		viewerCountNode.appendChild(viewerCountLogoNode);
-		titleLine.appendChild(viewerCountNode);
-	}
-	
 	if(data.online){
 		if(data.streamStatus != ""){
 			var statusLine = document.createElement("span");
@@ -299,6 +389,21 @@ function listener(data){
 	newLine.setAttribute("data-streamWebsite", data.website);
 	newLine.setAttribute("data-streamUrl", data.streamUrl);
 	newLine.addEventListener("click", streamItemClick);
+	
+	/*			---- Control span ----			*/
+	let control_span = document.createElement("span");
+	control_span.className = "stream_control";
+	let deleteButton_node = newDeleteStreamButton(data.id, data.website);
+	control_span.appendChild(deleteButton_node);
+	let copyLivestreamerCmd_node = newCopyLivestreamerCmdButton(data.id, data.website);
+	control_span.appendChild(copyLivestreamerCmd_node);
+	if(data.online){
+		stream_right_container_node.appendChild(control_span);
+	} else {
+		titleLine.appendChild(control_span);
+	}
+	deleteButton_node.addEventListener("click", newDeleteStreamButton_onClick, false);
+	copyLivestreamerCmd_node.addEventListener("click", newCopyLivestreamerCmdButton_onClick, false);
 	
 	showNonEmptySitesBlocks();
 	if(scrollbar_streamList !== null){

@@ -190,7 +190,7 @@ function addStreamFromPanel(embed_list){
 				if(pattern.test(url)){
 					id = pattern.exec(url)[1];
 					if(streamListSetting.streamExist(id)){
-						doNotif("Stream Notifier",`${id} ${_("is already configured.")}`);
+						doNotif("Live Notifier",`${id} ${_("is already configured.")}`);
 						return true;
 					} else {
 						let id_toChecked = id;
@@ -202,7 +202,7 @@ function addStreamFromPanel(embed_list){
 								let id = id_toChecked;
 								data = response.json;
 								if(isValidResponse(website, data) == false){
-									doNotif("Stream Notifier", `${id} ${_("wasn't configured, but not detected as channel.")}`);
+									doNotif("Live Notifier", `${id} ${_("wasn't configured, but not detected as channel.")}`);
 									return null;
 								} else {
 									if(getPreferences("confirm_addStreamFromPanel")){
@@ -210,7 +210,7 @@ function addStreamFromPanel(embed_list){
 											streamListSetting.addStream(id, ((type == "embed")? active_tab_url : ""));
 											//streamListSetting.objData[id] = (type == "embed")? active_tab_url : "";
 											streamListSetting.update();
-											doNotif("Stream Notifier", `${id} ${_("have been added.")}`);
+											doNotif("Live Notifier", `${id} ${_("have been added.")}`);
 											// Update the panel for the new stream added
 											refreshStreamsFromPanel();
 											})
@@ -219,7 +219,7 @@ function addStreamFromPanel(embed_list){
 										streamListSetting.addStream(id, ((type == "embed")? active_tab_url : ""));
 										//streamListSetting.objData[id] = (type == "embed")? active_tab_url : "";
 										streamListSetting.update();
-										doNotif("Stream Notifier", `${id} ${_("wasn't configured, and have been added.")}`);
+										doNotif("Live Notifier", `${id} ${_("wasn't configured, and have been added.")}`);
 										// Update the panel for the new stream added
 										refreshStreamsFromPanel();
 									}
@@ -239,7 +239,7 @@ function addStreamFromPanel(embed_list){
 		addStreamFromPanel_pageListener.push(page_port);
 		page_port.port.on("addStream", addStreamFromPanel);
 	} else {
-		doNotif("Stream Notifier", _("No supported stream detected in the current tab, so, nothing to add."));
+		doNotif("Live Notifier", _("No supported stream detected in the current tab, so, nothing to add."));
 	}
 }
 function deleteStreamFromPanel(data){
@@ -251,7 +251,7 @@ function deleteStreamFromPanel(data){
 			let deletestreamNotifAction = new notifAction("function", function(){
 				delete streamListSetting.objData[id];
 				streamListSetting.update();
-				doNotif("Stream Notifier", `${id} ${_("has been deleted.")}`);
+				doNotif("Live Notifier", `${id} ${_("has been deleted.")}`);
 				// Update the panel for the new stream added
 				refreshStreamsFromPanel();
 				})
@@ -259,7 +259,7 @@ function deleteStreamFromPanel(data){
 		} else {
 			delete streamListSetting.objData[id];
 			streamListSetting.update();
-			doNotif("Stream Notifier", `${id} ${_("has been deleted.")}`);
+			doNotif("Live Notifier", `${id} ${_("has been deleted.")}`);
 			// Update the panel for the new stream added
 			refreshStreamsFromPanel();
 		}
@@ -287,6 +287,7 @@ panel.port.on("importStreams", importButton_Panel);
 panel.port.on("refreshStreams", refreshStreamsFromPanel);
 panel.port.on("addStream", addStreamFromPanel);
 panel.port.on("deleteStream", deleteStreamFromPanel);
+panel.port.on("copyLivestreamerCmd", copyLivestreamerCmd);
 panel.port.on("openOnlineLive", openOnlineLive);
 panel.port.on("openTab", openTabIfNotExist);
 panel.port.on("setting_Update", function(data){
@@ -352,11 +353,17 @@ function handleChange(state) {
 //Affichage des notifications en ligne / hors ligne
 var notifications = require("sdk/notifications");
 
+function copyLivestreamerCmd(data){
+	let cmd = `livestreamer ${getStreamURL(data.website, data.id, false)} ${getPreferences("livestreamer_cmd_quality")}`;
+	let clipboard_success = clipboard.set(cmd, "text");
+	if(clipboard_success){
+		doNotif("Live notifier", _("Livestreamer command copied into the clipboard"));
+	}
+}
 function openOnlineLive(data){
 	openTabIfNotExist(data.streamUrl);
 	if(getPreferences("livestreamer_cmd_to_clipboard")){
-		let cmd = `livestreamer ${getStreamURL(data.website, data.id, false)} ${getPreferences("livestreamer_cmd_quality")}`;
-		clipboard.set(cmd, "text");
+		copyLivestreamerCmd(data);
 	}
 }
 
@@ -690,6 +697,9 @@ checkLiveStatus = {
 				} else if(data["category_logo_small"] !== null){
 					liveStatus["hitbox"][hitbox_key].streamCategoryLogo = "http://edge.sf.hitbox.tv" + data["category_logo_small"];
 				} else {
+					liveStatus["hitbox"][hitbox_key].streamCategoryLogo = "";
+				}
+				if(liveStatus["hitbox"][hitbox_key].streamCategoryLogo = "http://edge.sf.hitbox.tv/static/img/generic/blank.gif"){
 					liveStatus["hitbox"][hitbox_key].streamCategoryLogo = "";
 				}
 				if(data.channel["user_logo"] !== null){
