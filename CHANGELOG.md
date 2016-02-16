@@ -1,3 +1,6 @@
+# 4.6.2
+* Fix: Viewer count
+
 # 4.6.1
 * Fix: Panel html
 * Fix: Style of settings from the panel

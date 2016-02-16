@@ -333,7 +333,10 @@ function listener(data){
 		
 		var viewerCountNode = document.createElement("span");
 		viewerCountNode.className = "streamCurrentViewers";
-		viewerCountNode.appendChild(document.createTextNode(data.streamCurrentViewers));
+		
+		let viewer_number = (typeof data.streamCurrentViewers == "number")? data.streamCurrentViewers : parseInt(data.streamCurrentViewers);
+		viewerCountNode.textContent = (viewer_number < 10000)? viewer_number : ((Math.round(viewer_number / 100)/10)+ "k");
+		
 		var viewerCountLogoNode = document.createElement("i");
 		viewerCountLogoNode.className = "material-icons";
 		viewerCountLogoNode.appendChild(document.createTextNode("visibility"));
