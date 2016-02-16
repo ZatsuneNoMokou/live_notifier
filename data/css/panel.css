@@ -69,7 +69,7 @@ header button {
 	flex-direction: column;
 	align-items: stretch;
 	justify-content: space-between;
-	padding: 14px;
+	padding: 5px 14px;
 }
 #settings_container{
 	display: inline;
@@ -104,13 +104,20 @@ header button {
 	padding-left: 58px;
 	background-size: auto 100%;
 }
-.item-stream:not(.streamLogo) .streamTitle{
-	padding-left: 7px;
+.item-stream.onlineItem .streamTitle{
+	width: 170px;
+}
+.item-stream.offlineItem .streamTitle{
+	max-height: 17px;
+	overflow: hidden;
 }
 .item-stream.streamLogo .streamTitle{
 	position: relative;
 	left: -12px;
 	margin-top: -5px;
+}
+.item-stream.offlineItem.streamLogo .streamTitle{
+	width: 190px;
 }
 .item-stream.streamLogo .streamCurrentViewers{
 	top: -10px;
@@ -173,10 +180,11 @@ header button {
 	float: right;
 	right: -10px;
 	top: -10px;
+	width: 30px;
 }
-#stream_right_container > span{
+/*#stream_right_container > span{
 	display: block;
-}
+}*/
 .stream_control{
 	display: none;
 	visibility: hidden;
@@ -185,10 +193,11 @@ header button {
 .stream_control i.material-icons{
 	font-size: 17px;
 }
-.item-stream.offlineItem > .streamTitle:hover > .stream_control{
+.item-stream.offlineItem .stream_control{
 	position: relative;
 	float: right;
-	margin-right: -5px;
+	top: -13px;
+	margin-right: -7px;
 }
 .item-stream.offlineItem .stream_control span{
 	margin-left: 5px;
@@ -201,9 +210,36 @@ header button {
 	display: block;
 	visibility: unset;
 }
-.item-stream:hover > #stream_right_container > .stream_control, .item-stream > .streamTitle:hover > .stream_control{
+.item-stream:hover > #stream_right_container > .stream_control, .item-stream:hover .stream_control{
 	display: inline;
 	visibility: unset;
+}
+.website_pref, pref_group{
+	padding: 3px 0px;
+	margin: 6px 3px;
+}
+.preference:not(.flex_input_text):not(.flex_select){
+	display: block;
+}
+.preference{
+	margin-top: 3px;
+	margin-bottom: 3px;
+}
+.flex_select, .flex_input_text{
+	display: flex;
+}
+.flex_select span, .flex_input_text span{
+	flex: 4;
+}
+.flex_select select, .flex_input_text input{
+	flex: 1;
+	margin: 3px 10px;
+}
+input[type=checkbox]{
+	width: 28px;
+}
+input[type=number]{
+	max-width: 42px;
 }
 footer, footer *{
 	white-space: pre-line;

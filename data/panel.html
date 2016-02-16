@@ -19,18 +19,18 @@
 	</header>
 	<section id="streamList">
 		<div id="deleteStreamWarning" class="hide"><i class="material-icons">warning</i> <span data-l10n-id="delete_stream_mode">Clicking on a stream will delete it from the settings.</span></div>
-		<p id="streamListOnline">
+		<div id="streamListOnline">
 			<div id="streamOnlineCountLabel">No online stream currently</div>
 			<div id="dailymotionOnlineList" class="group"></div>
 			<div id="hitboxOnlineList" class="group"></div>
 			<div id="twitchOnlineList" class="group"></div>
-		</p>
-		<p id="streamListOffline">
+		</div>
+		<div id="streamListOffline">
 			<div id="streamOfflineCountLabel">No offline stream currently</div>
 			<div id="dailymotionOfflineList" class="group"></div>
 			<div id="hitboxOfflineList" class="group"></div>
 			<div id="twitchOfflineList" class="group"></div>
-		</p>
+		</div>
 	</section>
 	<section id="settings_container" class="hide">
 		<p id="hitbox" class="website_pref">
@@ -53,63 +53,73 @@
 			</label>
 		</p>
 
-		<label class="preference" data-translate-title="dailymotion_check_delay_description" title="Delay between checks, in minute">
-			<span data-l10n-id="dailymotion_check_delay_description">Delay between checks, in minute</span>: 
-			<input type="number" id="dailymotion_check_delay" class="preferenceInput" data-setting-type="number">
+		<label class="preference flex_input_text" data-translate-title="check_delay_description" title="Delay between checks, in minute">
+			<span data-l10n-id="check_delay_description">Delay between checks, in minute</span>: 
+			<input type="number" id="check_delay" class="preferenceInput" data-setting-type="number">
 		</label>
 		
 		<p class="pref_group">
-			<label class="preference" data-translate-title="notify_online_description" title="Notification when checked">
+			<label class="preference flex_select">
+				<span data-l10n-id="notification_type_title">Notification type</span>: 
+				<select id="notification_type" class="preferenceInput" data-setting-type="string">
+					<option value="web" data-l10n-id="notification_type_web">Web</option>
+					<option value="chrome_api" data-l10n-id="notification_type_chrome_api">API Chrome</option>
+				</select>
+			</label>
+		</p>
+		
+		<p class="pref_group">
+			<label class="preference flex_input_text" data-translate-title="notify_online_description" title="Notification when checked">
 				<span data-l10n-id="notify_online_title">Show a notification when a stream start</span>: 
 				<input type="checkbox" id="notify_online" class="preferenceInput" data-setting-type="boolean">
 			</label>
-			<br>
-			<label class="preference" data-translate-title="notify_offline_description" title="Notification when checked">
+			
+			<label class="preference flex_input_text" data-translate-title="notify_offline_description" title="Notification when checked">
 				<span data-l10n-id="notify_offline_title">Show a notification when a stream finish</span>: 
 				<input type="checkbox" id="notify_offline" class="preferenceInput" data-setting-type="boolean">
 			</label>
 		</p>
-
-		<label class="preference" data-translate-title="show_offline_in_panel_description" title="Shown when checked">
+		
+		<label class="preference flex_input_text" data-translate-title="show_offline_in_panel_description" title="Shown when checked">
 			<span data-l10n-id="show_offline_in_panel_title">Show offline streams in the panel</span>: 
 			<input type="checkbox" id="show_offline_in_panel" class="preferenceInput" data-setting-type="boolean">
 		</label>
 		
 		<p class="pref_group">
-			<label class="preference" data-translate-title="confirm_addStreamFromPanel_description" title="Show a notification to confirm when adding a stream of config (from panel)">
-				<span data-l10n-id="confirm_addStreamFromPanel_title">Confirmation to add streams</span>: 
+			<label class="preference flex_input_text" data-translate-title="confirm_addStreamFromPanel_description" title="Show a notification to confirm when adding a stream of config (from panel)">
+				<span data-l10n-id="confirm_addStreamFromPanel_title">Confirmation to add streams</span>:
 				<input type="checkbox" id="confirm_addStreamFromPanel" class="preferenceInput" data-setting-type="boolean">
 			</label>
-			<br>
-			<label class="preference" data-translate-title="confirm_deleteStreamFromPanel_description" title="Show a notification to confirm when deleting a stream of config (from panel)">
+			
+			<label class="preference flex_input_text" data-translate-title="confirm_deleteStreamFromPanel_description" title="Show a notification to confirm when deleting a stream of config (from panel)">
 				<span data-l10n-id="confirm_deleteStreamFromPanel_title">Confirmation to delete streams</span>: 
 				<input type="checkbox" id="confirm_deleteStreamFromPanel" class="preferenceInput" data-setting-type="boolean">
 			</label>
 		</p>
 		
 		<p class="pref_group">
-			<label class="preference" data-translate-title="panel_theme_description" title="Choose the panel of the panel">
+			<label class="preference flex_select" data-translate-title="panel_theme_description" title="Choose the panel of the panel">
 				<span data-l10n-id="panel_theme_title">Panel theme</span>: 
 				<select id="panel_theme" data-setting-type="string">
-					<option value="dark" data-l10n-id="panel_theme_options.Dark">Dark</option>
-					<option value="light" data-l10n-id="panel_theme_options.Light">Light</option>
+					<option value="dark" data-l10n-id="panel_theme_dark">Dark</option>
+					<option value="light" data-l10n-id="panel_theme_light">Light</option>
 				</select>
-			</label><br>
+			</label>
 			
-			<label class="preference" data-translate-title="background_color_description" title="Choose background color">
+			<label class="preference flex_input_text" data-translate-title="background_color_description" title="Choose background color">
 				<span data-l10n-id="background_color_title">Panel background color</span>: 
 				<input type="color" id="background_color" data-setting-type="string">
-			</label><br>
+			</label>
 		</p>
 		
 		<p class="pref_group">
-			<label class="preference" data-translate-title="livestreamer_cmd_to_clipboard_description" title="Check to activate">
+			<label class="preference flex_input_text" data-translate-title="livestreamer_cmd_to_clipboard_description" title="Check to activate">
 				<span data-l10n-id="livestreamer_cmd_to_clipboard_title">Copy Livestreamer command on stream click</span>: 
 				<input type="checkbox" id="livestreamer_cmd_to_clipboard" class="preferenceInput" data-setting-type="boolean">
 			</label>
 			
 			<label class="preference flex_input_text" data-translate-title="livestreamer_cmd_quality_description" title="More information on Livestreamer page">
-				<span data-l10n-id="livestreamer_cmd_quality_title">Livestreamer quality</span>:<br>
+				<span data-l10n-id="livestreamer_cmd_quality_title">Livestreamer quality</span>: 
 				<input type="text" id="livestreamer_cmd_quality" class="preferenceInput" data-setting-type="string">
 			</label>
 		</p>

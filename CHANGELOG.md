@@ -1,3 +1,9 @@
+# 4.6.1
+* Fix: Panel html
+* Fix: Style of settings from the panel
+* Fix: Control stream buttons (position)
+* Fix: Localisation (copy Livestreamer title)
+
 # 4.6.0
 * +: Added 2 buttons to streams, to delete a stream and to copy the livestreamer command
 * Fix: Blank image category for Hitbox

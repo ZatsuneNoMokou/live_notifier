@@ -400,7 +400,7 @@ function listener(data){
 	if(data.online){
 		stream_right_container_node.appendChild(control_span);
 	} else {
-		titleLine.appendChild(control_span);
+		newLine.appendChild(control_span);
 	}
 	deleteButton_node.addEventListener("click", newDeleteStreamButton_onClick, false);
 	copyLivestreamerCmd_node.addEventListener("click", newCopyLivestreamerCmdButton_onClick, false);
