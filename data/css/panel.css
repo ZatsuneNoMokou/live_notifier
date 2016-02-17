@@ -119,6 +119,9 @@ header button {
 .item-stream.offlineItem.streamLogo .streamTitle{
 	width: 190px;
 }
+.streamCurrentViewers{
+	display: block;
+}
 .item-stream.streamLogo .streamCurrentViewers{
 	top: -10px;
 }

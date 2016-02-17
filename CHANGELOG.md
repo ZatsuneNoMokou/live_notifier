@@ -1,3 +1,6 @@
+# 4.6.3
+* Fix: Viewer count / Control stream buttons (position)
+
 # 4.6.2
 * Fix: Viewer count
 
