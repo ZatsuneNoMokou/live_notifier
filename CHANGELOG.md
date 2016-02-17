@@ -1,3 +1,6 @@
+# 4.6.4
+* Fix: Offline streams height
+
 # 4.6.3
 * Fix: Viewer count / Control stream buttons (position)
 
