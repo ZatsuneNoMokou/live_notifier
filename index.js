@@ -861,7 +861,7 @@ checkLives();
 	let last_executed_version_numbers = getVersionNumbers.exec(last_executed_version);
 	let current_version_numbers = getVersionNumbers.exec(current_version);
 	
-	if(last_executed_version != current_version){
+	if(last_executed_version != current_version && last_executed_version != "0.0.0"){
 		if(current_version_numbers.length == 4 && last_executed_version_numbers.length == 4){
 			if(current_version_numbers[1] > last_executed_version_numbers[1]){
 				doNotif("Live notifier", _("Addon have been updated"));

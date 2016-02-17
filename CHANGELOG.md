@@ -1,3 +1,6 @@
+# 4.7.1
+* Fix: Avoid notification on installation
+
 # 4.7.0
 * +: Addon update notification
 * Fix: Settings from panel
