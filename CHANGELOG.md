@@ -1,3 +1,6 @@
+# 4.7.2
+* +: Add current version in the updated notification
+
 # 4.7.1
 * Fix: Avoid notification on installation
 
