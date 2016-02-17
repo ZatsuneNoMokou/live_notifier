@@ -1,3 +1,6 @@
+# 4.7.0
+*+: Addon update notification
+
 # 4.6.4
 * Fix: Offline streams height
 

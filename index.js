@@ -771,10 +771,6 @@ seconderyInfo = {
 		}
 }
 
-// Exécution
-var interval
-checkLives();
-
 function importButton(website){
 	importStreams(website, getPreferences(`${website}_user_id`));
 }
@@ -848,6 +844,37 @@ function importTwitchButton(){importButton("twitch");}
 sp.on("twitch_import", importTwitchButton);
 function importHitboxButton(){importButton("hitbox");}
 sp.on("hitbox_import", importHitboxButton);
+
+
+//				------ Load / Unload Event(s) ------				//
+
+// Begin to check lives
+var interval
+checkLives();
+
+// Checking if updated
+(function checkIfUpdated(){
+	let getVersionNumbers =  /^(\d*)\.(\d*)\.(\d*)$/;
+	let last_executed_version = getPreferences("livenotifier_version");
+	let current_version = self.version;
+	
+	let last_executed_version_numbers = getVersionNumbers.exec(last_executed_version);
+	let current_version_numbers = getVersionNumbers.exec(current_version);
+	
+	if(last_executed_version != current_version){
+		if(current_version_numbers.length == 4 && last_executed_version_numbers.length == 4){
+			if(current_version_numbers[1] > last_executed_version_numbers[1]){
+				doNotif("Live notifier", _("Addon have been updated"));
+			} else if((current_version_numbers[1] == last_executed_version_numbers[1]) && (current_version_numbers[2] > last_executed_version_numbers[2])){
+				doNotif("Live notifier", _("Addon have been updated"));
+			} else if((current_version_numbers[1] == last_executed_version_numbers[1]) && (current_version_numbers[2] == last_executed_version_numbers[2]) && (current_version_numbers[3] > last_executed_version_numbers[3])){
+				doNotif("Live notifier", _("Addon have been updated"));
+			}
+			savePreference("livenotifier_version", current_version);
+		}
+	}
+})();
+
 
 exports.onUnload = function (reason) {
 	clearInterval(interval);

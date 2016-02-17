@@ -239,6 +239,9 @@ header button {
 	flex: 1;
 	margin: 3px 10px;
 }
+#livestreamer_cmd_quality{
+	max-width: 175px;
+}
 input[type=checkbox]{
 	width: 28px;
 }
