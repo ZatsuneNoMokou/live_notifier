@@ -260,9 +260,10 @@ function newCopyLivestreamerCmdButton_onClick(event){
 	
 	let node = this;
 	let id = node.getAttribute("data-id");
+	let contentId = node.getAttribute("data-contentId");
 	let website = node.getAttribute("data-website");
 	
-	self.port.emit("copyLivestreamerCmd", {id: id, website: website});
+	self.port.emit("copyLivestreamerCmd", {id: id, contentId: contentId, website: website});
 }
 function newCopyLivestreamerCmdButton(id, website){
 	let node = document.createElement("span");
@@ -399,15 +400,21 @@ function listener(data){
 	control_span.className = "stream_control";
 	let deleteButton_node = newDeleteStreamButton(data.id, data.website);
 	control_span.appendChild(deleteButton_node);
-	let copyLivestreamerCmd_node = newCopyLivestreamerCmdButton(data.id, data.website);
-	control_span.appendChild(copyLivestreamerCmd_node);
+	
+	let copyLivestreamerCmd_node = null;
+	if(data.type == "live"){
+		copyLivestreamerCmd_node = newCopyLivestreamerCmdButton(data.id, data.website);
+		control_span.appendChild(copyLivestreamerCmd_node);
+	}
 	if(data.online){
 		stream_right_container_node.appendChild(control_span);
 	} else {
 		newLine.appendChild(control_span);
 	}
 	deleteButton_node.addEventListener("click", newDeleteStreamButton_onClick, false);
-	copyLivestreamerCmd_node.addEventListener("click", newCopyLivestreamerCmdButton_onClick, false);
+	if(copyLivestreamerCmd_node !== null){
+		copyLivestreamerCmd_node.addEventListener("click", newCopyLivestreamerCmdButton_onClick, false);
+	}
 	
 	showNonEmptySitesBlocks();
 	if(scrollbar_streamList !== null){
