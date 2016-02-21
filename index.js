@@ -172,6 +172,14 @@ function refreshStreamsFromPanel(){
 	}
 	var intervalRefreshPanel = setInterval(waitToUpdatePanel, 5000);
 }
+
+function display_id(id){
+	if(dailymotion_channel.test(id)){
+		return _("The channel %d", dailymotion_channel.exec(id)[1]);
+	} else {
+		return _("The stream %d", id);
+	}
+}
 let addStreamFromPanel_pageListener = new Array();
 function addStreamFromPanel(embed_list){
 	let current_tab = tabs.activeTab;
@@ -184,6 +192,8 @@ function addStreamFromPanel(embed_list){
 					"twitch": [/^(?:http|https):\/\/www\.twitch\.tv\/([^\/\?\&]*).*$/,/^(?:http|https):\/\/player\.twitch\.tv\/\?channel\=([\w\-]*).*$/]};
 	let url_list;
 	if(typeof embed_list == "object"){
+		console.log(`Embed list (${active_tab_url})`);
+		console.dir(embed_list);
 		url_list = embed_list;
 		for(i of addStreamFromPanel_pageListener){
 			i.port.removeListener('refreshStreams', refreshStreamsFromPanel);
@@ -201,7 +211,7 @@ function addStreamFromPanel(embed_list){
 				if(pattern.test(url)){
 					id = pattern.exec(url)[1];
 					if(streamListSetting.streamExist(id)){
-						doNotif("Live Notifier",`${id} ${_("is already configured.")}`);
+						doNotif("Live Notifier",`${display_id(id)} ${_("is already configured.")}`);
 						return true;
 					} else {
 						let id_toChecked = id;
@@ -212,28 +222,36 @@ function addStreamFromPanel(embed_list){
 							onComplete: function (response) {
 								let id = id_toChecked;
 								data = response.json;
+								console.dir(data);
+								
 								if(isValidResponse(website, data) == false){
-									doNotif("Live Notifier", `${id} ${_("wasn't configured, but not detected as channel.")}`);
-									return null;
-								} else {
-									if(getPreferences("confirm_addStreamFromPanel")){
-										let addstreamNotifAction = new notifAction("function", function(){
-											streamListSetting.addStream(id, ((type == "embed")? active_tab_url : ""));
-											//streamListSetting.objData[id] = (type == "embed")? active_tab_url : "";
-											streamListSetting.update();
-											doNotif("Live Notifier", `${id} ${_("have been added.")}`);
-											// Update the panel for the new stream added
-											refreshStreamsFromPanel();
-											})
-										doActionNotif(`Stream Notifier (${_("click to confirm")})`, `${id} ${_("wasn't configured, and can be added.")}`, addstreamNotifAction);
+									if(website == "dailymotion" && data.mode == "vod"){
+										// Use channel as id
+										id = `channel::${data.owner}`;
+										if(streamListSetting.streamExist(id)){
+											doNotif("Stream Notifier",`${display_id(id)} ${_("is_already_configured")}`);
+											return true;
+										}
 									} else {
+										doNotif("Stream Notifier", `${display_id(id)} ${_("wasnt_configured_but_not_detected_as_channel")}`);
+										return null;
+									}
+								}
+								if(getPreferences("confirm_addStreamFromPanel")){
+									let addstreamNotifAction = new notifAction("function", function(){
 										streamListSetting.addStream(id, ((type == "embed")? active_tab_url : ""));
-										//streamListSetting.objData[id] = (type == "embed")? active_tab_url : "";
 										streamListSetting.update();
-										doNotif("Live Notifier", `${id} ${_("wasn't configured, and have been added.")}`);
+										doNotif("Live Notifier", `${display_id(id)} ${_("have been added.")}`);
 										// Update the panel for the new stream added
 										refreshStreamsFromPanel();
-									}
+										})
+									doActionNotif(`Stream Notifier (${_("click to confirm")})`, `${display_id(id)} ${_("wasn't configured, and can be added.")}`, addstreamNotifAction);
+								} else {
+									streamListSetting.addStream(id, ((type == "embed")? active_tab_url : ""));
+									streamListSetting.update();
+									doNotif("Live Notifier", `${display_id(id)} ${_("wasn't configured, and have been added.")}`);
+									// Update the panel for the new stream added
+									refreshStreamsFromPanel();
 								}
 							}
 						}).get();
@@ -262,15 +280,15 @@ function deleteStreamFromPanel(data){
 			let deletestreamNotifAction = new notifAction("function", function(){
 				delete streamListSetting.objData[id];
 				streamListSetting.update();
-				doNotif("Live Notifier", `${id} ${_("has been deleted.")}`);
+				doNotif("Live Notifier", `${display_id(id)} ${_("has been deleted.")}`);
 				// Update the panel for the new stream added
 				refreshStreamsFromPanel();
 				})
-			doActionNotif(`Stream Notifier (${_("click to confirm")})`, `${id} ${_("will be deleted, are you sure?")}`, deletestreamNotifAction);
+			doActionNotif(`Stream Notifier (${_("click to confirm")})`, `${display_id(id)} ${_("will be deleted, are you sure?")}`, deletestreamNotifAction);
 		} else {
 			delete streamListSetting.objData[id];
 			streamListSetting.update();
-			doNotif("Live Notifier", `${id} ${_("has been deleted.")}`);
+			doNotif("Live Notifier", `${display_id(id)} ${_("has been deleted.")}`);
 			// Update the panel for the new stream added
 			refreshStreamsFromPanel();
 		}

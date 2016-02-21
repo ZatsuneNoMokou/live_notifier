@@ -1,6 +1,7 @@
 # 5.0.0:
-* +: Use Twitch display name to get exact streamer case (uppercase and lowercase letters)
 * +: Add support to multi stream per setting, allowing to support using Dailymotion channel as setting instead of only videos
+* +: Using the add button (from the panel) on Dailymotion with an embed or a page of a video will add the Dailymotion channel
+* Fix: Use Twitch display name to get exact streamer case (uppercase and lowercase letters)
 
 # 4.7.2
 * +: Add current version in the updated notification
