@@ -324,7 +324,7 @@ function listener(data){
 	let nodeListOffline = new offlineNodes();
 	
 	var newLine = document.createElement("div");
-	newLine.id = data.website + '/' + data.id;
+	newLine.id = `${data.website}/${data.id}/${data.contentId}`;
 	
 	let stream_right_container_node;
 	if(data.online && typeof data.streamCurrentViewers == "number"){
@@ -388,6 +388,7 @@ function listener(data){
 	newLine.className += " cursor";
 	
 	newLine.setAttribute("data-streamId", data.id);
+	newLine.setAttribute("data-contentId", data.contentId);
 	newLine.setAttribute("data-online", data.online);
 	newLine.setAttribute("data-streamWebsite", data.website);
 	newLine.setAttribute("data-streamUrl", data.streamUrl);

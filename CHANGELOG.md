@@ -1,3 +1,7 @@
+# 5.0.0:
+* +: Use Twitch display name to get exact streamer case (uppercase and lowercase letters)
+* +: Add support to multi stream per setting, allowing to support using Dailymotion channel as setting instead of only videos
+
 # 4.7.2
 * +: Add current version in the updated notification
 

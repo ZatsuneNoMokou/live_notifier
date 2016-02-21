@@ -108,13 +108,16 @@ function streamListFromSetting(website){
 	}
 }
 
-function getStreamURL(website, id, usePrefUrl){
-	var streamList = (new streamListFromSetting(website)).objData;	
+function getStreamURL(website, id, contentId, usePrefUrl){
+	var streamList = (new streamListFromSetting(website)).objData;
+	
+	let streamData = liveStatus[website][id][contentId];
+	
 	if(streamList[id] != "" && usePrefUrl == true){
 		return streamList[id];
 	} else {
-		if(typeof liveStatus[website][id].streamURL == "string" && liveStatus[website][id].streamURL != ""){
-			return liveStatus[website][id].streamURL;
+		if(typeof streamData.streamURL == "string" && streamData.streamURL != ""){
+			return streamData.streamURL;
 		} else {
 			switch(website){
 				case "dailymotion":
@@ -315,12 +318,33 @@ function updatePanelData(){
 		panel.port.emit("updateOfflineCount", "");
 	}
 	
-	for(website in liveStatus){
+	for(let website in liveStatus){
 		var streamList = (new streamListFromSetting(website)).objData;
-		for(i in liveStatus[website]){
-			if(i in streamList && (liveStatus[website][i].online || (getPreferences("show_offline_in_panel") && !liveStatus[website][i].online))){
-				let streamInfo = {"id": i, "online": liveStatus[website][i].online, "website": website, "streamName": liveStatus[website][i].streamName, "streamStatus": liveStatus[website][i].streamStatus, "streamGame": liveStatus[website][i].streamGame, "streamOwnerLogo": liveStatus[website][i].streamOwnerLogo, "streamCategoryLogo": liveStatus[website][i].streamCategoryLogo, "streamCurrentViewers": liveStatus[website][i].streamCurrentViewers, "streamUrl": getStreamURL(website, i, true)}
-				panel.port.emit("updateData", streamInfo);
+		for(let id in liveStatus[website]){
+			
+			if(JSON.stringify(liveStatus[website][id]) == "{}"){
+				console.error(`No data found: ${id} (${website})`);
+			}
+			
+			for(let contentId in liveStatus[website][id]){
+				let streamData = liveStatus[website][id][contentId];
+				
+				if(id in streamList && (streamData.online || (getPreferences("show_offline_in_panel") && !streamData.online))){
+					let streamInfo = {
+						"id": id,
+						"contentId": contentId,
+						"online": streamData.online,
+						"website": website,
+						"streamName": streamData.streamName,
+						"streamStatus": streamData.streamStatus,
+						"streamGame": streamData.streamGame,
+						"streamOwnerLogo": streamData.streamOwnerLogo,
+						"streamCategoryLogo": streamData.streamCategoryLogo,
+						"streamCurrentViewers": streamData.streamCurrentViewers,
+						"streamUrl": getStreamURL(website, id, contentId, true)
+					}
+					panel.port.emit("updateData", streamInfo);
+				}
 			}
 		}
 	}
@@ -419,10 +443,12 @@ function doActionNotif(title, message, action, imgurl){
 	});
 }
 
-function doStreamNotif(website,id,isStreamOnline){
-	let streamName = liveStatus[website][id].streamName;
-	let streamOwnerLogo = liveStatus[website][id].streamOwnerLogo;
-	let streamCategoryLogo = liveStatus[website][id].streamCategoryLogo;
+function doStreamNotif(website, id, contentId, isStreamOnline){
+	let streamData = liveStatus[website][id][contentId];
+	
+	let streamName = streamData.streamName;
+	let streamOwnerLogo = streamData.streamOwnerLogo;
+	let streamCategoryLogo = streamData.streamCategoryLogo;
 	let streamLogo = "";
 
 	if(typeof streamOwnerLogo == "string" && streamOwnerLogo != ""){
@@ -430,8 +456,8 @@ function doStreamNotif(website,id,isStreamOnline){
 	}
 	
 	if(isStreamOnline){
-		if(getPreferences("notify_online") && liveStatus[website][id].online == false){
-			let streamStatus = liveStatus[website][id].streamStatus + ((liveStatus[website][id].streamGame != "")? (" (" + liveStatus[website][id].streamGame + ")") : "");
+		if(getPreferences("notify_online") && streamData.online == false){
+			let streamStatus = streamData.streamStatus + ((streamData.streamGame != "")? (" (" + streamData.streamGame + ")") : "");
 			if(streamStatus.length > 0 && streamStatus.length < 60){
 				if(streamLogo != ""){
 					doNotifUrl(_("Stream online"), streamName + ": " + streamStatus, getStreamURL(website, id, true), streamLogo);
@@ -448,7 +474,7 @@ function doStreamNotif(website,id,isStreamOnline){
 			}
 		}
 	} else {
-		if(getPreferences("notify_offline") && liveStatus[website][id].online){
+		if(getPreferences("notify_offline") && streamData.online){
 			if(streamLogo != ""){
 				doNotif(_("Stream offline"),streamName, streamLogo);
 			} else {
@@ -456,16 +482,18 @@ function doStreamNotif(website,id,isStreamOnline){
 			}
 		}
 	}
-	liveStatus[website][id].online = isStreamOnline;
+	streamData.online = isStreamOnline;
 }
 
 function getOfflineCount(){
 	var offlineCount = 0;
-	for(website in liveStatus){
+	for(let website in liveStatus){
 		var streamList = (new streamListFromSetting(website)).objData;
-		for(i in liveStatus[website]){
-			if(!liveStatus[website][i].online && streamList.hasOwnProperty(i)){
-				offlineCount = offlineCount + 1;
+		for(let id in liveStatus[website]){
+			for(let contentId in liveStatus[website][id]){
+				if(!liveStatus[website][id][contentId].online && streamList.hasOwnProperty(id)){
+					offlineCount = offlineCount + 1;
+				}
 			}
 		}
 	}
@@ -476,11 +504,13 @@ function getOfflineCount(){
 function setIcon() {
 	var onlineCount = 0;
 	
-	for(website in liveStatus){
+	for(let website in liveStatus){
 		var streamList = (new streamListFromSetting(website)).objData;
-		for(i in liveStatus[website]){
-			if(liveStatus[website][i].online && streamList.hasOwnProperty(i)){
-				onlineCount = onlineCount + 1;
+		for(let id in liveStatus[website]){
+			for(let contentId in liveStatus[website][id]){
+				if(liveStatus[website][id][contentId].online && streamList.hasOwnProperty(id)){
+					onlineCount = onlineCount + 1;
+				}
 			}
 		}
 	}
@@ -503,6 +533,7 @@ function setIcon() {
 	}
 };
 
+let dailymotion_channel = /channel\:\:(.*)/;
 function API(website, id){
 	this.id = id;
 	this.url = "";
@@ -510,7 +541,11 @@ function API(website, id){
 	
 	switch(website){
 		case "dailymotion":
-			this.url = `https://api.dailymotion.com/video/${id}?fields=title,owner,audience,url,mode,onair?_= ${new Date().getTime()}`;
+			if(dailymotion_channel.test(id)){
+				this.url = `https://api.dailymotion.com/videos?live_onair&owners=${dailymotion_channel.exec(id)[1]}&fields=id,title,owner,audience,url,mode,onair?_= ${new Date().getTime()}`;
+			} else {
+				this.url = `https://api.dailymotion.com/video/${id}?fields=title,owner,audience,url,mode,onair?_= ${new Date().getTime()}`;
+			}
 			this.overrideMimeType = "text/plain; charset=latin1";
 			break;
 		case "hitbox":
@@ -565,7 +600,7 @@ function isValidResponse(website, data){
 	}
 	switch(website){
 		case "dailymotion":
-			if(data.mode != "live"){
+			if(data.mode != "live" && typeof data.list == "undefined"){
 				console.warn(`[${website}] Unable to get stream state (not a stream).`);
 				return false;
 			}
@@ -599,63 +634,7 @@ function checkLives(){
 		console.info(JSON.stringify(streamList));
 		
 		for(let id in streamList){
-			//let request_id = id;
-			let current_API = new API(website, id);
-			
-			console.time(id);
-			
-			Request({
-				url: current_API.url,
-				overrideMimeType: current_API.overrideMimeType,
-				onComplete: function (response) {
-					let id = current_API.id;
-					data = response.json;
-					if(isValidResponse(website, data) == false){
-						console.timeEnd(id);
-						console.groupEnd();
-						return null;
-					}
-					
-					console.group();
-					console.info(`${website} - ${id} (${current_API.url})`);
-					console.dir(data);
-					
-					if(typeof liveStatus[website][id] == "undefined"){
-						liveStatus[website][id] = {"online": false, "streamName": "", "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": ""};
-					}
-					let liveState = checkLiveStatus[website](id,data);
-					if(liveState !== null){
-						let second_API = new API_second(website, id);
-						
-						if(second_API.url !== null && second_API.overrideMimeType !== null){
-							Request({
-								url: second_API.url,
-								overrideMimeType: second_API.overrideMimeType,
-								onComplete: function (response) {
-									let data_second = response.json;
-									
-									console.info(website + " - " + id + " (" + second_API.url + ")");
-									console.dir(data_second);
-									
-									seconderyInfo[website](id,data_second,liveState);
-									
-									doStreamNotif(website,id,liveState);
-									setIcon();
-								}
-							}).get();
-						} else {
-							doStreamNotif(website,id,liveState);
-						}
-					} else {
-						console.warn("Unable to get stream state.");
-					}
-					
-					setIcon();
-					
-					console.timeEnd(id);
-					console.groupEnd();
-				}
-			}).get();
+			getPrimary(id, website);
 		}
 	}
 	
@@ -665,13 +644,119 @@ function checkLives(){
 	interval = setInterval(checkLives, getPreferences('dailymotion_check_delay') * 60000);
 }
 
+
+function getPrimary(id, website, url, pageNumber){
+	//let request_id = id;
+	let current_API = new API(website, id);
+	if(typeof url == "string"){
+		current_API.url = url;
+	}
+	
+	console.time(id);
+	
+	Request({
+		url: current_API.url,
+		overrideMimeType: current_API.overrideMimeType,
+		onComplete: function (response) {
+			let id = current_API.id;
+			data = response.json;
+			if(isValidResponse(website, data) == false){
+				console.timeEnd(id);
+				console.groupEnd();
+				return null;
+			}
+			
+			console.group();
+			console.info(`${website} - ${id} (${current_API.url})`);
+			console.dir(data);
+			
+			if(typeof liveStatus[website][id] == "undefined"){
+				liveStatus[website][id] = {};
+			}
+			
+			if(dailymotion_channel.test(id)){
+				if(typeof pageNumber == "number"){
+					pagingPrimary[website](id, website, data, pageNumber)
+				} else {
+					pagingPrimary[website](id, website, data)
+				}
+			} else {
+				processPrimary(id, id, website, data);
+			}
+		}
+	}).get();
+}
+
+function pagingPrimaryEnd(id){
+	setIcon();
+	console.timeEnd(id);
+}
+let pagingPrimary = {
+	"dailymotion":
+		function(id, website, data, pageNumber){
+			let list = data.list;
+			
+			for(let i in list){
+				let contentId = list[i].id;
+				processPrimary(id, contentId, website, list[i]);
+			}
+			
+			if(data.has_more){
+				let next_url = (new API(website, dailymotion_channel.exec(id)[1])).url;
+				let current_pageNumber = ((typeof pageNumber == "number")? pageNumber : 1);
+				getPrimary(id, website, next_url, current_pageNumber + 1);
+			} else {
+				pagingPrimaryEnd(id);
+			}
+		}
+}
+
+function processPrimary(id, contentId, website, data){
+	if(typeof liveStatus[website][id][contentId] == "undefined"){
+		liveStatus[website][id][contentId] = {"online": false, "streamName": "", "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": ""};
+	}
+	let liveState = checkLiveStatus[website](id, contentId, data);
+	if(liveState !== null){
+		//let second_API = new API_second(website, id);
+		let second_API = new API_second(website, contentId);
+		
+		if(second_API.url !== null && second_API.overrideMimeType !== null){
+			Request({
+				url: second_API.url,
+				overrideMimeType: second_API.overrideMimeType,
+				onComplete: function (response) {
+					let data_second = response.json;
+					
+					console.info(website + " - " + id + " (" + second_API.url + ")");
+					console.dir(data_second);
+					
+					seconderyInfo[website](id, contentId, data_second, liveState);
+					
+					doStreamNotif(website, id, contentId, liveState);
+					setIcon();
+				}
+			}).get();
+		} else {
+			doStreamNotif(website, id, contentId, liveState);
+		}
+	} else {
+		console.warn("Unable to get stream state.");
+	}
+	
+	setIcon();
+	
+	console.timeEnd(id);
+	console.groupEnd();
+}
+
 //Fonction principale : check si le live est on
 checkLiveStatus = {
 	"dailymotion":
-		function(dailymotion_key, data){
-			liveStatus["dailymotion"][dailymotion_key].streamName = data.title;
-			liveStatus["dailymotion"][dailymotion_key].streamCurrentViewers = JSON.parse(data.audience);
-			liveStatus["dailymotion"][dailymotion_key].streamURL = data.url;
+		function(id, contentId, data){
+			let streamData = liveStatus["dailymotion"][id][contentId];
+			streamData.streamName = data.title;
+			streamData.streamCurrentViewers = JSON.parse(data.audience);
+			streamData.streamURL = data.url;
 			if(typeof data.onair == "boolean"){
 				return data.onair;
 			} else {
@@ -679,40 +764,41 @@ checkLiveStatus = {
 			}
 		},
 	"hitbox":
-		function(hitbox_key, data){
+		function(id, contentId, data){
+			let streamData = liveStatus["hitbox"][id][contentId];
 			if(data.hasOwnProperty("livestream") == false){
 				if(data.error_msg="no_media_found"){
-					liveStatus["hitbox"][hitbox_key].online = false;
+					streamData.online = false;
 				}
-				liveStatus["hitbox"][hitbox_key].streamName = hitbox_key;
+				streamData.streamName = hitbox_key;
 				return null;
 			}
 			if(typeof data["livestream"][0] == "object"){
 				data = data["livestream"][0];
-				liveStatus["hitbox"][hitbox_key].streamName = data["media_user_name"];
-				liveStatus["hitbox"][hitbox_key].streamStatus = data["media_status"];
-				liveStatus["hitbox"][hitbox_key].streamGame = data["category_name"];
+				streamData.streamName = data["media_user_name"];
+				streamData.streamStatus = data["media_status"];
+				streamData.streamGame = data["category_name"];
 				if(data["category_logo_large"] !== null){
-					liveStatus["hitbox"][hitbox_key].streamCategoryLogo = "http://edge.sf.hitbox.tv" + data["category_logo_large"];
+					streamData.streamCategoryLogo = "http://edge.sf.hitbox.tv" + data["category_logo_large"];
 				} else if(data["category_logo_small"] !== null){
-					liveStatus["hitbox"][hitbox_key].streamCategoryLogo = "http://edge.sf.hitbox.tv" + data["category_logo_small"];
+					streamData.streamCategoryLogo = "http://edge.sf.hitbox.tv" + data["category_logo_small"];
 				} else {
-					liveStatus["hitbox"][hitbox_key].streamCategoryLogo = "";
+					streamData.streamCategoryLogo = "";
 				}
-				if(liveStatus["hitbox"][hitbox_key].streamCategoryLogo = "http://edge.sf.hitbox.tv/static/img/generic/blank.gif"){
-					liveStatus["hitbox"][hitbox_key].streamCategoryLogo = "";
+				if(streamData.streamCategoryLogo = "http://edge.sf.hitbox.tv/static/img/generic/blank.gif"){
+					streamData.streamCategoryLogo = "";
 				}
 				if(data.channel["user_logo"] !== null){
-					liveStatus["hitbox"][hitbox_key].streamOwnerLogo = "http://edge.sf.hitbox.tv" + data.channel["user_logo"];
+					streamData.streamOwnerLogo = "http://edge.sf.hitbox.tv" + data.channel["user_logo"];
 				} else if(data["user_logo_small"] !== null){
-					liveStatus["hitbox"][hitbox_key].streamOwnerLogo = "http://edge.sf.hitbox.tv" + data.channel["user_logo_small"];
+					streamData.streamOwnerLogo = "http://edge.sf.hitbox.tv" + data.channel["user_logo_small"];
 				} else {
-					liveStatus["hitbox"][hitbox_key].streamOwnerLogo = "";
+					streamData.streamOwnerLogo = "";
 				}
 				if(typeof data.channel["channel_link"] == "string" && data.channel["channel_link"] != ""){
-					liveStatus["hitbox"][hitbox_key].streamURL = data.channel["channel_link"];
+					streamData.streamURL = data.channel["channel_link"];
 				}
-				liveStatus["hitbox"][hitbox_key].streamCurrentViewers = JSON.parse(data["media_views"]);
+				streamData.streamCurrentViewers = JSON.parse(data["media_views"]);
 				if(data["media_is_live"] == "1"){
 					return true;
 				} else {
@@ -723,24 +809,25 @@ checkLiveStatus = {
 			}
 		},
 	"twitch":
-		function(twitch_key, data){
+		function(id, contentId, data){
+			let streamData = liveStatus["twitch"][id][contentId];
 			if(data.hasOwnProperty("stream")){
 				data = data["stream"];
 				if(data != null){
-					liveStatus["twitch"][twitch_key].streamName = data["channel"]["display_name"];
-					liveStatus["twitch"][twitch_key].streamStatus = data["channel"]["status"];
-					liveStatus["twitch"][twitch_key].streamGame = (data["game"] !== null && typeof data["game"] == "string")? data["game"] : "";
+					streamData.streamName = data["channel"]["display_name"];
+					streamData.streamStatus = data["channel"]["status"];
+					streamData.streamGame = (data["game"] !== null && typeof data["game"] == "string")? data["game"] : "";
 					if(typeof data.channel["logo"] == "string" && data.channel["logo"] != "") {
-						liveStatus["twitch"][twitch_key].streamOwnerLogo = data.channel["logo"];
+						streamData.streamOwnerLogo = data.channel["logo"];
 					}
 					if(typeof data.channel["url"] == "string" && data.channel["url"] != "") {
-						liveStatus["twitch"][twitch_key].streamURL = data.channel["url"];
+						streamData.streamURL = data.channel["url"];
 					}
-					liveStatus["twitch"][twitch_key].streamCurrentViewers = JSON.parse(data["viewers"]);
+					streamData.streamCurrentViewers = JSON.parse(data["viewers"]);
 					return true;
 				} else {
-					if(liveStatus["twitch"][twitch_key].streamName == ""){
-						liveStatus["twitch"][twitch_key].streamName = twitch_key;
+					if(streamData.streamName == ""){
+						streamData.streamName = id;
 					}
 					return false;
 				}
@@ -751,22 +838,27 @@ checkLiveStatus = {
 }
 seconderyInfo = {
 	"dailymotion":
-		function(id,data,isStreamOnline){
+		function(id, contentId, data, isStreamOnline){
+			let streamData = liveStatus["dailymotion"][id][contentId];
 			if(data.hasOwnProperty("user.screenname")){
 				if(isStreamOnline){
-					liveStatus["dailymotion"][id].streamStatus = liveStatus["dailymotion"][id].streamName;
-					liveStatus["dailymotion"][id].streamGame = (data["game.title"] !== null && typeof data["game.title"] == "string")? data["game.title"] : "";
+					streamData.streamStatus = streamData.streamName;
+					streamData.streamGame = (data["game.title"] !== null && typeof data["game.title"] == "string")? data["game.title"] : "";
 				}
 				if(typeof data["user.avatar_720_url"] == "string" && data["user.avatar_720_url"] != ""){
-					liveStatus["dailymotion"][id].streamOwnerLogo = data["user.avatar_720_url"];
+					streamData.streamOwnerLogo = data["user.avatar_720_url"];
 				}
-				liveStatus["dailymotion"][id].streamName = data["user.screenname"];
+				streamData.streamName = data["user.screenname"];
 			}
 		},
 	"twitch":
-		function(id,data,isStreamOnline){
+		function(id, contentId, data, isStreamOnline){
+			let streamData = liveStatus["twitch"][id][contentId];
+			if(typeof data["display_name"] == "string"){
+				streamData.streamName = data["display_name"];
+			}
 			if(typeof data["logo"] == "string" && data["logo"] != ""){
-				liveStatus["twitch"][id].streamOwnerLogo = data["logo"];
+				streamData.streamOwnerLogo = data["logo"];
 			}
 		}
 }
