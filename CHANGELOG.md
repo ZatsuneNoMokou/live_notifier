@@ -1,3 +1,6 @@
+# 5.0.1:
+* Fix: Livestreamer copy buttons (panel)
+
 # 5.0.0:
 * +: Add support to multi stream per setting, allowing to support using Dailymotion channel as setting instead of only videos
 * +: Using the add button (from the panel) on Dailymotion with an embed or a page of a video will add the Dailymotion channel
