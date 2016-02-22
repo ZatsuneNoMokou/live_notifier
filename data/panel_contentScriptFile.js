@@ -194,11 +194,13 @@ function onlineNodes(){
 	this.dailymotion = document.querySelector("#dailymotionOnlineList");
 	this.hitbox = document.querySelector("#hitboxOnlineList");
 	this.twitch = document.querySelector("#twitchOnlineList");
+	this.beam = document.querySelector("#beamOnlineList");
 }
 function offlineNodes(){
 	this.dailymotion = document.querySelector("#dailymotionOfflineList");
 	this.hitbox = document.querySelector("#hitboxOfflineList");
 	this.twitch = document.querySelector("#twitchOfflineList");
+	this.beam = document.querySelector("#beamOfflineList");
 }
 
 function initList(showOffline){

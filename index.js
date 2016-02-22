@@ -46,7 +46,7 @@ let myIconURL_offline = {
 
 let _ = require("sdk/l10n").get;
 
-let websites = ["dailymotion","hitbox","twitch"];
+let websites = ["dailymotion","hitbox","twitch","beam"];
 let liveStatus = {};
 let channelInfos = {};
 for(website of websites){
@@ -130,13 +130,16 @@ function getStreamURL(website, id, contentId, usePrefUrl){
 		}
 		switch(website){
 			case "dailymotion":
-				return "http://www.dailymotion.com/video/" + id;
+				return `http://www.dailymotion.com/video/${id}`;
 				break;
 			case "hitbox":
-				return "http://www.hitbox.tv/" + id;
+				return `http://www.hitbox.tv/${id}`;
 				break;
 			case "twitch":
-				return "http://www.twitch.tv/" + id;
+				return `http://www.twitch.tv/${id}`;
+				break;
+			case "beam":
+				return `https://beam.pro/${id}`;
 				break;
 			default:
 				return null;
@@ -189,7 +192,8 @@ function addStreamFromPanel(embed_list){
 	let type;
 	let patterns = {"dailymotion": [/^(?:http|https):\/\/games\.dailymotion\.com\/live\/([a-zA-Z0-9]*).*$/, /^(?:http|https):\/\/www\.dailymotion\.com\/(?:embed\/)?video\/([a-zA-Z0-9]*).*$/],
 					"hitbox": [/^(?:http|https):\/\/www\.hitbox\.tv\/(?:embedchat\/)?([^\/\?\&]*).*$/],
-					"twitch": [/^(?:http|https):\/\/www\.twitch\.tv\/([^\/\?\&]*).*$/,/^(?:http|https):\/\/player\.twitch\.tv\/\?channel\=([\w\-]*).*$/]};
+					"twitch": [/^(?:http|https):\/\/www\.twitch\.tv\/([^\/\?\&]*).*$/,/^(?:http|https):\/\/player\.twitch\.tv\/\?channel\=([\w\-]*).*$/],
+					"beam": [/^(?:http|https):\/\/beam\.pro\/([^\/\?\&]*)/]};
 	let url_list;
 	if(typeof embed_list == "object"){
 		console.log(`Embed list (${active_tab_url})`);
@@ -602,6 +606,10 @@ function API(website, id){
 			this.url = `https://api.twitch.tv/kraken/streams/${id}`;
 			this.overrideMimeType = "text/plain; charset=utf-8";
 			break;
+		case "beam":
+			this.url = `https://beam.pro/api/v1/channels/${id}`;
+			this.overrideMimeType = "text/plain; charset=utf-8";
+			break;
 	}
 }
 function API_channelInfos(website, id){
@@ -680,6 +688,11 @@ function isValidResponse(website, data){
 			if(data.error == "Not Found"){
 				console.warn(`[${website}] Unable to get stream state (error detected).`);
 				return false;
+			}
+			break;
+		case "beam":
+			if(data == "Channel not found." || data.statusCode == 404){
+				console.warn(`[${website}] Unable to get stream state (error detected).`);
 			}
 			break;
 	}
@@ -900,7 +913,7 @@ checkLiveStatus = {
 				if(typeof data.channel["channel_link"] == "string" && data.channel["channel_link"] != ""){
 					streamData.streamURL = data.channel["channel_link"];
 				}
-				streamData.streamCurrentViewers = JSON.parse(data["media_views"]);
+				streamData.streamCurrentViewers = parseInt(data["media_views"]);
 				if(data["media_is_live"] == "1"){
 					return true;
 				} else {
@@ -925,7 +938,7 @@ checkLiveStatus = {
 					if(typeof data.channel["url"] == "string" && data.channel["url"] != "") {
 						streamData.streamURL = data.channel["url"];
 					}
-					streamData.streamCurrentViewers = JSON.parse(data["viewers"]);
+					streamData.streamCurrentViewers = parseInt(data["viewers"]);
 					return true;
 				} else {
 					if(streamData.streamName == ""){
@@ -936,6 +949,20 @@ checkLiveStatus = {
 			} else {
 				return null;
 			}
+		},
+	"beam":
+		function(id, contentId, data){
+			let streamData = liveStatus["beam"][id][contentId];
+			
+			streamData.streamName = data["user"]["username"];
+			streamData.streamStatus = data["name"];
+			
+			if(typeof data["user"]["avatarUrl"] == "string" && data["user"]["avatarUrl"] != ""){
+				streamData.streamOwnerLogo = data["user"]["avatarUrl"];
+			}
+			streamData.streamCurrentViewers = parseInt(data["viewersCurrent"]);
+			
+			return data["online"];
 		}
 }
 seconderyInfo = {

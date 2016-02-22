@@ -1,3 +1,6 @@
+# 5.1.0:
+* +: Beam.pro support
+
 # 5.0.1:
 * Fix: Livestreamer copy buttons (panel)
 
