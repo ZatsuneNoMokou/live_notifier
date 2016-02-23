@@ -18,6 +18,7 @@ function dailymotion_check_delay_onChange(){
 sp.on("dailymotion_check_delay", dailymotion_check_delay_onChange);
 
 let tabs = require("sdk/tabs");
+let windows = require("sdk/windows").browserWindows;
 
 let {setInterval, setTimeout, clearInterval} = require("sdk/timers");
 
@@ -190,7 +191,7 @@ function addStreamFromPanel(embed_list){
 	console.info("Current active tab: " + active_tab_url);
 	let active_tab_title = current_tab.title;
 	let type;
-	let patterns = {"dailymotion": [/^(?:http|https):\/\/games\.dailymotion\.com\/live\/([a-zA-Z0-9]*).*$/, /^(?:http|https):\/\/www\.dailymotion\.com\/(?:embed\/)?video\/([a-zA-Z0-9]*).*$/],
+	let patterns = {"dailymotion": [/^(?:http|https):\/\/games\.dailymotion\.com\/(?:live|video)\/([a-zA-Z0-9]*).*$/, /^(?:http|https):\/\/www\.dailymotion\.com\/(?:embed\/)?video\/([a-zA-Z0-9]*).*$/],
 					"hitbox": [/^(?:http|https):\/\/www\.hitbox\.tv\/(?:embedchat\/)?([^\/\?\&]*).*$/],
 					"twitch": [/^(?:http|https):\/\/www\.twitch\.tv\/([^\/\?\&]*).*$/,/^(?:http|https):\/\/player\.twitch\.tv\/\?channel\=([\w\-]*).*$/],
 					"beam": [/^(?:http|https):\/\/beam\.pro\/([^\/\?\&]*)/]};
@@ -1096,6 +1097,12 @@ checkLives();
 	}
 })();
 
+function windowsFocusChange(window){
+	console.log("[Live notifier] Active window change: icon update");
+	setIcon();
+}
+windows.on('activate', windowsFocusChange);
+
 
 exports.onUnload = function (reason) {
 	clearInterval(interval);
@@ -1107,5 +1114,6 @@ exports.onUnload = function (reason) {
 	panel.port.removeListener("deleteStream", deleteStreamFromPanel);
 	panel.port.removeListener("openTab", openTabIfNotExist);
 	sp.removeListener("twitch_import", importTwitchButton);
+	windows.removeListener("activate", windowsFocusChange);
 	panel.port.emit('unloadListeners', "");
 }
