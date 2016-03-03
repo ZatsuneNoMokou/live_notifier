@@ -55,31 +55,60 @@ for(website of websites){
 	channelInfos[website] = {};
 }
 
-function streamListFromSetting(website){
+function streamListFromSetting (website){
 	let somethingElseThanSpaces = /[^\s]+/;
-	let pref = getPreferences(`${website}_keys_list`);
-	this.stringData = pref;
+	let pref = this.stringData = new String(getPreferences(`${website}_keys_list`));
+	
 	let obj = {};
 	if(pref != "" && somethingElseThanSpaces.test(pref)){
 		let myTable = pref.split(",");
-		let reg= /\s*([^\s]+)\s*(\w+\:\:[^\s]+)?\s*(.*)?/;
-		let reg_removeSpaces= /\s*([^\s]+)\s*/;
+		let reg= /\s*([^\s]+)\s*(.*)?/;
 		if(myTable.length > 0){
 			for(let i in myTable){
-				let url = /^(?:http|https):\/\/.*$/;
-				let filters = /(\w+)\:\:(\w+)/;
-				let result=reg.exec(myTable[i]);
+				let url = /((?:http|https):\/\/.*)\s*$/;
+				let filters = /\s*(?:(\w+)\:\:(.+)\s*)/;
 				
+				let result=reg.exec(myTable[i]);
 				let id = result[1];
+				let data = result[2];
 				
 				obj[id] = {streamURL: ""};
-				for(let j in result){
-					if(j > 1 && typeof result[j] == "string"){
-						if(filters.test(result[j])){
-							let filtered_result = filters.exec(result[j]);
-							obj[id][filtered_result[1]] = filtered_result[2];
-						} else if(url.test(result[j])){
-							obj[id].streamURL = result[j];
+				
+				if(typeof data != "undefined"){
+					if(url.test(data) == true){
+						let url_result = url.exec(data);
+						obj[id].streamURL = url_result[1];
+						data = data.replace(url_result[0],"");
+					}
+					
+					if(filters.test(data)){
+						let filters_array = new Array();
+						
+						let filter_id = /(?:(\w+)\:\:)/;
+						let scan_string = data;
+						while(filter_id.test(scan_string) == true){
+							let current_filter_result = scan_string.match(filter_id);
+							
+							let current_filter_id = current_filter_result[1];
+							
+							scan_string = scan_string.substring(current_filter_result.index+current_filter_result[0].length, scan_string.length);
+							
+							let next_filter_result = scan_string.match(filter_id);
+							let next_pos = (next_filter_result !== null)? next_filter_result.index : scan_string.length;
+							
+							let current_data;
+							if(next_filter_result !== null){
+								current_data = scan_string.substring(current_filter_result.index, next_filter_result.index - 1);
+							} else {
+								current_data = scan_string.substring(current_filter_result.index, scan_string.length);
+							}
+							
+							if(typeof obj[id][current_filter_id] == "undefined"){
+								obj[id][current_filter_id] = new Array();
+							}
+							
+							obj[id][current_filter_id].push(current_data);
+							scan_string = scan_string.substring(next_pos, scan_string.length);
 						}
 					}
 				}
@@ -88,34 +117,36 @@ function streamListFromSetting(website){
 	}
 	this.objData = obj;
 	this.website = website;
-	this.streamExist = function(id){
-		for(i in this.objData){
+	
+	streamExist = function(id){
+		for(let i in this.objData){
 			if(i.toLowerCase() == id.toLowerCase()){
 				return true;
 			}
 		}
 		return false;
 	}
-	this.addStream = function(id, url){
+	
+	addStream = function(id, url){
 		if(this.streamExist(id) == false){
 			this.objData[id] = url;
 			console.log(`${id} has been added`);
 		}
 	}
-	this.deleteStream = function(id){
+	deleteStream = function(id){
 		if(this.streamExist(id)){
 			delete this.objData[id];
 			console.log(`${id} has been deleted`);
 		}
 	}
-	this.update = function(){
+	update = function(){
 		let array = new Array();
-		for(i in this.objData){
+		for(let i in this.objData){
 			array.push(i + ((this.objData[i] != "")? (" " + this.objData[i]) : ""));
 		}
 		let newSettings = array.join(",");
 		savePreference(`${this.website}_keys_list`, newSettings);
-		console.log(`New settings (${this.website}): ${getPreferences(`${this.website}_keys_list`)}`);
+		console.log(`New settings (${this.website}): ${localStorage.getItem(`${this.website}_keys_list`)}`);
 	}
 }
 
