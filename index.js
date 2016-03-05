@@ -67,6 +67,7 @@ function streamListFromSetting (website){
 			for(let i in myTable){
 				let url = /((?:http|https):\/\/.*)\s*$/;
 				let filters = /\s*(?:(\w+)\:\:(.+)\s*)/;
+				let cleanEndingSpace = /(.*)\s+$/;
 				
 				let result=reg.exec(myTable[i]);
 				let id = result[1];
@@ -98,9 +99,12 @@ function streamListFromSetting (website){
 							
 							let current_data;
 							if(next_filter_result !== null){
-								current_data = scan_string.substring(current_filter_result.index, next_filter_result.index - 1);
+								current_data = scan_string.substring(current_filter_result.index, next_filter_result.index);
 							} else {
 								current_data = scan_string.substring(current_filter_result.index, scan_string.length);
+							}
+							if(cleanEndingSpace.test(current_data)){
+								current_data = cleanEndingSpace.exec(current_data)[1];
 							}
 							
 							if(typeof obj[id][current_filter_id] == "undefined"){
@@ -367,7 +371,7 @@ panel.port.on("setting_Update", function(data){
 	settingUpdate(data.settingName, data.settingValue);
 });
 
-function updatePanelData(){	
+function updatePanelData(){
 	if((typeof current_panel_theme != "string" && typeof current_background_color != "string") || current_panel_theme != getPreferences("panel_theme") || current_background_color != getPreferences("background_color")){
 		console.log("Sending panel theme data");
 		panel.port.emit("panel_theme", {"theme": getPreferences("panel_theme"), "background_color": getPreferences("background_color")});
@@ -417,12 +421,16 @@ function updatePanelData(){
 				for(let contentId in liveStatus[website][id]){
 					let streamData = liveStatus[website][id][contentId];
 					
-					if(id in streamList && (streamData.online || (getPreferences("show_offline_in_panel") && !streamData.online))){
+					if(id in streamList){
+						getCleanedStreamStatus(website, id, contentId, streamList[id], streamData.online);
+					}
+					
+					if(id in streamList && (streamData.online_cleaned || (getPreferences("show_offline_in_panel") && !streamData.online_cleaned))){
 						let streamInfo = {
 							id: id,
 							type: "live",
 							contentId: contentId,
-							online: streamData.online,
+							online: streamData.online_cleaned,
 							website: website,
 							streamName: streamData.streamName,
 							streamStatus: streamData.streamStatus,
@@ -438,6 +446,8 @@ function updatePanelData(){
 			}
 		}
 	}
+	
+	setIcon();
 	
 	let updateSettings = [
 		"hitbox_user_id",
@@ -533,20 +543,56 @@ function doActionNotif(title, message, action, imgurl){
 	});
 }
 
-function doStreamNotif(website, id, contentId, isStreamOnline){
+function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamOnline){
+	let streamData = liveStatus[website][id][contentId];
+	let lowerCase_status = (streamData.streamStatus).toLowerCase();
+	if(isStreamOnline && streamSetting.statusWhitelist){
+		let statusWhitelist = streamSetting.statusWhitelist;
+		let whitelisted = false;
+		for(let i in statusWhitelist){
+			if(lowerCase_status.indexOf(statusWhitelist[i]) != -1){
+				whitelisted = true;
+				break;
+			}
+		}
+		if(whitelisted == false){
+			isStreamOnline = false;
+			console.info(`${id} current status does not contain whitelist element(s)`);
+		}
+	}
+	if(isStreamOnline && streamSetting.statusBlacklist){
+		let statusBlacklist = streamSetting.statusBlacklist;
+		let blacklisted = false;
+		for(let i in statusBlacklist){
+			if(lowerCase_status.indexOf(statusBlacklist[i]) != -1){
+				blacklisted = true;
+			}
+		}
+		if(blacklisted == true){
+			isStreamOnline = false;
+			console.info(`${id} current status contain blacklist element(s)`);
+		}
+	}
+	streamData.online_cleaned = isStreamOnline;
+	return isStreamOnline;
+}
+
+function doStreamNotif(website, id, contentId, streamSetting, isStreamOnline){
 	let streamData = liveStatus[website][id][contentId];
 	
 	let streamName = streamData.streamName;
 	let streamOwnerLogo = streamData.streamOwnerLogo;
 	let streamCategoryLogo = streamData.streamCategoryLogo;
 	let streamLogo = "";
-
+	
 	if(typeof streamOwnerLogo == "string" && streamOwnerLogo != ""){
 		streamLogo  = streamOwnerLogo;
 	}
 	
-	if(isStreamOnline){
-		if(getPreferences("notify_online") && streamData.online == false){
+	let isStreamOnline_cleaned = getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamOnline);
+	
+	if(isStreamOnline_cleaned){
+		if(getPreferences("notify_online") && streamData.online_cleaned == false){
 			let streamStatus = streamData.streamStatus + ((streamData.streamGame != "")? (" (" + streamData.streamGame + ")") : "");
 			if(streamStatus.length > 0 && streamStatus.length < 60){
 				if(streamLogo != ""){
@@ -564,7 +610,7 @@ function doStreamNotif(website, id, contentId, isStreamOnline){
 			}
 		}
 	} else {
-		if(getPreferences("notify_offline") && streamData.online){
+		if(getPreferences("notify_offline") && streamData.online_cleaned){
 			if(streamLogo != ""){
 				doNotif(_("Stream offline"),streamName, streamLogo);
 			} else {
@@ -581,7 +627,7 @@ function getOfflineCount(){
 		var streamList = (new streamListFromSetting(website)).objData;
 		for(let id in liveStatus[website]){
 			for(let contentId in liveStatus[website][id]){
-				if(!liveStatus[website][id][contentId].online && streamList.hasOwnProperty(id)){
+				if(!liveStatus[website][id][contentId].online_cleaned && streamList.hasOwnProperty(id)){
 					offlineCount = offlineCount + 1;
 				}
 			}
@@ -598,7 +644,7 @@ function setIcon() {
 		var streamList = (new streamListFromSetting(website)).objData;
 		for(let id in liveStatus[website]){
 			for(let contentId in liveStatus[website][id]){
-				if(liveStatus[website][id][contentId].online && streamList.hasOwnProperty(id)){
+				if(liveStatus[website][id][contentId].online_cleaned && streamList.hasOwnProperty(id)){
 					onlineCount = onlineCount + 1;
 				}
 			}
@@ -748,7 +794,7 @@ function checkLives(){
 		console.info(JSON.stringify(streamList));
 		
 		for(let id in streamList){
-			getPrimary(id, website);
+			getPrimary(id, website, streamList[id]);
 		}
 	}
 	
@@ -759,7 +805,7 @@ function checkLives(){
 }
 
 
-function getPrimary(id, website, url, pageNumber){
+function getPrimary(id, website, streamSetting, url, pageNumber){
 	//let request_id = id;
 	let current_API = new API(website, id);
 	if(typeof url == "string"){
@@ -790,12 +836,12 @@ function getPrimary(id, website, url, pageNumber){
 			
 			if(dailymotion_channel.test(id)){
 				if(typeof pageNumber == "number"){
-					pagingPrimary[website](id, website, data, pageNumber)
+					pagingPrimary[website](id, website, streamSetting, data, pageNumber)
 				} else {
-					pagingPrimary[website](id, website, data)
+					pagingPrimary[website](id, website, streamSetting, data)
 				}
 			} else {
-				processPrimary(id, id, website, data);
+				processPrimary(id, id, website, streamSetting, data);
 			}
 		}
 	}).get();
@@ -808,7 +854,7 @@ function pagingPrimaryEnd(id){
 }
 let pagingPrimary = {
 	"dailymotion":
-		function(id, website, data, pageNumber){
+		function(id, website, streamSetting, data, pageNumber){
 			let list = data.list;
 			
 			if(data.total == 0){
@@ -817,13 +863,13 @@ let pagingPrimary = {
 			} else {
 				for(let i in list){
 					let contentId = list[i].id;
-					processPrimary(id, contentId, website, list[i]);
+					processPrimary(id, contentId, website, streamSetting, list[i]);
 				}
 				
 				if(data.has_more){
 					let next_url = (new API(website, dailymotion_channel.exec(id)[1])).url;
 					let current_pageNumber = ((typeof pageNumber == "number")? pageNumber : 1);
-					getPrimary(id, website, next_url, current_pageNumber + 1);
+					getPrimary(id, website, streamSetting, next_url, current_pageNumber + 1);
 				} else {
 					pagingPrimaryEnd(id);
 				}
@@ -831,7 +877,7 @@ let pagingPrimary = {
 		}
 }
 
-function processPrimary(id, contentId, website, data){
+function processPrimary(id, contentId, website, streamSetting, data){
 	if(typeof liveStatus[website][id][contentId] == "undefined"){
 		liveStatus[website][id][contentId] = {"online": false, "streamName": "", "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": ""};
 	}
@@ -852,12 +898,12 @@ function processPrimary(id, contentId, website, data){
 					
 					seconderyInfo[website](id, contentId, data_second, liveState);
 					
-					doStreamNotif(website, id, contentId, liveState);
+					doStreamNotif(website, id, contentId, streamSetting, liveState);
 					setIcon();
 				}
 			}).get();
 		} else {
-			doStreamNotif(website, id, contentId, liveState);
+			doStreamNotif(website, id, contentId, streamSetting, liveState);
 		}
 	} else {
 		console.warn("Unable to get stream state.");
