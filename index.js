@@ -122,7 +122,7 @@ function streamListFromSetting (website){
 	this.objData = obj;
 	this.website = website;
 	
-	streamExist = function(id){
+	this.streamExist = function(id){
 		for(let i in this.objData){
 			if(i.toLowerCase() == id.toLowerCase()){
 				return true;
@@ -131,26 +131,35 @@ function streamListFromSetting (website){
 		return false;
 	}
 	
-	addStream = function(id, url){
+	this.addStream = function(id, url){
 		if(this.streamExist(id) == false){
 			this.objData[id] = url;
 			console.log(`${id} has been added`);
 		}
 	}
-	deleteStream = function(id){
+	this.deleteStream = function(id){
 		if(this.streamExist(id)){
 			delete this.objData[id];
 			console.log(`${id} has been deleted`);
 		}
 	}
-	update = function(){
+	this.update = function(){
 		let array = new Array();
-		for(let i in this.objData){
-			array.push(i + ((this.objData[i] != "")? (" " + this.objData[i]) : ""));
+		for(let id in this.objData){
+			let filters = "";
+			for(let j in this.objData[id]){
+				if(j != "streamURL"){
+					filters = filters + " " + j + "::" + this.objData[id][j];
+				}
+			}
+			
+			let URL = (typeof this.objData[id].streamURL != "undefined")? (" " + this.objData[id].streamURL) : "";
+			
+			array.push(`${id}${filters}${URL}`);
 		}
 		let newSettings = array.join(",");
 		savePreference(`${this.website}_keys_list`, newSettings);
-		console.log(`New settings (${this.website}): ${localStorage.getItem(`${this.website}_keys_list`)}`);
+		console.log(`New settings (${this.website}): ${getPreferences(`${this.website}_keys_list`)}`);
 	}
 }
 
