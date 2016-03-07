@@ -1,6 +1,10 @@
+# 5.3.1:
+* Fix: Use id as default stream name
+
 # 5.3.0:
 * +: Use textContent instead of createTextNode
 * +: Support filtering game (with website providing this information)
+* +: Use 1k style for >1000 viewers
 * Fix: Lower case search with stream filters
 * Fix: Make sure that the count of online / offline streams is updated properly with filters
 
