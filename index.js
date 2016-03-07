@@ -960,7 +960,7 @@ function getChannelInfo(website, id){
 	let channelInfos_API = new API_channelInfos(website, id);
 	
 	if(typeof channelInfos["dailymotion"][id] == "undefined"){
-		channelInfos["dailymotion"][id] = {"online": false, "streamName": "", "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": ""};
+		channelInfos["dailymotion"][id] = {"online": false, "streamName": id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": ""};
 	}
 	
 	if(channelInfos_API.url !== null && channelInfos_API.overrideMimeType !== null){
