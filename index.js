@@ -391,16 +391,6 @@ function updatePanelData(){
 	//Clear stream list in the panel
 	panel.port.emit("initList", getPreferences("show_offline_in_panel"));
 	
-	//Update online steam count in the panel
-	panel.port.emit("updateOnlineCount", (firefox_button.state("window").badge == 0)? _("No stream online") :  _("%d stream(s) online",firefox_button.state("window").badge) + ":");
-	
-	if(getPreferences("show_offline_in_panel")){
-		var offlineCount = getOfflineCount();
-		panel.port.emit("updateOfflineCount", (offlineCount == 0)? _("No stream offline") :  _("%d stream(s) offline",offlineCount) + ":");
-	} else {
-		panel.port.emit("updateOfflineCount", "");
-	}
-	
 	for(let website in liveStatus){
 		var streamList = (new streamListFromSetting(website)).objData;
 		for(let id in liveStatus[website]){
@@ -457,6 +447,16 @@ function updatePanelData(){
 	}
 	
 	setIcon();
+	
+	//Update online steam count in the panel
+	panel.port.emit("updateOnlineCount", (firefox_button.state("window").badge == 0)? _("No stream online") :  _("%d stream(s) online",firefox_button.state("window").badge) + ":");
+	
+	if(getPreferences("show_offline_in_panel")){
+		var offlineCount = getOfflineCount();
+		panel.port.emit("updateOfflineCount", (offlineCount == 0)? _("No stream offline") :  _("%d stream(s) offline",offlineCount) + ":");
+	} else {
+		panel.port.emit("updateOfflineCount", "");
+	}
 	
 	let updateSettings = [
 		"hitbox_user_id",
@@ -554,32 +554,65 @@ function doActionNotif(title, message, action, imgurl){
 
 function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamOnline){
 	let streamData = liveStatus[website][id][contentId];
-	let lowerCase_status = (streamData.streamStatus).toLowerCase();
-	if(isStreamOnline && streamSetting.statusWhitelist){
-		let statusWhitelist = streamSetting.statusWhitelist;
-		let whitelisted = false;
-		for(let i in statusWhitelist){
-			if(lowerCase_status.indexOf(statusWhitelist[i]) != -1){
-				whitelisted = true;
-				break;
+	
+	if(streamData.streamStatus != ""){
+		let lowerCase_status = (streamData.streamStatus).toLowerCase();
+		if(isStreamOnline && streamSetting.statusWhitelist){
+			let statusWhitelist = streamSetting.statusWhitelist;
+			let whitelisted = false;
+			for(let i in statusWhitelist){
+				if(lowerCase_status.indexOf(statusWhitelist[i].toLowerCase()) != -1){
+					whitelisted = true;
+					break;
+				}
+			}
+			if(whitelisted == false){
+				isStreamOnline = false;
+				console.info(`${id} current status does not contain whitelist element(s)`);
 			}
 		}
-		if(whitelisted == false){
-			isStreamOnline = false;
-			console.info(`${id} current status does not contain whitelist element(s)`);
+		if(isStreamOnline && streamSetting.statusBlacklist){
+			let statusBlacklist = streamSetting.statusBlacklist;
+			let blacklisted = false;
+			for(let i in statusBlacklist){
+				if(lowerCase_status.indexOf(statusBlacklist[i].toLowerCase()) != -1){
+					blacklisted = true;
+				}
+			}
+			if(blacklisted == true){
+				isStreamOnline = false;
+				console.info(`${id} current status contain blacklist element(s)`);
+			}
 		}
 	}
-	if(isStreamOnline && streamSetting.statusBlacklist){
-		let statusBlacklist = streamSetting.statusBlacklist;
-		let blacklisted = false;
-		for(let i in statusBlacklist){
-			if(lowerCase_status.indexOf(statusBlacklist[i]) != -1){
-				blacklisted = true;
+	if(typeof streamData.streamGame == "string" && streamData.streamGame != ""){
+		let lowerCase_streamGame = (streamData.streamGame).toLowerCase();
+		if(isStreamOnline && streamSetting.gameWhitelist){
+			let gameWhitelist = streamSetting.gameWhitelist;
+			let whitelisted = false;
+			for(let i in gameWhitelist){
+				if(lowerCase_streamGame.indexOf(gameWhitelist[i].toLowerCase()) != -1){
+					whitelisted = true;
+					break;
+				}
+			}
+			if(whitelisted == false){
+				isStreamOnline = false;
+				console.info(`${id} current game does not contain whitelist element(s)`);
 			}
 		}
-		if(blacklisted == true){
-			isStreamOnline = false;
-			console.info(`${id} current status contain blacklist element(s)`);
+		if(isStreamOnline && streamSetting.gameBlacklist){
+			let gameBlacklist = streamSetting.gameBlacklist;
+			let blacklisted = false;
+			for(let i in gameBlacklist){
+				if(lowerCase_streamGame.indexOf(gameBlacklist[i].toLowerCase()) != -1){
+					blacklisted = true;
+				}
+			}
+			if(blacklisted == true){
+				isStreamOnline = false;
+				console.info(`${id} current game contain blacklist element(s)`);
+			}
 		}
 	}
 	streamData.online_cleaned = isStreamOnline;

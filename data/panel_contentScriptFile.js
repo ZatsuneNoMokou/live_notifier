@@ -227,13 +227,13 @@ function showNonEmptySitesBlocks(){
 function listenerOnlineCount(data){
 	let streamOnlineCountNode = document.querySelector("#streamOnlineCountLabel");
 	removeAllChildren(streamOnlineCountNode);
-	streamOnlineCountNode.appendChild(document.createTextNode(data));
+	streamOnlineCountNode.textContent = data;
 }
 
 function listenerOfflineCount(data){
 	let streamOfflineCountNode = document.querySelector("#streamOfflineCountLabel");
 	removeAllChildren(streamOfflineCountNode);
-	streamOfflineCountNode.appendChild(document.createTextNode(data));
+	streamOfflineCountNode.textContent = data;
 }
 
 function newDeleteStreamButton_onClick(event){
@@ -297,11 +297,11 @@ function listener(data){
 		viewerCountNode.className = "streamCurrentViewers";
 		
 		let viewer_number = (typeof data.streamCurrentViewers == "number")? data.streamCurrentViewers : parseInt(data.streamCurrentViewers);
-		viewerCountNode.textContent = (viewer_number < 10000)? viewer_number : ((Math.round(viewer_number / 100)/10)+ "k");
+		viewerCountNode.textContent = (viewer_number < 1000)? viewer_number : ((Math.round(viewer_number / 100)/10)+ "k");
 		
 		var viewerCountLogoNode = document.createElement("i");
 		viewerCountLogoNode.className = "material-icons";
-		viewerCountLogoNode.appendChild(document.createTextNode("visibility"));
+		viewerCountLogoNode.textContent ="visibility";
 		viewerCountNode.appendChild(viewerCountLogoNode);
 		stream_right_container_node.appendChild(viewerCountNode);
 		newLine.appendChild(stream_right_container_node);
@@ -330,14 +330,14 @@ function listener(data){
 		imgStreamStatusLogo.src = (data.online)? "online-stream.svg" : "offline-stream.svg";
 		titleLine.appendChild(imgStreamStatusLogo);
 	}
-	titleLine.appendChild(document.createTextNode(data.streamName));
+	titleLine.textContent = data.streamName;
 	newLine.appendChild(titleLine);
 	
 	if(data.online){
 		if(data.streamStatus != ""){
 			var statusLine = document.createElement("span");
 			statusLine.className = "streamStatus";
-			statusLine.appendChild(document.createTextNode(data.streamStatus + ((data.streamGame.length > 0)? (" (" + data.streamGame + ")") : "")));
+			statusLine.textContent = data.streamStatus + ((data.streamGame.length > 0)? (" (" + data.streamGame + ")") : "");
 			newLine.appendChild(statusLine);
 		}
 		
@@ -473,7 +473,7 @@ function theme_update(data){
 	custom_stylesheet += "header, footer {background-color: hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[1] + ");}\n";
 	custom_stylesheet += "header button, .item-stream {background-color: hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[2] + ");}\n";
 	custom_stylesheet += "header, .item-stream, footer{box-shadow: 0px 0px 5px 0px hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[3] + ");}";
-	panelColorStylesheet.appendChild(document.createTextNode(custom_stylesheet));
+	panelColorStylesheet.textContent = custom_stylesheet;
 	//console.log(baseColor.rgbCode());
 	//console.log("hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + baseColor_hsl.L + ")");
 	
