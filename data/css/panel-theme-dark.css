@@ -1,12 +1,15 @@
 @import "panel-text-color-white.css";
 
-body {
+body{
 	background-color: hsl(0, 0%, 19%); /*#303030;*/
 }
-header, footer {
+header, footer{
 	background-color: hsl(0, 0%, 13%); /*#212121;*/
 }
-header button, .item-stream {
+#deleteStreamTooltip{
+	background-color: hsla(0, 0%, 13%, 0.95); /*#212121;*/
+}
+header button, .item-stream{
 	background-color: hsl(0, 0%, 26%); /*#424242;*/
 }
 

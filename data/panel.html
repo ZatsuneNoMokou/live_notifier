@@ -13,12 +13,12 @@
 	<header>
 		<div id="vide" class="vide"></div>
 		<button id="addStream"><i class="material-icons">add</i></button>
-		<button id="deleteStream"><i class="material-icons">delete</i></button>
+		<button id="deleteStream" class="dragover"><i class="material-icons dragover">delete</i></button>
 		<button id="refreshStreams"><i class="material-icons">refresh</i></button>
 		<button id="settings"><i class="material-icons">settings</i></button>
 	</header>
 	<section id="streamList">
-		<div id="deleteStreamWarning" class="hide"><i class="material-icons">warning</i> <span data-l10n-id="delete_stream_mode">Clicking on a stream will delete it from the settings.</span></div>
+		<div id="deleteStreamTooltip" class="hide"><i class="material-icons">info</i> <span data-l10n-id="delete_tooltip">To delete a stream from the settings, move it in the trash can.</span></div>
 		<div id="streamListOnline">
 			<div id="streamOnlineCountLabel">No online stream currently</div>
 			<div id="dailymotionOnlineList" class="group"></div>

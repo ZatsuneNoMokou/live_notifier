@@ -1,11 +1,14 @@
 /*			---- Primary text / Icons ----			*/
-body, header button, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteStreamWarning{
+body, header button, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteStreamTooltip{
 	color: #FFFFFF;
 }
 /*		--- Secondary text / Base Color ----		*/
 .item-stream, .item-stream .streamTitle, .item-stream .streamStatus, .item-stream .streamCurrentViewers{
 	color: #FFFFFF;
 	color: rgba(255, 255, 255, 0.8);
+}
+#deleteStream.active{
+	text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
 }
 /*			---- Disabled / Hint text ----			*/
 footer{

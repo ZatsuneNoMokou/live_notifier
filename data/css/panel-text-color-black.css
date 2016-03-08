@@ -1,5 +1,5 @@
 /*			---- Primary text / Icons ----			*/
-body, header button, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteStreamWarning{
+body, header button, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteStreamTooltip{
 	color: #FFFFFF;
 	color: rgba(0, 0, 0, 0.8);
 }
@@ -7,6 +7,9 @@ body, header button, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteS
 .item-stream, .item-stream .streamTitle, .item-stream .streamStatus, .item-stream .streamCurrentViewers{
 	color: #FFFFFF;
 	color: rgba(0, 0, 0, 0.5);
+}
+#deleteStream.active{
+	text-shadow: 0 0 2px rrgba(0, 0, 0, 0.5);
 }
 /*			---- Disabled / Hint text ----			*/
 footer{

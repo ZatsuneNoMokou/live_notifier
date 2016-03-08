@@ -43,20 +43,60 @@ function addStreamButtonClick(){
 }
 addStreamButton.addEventListener("click",addStreamButtonClick,false);
 
+function allowDrop(event){
+	event.preventDefault();
+}
+function drag(event) {
+	let node = event.target;
+	if(node.draggable = true && node.getAttribute("data-streamId") !== null){
+		let id = node.getAttribute("data-streamId");
+		let website = node.getAttribute("data-streamWebsite");
+		
+		let data = {id: id, website: website};
+		
+		event.dataTransfer.setData("text", JSON.stringify(data));
+	}
+}
+function drop(event) {
+	event.preventDefault();
+	
+	let dropDiv = document.querySelector("#deleteStream");
+	dropDiv.className = dropDiv.className.replace(/\s*active/i,"");
+	
+	let data = JSON.parse(event.dataTransfer.getData("text"));
+	
+	self.port.emit("deleteStream", {id: data.id, website: data.website});
+}
+function dragenter(event){
+	if(event.target.className.indexOf('dragover') != -1){
+		let dropDiv = document.querySelector("#deleteStream");
+		dropDiv.className += " active";
+	}
+}
+function dragleave(event){
+	let node = event.target;
+	if(event.target.className.indexOf('dragover') != -1){
+		let dropDiv = document.querySelector("#deleteStream");
+		dropDiv.className = dropDiv.className.replace(/\s*active/i,"");
+	}
+}
+let dropDiv = document.querySelector("#deleteStream");
+dropDiv.addEventListener("drop", drop);
+dropDiv.addEventListener("dragover", allowDrop);
+document.addEventListener("dragenter", dragenter); // Event dragging something and entering a valid node
+document.addEventListener("dragleave", dragleave); // Event dragging something and leaving a valid node
+document.addEventListener("dragstart", drag); // Get dragged element data
 let deleteStreamButton = document.querySelector("#deleteStream");
-let deleteModeState = false;
-
+let showDeleteTooltip = false;
 function deleteStreamButtonClick(){
-	let deleteStreamButton = document.querySelector("#deleteStream");
-	let deleteStreamWarning = document.querySelector("#deleteStreamWarning");
-	if(deleteModeState){
-		deleteModeState = false;
-		deleteStreamButton.className = deleteStreamButton.className.replace(/\s*active/i,"");
-		deleteStreamWarning.className += " hide";
-	} else {
-		deleteModeState = true;
-		deleteStreamButton.className += " active";
-		deleteStreamWarning.className = deleteStreamWarning.className.replace(/\s*hide/i,"");
+	let deleteStreamTooltip = document.querySelector("#deleteStreamTooltip");
+	if(!showDeleteTooltip){
+		showDeleteTooltip = true;
+		deleteStreamTooltip.className = deleteStreamTooltip.className.replace(/\s*hide/i,"");
+		setTimeout(function() {
+			showDeleteTooltip = false;
+			deleteStreamTooltip.className += " hide";
+		}, 2500);
 	}
 }
 deleteStreamButton.addEventListener("click",deleteStreamButtonClick,false);
@@ -70,7 +110,7 @@ function setting_Toggle(){
 	let settings_node = document.querySelector("#settings_container");
 	if(setting_Enabled){
 		setting_Enabled = false;
-		streamList.className = deleteStreamButton.className.replace(/\s*hide/i,"");
+		streamList.className = streamList.className.replace(/\s*hide/i,"");
 		settings_node.className += " hide";
 		if(scrollbar_streamList !== null){
 			scrollbar_streamList.resetValues();
@@ -78,7 +118,7 @@ function setting_Toggle(){
 	} else {
 		setting_Enabled = true;
 		streamList.className += " hide";
-		settings_node.className = deleteStreamWarning.className.replace(/\s*hide/i,"");
+		settings_node.className = settings_node.className.replace(/\s*hide/i,"");
 		
 		if(scrollbar_settings_container === null){
 			settings_container_node = document.querySelector('#settings_container');
@@ -377,6 +417,8 @@ function listener(data){
 		copyLivestreamerCmd_node.addEventListener("click", newCopyLivestreamerCmdButton_onClick, false);
 	}
 	
+	newLine.draggable = true;
+	
 	showNonEmptySitesBlocks();
 	if(scrollbar_streamList !== null){
 		scrollbar_streamList.resetValues();
@@ -389,15 +431,10 @@ function streamItemClick(){
 	let website = node.getAttribute("data-streamWebsite");
 	let streamUrl = node.getAttribute("data-streamUrl");
 	
-	if(deleteModeState == true){
-		self.port.emit("deleteStream", {id: id, website: website});
-		deleteStreamButtonClick();
+	if(online){
+		self.port.emit("openOnlineLive", {id: id, website: website, streamUrl: streamUrl});
 	} else {
-		if(online){
-			self.port.emit("openOnlineLive", {id: id, website: website, streamUrl: streamUrl});
-		} else {
-			self.port.emit("openTab", streamUrl);
-		}
+		self.port.emit("openTab", streamUrl);
 	}
 }
 
@@ -472,6 +509,7 @@ function theme_update(data){
 	custom_stylesheet += "body {background-color: hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[0] + ");}\n";
 	custom_stylesheet += "header, footer {background-color: hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[1] + ");}\n";
 	custom_stylesheet += "header button, .item-stream {background-color: hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[2] + ");}\n";
+	custom_stylesheet += "#deleteStreamTooltip {background-color: hsla(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[2] + ", 0.95);}\n";
 	custom_stylesheet += "header, .item-stream, footer{box-shadow: 0px 0px 5px 0px hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[3] + ");}";
 	panelColorStylesheet.textContent = custom_stylesheet;
 	//console.log(baseColor.rgbCode());

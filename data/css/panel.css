@@ -52,11 +52,13 @@ header button {
 #deleteStream.active{
 	color: red;
 }
-#deleteStreamWarning{
+#deleteStreamTooltip{
+	position: fixed;
 	vertical-align: middle;
 	font-weight: bold;
 	margin-top: 7px;
 	margin-bottom: 7px;
+	border-radius: 2px;
 }
 .cursor{
 	cursor: pointer;
@@ -109,11 +111,11 @@ header button {
 }
 .item-stream.offlineItem .streamTitle{
 	max-height: 19px;
+	left: -15px;
 	overflow: hidden;
 }
 .item-stream.streamLogo .streamTitle{
 	position: relative;
-	left: -15px;
 	margin-top: -5px;
 }
 .item-stream.offlineItem.streamLogo .streamTitle{

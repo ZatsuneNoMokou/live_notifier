@@ -1,3 +1,6 @@
+# 5.4.0:
+* +: Replaced delete stream mode by a html5 drag-n-drop
+
 # 5.3.1:
 * Fix: Use id as default stream name
 

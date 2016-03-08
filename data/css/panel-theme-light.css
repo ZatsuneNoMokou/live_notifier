@@ -1,12 +1,15 @@
-@import url("panel-text-color-white.css");
+@import "panel-text-color-black.css";
 
-body {
+body{
 	background-color: hsl(0, 0%, 87%);
 }
-header, footer {
+header, footer{
 	background-color: hsl(0, 0%, 74%);
 }
-header button, .item-stream {
+#deleteStreamTooltip{
+	background-color: hsla(0, 0%, 74%, 0.95);
+}
+header button, .item-stream{
 	background-color: hsl(0, 0%, 81%);
 }
 
