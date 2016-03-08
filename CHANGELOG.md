@@ -1,3 +1,7 @@
+# 5.4.1:
+* Fix: Position of delete stream tooltip with online streams
+* Fix: Addon description
+
 # 5.4.0:
 * +: Replaced delete stream mode by a html5 drag-n-drop
 

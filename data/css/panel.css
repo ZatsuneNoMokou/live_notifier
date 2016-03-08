@@ -59,6 +59,7 @@ header button {
 	margin-top: 7px;
 	margin-bottom: 7px;
 	border-radius: 2px;
+	z-index: 9999999999999;
 }
 .cursor{
 	cursor: pointer;
