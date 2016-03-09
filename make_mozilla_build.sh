@@ -22,7 +22,14 @@ mv index_new.js index.js
 
 sed -n '1h;1!H;${;g;s/ else {[\s\t\n\p\r]*}//g;p;}' index.js > index_new.js
 
-mv index_new.js index.js
+sed -re 's/console\.(warn|info|dir|group|groupEnd|log|error|exception|time|timeEnd|jsm).*/ /g' \
+		-e '/^\s*$/d' \
+		data/panel_contentScriptFile.js > data/panel_contentScriptFile_new.js
+mv data/panel_contentScriptFile_new.js data/panel_contentScriptFile.js
+
+sed -n '1h;1!H;${;g;s/ else {[\s\t\n\p\r]*}//g;p;}' data/panel_contentScriptFile.js > data/panel_contentScriptFile_new.js
+
+mv data/panel_contentScriptFile_new.js data/panel_contentScriptFile.js
 
 echo "Remplacement des éléments de package.json..."
 sed		-e 's/\"id\"\: \"live_notifier\@zatsunenomokou\.eu\"/\"id\"\: \"dailymotionsstream\@zatsunenomokou\.eu\"/g' \

@@ -20,10 +20,11 @@ function getValueFromNode(node){
 	if(node.type == "checkbox") {
 		return node.checked;
 	} else if(node.tagName == "input" && node.type == "number"){
-		console.log("Number");
 		return parseInt(node.value);
 	} else if(typeof node.value == "string"){
 		return node.value;
+	} else {
+		console.error("Problem with node trying to get value");
 	}
 }
 

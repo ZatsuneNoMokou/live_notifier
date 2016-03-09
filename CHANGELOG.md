@@ -1,3 +1,7 @@
+# 5.4.3:
+* Fix: Removed useless console.log in getValueFromNode
+* Fix: Clean console.* in panel_contentScriptFile.js for mozilla build
+
 # 5.4.2:
 * Fix: Dailymotion Game video pattern missing
 
@@ -19,7 +23,7 @@
 * Fix: Make sure that the count of online / offline streams is updated properly with filters
 
 # 5.2.0:
-* +: Make additionnal stream setting data possible
+* +: Make additional stream setting data possible
 * +: Whitelist and/or blacklist for stream status
 
 # 5.1.1:
@@ -48,7 +52,7 @@
 * Fix: Settings from panel
 
 # 4.6.4
-* Fix: Offline streams height
+* Fix: Height of Offline streams
 
 # 4.6.3
 * Fix: Viewer count / Control stream buttons (position)
@@ -60,10 +64,10 @@
 * Fix: Panel html
 * Fix: Style of settings from the panel
 * Fix: Control stream buttons (position)
-* Fix: Localisation (copy Livestreamer title)
+* Fix: Localization (copy Livestreamer title)
 
 # 4.6.0
-* +: Added 2 buttons to streams, to delete a stream and to copy the livestreamer command
+* +: Added 2 buttons to streams, to delete a stream and to copy the Livestreamer command
 * Fix: Blank image category for Hitbox
 
 # 4.5.0:
@@ -193,7 +197,7 @@
 * +: Theme colorisation
 
 # 2.11.0
-* +: Theme support (theme function, theme option, theme localisation)
+* +: Theme support (theme function, theme option, theme localization)
 * +: Light theme (will be improved in the future, probably)
 * +: Moved css files to a css folder
 * +: Self hosted Google Material Design icons, font way to make colorisation easier (font files in the addon to avoid privacy issues)
