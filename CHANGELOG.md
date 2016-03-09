@@ -1,3 +1,6 @@
+# 5.4.2:
+* Fix: Dailymotion Game video pattern missing
+
 # 5.4.1:
 * Fix: Position of delete stream tooltip with online streams
 * Fix: Addon description
