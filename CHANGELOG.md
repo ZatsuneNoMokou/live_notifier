@@ -1,3 +1,6 @@
+# 5.4.4:
+* Fix: Settings in the panel, and localization
+
 # 5.4.3:
 * Fix: Removed useless console.log in getValueFromNode
 * Fix: Clean console.* in panel_contentScriptFile.js for mozilla build
