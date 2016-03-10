@@ -1,5 +1,5 @@
 # 5.4.4:
-* Fix: Settings in the panel, and localization
+* Fix: Setting that should not appear in the panel (on Firefox), and localization
 
 # 5.4.3:
 * Fix: Removed useless console.log in getValueFromNode
