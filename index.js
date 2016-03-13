@@ -461,6 +461,7 @@ function updatePanelData(){
 	let updateSettings = [
 		"hitbox_user_id",
 		"twitch_user_id",
+		"beam_user_id",
 		"dailymotion_check_delay",
 		"notify_online",
 		"notify_offline",
@@ -1124,6 +1125,13 @@ function importButton(website){
 	importStreams(website, getPreferences(`${website}_user_id`));
 }
 function importStreams(website, id, url, pageNumber){
+	
+	if(website == "beam"){
+		// In progress
+		return
+	}
+	
+
 	let current_API = new importAPI(website, id);
 	if(typeof url == "string" && url != ""){
 		current_API.url = url;
@@ -1193,6 +1201,8 @@ function importTwitchButton(){importButton("twitch");}
 sp.on("twitch_import", importTwitchButton);
 function importHitboxButton(){importButton("hitbox");}
 sp.on("hitbox_import", importHitboxButton);
+function importBeamButton(){importButton("beam");}
+sp.on("beam_import", importBeamButton);
 
 
 //				------ Load / Unload Event(s) ------				//
