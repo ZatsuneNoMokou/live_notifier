@@ -1,3 +1,6 @@
+# 5.5.0:
+* +: Support importing followed streams in Beam
+
 # 5.4.4:
 * Fix: Setting that should not appear in the panel (on Firefox), and localization
 
