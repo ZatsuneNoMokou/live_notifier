@@ -1,3 +1,6 @@
+# 5.5.1:
+* Fix: Error importing streams in Beam when id does not exist
+
 # 5.5.0:
 * +: Support importing followed streams in Beam
 

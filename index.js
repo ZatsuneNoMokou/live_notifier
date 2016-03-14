@@ -1131,17 +1131,22 @@ function importButton(website){
 			url: `https://beam.pro/api/v1/channels/${getPreferences(`${website}_user_id`)}`,
 			overrideMimeType: "text/plain; charset=utf-8",
 			onComplete: function (response) {
-				let data = response.json;
-				
-				console.group();
-				console.info(`${website} - https://beam.pro/api/v1/channels/${getPreferences(`${website}_user_id`)}`);
-				console.dir(data);
-				
-				let numerical_id = data.user.id;
-				
-				console.groupEnd();
-				
-				importStreams(website, numerical_id);
+				if(isValidResponse(website, response)){
+					console.warn("Sometimes bad things just happen");
+					doNotif("Live notifier", _("beam_import_error"));
+				} else {
+					let data = response.json;
+					
+					console.group();
+					console.info(`${website} - https://beam.pro/api/v1/channels/${getPreferences(`${website}_user_id`)}`);
+					console.dir(data);
+					
+					let numerical_id = data.user.id;
+					
+					console.groupEnd();
+					
+					importStreams(website, numerical_id);
+				}
 			}
 		}).get();
 	} else {
