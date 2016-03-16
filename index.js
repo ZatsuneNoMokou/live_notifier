@@ -135,6 +135,13 @@ function streamListFromSetting (website){
 		if(this.streamExist(id) == false){
 			this.objData[id] = url;
 			console.log(`${id} has been added`);
+			
+			try{
+				getPrimary(id, this.website, id);
+			}
+			catch(error){
+				console.warn(`[Live notifier] ${error}`);
+			}
 		}
 	}
 	this.deleteStream = function(id){
@@ -224,9 +231,8 @@ function refreshStreamsFromPanel(){
 	updatePanelData();
 	function waitToUpdatePanel(){
 		updatePanelData();
-		clearInterval(intervalRefreshPanel);
 	}
-	var intervalRefreshPanel = setInterval(waitToUpdatePanel, 5000);
+	setTimeout(waitToUpdatePanel, 5000);
 }
 
 function display_id(id){
@@ -253,7 +259,7 @@ function addStreamFromPanel(embed_list){
 		console.dir(embed_list);
 		url_list = embed_list;
 		for(i of addStreamFromPanel_pageListener){
-			i.port.removeListener('refreshStreams', refreshStreamsFromPanel);
+			i.port.removeListener("addStream", addStreamFromPanel);
 		}
 		type = "embed";
 	} else {
@@ -300,7 +306,9 @@ function addStreamFromPanel(embed_list){
 										streamListSetting.update();
 										doNotif("Live Notifier", `${display_id(id)} ${_("have been added.")}`);
 										// Update the panel for the new stream added
-										refreshStreamsFromPanel();
+										setTimeout(function(){
+											refreshPanel(false);
+										}, 5000);
 										})
 									doActionNotif(`Stream Notifier (${_("click to confirm")})`, `${display_id(id)} ${_("wasn't configured, and can be added.")}`, addstreamNotifAction);
 								} else {
@@ -308,7 +316,9 @@ function addStreamFromPanel(embed_list){
 									streamListSetting.update();
 									doNotif("Live Notifier", `${display_id(id)} ${_("wasn't configured, and have been added.")}`);
 									// Update the panel for the new stream added
-									refreshStreamsFromPanel();
+									setTimeout(function(){
+										refreshPanel(false);
+									}, 5000);
 								}
 							}
 						}).get();
@@ -339,7 +349,7 @@ function deleteStreamFromPanel(data){
 				streamListSetting.update();
 				doNotif("Live Notifier", `${display_id(id)} ${_("has been deleted.")}`);
 				// Update the panel for the new stream added
-				refreshStreamsFromPanel();
+				refreshPanel();
 				})
 			doActionNotif(`Stream Notifier (${_("click to confirm")})`, `${display_id(id)} ${_("will be deleted, are you sure?")}`, deletestreamNotifAction);
 		} else {
@@ -347,7 +357,7 @@ function deleteStreamFromPanel(data){
 			streamListSetting.update();
 			doNotif("Live Notifier", `${display_id(id)} ${_("has been deleted.")}`);
 			// Update the panel for the new stream added
-			refreshStreamsFromPanel();
+			refreshPanel();
 		}
 	}
 }
@@ -826,6 +836,7 @@ function isValidResponse(website, data){
 		case "beam":
 			if(data == "Channel not found." || data.statusCode == 404){
 				console.warn(`[${website}] Unable to get stream state (error detected).`);
+				return false;
 			}
 			break;
 	}
@@ -1131,12 +1142,12 @@ function importButton(website){
 			url: `https://beam.pro/api/v1/channels/${getPreferences(`${website}_user_id`)}`,
 			overrideMimeType: "text/plain; charset=utf-8",
 			onComplete: function (response) {
-				if(isValidResponse(website, response)){
-					console.warn("Sometimes bad things just happen");
+				let data = response.json;
+				
+				if(!isValidResponse(website, data)){
+					console.warn(`Sometimes bad things just happen - ${website} - https://beam.pro/api/v1/channels/${getPreferences(`${website}_user_id`)}`);
 					doNotif("Live notifier", _("beam_import_error"));
 				} else {
-					let data = response.json;
-					
 					console.group();
 					console.info(`${website} - https://beam.pro/api/v1/channels/${getPreferences(`${website}_user_id`)}`);
 					console.dir(data);
@@ -1165,7 +1176,7 @@ function importStreams(website, id, url, pageNumber){
 		overrideMimeType: current_API.overrideMimeType,
 		onComplete: function (response) {
 			let id = current_API.id;
-			data = response.json;
+			let data = response.json;
 			
 			console.group();
 			console.info(`${website} - ${id} (${current_API.url})`);
@@ -1177,6 +1188,9 @@ function importStreams(website, id, url, pageNumber){
 				importStreamWebsites[website](id, data);
 			}
 			console.groupEnd();
+			setTimeout(function(){
+				refreshPanel(false);
+			}, 5000);
 		}
 	}).get();
 }
@@ -1227,6 +1241,7 @@ let importStreamWebsites = {
 			}
 			streamListSetting.update();
 		}
+		importStreamsEnd(id);
 	}
 }
 function importTwitchButton(){importButton("twitch");}

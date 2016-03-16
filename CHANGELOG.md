@@ -1,3 +1,7 @@
+# 5.5.3:
+* Fix: Error importing streams in Beam
+* Fix: Refresh when importing, and refresh only added / removed streams
+
 # 5.5.1:
 * Fix: Error importing streams in Beam when id does not exist
 
