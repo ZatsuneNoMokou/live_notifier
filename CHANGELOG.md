@@ -1,3 +1,7 @@
+# 5.6.0:
+* +: Add website logo next to stream titles, in the panel
+* Fix: Twitch Requests overrideMimeType
+
 # 5.5.3:
 * Fix: Error importing streams in Beam
 * Fix: Refresh when importing, and refresh only added / removed streams

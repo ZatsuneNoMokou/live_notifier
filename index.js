@@ -743,7 +743,7 @@ function API(website, id){
 			break;
 		case "twitch":
 			this.url = `https://api.twitch.tv/kraken/streams/${id}`;
-			this.overrideMimeType = "text/plain; charset=utf-8";
+			this.overrideMimeType = "application/vnd.twitchtv.v3+json; charset=utf-8"; //"text/plain; charset=utf-8";
 			break;
 		case "beam":
 			this.url = `https://beam.pro/api/v1/channels/${id}`;
@@ -778,7 +778,7 @@ function API_second(website, id){
 			break;
 		case "twitch":
 			this.url = `https://api.twitch.tv/kraken/users/${id}`;
-			this.overrideMimeType = "text/plain; charset=utf-8";
+			this.overrideMimeType = "application/vnd.twitchtv.v3+json; charset=utf-8"; //"text/plain; charset=utf-8";
 			break;
 		default:
 			this.url = null;
@@ -791,13 +791,13 @@ function importAPI(website, id){
 	this.overrideMimeType = "";
 	
 	switch(website){
-		case "twitch":
-			this.url = `https://api.twitch.tv/kraken/users/${id}/follows/channels`;
-			this.overrideMimeType = "application/vnd.twitchtv.v3+json; charset=utf-8";
-			break;
 		case "hitbox":
 			this.url = `https://api.hitbox.tv/following/user?user_name=${id}`;
 			this.overrideMimeType = "text/plain; charset=utf-8";
+			break;
+		case "twitch":
+			this.url = `https://api.twitch.tv/kraken/users/${id}/follows/channels`;
+			this.overrideMimeType = "application/vnd.twitchtv.v3+json; charset=utf-8";
 			break;
 		case "beam":
 			this.url = `https://beam.pro/api/v1/users/${id}/follows?limit=-1&fields=id,token`;

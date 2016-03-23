@@ -94,6 +94,7 @@ header button {
 }
 .item-stream .streamTitle{
 	font-weight: 600;
+	vertical-align: middle;
 }
 .item-stream:not(.streamLogo){
 	padding-left: 45px;
@@ -106,6 +107,29 @@ header button {
 .item-stream.offlineItem.streamLogo{
 	padding-left: 58px;
 	background-size: auto 100%;
+}
+.item-stream .streamTitle::before{
+	display: inline-block;
+	content:"";
+	height: 15px;
+	width: 15px;
+	background-size: 15px 15px;
+	background-repeat: no-repeat;
+	padding-left: 3px;
+	padding-top: 3px;
+    vertical-align: middle;
+}
+.item-stream[data-streamwebsite=dailymotion] .streamTitle::before{
+	background-image: url("/data/images/dailymotion-icon.png");
+}
+.item-stream[data-streamwebsite=hitbox] .streamTitle::before{
+	background-image: url("/data/images/hitbox-icon.svg");
+}
+.item-stream[data-streamwebsite=twitch] .streamTitle::before{
+	background-image: url("/data/images/GlitchIcon_WhiteonPurple.png");
+}
+.item-stream[data-streamwebsite=beam] .streamTitle::before{
+	background-image: url("/data/images/beam_ball_color.svg");
 }
 .item-stream.onlineItem .streamTitle{
 	width: 160px;
