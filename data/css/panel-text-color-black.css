@@ -17,7 +17,7 @@ footer{
 	color: rgba(0, 0, 0, 0.4);
 }
 /*			---- Stream Title / Links ----			*/
-.item-stream .streamTitle, a{
+a{
 	color: #0062BD;
 	color: rgba(50, 159, 255, 0.8);
 }

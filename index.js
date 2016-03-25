@@ -133,7 +133,7 @@ function streamListFromSetting (website){
 	
 	this.addStream = function(id, url){
 		if(this.streamExist(id) == false){
-			this.objData[id] = url;
+			this.objData[id] = {streamURL: url};
 			console.log(`${id} has been added`);
 			
 			try{
@@ -175,34 +175,36 @@ function getStreamURL(website, id, contentId, usePrefUrl){
 	
 	let streamData = liveStatus[website][id][contentId];
 	
-	if(streamList[id].streamURL != "" && usePrefUrl == true){
-		return streamList[id].streamURL;
-	} else {
-		if(typeof liveStatus[website][id][contentId] != "undefined"){
-			if(typeof streamData.streamURL == "string" && streamData.streamURL != ""){
-				return streamData.streamURL;
+	if(id in streamList){
+		if(streamList[id].streamURL != "" && usePrefUrl == true){
+			return streamList[id].streamURL;
+		} else {
+			if(typeof liveStatus[website][id][contentId] != "undefined"){
+				if(typeof streamData.streamURL == "string" && streamData.streamURL != ""){
+					return streamData.streamURL;
+				}
 			}
-		}
-		if(typeof channelInfos[website][id] != "undefined"){
-			if(typeof channelInfos[website][id].streamURL == "string" && channelInfos.streamURL != ""){
-					return channelInfos[website][id].streamURL
+			if(typeof channelInfos[website][id] != "undefined"){
+				if(typeof channelInfos[website][id].streamURL == "string" && channelInfos.streamURL != ""){
+						return channelInfos[website][id].streamURL
+				}
 			}
-		}
-		switch(website){
-			case "dailymotion":
-				return `http://www.dailymotion.com/video/${id}`;
-				break;
-			case "hitbox":
-				return `http://www.hitbox.tv/${id}`;
-				break;
-			case "twitch":
-				return `http://www.twitch.tv/${id}`;
-				break;
-			case "beam":
-				return `https://beam.pro/${id}`;
-				break;
-			default:
-				return null;
+			switch(website){
+				case "dailymotion":
+					return `http://www.dailymotion.com/video/${id}`;
+					break;
+				case "hitbox":
+					return `http://www.hitbox.tv/${id}`;
+					break;
+				case "twitch":
+					return `http://www.twitch.tv/${id}`;
+					break;
+				case "beam":
+					return `https://beam.pro/${id}`;
+					break;
+				default:
+					return null;
+			}
 		}
 	}
 }
@@ -405,7 +407,7 @@ function updatePanelData(){
 		var streamList = (new streamListFromSetting(website)).objData;
 		for(let id in liveStatus[website]){
 			
-			if(JSON.stringify(liveStatus[website][id]) == "{}"){
+			if(id in streamList && JSON.stringify(liveStatus[website][id]) == "{}"){
 				let streamData = channelInfos[website][id];
 				let contentId = id;
 				
