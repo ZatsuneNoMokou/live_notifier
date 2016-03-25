@@ -190,10 +190,6 @@ header button {
 	margin-top: 2px;
 	margin-bottom: 2px;
 }
-.group, #streamListOnline > div, #streamListOffline > div{
-	padding-top: 2px !important;
-	padding-bottom: 2px !important;
-}
 .item-stream h1{
 	margin: 0px;
 	padding: 0px;

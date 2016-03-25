@@ -47,7 +47,7 @@ let myIconURL_offline = {
 
 let _ = require("sdk/l10n").get;
 
-let websites = ["dailymotion","hitbox","twitch","beam"];
+let websites = ["beam","dailymotion","hitbox","twitch"];
 let liveStatus = {};
 let channelInfos = {};
 for(website of websites){

@@ -1,3 +1,6 @@
+# 5.7.0
+* +: Alphabetical order of streams (and no longer grouped by website)
+
 # 5.6.2:
 * Fix: Black text color (panel theme)
 
