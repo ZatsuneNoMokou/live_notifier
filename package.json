@@ -10,8 +10,7 @@
 	"updateLink": "https://gitlab.com/ZatsuneNoMokou/live_notifier/raw/master/dist/live_notifier.xpi",
 	"updateURL": "https://gitlab.com/ZatsuneNoMokou/live_notifier/raw/master/dist/live_notifier.update.rdf",
 	"engines": {
-		"firefox": ">=38.0a1",
-		"fennec": ">=38.0a1"
+		"firefox": ">=38.0a1"
 	},
 	"permissions": {
 		"multiprocess": true
