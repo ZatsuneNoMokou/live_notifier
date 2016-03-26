@@ -1,3 +1,8 @@
+# 5.7.2
+* Fix: Dailymotion channels pattern missing
+* Fix: Localization
+* Fix: Removed Android from manifest, toggle button api not working / missing
+
 # 5.7.0
 * +: Alphabetical order of streams (and no longer grouped by website)
 
