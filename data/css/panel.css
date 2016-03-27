@@ -72,7 +72,7 @@ header button {
 	flex-direction: column;
 	align-items: stretch;
 	justify-content: space-between;
-	padding: 5px 14px;
+	padding: 5px;
 }
 #settings_container{
 	display: inline;
