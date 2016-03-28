@@ -1,3 +1,11 @@
+# 5.8.0:
+* +: Add streams from context menu
+* +: Dailymotion channel pattern missing
+* Fix: Better error detection from Hitbox
+* Fix: Channel patterns allowing empty id
+* Fix: Not-channel URL from Dailymotion
+* Fix: Panel opening too fast or without enough items, and then not letting slimScroll loading properly
+
 # 5.7.3
 * Fix: Section padding (scrollbar)
 

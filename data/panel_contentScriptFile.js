@@ -105,7 +105,6 @@ deleteStreamButton.addEventListener("click",deleteStreamButtonClick,false);
 /*				---- Settings ----				*/
 let settings_button = document.querySelector("#settings");
 let setting_Enabled = false;
-let scrollbar_settings_container = null;
 function setting_Toggle(){
 	let streamList = document.querySelector("#streamList");
 	let settings_node = document.querySelector("#settings_container");
@@ -113,32 +112,16 @@ function setting_Toggle(){
 		setting_Enabled = false;
 		streamList.className = streamList.className.replace(/\s*hide/i,"");
 		settings_node.className += " hide";
-		if(scrollbar_streamList !== null){
-			scrollbar_streamList.resetValues();
-		}
+		
+		scrollbar_streamList_resetValues();
 	} else {
 		setting_Enabled = true;
 		streamList.className += " hide";
 		settings_node.className = settings_node.className.replace(/\s*hide/i,"");
 		
-		if(scrollbar_settings_container === null){
-			settings_container_node = document.querySelector('#settings_container');
-			
-			// Apply slim scroll plugin
-			scrollbar_settings_container = new slimScroll(settings_container_node, {
-				'wrapperClass': 'scroll-wrapper unselectable mac',
-				'scrollBarContainerClass': 'scrollbarContainer',
-				'scrollBarContainerSpecialClass': 'animate',
-				'scrollBarClass': 'scrollbar',
-				'keepFocus': true
-			});
-		}
+		scrollbar_settings_container_resetValues();
 		
 		initSettings();
-		
-		if(scrollbar_settings_container !== null){
-			scrollbar_settings_container.resetValues();
-		}
 	}
 
 }
@@ -429,9 +412,7 @@ function listener(data){
 	
 	newLine.draggable = true;
 	
-	if(scrollbar_streamList !== null){
-		scrollbar_streamList.resetValues();
-	}
+	scrollbar_streamList_resetValues();
 }
 function streamItemClick(){
 	let node = this;
@@ -752,28 +733,54 @@ var slimScroll = function(C, payload){
 	}
 };
 
-let scrollbar_streamList = null;
-window.onload = function(){
-	let streamList_node = document.querySelector('#streamList');
-
-	// Apply slim scroll plugin
-	scrollbar_streamList = new slimScroll(streamList_node, {
-		'wrapperClass': 'scroll-wrapper unselectable mac',
-		'scrollBarContainerClass': 'scrollbarContainer',
-		'scrollBarContainerSpecialClass': 'animate',
-		'scrollBarClass': 'scrollbar',
-		'keepFocus': true
-	});
+let scrollbar = {"streamList": null, "settings_container": null};
+function load_scrollbar(id){
+	let scroll_node;
+	if(id == "streamList"){
+		scroll_node = document.querySelector('#streamList');
+	} else if(id == "settings_container"){
+		scroll_node = document.querySelector('#settings_container');
+	} else {
+		console.warn(`[Live notifier] Unkown scrollbar id (${id})`);
+		return null;
+	}
 	
-	// resize example
+	if(scroll_node.offsetHeight < scroll_node.scrollHeight){
+		console.warn(`${id} ${scroll_node.offsetHeight} ${scroll_node.scrollHeight}`);
+		// Apply slim scroll plugin
+		scrollbar[id] = new slimScroll(scroll_node, {
+			'wrapperClass': 'scroll-wrapper unselectable mac',
+			'scrollBarContainerClass': 'scrollbarContainer',
+			'scrollBarContainerSpecialClass': 'animate',
+			'scrollBarClass': 'scrollbar',
+			'keepFocus': true
+		});
+	}
+}
+function scrollbar_streamList_resetValues(){
+	if(scrollbar.streamList !== null && typeof scrollbar.streamList.resetValues == "function"){
+		scrollbar.streamList.resetValues();
+	} else {
+		if(page_loaded){load_scrollbar("streamList")};
+	}
+}
+function scrollbar_settings_container_resetValues(){
+	if(scrollbar.settings_container !== null && typeof scrollbar.settings_container.resetValues == "function"){
+		scrollbar.settings_container.resetValues();
+	} else {
+		if(page_loaded){load_scrollbar("settings_container")};
+	}
+}
+let page_loaded = false;
+window.onload = function(){
+	load_scrollbar("streamList");
+	
+	page_loaded = true;
+	// Resize example
 	// To make the resizing work, set the height of the container in PERCENTAGE
 	window.onresize = function(){
-		if(scrollbar_streamList !== null){
-			scrollbar_streamList.resetValues();
-		}
+		scrollbar_streamList_resetValues();
 		
-		if(scrollbar_settings_container !== null){
-			scrollbar_settings_container.resetValues();
-		}
+		scrollbar_settings_container_resetValues();
 	}
 }
