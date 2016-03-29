@@ -14,6 +14,13 @@ body{
 	flex-direction: column;
 }
 
+input[type=text]{
+	border: 1px solid #444;
+	border-radius: 3px;
+	padding-left: 2px;
+}
+
+
 .item-stream .streamTitle{
 	font-size: 15px;
 }
@@ -31,11 +38,14 @@ footer, footer *{
 header {
 	display: flex;
 	flex-direction: row;
-	padding: 5px 5px;
+	padding: 5px 2px;
 }
 header button {
+	flex: 1;
 	height: 36px;
-	min-width: 64px;
+	/*min-width: 64px;*/
+	min-width: 42px;
+	max-width: 64px;
 	padding: 0px 8px;
 	border: 0px none;
 	border-radius: 1px;
@@ -67,15 +77,25 @@ header button {
 #streamList, #settings_container{
 	overflow: hidden;
 	position: relative;
-	display: inline-flex;
 	flex: 1;
 	flex-direction: column;
 	align-items: stretch;
 	justify-content: space-between;
 	padding: 5px;
 }
-#settings_container{
-	display: inline;
+#searchInputContainer{
+	width: 100%;
+	padding-bottom: 3px;
+}
+#searchInputContainer #searchInput{
+	width: 100%;
+	min-height: 21px;
+	background-color: transparent;
+	border: 1px solid rgba(200,200,200,0.5);
+	padding-left: 26px;
+}
+#searchInputContainer label{
+	position: absolute;
 }
 #streamOnlineCountLabel, #streamOfflineCountLabel{
 	margin: 0px;
@@ -83,7 +103,7 @@ header button {
 }
 .item-stream {
 	margin: 7px 0px;
-	padding: 14px;
+	padding: 7px 14px;
 	background-repeat: no-repeat;
 	background-position: 3px center;
 	justify-content: space-between;
@@ -189,6 +209,7 @@ header button {
 #streamListOnline, #streamListOffline{
 	margin-top: 2px;
 	margin-bottom: 2px;
+	min-height: 21px;
 }
 .item-stream h1{
 	margin: 0px;
@@ -205,13 +226,10 @@ header button {
 	position: relative;
 	float: right;
 	right: -10px;
-	top: -10px;
+	top: -5px;
 	width: 45px;
 	text-align: right;
 }
-/*#stream_right_container > span{
-	display: block;
-}*/
 .stream_control{
 	display: none;
 	visibility: hidden;
