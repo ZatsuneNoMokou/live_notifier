@@ -1,3 +1,8 @@
+# 5.10.0:
+* +: New scrollbar (Perfect-scrollbar)
+* i: Small simplification
+* Fix: Clean filter when hiding search
+
 # 5.9.0:
 * +: Search, in the panel
 * i: Reduced online stream height

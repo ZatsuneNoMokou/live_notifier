@@ -109,8 +109,8 @@ function searchContainer_Toggle(){
 	let searchInputContainer = document.querySelector("#searchInputContainer");
 	let hiddenClass = /\s*hide/i;
 	
+	let searchInput = document.querySelector("input#searchInput");
 	if(!searchInput_onChange_Loaded){
-		let searchInput = document.querySelector("input#searchInput");
 		searchInput.addEventListener("change", searchInput_onChange);
 		
 		let searchLabel = document.querySelector("#searchInputContainer label");
@@ -121,28 +121,32 @@ function searchContainer_Toggle(){
 		searchInputContainer.className = searchInputContainer.className.replace(/\s*hide/i,"");
 	} else {
 		searchInputContainer.className += " hide";
+		searchInput.value = "";
+		searchInput_onChange();
 	}
+	
+	scrollbar_streamList_update();
 }
 toggle_search_button.addEventListener("click", searchContainer_Toggle);
 
-let searchInput = document.querySelector("input#searchInput");
 function searchInput_onChange(){
+	let searchInput = document.querySelector("input#searchInput");
 	let somethingElseThanSpaces = /[^\s]+/;
-	let search = this.value.toLowerCase();
+	let search = searchInput.value.toLowerCase();
 	let searchCSS_Node = document.querySelector("#search-cssSelector");
-	let cssSelector = "";
 	if(search.length > 0 && somethingElseThanSpaces.test(search)){
-		cssSelector = `
+		searchCSS_Node.textContent =  `
 .item-stream:not([data-streamnamelowercase*="${search}"]):not([data-streamstatuslowercase*="${search}"]):not([data-streamgamelowercase*="${search}"]):not([data-streamwebsitelowercase*="${search}"]){
 	display: none;
 	visibility: hidden;
 }
 `;
-		searchCSS_Node.textContent = cssSelector;
 	} else {
 		searchCSS_Node.textContent = "";
+		searchInput.value = "";
+		searchInput_onChange();
 	}
-	scrollbar_streamList_resetValues();
+	scrollbar_streamList_update();
 }
 
 /*				---- Settings ----				*/
@@ -156,13 +160,13 @@ function setting_Toggle(){
 		streamList.className = streamList.className.replace(/\s*hide/i,"");
 		settings_node.className += " hide";
 		
-		scrollbar_streamList_resetValues();
+		scrollbar_streamList_update();
 	} else {
 		setting_Enabled = true;
 		streamList.className += " hide";
 		settings_node.className = settings_node.className.replace(/\s*hide/i,"");
 		
-		scrollbar_settings_container_resetValues();
+		scrollbar_settings_container_update();
 		
 		initSettings();
 	}
@@ -465,7 +469,7 @@ function listener(data){
 	
 	newLine.draggable = true;
 	
-	scrollbar_streamList_resetValues();
+	scrollbar_streamList_update();
 }
 function streamItemClick(){
 	let node = this;
@@ -535,26 +539,28 @@ function theme_update(data){
 	baseColor_hsl = baseColor.getHSL();
 	let baseColor_L = JSON.parse(baseColor_hsl.L.replace("%",""))/100;
 	if(data.theme == "dark"){
-		var custom_stylesheet = "@import url(css/panel-text-color-white.css);\n";
+		var textColor_stylesheet = "@import url(css/panel-text-color-white.css);\n";
 		if(baseColor_L > 0.5 || baseColor_L < 0.1){
 			values = ["19%","13%","26%","13%"];
 		} else {
 			values = [(baseColor_L + 0.06) * 100 + "%", baseColor_L * 100 + "%", (baseColor_L + 0.13) * 100 + "%", baseColor_L * 100 + "%"];
 		}
 	} else if(data.theme == "light"){
-		var custom_stylesheet = "@import url(css/panel-text-color-black.css);\n";
+		var textColor_stylesheet = "@import url(css/panel-text-color-black.css);\n";
 		if(baseColor_L < 0.5 /*|| baseColor_L > 0.9*/){
 			values = ["87%","74%","81%","87%"];
 		} else {
 			values = [baseColor_L * 100 + "%", (baseColor_L - 0.13) * 100 + "%", (baseColor_L - 0.06) * 100 + "%", baseColor_L * 100 + "%"];
 		}
 	}
-	custom_stylesheet += "body {background-color: hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[0] + ");}\n";
-	custom_stylesheet += "header, footer {background-color: hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[1] + ");}\n";
-	custom_stylesheet += "header button, .item-stream {background-color: hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[2] + ");}\n";
-	custom_stylesheet += "#deleteStreamTooltip {background-color: hsla(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[2] + ", 0.95);}\n";
-	custom_stylesheet += "header, .item-stream, footer{box-shadow: 0px 0px 5px 0px hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + values[3] + ");}";
-	panelColorStylesheet.textContent = custom_stylesheet;
+panelColorStylesheet.textContent = `
+${textColor_stylesheet}
+body {background-color: hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[0]});}
+header, footer {background-color: hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[1]});}
+header button, .item-stream {background-color: hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[2]});}
+#deleteStreamTooltip {background-color: hsla(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[2]}, 0.95);};
+header, .item-stream, footer{box-shadow: 0px 0px 5px 0px hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[3]});}
+	`
 	//console.log(baseColor.rgbCode());
 	//console.log("hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + baseColor_hsl.L + ")");
 	
@@ -574,218 +580,6 @@ self.port.on('settingNodesUpdate', settingNodesUpdate);
 self.port.on('panel_theme', theme_update);
 
 
-// slimScroll from https://github.com/kamlekar/slim-scroll (License MIT)
-var slimScroll = function(C, payload){
-	var i = {},
-		w = "wrapper",s = "scrollBar",S = "scrollBarContainer",a = "",m = "",l="data-slimscroll",
-		// properties
-		oT = "offsetTop",sT = "scrollTop",pE = "parentElement",pes= "previousElementSibling", 
-		iH = "innerHTML",cT = "currentTarget",sK = "scroll-k",U = "%",d = ".",
-		// IE8 properties 
-		// (Dev note: remove below variables from all over the code to exclude IE8 compatibility)
-		pN = "parentNode",pS = "previousSibling",sE = "srcElement",
-		assignValues = function(k){
-			var q = i.E;
-			i.h = i[S].offsetHeight;
-			i.sH = i[w].scrollHeight;
-			i.sP = (i.h/i.sH) * 100;
-			// i.sbh is scroll bar height in pixels without pixel unit.
-			i.sbh = i.sP * i.h/100;
-			// Manually set the height of the scrollbar (in percentage)
-			// if user hasn't provided the fixed scroll height value
-			if(!q.sH) i.sP1 = i.sbh < q.mH? (q.mH/i.h * 100): i.sP;
-			else i.sP1 = q.sH/i.h * 100;
-			
-			i.rP1 = 100 - i.sP1;
-			i.x = (i.sH - i.h) * ((i.sP1 - i.sP)/(100 - i.sP));
-			i.sH1 = Math.abs((i.x / (i.rP1)) + (i.sH/100));
-			i[s].style.height = i.sP1 + U;
-			
-			i.reposition = getReposition(i[s], i.h);
-		},
-		// Start of private functions
-		setAttr = function(e, p, v){
-			e.setAttribute(p,v);
-		},
-		getAttr = function(e, p){
-			if(!e) return;
-			return e.getAttribute(p);            
-		},
-		addClass = function(e, c){
-			if(c.length) e.className = c;
-		},
-		cE = function(c, h, p){
-			var d = document.createElement('div');
-			addClass(d, c);
-			d[iH] = h;
-			p.appendChild(d);
-			return d;
-		},
-		setScroll = function(e){
-			var e = e || event,el = e.target || event[sE],
-				p = el[pE] || el[pN];
-			var q = i.E;
-
-			if(!i || p === i[S]) return;
-			var eY = e.pageY || event.clientY,
-				top = ((eY - getTop(i[w][pE] || i[w][pN]))/i.h * 100) - i.sP1/2;
-			if(top > i.rP1) top = i.rP1;
-			else if(top < 0) top = 0;
-			i[s].style.top = top + U;
-			i[w][sT] = top * i.sH1;
-			addClass(i[S], q.S + q.a);
-		},
-		beginScroll = function(e){
-			// removing selected text
-			// Link: http://stackoverflow.com/a/3171348
-			var sel = window.getSelection ? window.getSelection() : document.selection;
-			if (sel) {
-				if (sel.removeAllRanges) sel.removeAllRanges();
-				else if (sel.empty) sel.empty();
-			}
-			var e = e || event,
-				el = e[cT] || e[sE];
-
-			addEvent('mousemove', document, moveScroll);
-			addEvent('mouseup', document, endScroll);
-
-			i[oT] = getTop(i[w]);
-			i.firstY = e.pageY || event.clientY;
-			if(!i.reposition) i.reposition = getReposition(i[s], i.h);
-			// Disable text selection while dragging the scrollbar
-			return false;
-		},
-		getReposition = function(i, h){
-			var x = parseInt(i.style.top.replace(U,""),10) * h/100;
-			return x?x:0;
-		},
-		moveScroll = function(e){
-			var e = e || event,
-				q = i.E,
-				eY = e.pageY || e.clientY,
-				top = (i.reposition + eY - i.firstY)/i.h * 100;
-
-			if(i.rP1 < top) top = i.rP1;
-			if(!i.previousTop) i.previousTop = top + 1;
-			var blnThreshold = top >= 0 && i.firstY > i[oT];
-			if((i.previousTop > top && blnThreshold) || (blnThreshold && (i[w][sT] + i.h !== i.sH))){
-				i[s].style.top = top + U;
-				i.previousTop = top;   
-				i[w][sT] = top * i.sH1;
-			}
-			addClass(i[S], q.S);
-		},
-		endScroll = function(e){
-			var e = e || event,q = i.E; 
-
-			removeEvent('mousemove', document);
-			removeEvent('mouseup', document);
-
-			i.reposition = 0;
-			addClass(i[S], q.S + q.a);
-		},
-		doScroll = function(e){
-			var e = e || event;
-			if(!i) return;
-			var q = i.E;
-			addClass(i[S], q.S);
-			i[s].style.top = i[w][sT]/i.sH1 + U;
-			addClass(i[S], q.S + q.a);
-		},
-		addEvent = function(e, el, func){
-			el['on' + e] = func;
-			// el.addEventListener(e, func, false);
-		},
-		removeEvent = function(e, el){
-			el['on' + e] = null;
-			// el.removeEventListener(e, func, false);
-		},
-		addCSSRule = function(S, s, r, i) {
-			if(S.insertRule) S.insertRule(s + "{" + r + "}", i);
-			else if(S.addRule) S.addRule(s, r, i);
-		},
-		getTop = function(el){
-			var t = document.documentElement[sT];
-			return el.getBoundingClientRect().top + (t?t:document.body[sT]);
-		},
-		insertCss = function(){
-			if(window.slimScroll.inserted){
-				return;
-			}
-			// Inserting css rules
-			// Link: http://davidwalsh.name/add-rules-stylesheets
-			var slim = "["+l+"]",
-				imp = " !important",
-				pA = "position:absolute"+imp,
-				// classes
-				w = pA+";overflow:auto"+imp+";left:0px;top:0px"+imp+";right:-18px;bottom:0px"+imp+";padding-right:8px"+imp+";",
-				S = pA+";top:0px"+imp+";bottom:0px"+imp+";right:0px;left:auto;width:5px;cursor:pointer"+imp+";padding-right:0px"+imp+";",
-				s = pA+";background-color:#999;top:0px;left:0px;right:0px;",
-				//creating a sheet
-				style = document.createElement('style'),
-				scrollBar = "[data-scrollbar]";
-			try{
-				// WebKit hack :(
-				style.appendChild(document.createTextNode(""));
-			}catch(ex){}
-			
-			var head =  document.head || document.getElementsByTagName('head')[0];
-				
-			// adding above css to the sheet
-			head.insertBefore(style, (head.hasChildNodes())
-								? head.childNodes[0]
-								: null);
-			var sheet = style.sheet;
-			if(sheet){                
-				addCSSRule(sheet, slim+">div", w, 0);
-				addCSSRule(sheet, slim+">div+div", S, 0);
-				addCSSRule(sheet, scrollBar, s, 0);
-			}
-			else{
-				style.styleSheet.cssText = slim+">div{"+w+"}"+slim+">div+div"+"{"+S+"}"+slim+">div+div>div{"+s+"}";
-			}
-			window.slimScroll.inserted = true;
-		},
-		// Initial function
-		init = function(){
-			C.removeAttribute(l);  //reset
-			if(C.offsetHeight < C.scrollHeight){
-				setAttr(C, l, '1');
-				insertCss();
-				var h = C[iH], q = i.E = {};
-				// setting user defined classes
-				payload = payload || {};
-				q.w = payload.wrapperClass || "";
-				q.s = payload.scrollBarClass || "";
-				q.S = payload.scrollBarContainerClass || "";
-				q.a = payload.scrollBarContainerSpecialClass ? " " + payload.scrollBarContainerSpecialClass : "";
-				q.mH = payload.scrollBarMinHeight || 25;
-				q.sH = payload.scrollBarFixedHeight;  // could be undefined
-
-				C[iH] = "";
-				i[w] = cE(q.w, h, C);
-				i[S] = cE(q.S + q.a, "", C);
-				i[s] = cE(q.s, "", i[S]);
-				setAttr(i[s], 'data-scrollbar', '1');
-				assignValues();
-
-				if(payload.keepFocus){
-					setAttr(i[w], 'tabindex', '-1');
-					i[w].focus();
-				}
-				// Attaching mouse events
-				addEvent('mousedown', i[s], beginScroll);
-				addEvent('click', i[S], setScroll);
-				// For scroll
-				addEvent('scroll', i[w], doScroll);
-				// addEvent('selectstart', i[S], function(){return;});
-			}
-		}();
-	return {
-		resetValues: assignValues
-	}
-};
-
 let scrollbar = {"streamList": null, "settings_container": null};
 function load_scrollbar(id){
 	let scroll_node;
@@ -798,41 +592,26 @@ function load_scrollbar(id){
 		return null;
 	}
 	
-	if(scroll_node.offsetHeight < scroll_node.scrollHeight){
-		// Apply slim scroll plugin
-		scrollbar[id] = new slimScroll(scroll_node, {
-			'wrapperClass': 'scroll-wrapper unselectable mac',
-			'scrollBarContainerClass': 'scrollbarContainer',
-			'scrollBarContainerSpecialClass': 'animate',
-			'scrollBarClass': 'scrollbar',
-			'keepFocus': true
-		});
-	}
+	Ps.initialize(scroll_node, {
+		theme: "slimScrollbar"
+	});
 }
-function scrollbar_streamList_resetValues(){
-	if(scrollbar.streamList !== null && typeof scrollbar.streamList.resetValues == "function"){
-		scrollbar.streamList.resetValues();
-	} else {
-		if(page_loaded){load_scrollbar("streamList")};
-	}
+function scrollbar_streamList_update(){
+	let scroll_node = document.querySelector('#streamList');
+	Ps.update(scroll_node);
 }
-function scrollbar_settings_container_resetValues(){
-	if(scrollbar.settings_container !== null && typeof scrollbar.settings_container.resetValues == "function"){
-		scrollbar.settings_container.resetValues();
-	} else {
-		if(page_loaded){load_scrollbar("settings_container")};
-	}
+function scrollbar_settings_container_update(){
+	let scroll_node = document.querySelector('#settings_container');
+	Ps.update(scroll_node);
 }
-let page_loaded = false;
+
 window.onload = function(){
 	load_scrollbar("streamList");
+	load_scrollbar("settings_container");
 	
-	page_loaded = true;
-	// Resize example
-	// To make the resizing work, set the height of the container in PERCENTAGE
 	window.onresize = function(){
-		scrollbar_streamList_resetValues();
+		scrollbar_streamList_update();
 		
-		scrollbar_settings_container_resetValues();
+		scrollbar_settings_container_update();
 	}
 }

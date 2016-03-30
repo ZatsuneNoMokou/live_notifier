@@ -224,7 +224,7 @@ var firefox_button = ToggleButton({
 var panel = panels.Panel({
 	height: 350,
 	width: 285,
-	contentScriptFile: require("sdk/self").data.url("panel_contentScriptFile.js"),
+	contentScriptFile: [self.data.url("perfect-scrollbar.min.js"), self.data.url("panel_contentScriptFile.js")],
 	contentURL: self.data.url("panel.html"),
 });
 

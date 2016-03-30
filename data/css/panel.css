@@ -19,6 +19,15 @@ input[type=text]{
 	border-radius: 3px;
 	padding-left: 2px;
 }
+.ps-theme-slimScrollbar{
+	@include ps-container(map-merge($ps-theme-default, (
+		border-radius: 6,
+		scrollbar-x-rail-height: 3px,
+		scrollbar-x-height: 3px,
+		scrollbar-y-rail-width: 3px,
+		scrollbar-y-width: 3px
+	)));
+}
 
 
 .item-stream .streamTitle{
@@ -77,11 +86,14 @@ header button {
 #streamList, #settings_container{
 	overflow: hidden;
 	position: relative;
-	flex: 1;
+	/*flex: 1;*/
 	flex-direction: column;
 	align-items: stretch;
 	justify-content: space-between;
 	padding: 5px;
+	padding-right: 9px;
+	
+	height: 100%;
 }
 #searchInputContainer{
 	width: 100%;
@@ -108,6 +120,8 @@ header button {
 	background-position: 3px center;
 	justify-content: space-between;
 	flex-direction: column;
+	
+	max-width: 80%;
 }
 .item-stream.offlineItem{
 	padding: 7px;
@@ -137,7 +151,7 @@ header button {
 	background-repeat: no-repeat;
 	padding-left: 3px;
 	padding-top: 3px;
-    vertical-align: middle;
+	vertical-align: middle;
 }
 .item-stream[data-streamwebsite=dailymotion] .streamTitle::before{
 	background-image: url("/data/images/dailymotion-icon.png");
