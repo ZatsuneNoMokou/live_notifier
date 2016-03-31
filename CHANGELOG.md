@@ -1,3 +1,7 @@
+# 5.10.1:
+* Fix: Custum scrollbar style
+* Fix: Addon name in the notifications
+
 # 5.10.0:
 * +: New scrollbar (Perfect-scrollbar)
 * i: Small simplification

@@ -308,7 +308,7 @@ function addStreamFromPanel(data){
 				if(pattern.test(url)){
 					id = pattern.exec(url)[1];
 					if(streamListSetting.streamExist(id)){
-						doNotif("Live Notifier",`${display_id(id)} ${_("is already configured.")}`);
+						doNotif("Live notifier",`${display_id(id)} ${_("is already configured.")}`);
 						return true;
 					} else {
 						let id_toChecked = id;
@@ -351,17 +351,17 @@ function addStreamFromPanel(data){
 									let addstreamNotifAction = new notifAction("function", function(){
 										streamListSetting.addStream(id, ((type == "embed")? active_tab_url : ""));
 										streamListSetting.update();
-										doNotif("Live Notifier", `${display_id(id)} ${_("have been added.")}`);
+										doNotif("Live notifier", `${display_id(id)} ${_("have been added.")}`);
 										// Update the panel for the new stream added
 										setTimeout(function(){
 											refreshPanel(false);
 										}, 5000);
 										})
-									doActionNotif(`Stream Notifier (${_("click to confirm")})`, `${display_id(id)} ${_("wasn't configured, and can be added.")}`, addstreamNotifAction);
+									doActionNotif(`Live notifier (${_("click to confirm")})`, `${display_id(id)} ${_("wasn't configured, and can be added.")}`, addstreamNotifAction);
 								} else {
 									streamListSetting.addStream(id, ((type == "embed")? active_tab_url : ""));
 									streamListSetting.update();
-									doNotif("Live Notifier", `${display_id(id)} ${_("wasn't configured, and have been added.")}`);
+									doNotif("Live notifier", `${display_id(id)} ${_("wasn't configured, and have been added.")}`);
 									// Update the panel for the new stream added
 									setTimeout(function(){
 										refreshPanel(false);
@@ -384,7 +384,7 @@ function addStreamFromPanel(data){
 			page_port.port.on("addStream", addStreamFromPanel);
 		}
 	} else {
-		doNotif("Live Notifier", _("No supported stream detected in the current tab, so, nothing to add."));
+		doNotif("Live notifier", _("No supported stream detected in the current tab, so, nothing to add."));
 	}
 }
 function deleteStreamFromPanel(data){
@@ -396,15 +396,15 @@ function deleteStreamFromPanel(data){
 			let deletestreamNotifAction = new notifAction("function", function(){
 				delete streamListSetting.objData[id];
 				streamListSetting.update();
-				doNotif("Live Notifier", `${display_id(id)} ${_("has been deleted.")}`);
+				doNotif("Live notifier", `${display_id(id)} ${_("has been deleted.")}`);
 				// Update the panel for the new stream added
 				refreshPanel();
 				})
-			doActionNotif(`Stream Notifier (${_("click to confirm")})`, `${display_id(id)} ${_("will be deleted, are you sure?")}`, deletestreamNotifAction);
+			doActionNotif(`Live notifier (${_("click to confirm")})`, `${display_id(id)} ${_("will be deleted, are you sure?")}`, deletestreamNotifAction);
 		} else {
 			delete streamListSetting.objData[id];
 			streamListSetting.update();
-			doNotif("Live Notifier", `${display_id(id)} ${_("has been deleted.")}`);
+			doNotif("Live notifier", `${display_id(id)} ${_("has been deleted.")}`);
 			// Update the panel for the new stream added
 			refreshPanel();
 		}

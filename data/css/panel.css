@@ -19,14 +19,16 @@ input[type=text]{
 	border-radius: 3px;
 	padding-left: 2px;
 }
-.ps-theme-slimScrollbar{
-	@include ps-container(map-merge($ps-theme-default, (
-		border-radius: 6,
-		scrollbar-x-rail-height: 3px,
-		scrollbar-x-height: 3px,
-		scrollbar-y-rail-width: 3px,
-		scrollbar-y-width: 3px
-	)));
+.ps-theme-slimScrollbar .ps-scrollbar-x-rail, .ps-theme-slimScrollbar .ps-scrollbar-y-rail{
+	background-color: transparent !important;
+}
+.ps-theme-slimScrollbar .ps-scrollbar-x-rail, .ps-theme-slimScrollbar .ps-scrollbar-x{
+	border-radius: 6px !important;
+	height: 6px !important;
+}
+.ps-theme-slimScrollbar .ps-scrollbar-y-rail, .ps-theme-slimScrollbar .ps-scrollbar-y{
+	border-radius: 6px !important;
+	width: 6px !important;
 }
 
 
