@@ -1,3 +1,6 @@
+# 5.10.2:
+* Fix: Offline live count
+
 # 5.10.1:
 * Fix: Custum scrollbar style
 * Fix: Addon name in the notifications

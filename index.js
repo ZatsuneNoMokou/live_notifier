@@ -725,12 +725,21 @@ function doStreamNotif(website, id, contentId, streamSetting, isStreamOnline){
 
 function getOfflineCount(){
 	var offlineCount = 0;
-	for(let website in liveStatus){
-		var streamList = (new streamListFromSetting(website)).objData;
-		for(let id in liveStatus[website]){
-			for(let contentId in liveStatus[website][id]){
-				if(!liveStatus[website][id][contentId].online_cleaned && streamList.hasOwnProperty(id)){
+	
+	for(let i in websites){
+		let website = websites[i];
+		let streamList = (new streamListFromSetting(website)).objData;
+		
+		for(let id in streamList){
+			if(id in liveStatus[website]){
+				if(JSON.stringify(liveStatus[website][id]) == "{}"){
 					offlineCount = offlineCount + 1;
+				} else {
+					for(let contentId in liveStatus[website][id]){
+						if(!liveStatus[website][id][contentId].online_cleaned && streamList.hasOwnProperty(id)){
+							offlineCount = offlineCount + 1;
+						}
+					}
 				}
 			}
 		}
