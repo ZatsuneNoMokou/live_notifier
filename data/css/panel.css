@@ -227,6 +227,10 @@ header button {
 	margin-bottom: 2px;
 	min-height: 21px;
 }
+#streamListOnline > div.group, #streamListOffline > div.group{
+	padding-top: 2px !important;
+	/*padding-bottom: 2px !important;*/
+}
 .item-stream h1{
 	margin: 0px;
 	padding: 0px;

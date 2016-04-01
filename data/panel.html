@@ -24,9 +24,17 @@
 		<div id="deleteStreamTooltip" class="hide"><i class="material-icons">info</i> <span data-l10n-id="delete_tooltip">To delete a stream from the settings, move it in the trash can.</span></div>
 		<div id="streamListOnline">
 			<div id="streamOnlineCountLabel">No online stream currently</div>
+			<div class="beam group"></div>
+			<div class="dailymotion group"></div>
+			<div class="hitbox group"></div>
+			<div class="twitch group"></div>
 		</div>
 		<div id="streamListOffline">
 			<div id="streamOfflineCountLabel">No offline stream currently</div>
+			<div class="beam group"></div>
+			<div class="dailymotion group"></div>
+			<div class="hitbox group"></div>
+			<div class="twitch group"></div>
 		</div>
 	</section>
 	<section id="settings_container" class="hide">
@@ -77,10 +85,17 @@
 			</label>
 		</p>
 		
-		<label class="preference flex_input_text" data-translate-title="show_offline_in_panel_description" title="Shown when checked">
-			<span data-l10n-id="show_offline_in_panel_title">Show offline streams in the panel</span>: 
-			<input type="checkbox" id="show_offline_in_panel" class="preferenceInput" data-setting-type="boolean">
-		</label>
+		<p class="pref_group">
+			<label class="preference flex_input_text" data-translate-title="group_streams_by_websites_description" title="Grouped when checked">
+				<span data-l10n-id="group_streams_by_websites_title">Group streams by website</span>: 
+				<input type="checkbox" id="group_streams_by_websites" class="preferenceInput" data-setting-type="boolean">
+			</label>
+			
+			<label class="preference flex_input_text" data-translate-title="show_offline_in_panel_description" title="Shown when checked">
+				<span data-l10n-id="show_offline_in_panel_title">Show offline streams in the panel</span>: 
+				<input type="checkbox" id="show_offline_in_panel" class="preferenceInput" data-setting-type="boolean">
+			</label>
+		</p>
 		
 		<p class="pref_group">
 			<label class="preference flex_input_text" data-translate-title="confirm_addStreamFromPanel_description" title="Show a notification to confirm when adding a stream of config (from panel)">

@@ -1,3 +1,7 @@
+# 5.10.3:
+* Fix: Various bug fix
+* Fix: Setting to choose grouped by website or not, in panel
+
 # 5.10.2:
 * Fix: Offline stream count
 * Fix: Localization

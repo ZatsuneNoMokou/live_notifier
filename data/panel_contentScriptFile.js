@@ -104,17 +104,17 @@ deleteStreamButton.addEventListener("click",deleteStreamButtonClick,false);
 
 /*				---- Search Button ----				*/
 let toggle_search_button = document.querySelector("button#searchStream");
-let searchInput_onChange_Loaded = false;
+let searchInput_onInput_Loaded = false;
 function searchContainer_Toggle(){
 	let searchInputContainer = document.querySelector("#searchInputContainer");
 	let hiddenClass = /\s*hide/i;
 	
 	let searchInput = document.querySelector("input#searchInput");
-	if(!searchInput_onChange_Loaded){
-		searchInput.addEventListener("change", searchInput_onChange);
+	if(!searchInput_onInput_Loaded){
+		searchInput.addEventListener("input", searchInput_onInput);
 		
 		let searchLabel = document.querySelector("#searchInputContainer label");
-		searchLabel.addEventListener("click", searchInput_onChange);
+		searchLabel.addEventListener("click", searchInput_onInput);
 	}
 	
 	if(hiddenClass.test(searchInputContainer.className)){
@@ -122,14 +122,14 @@ function searchContainer_Toggle(){
 	} else {
 		searchInputContainer.className += " hide";
 		searchInput.value = "";
-		searchInput_onChange();
+		searchInput_onInput();
 	}
 	
 	scrollbar_streamList_update();
 }
 toggle_search_button.addEventListener("click", searchContainer_Toggle);
 
-function searchInput_onChange(){
+function searchInput_onInput(){
 	let searchInput = document.querySelector("input#searchInput");
 	let somethingElseThanSpaces = /[^\s]+/;
 	let search = searchInput.value.toLowerCase();
@@ -144,7 +144,7 @@ function searchInput_onChange(){
 	} else {
 		searchCSS_Node.textContent = "";
 		searchInput.value = "";
-		searchInput_onChange();
+		searchInput_onInput();
 	}
 	scrollbar_streamList_update();
 }
@@ -208,6 +208,9 @@ function initSettings(){
 	let notify_offline_input = document.querySelector("#notify_offline");
 	notify_offline_input.addEventListener("change", settingNode_onChange, false);
 	
+	let group_streams_by_websites_input = document.querySelector("#group_streams_by_websites");
+	group_streams_by_websites_input.addEventListener("change", settingNode_onChange, false);
+	
 	let show_offline_in_panel = document.querySelector("#show_offline_in_panel");
 	show_offline_in_panel.addEventListener("change", settingNode_onChange, false);
 	
@@ -269,7 +272,11 @@ function removeAllChildren(node){
 	}
 }
 
-function initList(showOffline){
+let group_streams_by_websites = true;
+function initList(data){
+	let showOffline = data.show_offline_in_panel;
+	group_streams_by_websites = data.group_streams_by_websites;
+	
 	let streamItems = document.querySelectorAll(".item-stream");
 	for(let node of streamItems){
 		node.removeEventListener("click", streamItemClick);
@@ -335,6 +342,31 @@ function newCopyLivestreamerCmdButton(id, contentId, website){
 	return node;
 }
 
+let streamNodes = {
+	"online": {
+		"beam": document.querySelector("#streamListOnline .beam"),
+		"dailymotion": document.querySelector("#streamListOnline .dailymotion"),
+		"hitbox": document.querySelector("#streamListOnline .hitbox"),
+		"twitch": document.querySelector("#streamListOnline .twitch")
+	},
+	"offline": {
+		"beam": document.querySelector("#streamListOffline .beam"),
+		"dailymotion": document.querySelector("#streamListOffline .dailymotion"),
+		"hitbox": document.querySelector("#streamListOffline .hitbox"),
+		"twitch": document.querySelector("#streamListOffline .twitch")
+	}
+}
+
+function showNonEmptySitesBlocks(){
+	let current_node;
+	for(let onlineStatus in streamNodes){
+		for(let website in streamNodes[onlineStatus]){
+			current_node = streamNodes[onlineStatus][website];
+			current_node.className = current_node.className.replace(/\s*hide/i,"");
+			current_node.className = current_node.className + ((current_node.hasChildNodes())? "" : " hide");
+		}
+	}
+}
 function insertStreamNode(newLine, data){
 	let statusNode;
 	let statusStreamList;
@@ -347,20 +379,25 @@ function insertStreamNode(newLine, data){
 		statusStreamList = document.querySelectorAll("#streamListOffline .item-stream");
 	}
 	
-	if(statusStreamList.length > 0){
-		for(let i in statusStreamList){
-			let streamNode = statusStreamList[i];
-			if(typeof streamNode.getAttribute == "function"){
-				let streamNode_title = streamNode.getAttribute("data-streamName");
-				if(data.streamName.toLowerCase() < streamNode_title.toLowerCase()){
-					streamNode.parentNode.insertBefore(newLine,streamNode);
-					return true;
+	if(group_streams_by_websites){
+		streamNodes[((data.online)? "online" : "offline")][data.website].appendChild(newLine);
+		return true;
+	} else {
+		if(statusStreamList.length > 0){
+			for(let i in statusStreamList){
+				let streamNode = statusStreamList[i];
+				if(typeof streamNode.getAttribute == "function"){
+					let streamNode_title = streamNode.getAttribute("data-streamName");
+					if(data.streamName.toLowerCase() < streamNode_title.toLowerCase()){
+						streamNode.parentNode.insertBefore(newLine,streamNode);
+						return true;
+					}
 				}
 			}
 		}
+		statusNode.appendChild(newLine);
+		return true;
 	}
-	statusNode.appendChild(newLine);
-	return true;
 }
 
 function listener(data){
@@ -469,6 +506,7 @@ function listener(data){
 	
 	newLine.draggable = true;
 	
+	showNonEmptySitesBlocks();
 	scrollbar_streamList_update();
 }
 function streamItemClick(){

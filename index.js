@@ -448,7 +448,7 @@ function updatePanelData(){
 	current_background_color = getPreferences("background_color");
 	
 	//Clear stream list in the panel
-	panel.port.emit("initList", getPreferences("show_offline_in_panel"));
+	panel.port.emit("initList", {"group_streams_by_websites": getPreferences("group_streams_by_websites"), "show_offline_in_panel": getPreferences("show_offline_in_panel")});
 	
 	for(let website in liveStatus){
 		var streamList = (new streamListFromSetting(website)).objData;
@@ -470,7 +470,7 @@ function updatePanelData(){
 					streamStatus: streamData.streamStatus,
 					streamGame: streamData.streamGame,
 					streamOwnerLogo: streamData.streamOwnerLogo,
-					treamCategoryLogo: streamData.streamCategoryLogo,
+					streamCategoryLogo: streamData.streamCategoryLogo,
 					streamCurrentViewers: streamData.streamCurrentViewers,
 					streamUrl: getStreamURL(website, id, contentId, true)
 				}
@@ -524,6 +524,7 @@ function updatePanelData(){
 		"dailymotion_check_delay",
 		"notify_online",
 		"notify_offline",
+		"group_streams_by_websites",
 		"show_offline_in_panel",
 		"confirm_addStreamFromPanel",
 		"confirm_deleteStreamFromPanel",
@@ -864,7 +865,7 @@ function importAPI(website, id){
 	}
 }
 function isValidResponse(website, data){
-	if(data == null){
+	if(data == null || typeof data != "object" || JSON.stringify == "{}"){
 		console.warn("Unable to get stream state (no connection).");
 		return false;
 	}
