@@ -1,5 +1,5 @@
 # 5.10.2:
-* Fix: Offline live count
+* Fix: Offline stream count
 * Fix: Localization
 
 # 5.10.1:
