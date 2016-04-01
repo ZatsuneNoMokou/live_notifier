@@ -1,5 +1,6 @@
 # 5.10.2:
 * Fix: Offline live count
+* Fix: Localization
 
 # 5.10.1:
 * Fix: Custum scrollbar style
