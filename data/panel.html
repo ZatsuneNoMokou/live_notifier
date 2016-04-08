@@ -3,7 +3,7 @@
 	<meta charset="UTF-8">
 	<link rel="stylesheet" type="text/css" media="all" href="css/panel.css" />
 	<style id="search-cssSelector"></style>
-	<link id="panel-color-stylesheet" rel="stylesheet" type="text/css" media="all" href="css/panel-theme-dark.css" />
+	<link id="panel-color-stylesheet" rel="stylesheet" type="text/css" media="all" data-theme="dark" data-background_color="#000000" href="css/panel-theme-dark.css" />
 	
 	<link rel="stylesheet" href="css/perfect-scrollbar.min.css" />
 	
@@ -38,12 +38,22 @@
 		</div>
 	</section>
 	<section id="settings_container" class="hide">
+		<p id="dailymotion" class="website_pref">
+			<label class="preference import_container" data-translate-title="dailymotion_user_id_description" title="Enter your Dailymotion id to be able to import the stream(s) you follow">
+				<span class="label"><span data-l10n-id="dailymotion_user_id_description">Enter your Dailymotion id to be able to import the stream(s) you follow</span>:</span>
+				<span class="pref_container">
+					<input type="text" id="dailymotion_user_id" class="preferenceInput" data-setting-type="string">
+					<button id="dailymotion_import" data-l10n-id="dailymotion_import_label">Import</button>
+				</span>
+			</label>
+		</p>
+
 		<p id="hitbox" class="website_pref">
 			<label class="preference import_container" data-translate-title="hitbox_user_id_description" title="Enter your Hitbox id to be able to import the stream(s) you follow">
 				<span class="label"><span data-l10n-id="hitbox_user_id_description">Enter your Hitbox id to be able to import the stream(s) you follow</span>:</span>
 				<span class="pref_container">
 					<input type="text" id="hitbox_user_id" class="preferenceInput" data-setting-type="string">
-					<button id="hitbox_import" data-l10n-id="hitbox_import">Import</button>
+					<button id="hitbox_import" data-l10n-id="hitbox_import_label">Import</button>
 				</span>
 			</label>
 		</p>
@@ -53,7 +63,7 @@
 				<span class="label"><span data-l10n-id="twitch_user_id_description">Enter your Twitch id to be able to import the stream(s) you follow</span>:</span>
 				<span class="pref_container">
 					<input type="text" id="twitch_user_id" class="preferenceInput" data-setting-type="string">
-					<button id="twitch_import" data-l10n-id="twitch_import">Import</button>
+					<button id="twitch_import" data-l10n-id="twitch_import_label">Import</button>
 				</span>
 			</label>
 		</p>
@@ -63,7 +73,7 @@
 				<span class="label"><span data-l10n-id="beam_user_id_description">Enter your Beam id to be able to import the stream(s) you follow</span>:</span>
 				<span class="pref_container">
 					<input type="text" id="beam_user_id" class="preferenceInput" data-setting-type="string">
-					<button id="beam_import" data-l10n-id="beam_import">Import</button>
+					<button id="beam_import" data-l10n-id="beam_import_label">Import</button>
 				</span>
 			</label>
 		</p>

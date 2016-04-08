@@ -1,3 +1,11 @@
+# 5.11.0:
+* +: Support of importing from Dailymotion 
+* i: Updating input text from panel on input
+* Fix: paging management on Hitbox import and dailymotion channels
+* Fix: onInput event for input text setting from panel
+* Fix: Title width of offline streams
+* Fix: Localization of import buttons
+
 # 5.10.3:
 * Fix: Various bug fix
 * Fix: Setting to choose grouped by website or not, in panel

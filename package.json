@@ -2,7 +2,7 @@
 	"name": "livenotifier",
 	"title": "Live notifier",
 	"id": "live_notifier@zatsunenomokou.eu",
-	"version": "5.10.3",
+	"version": "5.11.0",
 	"description": "Be notified of streams from Dailymotion, Hitbox, Twitch and Beam",
 	"main": "index.js",
 	"author": "Zatsune No Mokou",
@@ -24,6 +24,20 @@
 			"value": ""
 		},
 		{
+			"name": "dailymotion_user_id",
+			"title": "Your Dailymotion id",
+			"description": "Enter your Dailymotion id to be able to import the stream(s) you follow.",
+			"type": "string",
+			"value": ""
+		},
+		{
+			"name": "dailymotion_import",
+			"title": "Import the Dailymotion stream(s) you follow",
+			"label": "Import",
+			"type": "control"
+		},
+		
+		{
 			"name": "hitbox_keys_list",
 			"title": "Hitbox keys to notify",
 			"description": "Stream list in a comma separated list.",
@@ -43,7 +57,7 @@
 			"label": "Import",
 			"type": "control"
 		},
-
+		
 		{
 			"name": "twitch_keys_list",
 			"title": "Twitch keys to notify",
@@ -64,6 +78,7 @@
 			"label": "Import",
 			"type": "control"
 		},
+		
 		{
 			"name": "beam_keys_list",
 			"title": "Beam keys to notify",

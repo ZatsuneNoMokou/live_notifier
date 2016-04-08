@@ -142,7 +142,7 @@ header button {
 }
 .item-stream.offlineItem.streamLogo{
 	padding-left: 58px;
-	background-size: auto 100%;
+	background-size: auto 28px;
 }
 .item-stream .streamTitle::before{
 	display: inline-block;
@@ -171,7 +171,7 @@ header button {
 	width: 160px;
 }
 .item-stream.offlineItem .streamTitle{
-	max-height: 19px;
+	/*max-height: 19px;*/
 	left: -15px;
 	overflow: hidden;
 }
@@ -179,9 +179,9 @@ header button {
 	position: relative;
 	margin-top: -5px;
 }
-.item-stream.offlineItem.streamLogo .streamTitle{
+/*.item-stream.offlineItem.streamLogo .streamTitle{
 	width: 190px;
-}
+}*/
 .streamCurrentViewers{
 	display: block;
 }

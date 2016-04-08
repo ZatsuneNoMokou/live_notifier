@@ -27,9 +27,11 @@ let {setInterval, setTimeout, clearInterval} = require("sdk/timers");
 function getPreferences(prefId){
 	return simplePrefs[prefId];
 }
-function savePreference(prefId, value){
+function savePreference(prefId, value, updatePanel){
 	simplePrefs[prefId] = value;
-	refreshPanel();
+	if(typeof updatePanel == "undefined" || updatePanel == true){
+		refreshPanel();
+	}
 }
 
 let myIconURL = self.data.url("live_offline_64.svg");
@@ -411,15 +413,23 @@ function deleteStreamFromPanel(data){
 	}
 }
 
-function settingUpdate(settingName, settingValue){
+function settingUpdate(data){
+	let settingName = data.settingName;
+	let settingValue = data.settingValue;
+	
+	let updatePanel = true;
+	if(typeof data.updatePanel != "undefined"){
+		updatePanel = data.updatePanel;
+	}
+	
 	if(typeof getPreferences(settingName) == "number" && typeof settingValue == "string"){
 		settingValue = parseInt(settingValue);
 	}
-	console.log(`${settingName} - ${settingValue}`);
+	console.log(`${settingName} - ${settingValue} (Update panel: ${updatePanel})`);
 	if(typeof getPreferences(settingName) != typeof settingValue){
 		console.warn(`Setting (${settingName}) type: ${typeof getPreferences(settingName)} - Incoming type: ${typeof settingValue}`);
 	}
-	savePreference(settingName, settingValue);
+	savePreference(settingName, settingValue, updatePanel);
 }
 
 function importButton_Panel(website){
@@ -435,9 +445,7 @@ panel.port.on("deleteStream", deleteStreamFromPanel);
 panel.port.on("copyLivestreamerCmd", copyLivestreamerCmd);
 panel.port.on("openOnlineLive", openOnlineLive);
 panel.port.on("openTab", openTabIfNotExist);
-panel.port.on("setting_Update", function(data){
-	settingUpdate(data.settingName, data.settingValue);
-});
+panel.port.on("setting_Update", settingUpdate);
 
 function updatePanelData(){
 	if((typeof current_panel_theme != "string" && typeof current_background_color != "string") || current_panel_theme != getPreferences("panel_theme") || current_background_color != getPreferences("background_color")){
@@ -518,6 +526,7 @@ function updatePanelData(){
 	}
 	
 	let updateSettings = [
+		"dailymotion_user_id",
 		"hitbox_user_id",
 		"twitch_user_id",
 		"beam_user_id",
@@ -792,7 +801,7 @@ function API(website, id){
 			if(website_channel_id.test(id)){
 				this.url = `https://api.dailymotion.com/videos?live_onair&owners=${website_channel_id.exec(id)[1]}&fields=id,title,owner,audience,url,mode,onair?_= ${new Date().getTime()}`;
 			} else {
-				this.url = `https://api.dailymotion.com/video/${id}?fields=title,owner,user.username,audience,url,mode,onair?_= ${new Date().getTime()}`;
+				this.url = `https://api.dailymotion.com/video/${id}?fields=title,owner,user.username,audience,url,mode,onair?_=${new Date().getTime()}`;
 			}
 			this.overrideMimeType = "text/plain; charset=latin1";
 			break;
@@ -850,6 +859,10 @@ function importAPI(website, id){
 	this.overrideMimeType = "";
 	
 	switch(website){
+		case "dailymotion":
+			this.url = `https://api.dailymotion.com/user/${id}/following?fields=id,username?_=${new Date().getTime()}`;
+			this.overrideMimeType = "text/plain; charset=latin1";
+			break;
 		case "hitbox":
 			this.url = `https://api.hitbox.tv/following/user?user_name=${id}`;
 			this.overrideMimeType = "text/plain; charset=utf-8";
@@ -989,8 +1002,8 @@ let pagingPrimary = {
 				
 				if(data.has_more){
 					let next_url = (new API(website, website_channel_id.exec(id)[1])).url;
-					let current_pageNumber = ((typeof pageNumber == "number")? pageNumber : 1);
-					getPrimary(id, website, streamSetting, next_url, current_pageNumber + 1);
+					let next_page_number = ((typeof pageNumber == "number")? pageNumber : 1) + 1;
+					getPrimary(id, website, streamSetting, next_url + "&page=" + next_page_number, next_page_number);
 				} else {
 					pagingPrimaryEnd(id);
 				}
@@ -1073,6 +1086,20 @@ let channelInfosProcess = {
 
 //Fonction principale : check si le live est on
 checkLiveStatus = {
+	"beam":
+		function(id, contentId, data){
+			let streamData = liveStatus["beam"][id][contentId];
+			
+			streamData.streamName = data["user"]["username"];
+			streamData.streamStatus = data["name"];
+			
+			if(typeof data["user"]["avatarUrl"] == "string" && data["user"]["avatarUrl"] != ""){
+				streamData.streamOwnerLogo = data["user"]["avatarUrl"];
+			}
+			streamData.streamCurrentViewers = parseInt(data["viewersCurrent"]);
+			
+			return data["online"];
+		},
 	"dailymotion":
 		function(id, contentId, data){
 			let streamData = liveStatus["dailymotion"][id][contentId];
@@ -1156,20 +1183,6 @@ checkLiveStatus = {
 			} else {
 				return null;
 			}
-		},
-	"beam":
-		function(id, contentId, data){
-			let streamData = liveStatus["beam"][id][contentId];
-			
-			streamData.streamName = data["user"]["username"];
-			streamData.streamStatus = data["name"];
-			
-			if(typeof data["user"]["avatarUrl"] == "string" && data["user"]["avatarUrl"] != ""){
-				streamData.streamOwnerLogo = data["user"]["avatarUrl"];
-			}
-			streamData.streamCurrentViewers = parseInt(data["viewersCurrent"]);
-			
-			return data["online"];
 		}
 }
 seconderyInfo = {
@@ -1263,6 +1276,57 @@ function importStreamsEnd(id){
 }
 
 let importStreamWebsites = {
+	"beam": function(id, data){
+		let streamListSetting = new streamListFromSetting("beam");
+		let streamList = streamListSetting.objData;
+		if(typeof data == "object"){
+			for(let item of data){
+				streamListSetting.addStream(item["token"], "");
+			}
+			streamListSetting.update();
+		}
+		importStreamsEnd(id);
+	},
+	"dailymotion": function(id, data, pageNumber){
+		let streamListSetting = new streamListFromSetting("dailymotion");
+		let streamList = streamListSetting.objData;
+		
+		if(data.total > 0){
+			for(let item of data.list){
+				if(!streamListSetting.streamExist(`channel::${item.id}`) && !streamListSetting.streamExist(`channel::${item.username}`)){
+					streamListSetting.addStream(`channel::${item.id}`, "");
+				} else {
+					console.log(`${item.username} already exist`);
+				}
+			}
+			streamListSetting.update();
+		}
+		
+		if(data.has_more){
+			let next_url = new importAPI("dailymotion", id).url;
+			let next_page_number = ((typeof pageNumber == "number")? pageNumber : 1) + 1;
+			importStreams("dailymotion", id, next_url + "&page=" + next_page_number, next_page_number);
+		} else {
+			importStreamsEnd(id);
+		}
+	},
+	"hitbox": function(id, data, pageNumber){
+		let streamListSetting = new streamListFromSetting("hitbox");
+		let streamList = streamListSetting.objData;
+		if(typeof data.following == "object"){
+			for(let item of data.following){
+				streamListSetting.addStream(item["user_name"], "");
+			}
+			streamListSetting.update();
+			if(data.following.length > 0){
+				let next_url = new importAPI("hitbox", id).url;
+				let next_page_number = ((typeof pageNumber == "number")? pageNumber : 1) + 1;
+				importStreams("hitbox", id, next_url + "&offset=" + next_page_number, next_page_number);
+			} else {
+				importStreamsEnd(id);
+			}
+		}
+	},
 	"twitch": function(id, data){
 		let streamListSetting = new streamListFromSetting("twitch");
 		let streamList = streamListSetting.objData;
@@ -1277,34 +1341,6 @@ let importStreamWebsites = {
 				importStreamsEnd(id);
 			}
 		}
-	},
-	"hitbox": function(id, data, pageNumber){
-		let streamListSetting = new streamListFromSetting("hitbox");
-		let streamList = streamListSetting.objData;
-		if(typeof data.following == "object"){
-			for(let item of data.following){
-				streamListSetting.addStream(item["user_name"], "");
-			}
-			streamListSetting.update();
-			if(data.following.length > 0){
-				let next_url = new importAPI("hitbox", id).url;
-				let current_pageNumber = ((typeof pageNumber == "number")? pageNumber : 1);
-				importStreams("hitbox", id, next_url + "&offset=" + current_pageNumber, current_pageNumber + 1);
-			} else {
-				importStreamsEnd(id);
-			}
-		}
-	},
-	"beam": function(id, data){
-		let streamListSetting = new streamListFromSetting("beam");
-		let streamList = streamListSetting.objData;
-		if(typeof data == "object"){
-			for(let item of data){
-				streamListSetting.addStream(item["token"], "");
-			}
-			streamListSetting.update();
-		}
-		importStreamsEnd(id);
 	}
 }
 function importTwitchButton(){importButton("twitch");}
@@ -1322,10 +1358,11 @@ var interval
 checkLives();
 
 // Checking if updated
+let current_version = "";
 (function checkIfUpdated(){
 	let getVersionNumbers =  /^(\d*)\.(\d*)\.(\d*)$/;
 	let last_executed_version = getPreferences("livenotifier_version");
-	let current_version = self.version;
+	current_version = self.version;
 	
 	let last_executed_version_numbers = getVersionNumbers.exec(last_executed_version);
 	let current_version_numbers = getVersionNumbers.exec(current_version);
@@ -1352,15 +1389,20 @@ windows.on('activate', windowsFocusChange);
 
 
 exports.onUnload = function (reason) {
-	clearInterval(interval);
-	sp.removeListener("dailymotion_check_delay", dailymotion_check_delay_onChange);
-	panel.port.removeListener("refreshPanel", refreshPanel);
-	panel.port.removeListener("importStreams", importButton_Panel);
-	panel.port.removeListener('refreshStreams', refreshStreamsFromPanel);
-	panel.port.removeListener("addStream", addStreamFromPanel);
-	panel.port.removeListener("deleteStream", deleteStreamFromPanel);
-	panel.port.removeListener("openTab", openTabIfNotExist);
-	sp.removeListener("twitch_import", importTwitchButton);
-	windows.removeListener("activate", windowsFocusChange);
-	panel.port.emit('unloadListeners', "");
+	try{
+		clearInterval(interval);
+		sp.removeListener("dailymotion_check_delay", dailymotion_check_delay_onChange);
+		panel.port.removeListener("refreshPanel", refreshPanel);
+		panel.port.removeListener("importStreams", importButton_Panel);
+		panel.port.removeListener('refreshStreams', refreshStreamsFromPanel);
+		panel.port.removeListener("addStream", addStreamFromPanel);
+		panel.port.removeListener("deleteStream", deleteStreamFromPanel);
+		panel.port.removeListener("openTab", openTabIfNotExist);
+		sp.removeListener("twitch_import", importTwitchButton);
+		windows.removeListener("activate", windowsFocusChange);
+		panel.port.emit('unloadListeners', "");
+	}
+	catch(err){
+		console.warn(err);
+	}
 }

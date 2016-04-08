@@ -175,8 +175,16 @@ function setting_Toggle(){
 settings_button.addEventListener("click", setting_Toggle, false);
 
 function initSettings(){
+	let dailymotion_user_id_input = document.querySelector("#dailymotion_user_id");
+	dailymotion_user_id_input.addEventListener("input", settingNode_onChange, false);
+	
+	let dailymotion_import_button = document.querySelector("button#dailymotion_import");
+	dailymotion_import_button.addEventListener("click", function(){
+		self.port.emit("importStreams","dailymotion");
+	});
+	
 	let hitbox_user_id_input = document.querySelector("#hitbox_user_id");
-	hitbox_user_id_input.addEventListener("blur", settingNode_onChange, false);
+	hitbox_user_id_input.addEventListener("input", settingNode_onChange, false);
 	
 	let hitbox_import_button = document.querySelector("button#hitbox_import");
 	hitbox_import_button.addEventListener("click", function(){
@@ -184,7 +192,7 @@ function initSettings(){
 	});
 	
 	let twitch_user_id_input = document.querySelector("#twitch_user_id");
-	twitch_user_id_input.addEventListener("blur", settingNode_onChange, false);
+	twitch_user_id_input.addEventListener("input", settingNode_onChange, false);
 	
 	let twitch_import_button = document.querySelector("button#twitch_import");
 	twitch_import_button.addEventListener("click", function(){
@@ -192,7 +200,7 @@ function initSettings(){
 	});
 	
 	let beam_user_id_input = document.querySelector("#beam_user_id");
-	beam_user_id_input.addEventListener("blur", settingNode_onChange, false);
+	beam_user_id_input.addEventListener("input", settingNode_onChange, false);
 	
 	let beam_import_button = document.querySelector("button#beam_import");
 	beam_import_button.addEventListener("click", function(){
@@ -230,20 +238,29 @@ function initSettings(){
 	livestreamer_cmd_to_clipboard_input.addEventListener("change", settingNode_onChange, false);
 	
 	let livestreamer_cmd_quality_input = document.querySelector("#livestreamer_cmd_quality");
-	livestreamer_cmd_quality_input.addEventListener("blur", settingNode_onChange, false);
+	livestreamer_cmd_quality_input.addEventListener("input", settingNode_onChange, false);
 	
 	self.port.emit("refreshPanel","");
 }
 
-function settingNode_onChange(){
+function settingNode_onChange(event){
 	let node = this;
 	let setting_Name = this.id;
 	let value = getValueFromNode(node);
 	if(setting_Name == "dailymotion_check_delay" && value < 1){
 		value = 1;
 	}
-	self.port.emit("setting_Update", {settingName: setting_Name, settingValue: value});
-	self.port.emit("refreshPanel", {});
+	
+	let updatePanel = true
+	// if(event.type == "input" && this.tagName == "INPUT" && this.type == "text"){
+	if(event.type == "input"){
+		updatePanel = false;
+	}
+	self.port.emit("setting_Update", {settingName: setting_Name, settingValue: value, updatePanel: updatePanel});
+	
+	if(updatePanel){
+		self.port.emit("refreshPanel", {});
+	}
 }
 
 function settingNodesUpdate(data){
@@ -260,6 +277,8 @@ function settingNodesUpdate(data){
 				settingNode.value = data.settingValue;
 				break;
 		}
+	} else {
+		console.warn(`${data.settingName} node is null`);
 	}
 }
 /*			---- Settings end ----			*/
@@ -599,6 +618,8 @@ header button, .item-stream {background-color: hsl(${baseColor_hsl.H}, ${baseCol
 #deleteStreamTooltip {background-color: hsla(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[2]}, 0.95);};
 header, .item-stream, footer{box-shadow: 0px 0px 5px 0px hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[3]});}
 	`
+	panelColorStylesheet.setAttribute("data-theme", panel_theme);
+	panelColorStylesheet.setAttribute("data-background_color", background_color);
 	//console.log(baseColor.rgbCode());
 	//console.log("hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + baseColor_hsl.L + ")");
 	
