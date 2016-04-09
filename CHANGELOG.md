@@ -1,3 +1,7 @@
+# 5.11.1:
+* Fix: Notification was broken
+* Fix: Default stream names
+
 # 5.11.0:
 * +: Support of importing from Dailymotion 
 * i: Updating input text from panel on input

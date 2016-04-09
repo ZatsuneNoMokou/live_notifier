@@ -704,7 +704,7 @@ function doStreamNotif(website, id, contentId, streamSetting, isStreamOnline){
 	let isStreamOnline_cleaned = getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamOnline);
 	
 	if(isStreamOnline_cleaned){
-		if(getPreferences("notify_online") && streamData.online_cleaned == false){
+		if(getPreferences("notify_online") && streamData.notificationStatus == false){
 			let streamStatus = streamData.streamStatus + ((streamData.streamGame != "")? (" (" + streamData.streamGame + ")") : "");
 			if(streamStatus.length > 0 && streamStatus.length < 60){
 				if(streamLogo != ""){
@@ -722,7 +722,7 @@ function doStreamNotif(website, id, contentId, streamSetting, isStreamOnline){
 			}
 		}
 	} else {
-		if(getPreferences("notify_offline") && streamData.online_cleaned){
+		if(getPreferences("notify_offline") && streamData.notificationStatus == true){
 			if(streamLogo != ""){
 				doNotif(_("Stream offline"),streamName, streamLogo);
 			} else {
@@ -731,6 +731,7 @@ function doStreamNotif(website, id, contentId, streamSetting, isStreamOnline){
 		}
 	}
 	streamData.online = isStreamOnline;
+	streamData.notificationStatus = isStreamOnline;
 }
 
 function getOfflineCount(){
@@ -1013,7 +1014,7 @@ let pagingPrimary = {
 
 function processPrimary(id, contentId, website, streamSetting, data){
 	if(typeof liveStatus[website][id][contentId] == "undefined"){
-		liveStatus[website][id][contentId] = {"online": false, "streamName": "", "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": ""};
+		liveStatus[website][id][contentId] = {"online": false, "notificationStatus": false, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": ""};
 	}
 	let liveState = checkLiveStatus[website](id, contentId, data);
 	if(liveState !== null){
@@ -1052,7 +1053,7 @@ function getChannelInfo(website, id){
 	let channelInfos_API = new API_channelInfos(website, id);
 	
 	if(typeof channelInfos["dailymotion"][id] == "undefined"){
-		channelInfos["dailymotion"][id] = {"online": false, "streamName": id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": ""};
+		channelInfos["dailymotion"][id] = {"online": false, "notificationStatus": false, "streamName": id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": ""};
 	}
 	
 	if(channelInfos_API.url !== null && channelInfos_API.overrideMimeType !== null){
