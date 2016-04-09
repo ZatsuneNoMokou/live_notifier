@@ -7,7 +7,7 @@
 * i: Updating input text from panel on input
 * Fix: paging management on Hitbox import and Dailymotion channels
 * Fix: onInput event for input text setting from panel
-* Fix: Title width of offline streams
+* Fix: Title height of offline streams
 * Fix: Localization of import buttons
 
 # 5.10.3:
