@@ -1,3 +1,6 @@
+# 5.11.2:
+* Fix: Verification delay setting localization
+
 # 5.11.1:
 * Fix: Notification was broken
 * Fix: Default stream names
