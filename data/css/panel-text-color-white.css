@@ -3,7 +3,7 @@ body, header button, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteS
 	color: #FFFFFF;
 }
 /*		--- Secondary text / Base Color ----		*/
-.item-stream, .item-stream .streamTitle, .item-stream .streamStatus, .item-stream .streamCurrentViewers{
+.item-stream, .item-stream .streamTitle, .item-stream .streamStatus, .item-stream .streamCurrentViewers, #current_version{
 	color: #FFFFFF;
 	color: rgba(255, 255, 255, 0.8);
 }

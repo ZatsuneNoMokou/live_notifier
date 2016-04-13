@@ -542,6 +542,11 @@ function streamItemClick(){
 	}
 }
 
+function current_version(data){
+	let current_version_node = document.querySelector("#current_version");
+	current_version_node.textContent = data.current_version;
+}
+
 function color(hexColorCode) {
 	let getCodes =  /^#([\da-fA-F]{2,2})([\da-fA-F]{2,2})([\da-fA-F]{2,2})$/;
 	if(getCodes.test(hexColorCode)){
@@ -637,6 +642,7 @@ self.port.on('updateOfflineCount', listenerOfflineCount);
 self.port.on('updateData', listener);
 self.port.on('settingNodesUpdate', settingNodesUpdate);
 self.port.on('panel_theme', theme_update);
+self.port.on('current_version', current_version);
 
 
 let scrollbar = {"streamList": null, "settings_container": null};

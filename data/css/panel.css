@@ -303,6 +303,12 @@ header button {
 #livestreamer_cmd_quality{
 	max-width: 175px;
 }
+#current_version::before{
+	content: "v";
+}
+#current_version{
+	display: block;
+}
 input[type=checkbox]{
 	width: 28px;
 }

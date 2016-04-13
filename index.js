@@ -543,6 +543,10 @@ function updatePanelData(){
 	for(let i in updateSettings){
 		panel.port.emit("settingNodesUpdate", {settingName: updateSettings[i], settingValue: getPreferences(updateSettings[i])});
 	}
+	
+	if(current_version != ""){
+		panel.port.emit("current_version", {"current_version": current_version});
+	}
 }
 
 function handleChange(state) {

@@ -1,3 +1,6 @@
+# 5.12.0:
+* +: Addon version in the bottom of the settings, in the panel
+
 # 5.11.2:
 * Fix: Verification delay setting localization
 
