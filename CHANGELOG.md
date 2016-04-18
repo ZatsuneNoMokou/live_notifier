@@ -1,3 +1,8 @@
+# 5.13.0:
+* +: Support to ignore a stream (do not even check it) and hide it (from panel)
+* i: No ":" anymore in the panel for the online and offline states, to avoid to display it for nothing
+* i: Console display for stream list when checking lives
+
 # 5.12.0:
 * +: Addon version in the bottom of the settings, in the panel
 

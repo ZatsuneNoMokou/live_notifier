@@ -34,6 +34,27 @@ function savePreference(prefId, value, updatePanel){
 	}
 }
 
+function getBooleanFromVar(string){
+	switch(typeof string){
+		case "boolean":
+			return string;
+			break;
+	case "number":
+		case "string":
+			if(string == "true" || string == "on" || string == 1){
+				return true;
+			} else if(string == "false" || string == "off" || string == 0){
+				return false;
+			} else {
+				console.warn(`getBooleanFromVar: Unkown boolean (${string})`);
+				return string;
+			}
+			break;
+		default:
+			console.warn(`getBooleanFromVar: Unknown type to make boolean (${typeof string})`);
+	}
+}
+
 let myIconURL = self.data.url("live_offline_64.svg");
 let myIconURL_16 = self.data.url("live_offline_16.svg");
 
@@ -116,7 +137,19 @@ function streamListFromSetting (website){
 								obj[id][current_filter_id] = new Array();
 							}
 							
-							obj[id][current_filter_id].push(current_data);
+							if(current_filter_id == "hide" || current_filter_id == "ignore"){
+								let boolean = getBooleanFromVar(current_data);
+								if(typeof boolean == "boolean"){
+									current_data = boolean;
+								} else {
+									console.warn(`${current_filter_id} of ${id} should be a boolean`);
+									current_data = false;
+								}
+								obj[id][current_filter_id] = current_data;
+							} else {
+								obj[id][current_filter_id].push(current_data);
+							}
+							
 							scan_string = scan_string.substring(next_pos, scan_string.length);
 						}
 					}
@@ -461,52 +494,61 @@ function updatePanelData(){
 	for(let website in liveStatus){
 		var streamList = (new streamListFromSetting(website)).objData;
 		for(let id in liveStatus[website]){
-			
-			if(id in streamList && JSON.stringify(liveStatus[website][id]) == "{}"){
-				let streamData = channelInfos[website][id];
-				let contentId = id;
-				
-				console.info(`No data found, using channel infos: ${id} (${website})`);
-				
-				let streamInfo = {
-					id: id,
-					type: "channel",
-					contentId: contentId,
-					online: streamData.online,
-					website: website,
-					streamName: streamData.streamName,
-					streamStatus: streamData.streamStatus,
-					streamGame: streamData.streamGame,
-					streamOwnerLogo: streamData.streamOwnerLogo,
-					streamCategoryLogo: streamData.streamCategoryLogo,
-					streamCurrentViewers: streamData.streamCurrentViewers,
-					streamUrl: getStreamURL(website, id, contentId, true)
+			// Make sure that the stream from the status is still in the settings
+			if(id in streamList){
+				if(typeof streamList[id].ignore == "boolean" && streamList[id].ignore == true){
+					console.info(`[Live notifier - Panel] Ignoring ${id}`);
+					continue;
 				}
-				panel.port.emit("updateData", streamInfo);
-			} else {
-				for(let contentId in liveStatus[website][id]){
-					let streamData = liveStatus[website][id][contentId];
+				if(typeof streamList[id].hide == "boolean" && streamList[id].hide == true){
+					console.info(`[Live notifier - Panel] Hiding ${id}`);
+					continue;
+				}
+				
+				if(JSON.stringify(liveStatus[website][id]) == "{}"){
+					let streamData = channelInfos[website][id];
+					let contentId = id;
 					
-					if(id in streamList){
-						getCleanedStreamStatus(website, id, contentId, streamList[id], streamData.online);
+					console.info(`No data found, using channel infos: ${id} (${website})`);
+					
+					let streamInfo = {
+						id: id,
+						type: "channel",
+						contentId: contentId,
+						online: streamData.online,
+						website: website,
+						streamName: streamData.streamName,
+						streamStatus: streamData.streamStatus,
+						streamGame: streamData.streamGame,
+						streamOwnerLogo: streamData.streamOwnerLogo,
+						streamCategoryLogo: streamData.streamCategoryLogo,
+						streamCurrentViewers: streamData.streamCurrentViewers,
+						streamUrl: getStreamURL(website, id, contentId, true)
 					}
-					
-					if(id in streamList && (streamData.online_cleaned || (getPreferences("show_offline_in_panel") && !streamData.online_cleaned))){
-						let streamInfo = {
-							id: id,
-							type: "live",
-							contentId: contentId,
-							online: streamData.online_cleaned,
-							website: website,
-							streamName: streamData.streamName,
-							streamStatus: streamData.streamStatus,
-							streamGame: streamData.streamGame,
-							streamOwnerLogo: streamData.streamOwnerLogo,
-							streamCategoryLogo: streamData.streamCategoryLogo,
-							streamCurrentViewers: streamData.streamCurrentViewers,
-							streamUrl: getStreamURL(website, id, contentId, true)
+					panel.port.emit("updateData", streamInfo);
+				} else {
+					for(let contentId in liveStatus[website][id]){
+						let streamData = liveStatus[website][id][contentId];
+						
+						getCleanedStreamStatus(website, id, contentId, streamList[id], streamData.online);
+						
+						if(streamData.online_cleaned || (getPreferences("show_offline_in_panel") && !streamData.online_cleaned)){
+							let streamInfo = {
+								id: id,
+								type: "live",
+								contentId: contentId,
+								online: streamData.online_cleaned,
+								website: website,
+								streamName: streamData.streamName,
+								streamStatus: streamData.streamStatus,
+								streamGame: streamData.streamGame,
+								streamOwnerLogo: streamData.streamOwnerLogo,
+								streamCategoryLogo: streamData.streamCategoryLogo,
+								streamCurrentViewers: streamData.streamCurrentViewers,
+								streamUrl: getStreamURL(website, id, contentId, true)
+							}
+							panel.port.emit("updateData", streamInfo);
 						}
-						panel.port.emit("updateData", streamInfo);
 					}
 				}
 			}
@@ -516,11 +558,11 @@ function updatePanelData(){
 	setIcon();
 	
 	//Update online steam count in the panel
-	panel.port.emit("updateOnlineCount", (firefox_button.state("window").badge == 0)? _("No stream online") :  _("%d stream(s) online",firefox_button.state("window").badge) + ":");
+	panel.port.emit("updateOnlineCount", (firefox_button.state("window").badge == 0)? _("No stream online") :  _("%d stream(s) online",firefox_button.state("window").badge));
 	
 	if(getPreferences("show_offline_in_panel")){
 		var offlineCount = getOfflineCount();
-		panel.port.emit("updateOfflineCount", (offlineCount == 0)? _("No stream offline") :  _("%d stream(s) offline",offlineCount) + ":");
+		panel.port.emit("updateOfflineCount", (offlineCount == 0)? _("No stream offline") :  _("%d stream(s) offline",offlineCount));
 	} else {
 		panel.port.emit("updateOfflineCount", "");
 	}
@@ -746,6 +788,12 @@ function getOfflineCount(){
 		let streamList = (new streamListFromSetting(website)).objData;
 		
 		for(let id in streamList){
+			if(typeof streamList[id].ignore == "boolean" && streamList[id].ignore == true){
+				// Ignoring stream with ignore set to true from online count
+				console.log(`[Live notifier - getOfflineCount] ${id} of ${website} is ignored`);
+				continue;
+			}
+			
 			if(id in liveStatus[website]){
 				if(JSON.stringify(liveStatus[website][id]) == "{}"){
 					offlineCount = offlineCount + 1;
@@ -769,9 +817,15 @@ function setIcon() {
 	for(let website in liveStatus){
 		var streamList = (new streamListFromSetting(website)).objData;
 		for(let id in liveStatus[website]){
-			for(let contentId in liveStatus[website][id]){
-				if(liveStatus[website][id][contentId].online_cleaned && streamList.hasOwnProperty(id)){
-					onlineCount = onlineCount + 1;
+			if(id in streamList && (typeof streamList[id].ignore == "boolean" && streamList[id].ignore == true)){
+				// Ignoring stream with ignore set to true from online count
+				console.log(`[Live notifier - setIcon] ${id} of ${website} is ignored`);
+				continue;
+			} else {
+				for(let contentId in liveStatus[website][id]){
+					if(liveStatus[website][id][contentId].online_cleaned && streamList.hasOwnProperty(id)){
+						onlineCount = onlineCount + 1;
+					}
 				}
 			}
 		}
@@ -930,9 +984,17 @@ function checkLives(){
 		let website = websites[i];
 		let streamList = (new streamListFromSetting(website)).objData;
 		
-		console.info(JSON.stringify(streamList));
+		console.group();
+		console.info(website);
+		console.dir(streamList);
+		console.groupEnd();
+		//console.info(`${website}: ${JSON.stringify(streamList)}`);
 		
 		for(let id in streamList){
+			if(typeof streamList[id].ignore == "boolean" && streamList[id].ignore == true){
+				console.info(`Ignoring ${id}`);
+				continue;
+			}
 			getPrimary(id, website, streamList[id]);
 		}
 	}
@@ -1348,6 +1410,8 @@ let importStreamWebsites = {
 		}
 	}
 }
+function importDailymotionButton(){importButton("dailymotion");}
+sp.on("dailymotion_import", importDailymotionButton);
 function importTwitchButton(){importButton("twitch");}
 sp.on("twitch_import", importTwitchButton);
 function importHitboxButton(){importButton("hitbox");}
