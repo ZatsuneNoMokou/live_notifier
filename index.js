@@ -194,7 +194,13 @@ function streamListFromSetting (website){
 			let filters = "";
 			for(let j in this.objData[id]){
 				if(j != "streamURL"){
-					filters = filters + " " + j + "::" + this.objData[id][j];
+					if(typeof this.objData[id][j] == "boolean"){
+						filters = filters + " " + j + "::" + this.objData[id][j];
+					} else {
+						for(let k in this.objData[id][j]){
+							filters = filters + " " + j + "::" + this.objData[id][j][k];
+						}
+					}
 				}
 			}
 			

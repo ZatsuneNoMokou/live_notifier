@@ -1,3 +1,6 @@
+# 5.13.1:
+* Fix: Stream key list update
+
 # 5.13.0:
 * +: Support to ignore a stream (do not even check it) and hide it (from panel)
 * i: No ":" anymore in the panel for the online and offline states, to avoid to display it for nothing
