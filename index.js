@@ -41,9 +41,9 @@ function getBooleanFromVar(string){
 			break;
 	case "number":
 		case "string":
-			if(string == "true" || string == "on" || string == 1){
+			if(string == "true" || string == "on" || string == "1" || string == 1){
 				return true;
-			} else if(string == "false" || string == "off" || string == 0){
+			} else if(string == "false" || string == "off" || string == "0" || string == 0){
 				return false;
 			} else {
 				console.warn(`getBooleanFromVar: Unkown boolean (${string})`);
@@ -265,7 +265,7 @@ var firefox_button = ToggleButton({
 var panel = panels.Panel({
 	height: 350,
 	width: 285,
-	contentScriptFile: [self.data.url("perfect-scrollbar.min.js"), self.data.url("panel_contentScriptFile.js")],
+	contentScriptFile: [self.data.url("perfect-scrollbar.min.js"), self.data.url("options-data.js"), self.data.url("panel_contentScriptFile.js")],
 	contentURL: self.data.url("panel.html"),
 });
 
@@ -475,6 +475,13 @@ function importButton_Panel(website){
 	console.info(`Importing ${website}...`);
 	importButton(website);
 }
+
+function sendTranslation(data){
+	let result = JSON.parse(data);
+	result.translated = _(result["data-l10n-id"]);
+	panel.port.emit("translate", JSON.stringify(result));
+}
+panel.port.on("translate", sendTranslation)
 
 panel.port.on("refreshPanel", refreshPanel);
 panel.port.on("importStreams", importButton_Panel);
@@ -741,8 +748,10 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 	return isStreamOnline;
 }
 
-function doStreamNotif(website, id, contentId, streamSetting, isStreamOnline){
+function doStreamNotif(website, id, contentId, streamSetting){
 	let streamData = liveStatus[website][id][contentId];
+	
+	let online = streamData.online;
 	
 	let streamName = streamData.streamName;
 	let streamOwnerLogo = streamData.streamOwnerLogo;
@@ -753,7 +762,7 @@ function doStreamNotif(website, id, contentId, streamSetting, isStreamOnline){
 		streamLogo  = streamOwnerLogo;
 	}
 	
-	let isStreamOnline_cleaned = getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamOnline);
+	let isStreamOnline_cleaned = getCleanedStreamStatus(website, id, contentId, streamSetting, online);
 	
 	if(isStreamOnline_cleaned){
 		if(getPreferences("notify_online") && streamData.notificationStatus == false){
@@ -782,8 +791,7 @@ function doStreamNotif(website, id, contentId, streamSetting, isStreamOnline){
 			}
 		}
 	}
-	streamData.online = isStreamOnline;
-	streamData.notificationStatus = isStreamOnline;
+	streamData.notificationStatus = online;
 }
 
 function getOfflineCount(){
@@ -983,12 +991,51 @@ function isValidResponse(website, data){
 	}
 	return true;
 }
+let checkingLives_processState = {data: {},checked: null, totalwebsites: null, total: null};
+function checkLiveEnd(){
+	let checked = checkingLives_processState.checked;
+	let totalwebsites = checkingLives_processState.totalwebsites;
+	let total = checkingLives_processState.total;
+	
+	let data = checkingLives_processState.data;
+	for(let website in data){
+		for(let id in data){
+			if(data[website][id] == 0){
+				delete data[website][id];
+			}
+		}
+		if(JSON.stringify(data[website]) == "{}"){
+			delete data[website];
+		}
+	}
+	//if(totalwebsites == websites.length && checked == total){
+	if(totalwebsites == websites.length && JSON.stringify(data) == "{}"){
+		for(let i in websites){
+			let website = websites[i];
+			var streamList = (new streamListFromSetting(website)).objData;
+			for(let id in liveStatus[website]){
+				if(id in streamList && (typeof streamList[id].ignore == "boolean" && streamList[id].ignore == true)){
+					console.dir(liveStatus[website][id]);
+					console.info("[Live notifier] Live check end");
+					//doStreamNotif(website, id, streamList[id].contentId, streamList[id].streamSetting);
+				}
+			}
+		}
+	}
+}
 function checkLives(){
 	console.group();
+	
+	checkingLives_processState.data = {};
+	checkingLives_processState.checked = 0;
+	checkingLives_processState.total = 0;
 	
 	for(let i in websites){
 		let website = websites[i];
 		let streamList = (new streamListFromSetting(website)).objData;
+		
+		checkingLives_processState.totalwebsites += streamList.totalwebsites + 1;
+		checkingLives_processState.total += streamList.length;
 		
 		console.group();
 		console.info(website);
@@ -997,6 +1044,10 @@ function checkLives(){
 		//console.info(`${website}: ${JSON.stringify(streamList)}`);
 		
 		for(let id in streamList){
+			if(typeof checkingLives_processState.data[website]){
+				checkingLives_processState.data[website] = {};
+			}
+			checkingLives_processState.data[website][id] = 0;
 			if(typeof streamList[id].ignore == "boolean" && streamList[id].ignore == true){
 				console.info(`Ignoring ${id}`);
 				continue;
@@ -1048,6 +1099,7 @@ function getPrimary(id, website, streamSetting, url, pageNumber){
 					pagingPrimary[website](id, website, streamSetting, data)
 				}
 			} else {
+				checkingLives_processState.data[website][id] = 1;
 				processPrimary(id, id, website, streamSetting, data);
 			}
 		}
@@ -1070,6 +1122,7 @@ let pagingPrimary = {
 			} else {
 				for(let i in list){
 					let contentId = list[i].id;
+					checkingLives_processState.data[website][id] += 1;
 					processPrimary(id, contentId, website, streamSetting, list[i]);
 				}
 				
@@ -1106,11 +1159,13 @@ function processPrimary(id, contentId, website, streamSetting, data){
 					seconderyInfo[website](id, contentId, data_second, liveState);
 					
 					doStreamNotif(website, id, contentId, streamSetting, liveState);
+					checkLiveEnd();
 					setIcon();
 				}
 			}).get();
 		} else {
 			doStreamNotif(website, id, contentId, streamSetting, liveState);
+			checkLiveEnd();
 		}
 	} else {
 		console.warn("Unable to get stream state.");
@@ -1171,7 +1226,8 @@ checkLiveStatus = {
 			}
 			streamData.streamCurrentViewers = parseInt(data["viewersCurrent"]);
 			
-			return data["online"];
+			streamData.online = data["online"];
+			return streamData.online;
 		},
 	"dailymotion":
 		function(id, contentId, data){
@@ -1180,7 +1236,8 @@ checkLiveStatus = {
 			streamData.streamCurrentViewers = JSON.parse(data.audience);
 			streamData.streamURL = data.url;
 			if(typeof data.onair == "boolean"){
-				return data.onair;
+				streamData.online = data.onair
+				return streamData.online;
 			} else {
 				return null;
 			}
@@ -1199,7 +1256,9 @@ checkLiveStatus = {
 				data = data["livestream"][0];
 				streamData.streamName = data["media_user_name"];
 				streamData.streamStatus = data["media_status"];
-				streamData.streamGame = data["category_name"];
+				if(typeof data["category_name"] == "string" && data["category_name"] != ""){
+					streamData.streamGame = data["category_name"];
+				}
 				if(data["category_logo_large"] !== null){
 					streamData.streamCategoryLogo = "http://edge.sf.hitbox.tv" + data["category_logo_large"];
 				} else if(data["category_logo_small"] !== null){
@@ -1221,11 +1280,14 @@ checkLiveStatus = {
 					streamData.streamURL = data.channel["channel_link"];
 				}
 				streamData.streamCurrentViewers = parseInt(data["media_views"]);
-				if(data["media_is_live"] == "1"){
+				
+				streamData.online = (data["media_is_live"] == "1")? true : false;
+				return streamData.online;
+				/* if(data["media_is_live"] == "1"){
 					return true;
 				} else {
 					return false
-				}
+				}*/
 			} else {
 				return null;
 			}
@@ -1246,12 +1308,15 @@ checkLiveStatus = {
 						streamData.streamURL = data.channel["url"];
 					}
 					streamData.streamCurrentViewers = parseInt(data["viewers"]);
-					return true;
+					
+					streamData.online = true;
+					return streamData.online;
 				} else {
 					if(streamData.streamName == ""){
 						streamData.streamName = id;
 					}
-					return false;
+					streamData.online = false;
+					return streamData.online;
 				}
 			} else {
 				return null;

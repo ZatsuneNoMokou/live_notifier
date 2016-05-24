@@ -279,41 +279,78 @@ header button {
 	display: inline;
 	visibility: unset;
 }
-.website_pref, pref_group{
-	padding: 3px 0px;
-	margin: 6px 3px;
-}
-.preference:not(.flex_input_text):not(.flex_select){
+
+.pref_group, .website_pref{
 	display: block;
+	margin-top: 14px;
+	margin-bottom: 14px;
 }
-.preference{
+.preferenceContainer.flex_input_text{
+	display: flex;
+	width: 100%;
 	margin-top: 3px;
 	margin-bottom: 3px;
 }
-.flex_select, .flex_input_text{
+.preferenceContainer.flex_input_text .preferenceInput{
+	display: flex;
+	flex-grow: 5;
+}
+
+.preferenceContainer{
 	display: flex;
 }
-.flex_select span, .flex_input_text span{
+.preferenceContainer label{
 	flex: 4;
 }
-.flex_select select, .flex_input_text input{
+.preferenceContainer .preferenceInput{
+	align-items: flex-end;
+}
+.preferenceContainer .preferenceInput:not(select){
 	flex: 1;
-	margin: 3px 10px;
 }
-#livestreamer_cmd_quality{
-	max-width: 175px;
+.preference{
+	display: inline;
+	margin-top: 3px;
+	margin-bottom: 3px;
 }
-#current_version::before{
-	content: "v";
+.preference > span:after{
+	content: ": ";
 }
-#current_version{
+label:not(.flex_input_text){
+	display: inline;
+	padding-right: 3px;
+}
+label.flex_input_text{
+	display: inline-flex;
+	padding-right: 3px;
+}
+/*.import_container .label{
 	display: block;
+}
+.import_container .label{
+	display: block;
+}*/
+.pref_container{
+	padding-left: 10px;
+}
+.preferenceContainer button{
+	max-height: 25px;
+}
+.preferenceContainer input[type=text]{
+	max-height: 25px;
 }
 input[type=checkbox]{
 	width: 28px;
 }
 input[type=number]{
 	max-width: 42px;
+}
+
+#current_version::before{
+	content: "v";
+}
+#current_version{
+	display: block;
 }
 footer, footer *{
 	white-space: pre-line;

@@ -1,8 +1,8 @@
 {
 	"name": "livenotifier",
-	"title": "Live notifier",
+	"title": "Live notifier (Dev)",
 	"id": "live_notifier@zatsunenomokou.eu",
-	"version": "5.13.1",
+	"version": "5.16.0",
 	"description": "Be notified of streams from Dailymotion, Hitbox, Twitch and Beam",
 	"main": "index.js",
 	"author": "Zatsune No Mokou",
@@ -16,6 +16,14 @@
 		"multiprocess": true
 	},
 	"license": "GPL-3.0",
+	"locales": {
+		"fr": {
+			"description": "Soyez notifiés de vos streams de Beam, Dailymotion, Hitbox et Twitch"
+		}
+	},
+	"keywords": [
+		"jetpack"
+	],
 	"preferences": [{
 			"name": "dailymotion_keys_list",
 			"title": "Dailymotion keys to notify",

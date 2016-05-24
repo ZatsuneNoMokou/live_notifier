@@ -16,6 +16,26 @@ function unloadListeners() {
 	self.port.removeListener('unloadListeners', unloadListeners);
 }
 
+function getBooleanFromVar(string){
+	switch(typeof string){
+		case "boolean":
+			return string;
+			break;
+		case "number":
+		case "string":
+			if(string == "true" || string == "on" || string == 1){
+				return true;
+			} else if(string == "false" || string == "off" || string == 0){
+				return false;
+			} else {
+				console.warn(`getBooleanFromVar: Unkown boolean (${string})`);
+				return string;
+			}
+			break;
+		default:
+			console.warn(`getBooleanFromVar: Unknown type to make boolean (${typeof string})`);
+	}
+}
 function getValueFromNode(node){
 	if(node.type == "checkbox") {
 		return node.checked;
@@ -174,74 +194,154 @@ function setting_Toggle(){
 }
 settings_button.addEventListener("click", setting_Toggle, false);
 
+
+/*				---- Setting nodes generator ----				*/
+function loadPreferences(){
+	let container = document.querySelector("section#settings_container #preferences");
+	
+	for(let id in options){
+		let option = options[id];
+		if(typeof option.type == "undefined" || option.type == "hidden"){
+			continue;
+		}
+		if(typeof option.showPrefInPanel == "boolean" && option.showPrefInPanel == false){
+			continue;
+		}
+		
+		let groupNode = null;
+		if(typeof option.group == "string" && option.group != ""){
+			groupNode = getPreferenceGroupNode(container, option.group);
+		}
+		
+		newPreferenceNode(((groupNode == null)? container : groupNode), id, option);
+	}
+}
+function getPreferenceGroupNode(parent, groupId){
+	let groupNode = document.querySelector(`#${groupId}.pref_group`);
+	if(groupNode == null){
+		groupNode = document.createElement("p");
+		groupNode.id = groupId;
+		groupNode.className = "pref_group";
+		if(groupId == "dailymotion" || groupId == "hitbox" || groupId == "twitch" || groupId == "beam"){
+			groupNode.className += " website_pref"
+		}
+		parent.appendChild(groupNode);
+	}
+	return groupNode;
+}
+function import_onClick(){
+	let getWebsite = /^(\w+)_import$/i;
+	let website = getWebsite.exec(this.id)[1];
+	port_options.sendData("importStreams", website);
+}
+function newPreferenceNode(parent, id, prefObj){
+	let node = document.createElement("div");
+	node.className = "preferenceContainer";
+	
+	let labelNode = document.createElement("label");
+	labelNode.className = "preference";
+	if(typeof prefObj.description == "string"){
+		labelNode.title = prefObj.description;
+	}
+	labelNode.htmlFor = id;
+	labelNode.setAttribute("data-translate-title",`${id}_description`)
+	
+	let title = document.createElement("span");
+	title.id = `${id}_title`;
+	title.textContent = prefObj.title
+	title.setAttribute("data-l10n-id",`${id}_title`)
+	labelNode.appendChild(title);
+	
+	self.port.emit("translate", JSON.stringify({"translate-node-id": `#${id}_title`, "data-l10n-id": `${id}_title`}));
+	
+	let prefNode = null;
+	switch(prefObj.type){
+		case "string":
+			prefNode = document.createElement("input");
+			prefNode.type = "text";
+			//prefNode.value = getPreferences(id);
+			break;
+		case "integer":
+			prefNode = document.createElement("input");
+			prefNode.type = "number";
+			//prefNode.value = parseInt(getPreferences(id));
+			break;
+		case "bool":
+			prefNode = document.createElement("input");
+			prefNode.type = "checkbox";
+			//prefNode.checked = getBooleanFromVar(getPreferences(id));
+			break;
+		case "color":
+			prefNode = document.createElement("input");
+			prefNode.type = "color";
+			//prefNode.value = getPreferences(id);
+			break;
+		case "control":
+			prefNode = document.createElement("button");
+			prefNode.textContent = prefObj.label;
+			break;
+		case "menulist":
+			prefNode = document.createElement("select");
+			prefNode.size = 2;
+			for(let o in prefObj.options){
+				let option = prefObj.options[o];
+				
+				let optionNode = document.createElement("option");
+				optionNode.id = option.value;
+				optionNode.text = option.label;
+				optionNode.value = option.value;
+				optionNode.setAttribute("data-l10n-id",`${id}_options.${option.label}`);
+				
+				self.port.emit("translate", JSON.stringify({"translate-node-id": `#${id} #${option.value}`, "data-l10n-id": `${id}_options.${option.label}`}));
+				
+				prefNode.add(optionNode);
+			}
+			//prefNode.value = getPreferences(id);
+			break;
+	}
+	prefNode.id = id;
+	if(prefObj.type != "control"){
+		prefNode.className = "preferenceInput";
+	}
+	if(prefObj.type == "control"){
+		self.port.emit("translate", JSON.stringify({"translate-node-id": `#${id}`, "data-l10n-id": `${id}_label`}));
+	}
+	if(id.indexOf("_keys_list") != -1 || id.indexOf("_user_id") != -1){
+		node.className += " flex_input_text";
+	}
+	prefNode.setAttribute("data-setting-type", prefObj.type);
+	
+	if(prefObj.type != "menulist"){
+		prefNode.setAttribute("data-l10n-id", id);
+	}
+	
+	node.appendChild(labelNode);
+	node.appendChild(prefNode);
+	parent.appendChild(node);
+	
+	switch(prefObj.type){
+		case "string":
+			prefNode.addEventListener("input", settingNode_onChange, false);
+			break;
+		case "integer":
+		case "bool":
+		case "color":
+		case "menulist":
+			prefNode.addEventListener("change", settingNode_onChange, false);
+			break;
+		case "control":
+			if(id.indexOf("_import") != -1){
+				prefNode.addEventListener("click", import_onClick, false);
+			}
+			break;
+	}
+}
+loadPreferences();
+
 function initSettings(){
-	let dailymotion_user_id_input = document.querySelector("#dailymotion_user_id");
-	dailymotion_user_id_input.addEventListener("input", settingNode_onChange, false);
-	
-	let dailymotion_import_button = document.querySelector("button#dailymotion_import");
-	dailymotion_import_button.addEventListener("click", function(){
-		self.port.emit("importStreams","dailymotion");
-	});
-	
-	let hitbox_user_id_input = document.querySelector("#hitbox_user_id");
-	hitbox_user_id_input.addEventListener("input", settingNode_onChange, false);
-	
-	let hitbox_import_button = document.querySelector("button#hitbox_import");
-	hitbox_import_button.addEventListener("click", function(){
-		self.port.emit("importStreams","hitbox");
-	});
-	
-	let twitch_user_id_input = document.querySelector("#twitch_user_id");
-	twitch_user_id_input.addEventListener("input", settingNode_onChange, false);
-	
-	let twitch_import_button = document.querySelector("button#twitch_import");
-	twitch_import_button.addEventListener("click", function(){
-		self.port.emit("importStreams","twitch");
-	});
-	
-	let beam_user_id_input = document.querySelector("#beam_user_id");
-	beam_user_id_input.addEventListener("input", settingNode_onChange, false);
-	
-	let beam_import_button = document.querySelector("button#beam_import");
-	beam_import_button.addEventListener("click", function(){
-		self.port.emit("importStreams","beam");
-	});
-	
-	let dailymotion_check_delay_input = document.querySelector("#dailymotion_check_delay");
-	dailymotion_check_delay_input.addEventListener("change", settingNode_onChange, false);
-	
-	let notify_online_input = document.querySelector("#notify_online");
-	notify_online_input.addEventListener("change", settingNode_onChange, false);
-	
-	let notify_offline_input = document.querySelector("#notify_offline");
-	notify_offline_input.addEventListener("change", settingNode_onChange, false);
-	
-	let group_streams_by_websites_input = document.querySelector("#group_streams_by_websites");
-	group_streams_by_websites_input.addEventListener("change", settingNode_onChange, false);
-	
-	let show_offline_in_panel = document.querySelector("#show_offline_in_panel");
-	show_offline_in_panel.addEventListener("change", settingNode_onChange, false);
-	
-	let confirm_addStreamFromPanel_input = document.querySelector("#confirm_addStreamFromPanel");
-	confirm_addStreamFromPanel_input.addEventListener("change", settingNode_onChange, false);
-	
-	let confirm_deleteStreamFromPanel_input = document.querySelector("#confirm_deleteStreamFromPanel");
-	confirm_deleteStreamFromPanel_input.addEventListener("change", settingNode_onChange, false);
-	
-	let background_color_input = document.querySelector("#background_color");
-	background_color_input.addEventListener("change", settingNode_onChange, false);
-	
-	let panel_theme_select = document.querySelector("#panel_theme");
-	panel_theme_select.addEventListener("change", settingNode_onChange, false);
-	
-	let livestreamer_cmd_to_clipboard_input = document.querySelector("#livestreamer_cmd_to_clipboard");
-	livestreamer_cmd_to_clipboard_input.addEventListener("change", settingNode_onChange, false);
-	
-	let livestreamer_cmd_quality_input = document.querySelector("#livestreamer_cmd_quality");
-	livestreamer_cmd_quality_input.addEventListener("input", settingNode_onChange, false);
-	
 	self.port.emit("refreshPanel","");
 }
+
 
 function settingNode_onChange(event){
 	let node = this;
@@ -266,15 +366,20 @@ function settingNode_onChange(event){
 function settingNodesUpdate(data){
 	let settingNode = document.querySelector(`#${data.settingName}`);
 	if(settingNode !== null){
-		switch(settingNode.getAttribute("data-setting-type")){
-			case "boolean":
-				settingNode.checked = data.settingValue;
+		switch(options[data.settingName].type){
+			case "string":
+			case "color":
+			case "menulist":
+				settingNode.value = data.settingValue;
 				break;
-			case "number":
+			case "integer":
 				settingNode.value = parseInt(data.settingValue);
 				break;
-			case "string":
-				settingNode.value = data.settingValue;
+			case "bool":
+				settingNode.checked = getBooleanFromVar(data.settingValue);
+				break;
+			case "control":
+				// Nothing to update, no value
 				break;
 		}
 	} else {
@@ -472,7 +577,7 @@ function listener(data){
 		if(data.streamStatus != ""){
 			var statusLine = document.createElement("span");
 			statusLine.className = "streamStatus";
-			statusLine.textContent = data.streamStatus + ((data.streamGame.length > 0)? (" (" + data.streamGame + ")") : "");
+			statusLine.textContent = data.streamStatus + ((typeof data.streamGame == "string" && data.streamGame.length > 0)? (" (" + data.streamGame + ")") : "");
 			newLine.appendChild(statusLine);
 			
 			newLine.setAttribute("data-streamStatus", data.streamStatus);
@@ -480,7 +585,7 @@ function listener(data){
 		}
 		
 		if(data.streamGame.length > 0){
-			newLine.setAttribute("data-streamGame", data.streamGame);
+			if(typeof data.streamGame == "string"){newLine.setAttribute("data-streamGame", data.streamGame)};
 			newLine.setAttribute("data-streamGameLowerCase", data.streamGame.toLowerCase());
 		}
 		
@@ -644,6 +749,20 @@ self.port.on('settingNodesUpdate', settingNodesUpdate);
 self.port.on('panel_theme', theme_update);
 self.port.on('current_version', current_version);
 
+function translateNode(data){
+	let translate_data = JSON.parse(data);
+	
+	let node_id = translate_data["translate-node-id"];
+	let translation = translate_data.translated;
+	
+	let node = document.querySelector(`${node_id}`);
+	if(node != null){
+		node.textContent = translation;
+	} else {
+		console.warn(`Node to translate (id: ${node_id}) not found`);
+	}
+}
+self.port.on('translate', translateNode);
 
 let scrollbar = {"streamList": null, "settings_container": null};
 function load_scrollbar(id){
