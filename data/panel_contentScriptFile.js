@@ -752,14 +752,16 @@ self.port.on('current_version', current_version);
 function translateNode(data){
 	let translate_data = JSON.parse(data);
 	
-	let node_id = translate_data["translate-node-id"];
-	let translation = translate_data.translated;
-	
-	let node = document.querySelector(`${node_id}`);
-	if(node != null){
-		node.textContent = translation;
-	} else {
-		console.warn(`Node to translate (id: ${node_id}) not found`);
+	if(typeof translate_data.translated == "string"){
+		let node_id = translate_data["translate-node-id"];
+		let translation = translate_data.translated;
+		
+		let node = document.querySelector(`${node_id}`);
+		if(node != null){
+			node.textContent = translation;
+		} else {
+			console.warn(`Node to translate (id: ${node_id}) not found`);
+		}
 	}
 }
 self.port.on('translate', translateNode);

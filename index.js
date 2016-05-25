@@ -81,7 +81,7 @@ for(website of websites){
 	channelInfos[website] = {};
 }
 
-function streamListFromSetting (website){
+function streamListFromSetting(website){
 	let somethingElseThanSpaces = /[^\s]+/;
 	let pref = this.stringData = new String(getPreferences(`${website}_keys_list`));
 	
@@ -478,7 +478,10 @@ function importButton_Panel(website){
 
 function sendTranslation(data){
 	let result = JSON.parse(data);
-	result.translated = _(result["data-l10n-id"]);
+	let translation = _(result["data-l10n-id"]);
+	if(translation != result["data-l10n-id"]){
+		result.translated = _(result["data-l10n-id"]);
+	}
 	panel.port.emit("translate", JSON.stringify(result));
 }
 panel.port.on("translate", sendTranslation)
