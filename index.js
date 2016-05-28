@@ -1519,9 +1519,9 @@ let current_version = "";
 			} else if((current_version_numbers[1] == last_executed_version_numbers[1]) && (current_version_numbers[2] == last_executed_version_numbers[2]) && (current_version_numbers[3] > last_executed_version_numbers[3])){
 				doNotif("Live notifier", _("Addon have been updated (version %d)", current_version));
 			}
-			savePreference("livenotifier_version", current_version);
 		}
 	}
+	savePreference("livenotifier_version", current_version);
 })();
 
 function windowsFocusChange(window){

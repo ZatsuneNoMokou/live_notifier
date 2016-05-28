@@ -1,3 +1,6 @@
+# 5.16.2:
+* Fix: Notification of new versions
+
 # 5.16.1:
 * Fix: Default translation of panel settings
 
