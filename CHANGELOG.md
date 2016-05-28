@@ -5,7 +5,7 @@
 * Fix: Default translation of panel settings
 
 # 5.16.0:
-* +: Option panel reworked, more automated, alike the chrome option page (using port to translate in Firefox, couldn't find better way)
+* +: Option on the panel reworked, more automated, alike the chrome option page (using port to translate in Firefox, couldn't find better way)
 * +: Dev version now showing (Dev) at the end of the name
 * Fix: Addon description localization
 * Fix: package.json for the mozilla build
