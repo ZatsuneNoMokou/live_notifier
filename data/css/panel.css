@@ -32,21 +32,7 @@ input[type=text]{
 }
 
 
-.item-stream .streamTitle{
-	font-size: 15px;
-}
-*,
-.item-stream .streamCurrentViewers .material-icons,
-.item-stream h1{
-	font-size: 13px;
-}
-#streamList,
-.item-stream .streamCurrentViewers,
-footer, footer *{
-	font-size: 12px;
-}
-
-header {
+header{
 	display: flex;
 	flex-direction: row;
 	padding: 5px 2px;
@@ -114,6 +100,20 @@ header button {
 #streamOnlineCountLabel, #streamOfflineCountLabel{
 	margin: 0px;
 	padding: 0px;
+}
+
+item-stream .streamTitle{
+	font-size: 15px;
+}
+*,
+.item-stream .streamCurrentViewers .material-icons,
+.item-stream h1{
+	font-size: 13px;
+}
+#streamList,
+.item-stream .streamCurrentViewers,
+footer, footer *{
+	font-size: 12px;
 }
 .item-stream {
 	margin: 7px 0px;
@@ -255,6 +255,14 @@ header button {
 	visibility: hidden;
 	font-weight: normal;
 }
+#streamList:not(.deleteButtonMode) .item-stream .stream_control .deleteStreamButton{
+	display: none;
+	visibility: hidden;
+}
+#streamList.deleteButtonMode .item-stream .stream_control span:not(.deleteStreamButton){
+	display: none;
+	visibility: hidden;
+}
 .stream_control i.material-icons{
 	font-size: 17px;
 }
@@ -271,10 +279,11 @@ header button {
 	position: relative;
 	float: right;
 }
-.item-stream.onlineItem:hover > #stream_right_container > .stream_control > span{
+#streamList:not(.deleteButtonMode) .item-stream.onlineItem:hover > #stream_right_container > .stream_control > span:not(.deleteStreamButton){
 	display: block;
 	visibility: unset;
 }
+#streamList.deleteButtonMode .stream_control,
 .item-stream:hover > #stream_right_container > .stream_control, .item-stream:hover .stream_control{
 	display: inline;
 	visibility: unset;

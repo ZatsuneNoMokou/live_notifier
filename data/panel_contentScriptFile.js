@@ -117,7 +117,15 @@ function deleteStreamButtonClick(){
 		setTimeout(function() {
 			showDeleteTooltip = false;
 			deleteStreamTooltip.className += " hide";
-		}, 2500);
+		}, 1250);
+	}
+	
+	let streamListNode = document.querySelector("#streamList");
+	let deleteButtonMode_reg = /\s*deleteButtonMode/;
+	if(deleteButtonMode_reg.test(streamListNode.className)){
+		streamListNode.className = streamListNode.className.replace(deleteButtonMode_reg,"");
+	} else {
+		streamListNode.className += " deleteButtonMode";
 	}
 }
 deleteStreamButton.addEventListener("click",deleteStreamButtonClick,false);
@@ -432,12 +440,61 @@ function newDeleteStreamButton_onClick(event){
 }
 function newDeleteStreamButton(id, website){
 	let node = document.createElement("span");
+	node.className = "deleteStreamButton";
 	node.setAttribute("data-id", id);
 	node.setAttribute("data-website", website);
 	
 	let node_img =  document.createElement("i");
 	node_img.className = "material-icons";
 	node_img.textContent = "delete";
+	node.appendChild(node_img);
+	
+	return node;
+}
+let I_am_watching_the_stream_of = "";
+function newShareStreamButton_onClick(event){
+	event.stopPropagation();
+	
+	let node = this;
+	let id = node.getAttribute("data-id");
+	let contentId = node.getAttribute("data-contentId");
+	let streamName = node.getAttribute("data-streamName");
+	let website = node.getAttribute("data-website");
+	let streamUrl = node.getAttribute("data-streamUrl");
+	let streamStatus = node.getAttribute("data-streamStatus");
+	
+	let facebookID = node.getAttribute("data-facebookID");
+	let twitterID = node.getAttribute("data-twitterID");
+	
+	let streamerAlias = streamName;
+	/*
+	if(facebookID != null && facebookID != ""){
+		
+	}*/
+	if(twitterID != null && twitterID != ""){
+		streamerAlias = `@${twitterID}`;
+		console.info(`${id}/${contentId} (${website}) twitter ID: ${twitterID}`)
+	}
+	
+	let shareMessage = `${I_am_watching_the_stream_of} ${streamerAlias}, "${streamStatus}"`;
+	console.info(shareMessage);
+	
+	window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${streamUrl}&hashtags=LiveNotifier${(twitterID != "")? `&related=${twitterID}` : ""}`, '_blank');
+}
+function newShareStreamButton(id, contentId, website, streamName, streamUrl, streamStatus, facebookID, twitterID){
+	let node = document.createElement("span");
+	node.setAttribute("data-id", id);
+	node.setAttribute("data-contentId", contentId);
+	node.setAttribute("data-streamName", streamName);
+	node.setAttribute("data-website", website);
+	node.setAttribute("data-streamUrl", streamUrl);
+	node.setAttribute("data-streamStatus", streamStatus)
+	node.setAttribute("data-facebookID", facebookID);
+	node.setAttribute("data-twitterID", twitterID);
+	
+	let node_img =  document.createElement("i");
+	node_img.className = "material-icons";
+	node_img.textContent = "share";
 	node.appendChild(node_img);
 	
 	return node;
@@ -605,6 +662,12 @@ function listener(data){
 	newLine.setAttribute("data-streamWebsite", data.website);
 	newLine.setAttribute("data-streamWebsiteLowerCase", data.website.toLowerCase());
 	newLine.setAttribute("data-streamUrl", data.streamUrl);
+	if(typeof data.facebookID == "string" && data.facebookID != ""){
+		newLine.setAttribute("data-facebookID", data.facebookID);
+	}
+	if(typeof data.facebookID == "string" && data.twitterID != ""){
+		newLine.setAttribute("data-twitterID", data.twitterID);
+	}
 	newLine.addEventListener("click", streamItemClick);
 	
 	/*			---- Control span ----			*/
@@ -614,11 +677,15 @@ function listener(data){
 	control_span.appendChild(deleteButton_node);
 	
 	let copyLivestreamerCmd_node = null;
+	let shareStream_node = null;
 	if(data.type == "live"){
 		copyLivestreamerCmd_node = newCopyLivestreamerCmdButton(data.id, data.contentId, data.website);
 		control_span.appendChild(copyLivestreamerCmd_node);
 	}
 	if(data.online){
+		shareStream_node = newShareStreamButton(data.id, data.contentId, data.website, data.streamName, data.streamUrl, data.streamStatus, (typeof data.facebookID == "string")? data.facebookID: "", (typeof data.twitterID == "string")? data.twitterID: "");
+		control_span.appendChild(shareStream_node);
+		
 		stream_right_container_node.appendChild(control_span);
 	} else {
 		newLine.appendChild(control_span);
@@ -626,6 +693,9 @@ function listener(data){
 	deleteButton_node.addEventListener("click", newDeleteStreamButton_onClick, false);
 	if(copyLivestreamerCmd_node !== null){
 		copyLivestreamerCmd_node.addEventListener("click", newCopyLivestreamerCmdButton_onClick, false);
+	}
+	if(shareStream_node !== null){
+		shareStream_node.addEventListener("click", newShareStreamButton_onClick, false);
 	}
 	
 	newLine.draggable = true;
@@ -742,6 +812,9 @@ header, .item-stream, footer{box-shadow: 0px 0px 5px 0px hsl(${baseColor_hsl.H},
 }
 
 self.port.on('initList', initList);
+self.port.on('I_am_watching_the_stream_of', function(data){
+	I_am_watching_the_stream_of = data;
+});
 self.port.on('updateOnlineCount', listenerOnlineCount);
 self.port.on('updateOfflineCount', listenerOfflineCount);
 self.port.on('updateData', listener);

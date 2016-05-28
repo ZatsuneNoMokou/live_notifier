@@ -1,3 +1,11 @@
+# 5.17.1:
+* Fix: Copy/Paste problem 
+
+# 5.17.0:
+* +: Support of getting Facebook/Twitter IDs to share stream
+* +: Sharing online streams using Twitter
+* +: Toggle delete stream button or not
+
 # 5.16.2:
 * Fix: Notification of new versions
 
