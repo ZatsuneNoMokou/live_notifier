@@ -1,3 +1,6 @@
+# 5.18.0:
+* +: Possibility to put the facebook or twitter of a streamer
+
 # 5.17.1:
 * Fix: Copy/Paste problem 
 
