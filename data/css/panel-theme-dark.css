@@ -9,7 +9,7 @@ header, footer{
 #deleteStreamTooltip{
 	background-color: hsla(0, 0%, 13%, 0.95); /*#212121;*/
 }
-header button, .item-stream{
+header button, button, .item-stream{
 	background-color: hsl(0, 0%, 26%); /*#424242;*/
 }
 

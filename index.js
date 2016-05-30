@@ -196,7 +196,16 @@ function streamListFromSetting(website){
 			let filters = "";
 			for(let j in this.objData[id]){
 				if(j != "streamURL"){
-					if(typeof this.objData[id][j] == "boolean"){
+					if(typeof this.objData[id][j] == "object" && JSON.stringify(this.objData[id][j]) == "[null]"){
+						continue;
+					}
+					if((j == "facebook" || j == "twitter") && this.objData[id][j] == ""){
+						continue;
+					}
+					if((j == "hide" || j == "ignore") && this.objData[id][j] == false){
+						continue;
+					}
+					if(typeof this.objData[id][j] == "boolean" || j == "facebook" || j == "twitter"){
 						filters = filters + " " + j + "::" + this.objData[id][j];
 					} else {
 						for(let k in this.objData[id][j]){
@@ -473,6 +482,23 @@ function settingUpdate(data){
 	savePreference(settingName, settingValue, updatePanel);
 }
 
+function streamSetting_Update(data){
+	let website = data.website;
+	let id = data.id;
+	let contentId = data.contentId;
+	
+	let streamSettingsData = data.streamSettingsData;
+	
+	let streamListSetting = new streamListFromSetting(website);
+	let streamList = streamListSetting.objData;
+	
+	for(let i in streamSettingsData){
+		streamList[id][i] = streamSettingsData[i];
+	}
+	streamListSetting.update();
+}
+
+
 function importButton_Panel(website){
 	console.info(`Importing ${website}...`);
 	importButton(website);
@@ -497,6 +523,7 @@ panel.port.on("copyLivestreamerCmd", copyLivestreamerCmd);
 panel.port.on("openOnlineLive", openOnlineLive);
 panel.port.on("openTab", openTabIfNotExist);
 panel.port.on("setting_Update", settingUpdate);
+panel.port.on("streamSetting_Update", streamSetting_Update);
 
 function updatePanelData(){
 	if((typeof current_panel_theme != "string" && typeof current_background_color != "string") || current_panel_theme != getPreferences("panel_theme") || current_background_color != getPreferences("background_color")){
@@ -547,6 +574,8 @@ function updatePanelData(){
 						facebookID: streamData.facebookID,
 						twitterID: streamData.twitterID
 					}
+					streamInfo.streamSettings = streamList[id];
+					
 					panel.port.emit("updateData", streamInfo);
 				} else {
 					for(let contentId in liveStatus[website][id]){
@@ -571,6 +600,8 @@ function updatePanelData(){
 								facebookID: streamData.facebookID,
 								twitterID: streamData.twitterID
 							}
+							streamInfo.streamSettings = streamList[id];
+							
 							panel.port.emit("updateData", streamInfo);
 						}
 					}

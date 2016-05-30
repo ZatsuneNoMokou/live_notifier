@@ -1,3 +1,6 @@
+# 5.19.0:
+* +: Stream editor (individual settings) in the panel
+
 # 5.18.1:
 * +: Use via instead of hashtag
 

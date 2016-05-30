@@ -1,5 +1,5 @@
 /*			---- Primary text / Icons ----			*/
-body, header button, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteStreamTooltip, #searchInputContainer, #searchInput{
+body, header button, button, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteStreamTooltip, #searchInputContainer, #searchInput{
 	color: #FFFFFF;
 }
 /*		--- Secondary text / Base Color ----		*/

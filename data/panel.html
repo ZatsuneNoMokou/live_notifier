@@ -37,6 +37,18 @@
 			<div class="twitch group"></div>
 		</div>
 	</section>
+	<section id="streamEditor" class="hide">
+		<div id="streamEditor-firstLine"><span id="editedStreamTitle"></span><span class="vide"></span><button id="closeEditor">X</button></div>
+		<div class="flex_input_text"><label for="customURL"><span data-l10n-id="customURL_title">Custom url</span></label><input id="customURL" pattern="(?:http|https):\/\/.+" type="url"></div>
+		<div class="flex_textarea"><label for="status_blacklist"><span data-l10n-id="blacklist_title">Blacklist</span> (<span data-l10n-id="Status_title">Status</span>)</label><textarea id="status_blacklist"></textarea></div>
+		<div class="flex_textarea"><label for="status_whitelist"><span data-l10n-id="whitelist_title">Whitelist</span> (<span data-l10n-id="Status_title">Status</span>)</label><textarea id="status_whitelist"></textarea></div>
+		<div class="flex_textarea"><label for="game_blacklist"><span data-l10n-id="blacklist_title">Blacklist</span> (<span data-l10n-id="Game_title">Game</span>)</label><textarea id="game_blacklist"></textarea></div>
+		<div class="flex_textarea"><label for="game_whitelist"><span data-l10n-id="whitelist_title">Whitelist</span> (<span data-l10n-id="Game_title">Game</span>)</label><textarea id="game_whitelist"></textarea></div>
+		<div class="flex_input_text"><label for="twitter" data-l10n-id="twitter_title">Twitter</label><input id="twitter" type="text"></div>
+		<div><label for="hideStream" data-l10n-id="hideStream_title">Hide stream</label><input id="hideStream" type="checkbox"></div>
+		<div><label for="ignoreStream" data-l10n-id="ignoreStream_title">Ignore stream</label><input id="ignoreStream" type="checkbox"></div>
+		<div><button id="saveEditedStream" data-l10n-id="save">Save</button></div>
+	</section>
 	<section id="settings_container" class="hide">
 		<p id="preferences"></p>
 		<span id="current_version"></span>
