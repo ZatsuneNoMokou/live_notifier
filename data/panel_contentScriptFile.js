@@ -479,7 +479,8 @@ function newShareStreamButton_onClick(event){
 	let shareMessage = `${I_am_watching_the_stream_of} ${streamerAlias}, "${streamStatus}"`;
 	console.info(shareMessage);
 	
-	window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${streamUrl}&hashtags=LiveNotifier${(twitterID != "")? `&related=${twitterID}` : ""}`, '_blank');
+	// window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${streamUrl}&hashtags=LiveNotifier${(twitterID != "")? `&related=${twitterID}` : ""}&via=LiveNotifier`, '_blank');
+	window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${streamUrl}${(twitterID != "")? `&related=${twitterID}` : ""}&via=LiveNotifier`, '_blank');
 }
 function newShareStreamButton(id, contentId, website, streamName, streamUrl, streamStatus, facebookID, twitterID){
 	let node = document.createElement("span");

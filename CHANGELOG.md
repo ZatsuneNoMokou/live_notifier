@@ -1,3 +1,6 @@
+# 5.18.1:
+* +: Use via instead of hashtag
+
 # 5.18.0:
 * +: Possibility to put the facebook or twitter of a streamer
 
