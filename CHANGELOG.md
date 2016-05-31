@@ -1,3 +1,8 @@
+# 5.19.1:
+* Fix: Avoid double @ in stream share
+* Fix: User defined Twitter updated better
+* Fix: No chars limit anymore, for the status in the notification
+
 # 5.19.0:
 * +: Stream editor (individual settings) in the panel
 
