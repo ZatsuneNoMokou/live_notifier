@@ -1,3 +1,7 @@
+# 5.19.2:
+* Fix: Stream sharing URL
+* Fix: Localization
+
 # 5.19.1:
 * Fix: Avoid double @ in stream share
 * Fix: User defined Twitter updated better
