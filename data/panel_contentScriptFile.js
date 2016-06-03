@@ -453,8 +453,8 @@ function saveEditedStreamButton_onClick(event){
 		gameBlacklist: removeEmplyItems(document.querySelector("#streamEditor #game_blacklist").value.split('\n')),
 		gameWhitelist: removeEmplyItems(document.querySelector("#streamEditor #game_whitelist").value.split('\n')),
 		twitter: document.querySelector("#streamEditor #twitter").value,
-		hide: document.querySelector("#streamEditor #hideStream").check,
-		ignore: document.querySelector("#streamEditor #ignoreStream").check
+		hide: document.querySelector("#streamEditor #hideStream").checked,
+		ignore: document.querySelector("#streamEditor #ignoreStream").checked
 	}
 	
 	self.port.emit("streamSetting_Update", {
@@ -579,8 +579,8 @@ function newEditStreamButton_onClick(event){
 	document.querySelector("#streamEditor #game_blacklist").value = (streamSettings.gameBlacklist)? streamSettings.gameBlacklist.join("\n") : "";
 	document.querySelector("#streamEditor #game_whitelist").value = (streamSettings.gameWhitelist)? streamSettings.gameWhitelist.join("\n") : "";
 	document.querySelector("#streamEditor #twitter").value = (streamSettings.twitter)? streamSettings.twitter : "";
-	document.querySelector("#streamEditor #hideStream").check = (typeof streamSettings.hide == "boolean")? streamSettings.hide : false;
-	document.querySelector("#streamEditor #ignoreStream").check = (typeof streamSettings.ignore == "boolean")? streamSettings.ignore : false;
+	document.querySelector("#streamEditor #hideStream").checked = (typeof streamSettings.hide == "boolean")? streamSettings.hide : false;
+	document.querySelector("#streamEditor #ignoreStream").checked = (typeof streamSettings.ignore == "boolean")? streamSettings.ignore : false;
 	
 	unhideClassNode(streamEditor);
 	scrollbar_streamEditor_update();

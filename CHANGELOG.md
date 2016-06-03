@@ -1,3 +1,9 @@
+# 5.19.3:
+* Fix: Context menu was using page URL instead of link url
+* Fix: Avoid exception of ":" and "," use in the stream settings by encoding/decoding it
+* Fix: Wrong attribute used on hide and ignore settings in the stream editor, in panel
+* Fix: No longer save useless spaces before commas in stream lists
+
 # 5.19.2:
 * Fix: Stream sharing URL
 * Fix: Localization
