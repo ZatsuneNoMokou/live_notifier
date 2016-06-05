@@ -1,3 +1,7 @@
+# 5.20.0:
+* +: Individual setting for online/offline notification
+* Fix: Infinite scroll with the stream setting
+
 # 5.19.3:
 * Fix: Context menu was using page URL instead of link url
 * Fix: Avoid exception of ":" and "," use in the stream settings by encoding/decoding it

@@ -315,7 +315,7 @@ footer, footer *{
 	height: 30px;
 }
 #streamEditor > div, #streamEditor > div{
-	padding: 3px 0px;
+	margin: 3px 0px;
 }
 #streamEditor div.flex_input_text, #streamEditor div.flex_textarea{
 	display: flex;
