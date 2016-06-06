@@ -545,13 +545,13 @@ function shareStream(data){
 	let reg_testTwitterId= /\s*@(.+)/;
 	if(twitterID != null && twitterID != ""){
 		streamerAlias = ((reg_testTwitterId.test(twitterID))? "" : "@") + twitterID;
-		console.info(`${id}/${contentId} (${website}) twitter ID: ${twitterID}`)
+		console.info(`${id}/${contentId} (${website}) twitter ID: ${twitterID}`);
 	}
 	
 	let shareMessage = `${_("I am watching the stream of")} ${streamerAlias}, "${streamStatus}"`;
 	
-	// window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${streamURL}&hashtags=LiveNotifier${(twitterID != "")? `&related=${twitterID}` : ""}&via=LiveNotifier`, '_blank');
-	tabs.open(`https:\/\/twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${streamURL}${(twitterID != "")? `&related=${twitterID}` : ""}&via=LiveNotifier`);
+	tabs.open(`https:\/\/twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${streamURL}&hashtags=LiveNotifier${(twitterID != "")? `&related=${twitterID}` : ""}`);
+	//tabs.open(`https:\/\/twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${streamURL}${(twitterID != "")? `&related=${twitterID}` : ""}&via=LiveNotifier`);
 }
 
 function streamSetting_Update(data){
@@ -882,17 +882,17 @@ function doStreamNotif(website, id, contentId, streamSetting){
 		if(((typeof streamList[id].notifyOnline == "boolean")? streamList[id].notifyOnline : getPreferences("notify_online")) == true && streamData.notificationStatus == false){
 			let streamStatus = streamData.streamStatus + ((streamData.streamGame != "")? (" (" + streamData.streamGame + ")") : "");
 				if(streamLogo != ""){
-					doNotifUrl(_("Stream_online"), streamName + ": " + streamStatus, getStreamURL(website, id, contentId, true), streamLogo);
+					doNotifUrl(_("Stream online"), streamName + ": " + streamStatus, getStreamURL(website, id, contentId, true), streamLogo);
 				} else {
-					doNotifUrl(_("Stream_online"), streamName + ": " + streamStatus, getStreamURL(website, id, contentId, true));
+					doNotifUrl(_("Stream online"), streamName + ": " + streamStatus, getStreamURL(website, id, contentId, true));
 				}
 		}
 	} else {
 		if(((typeof streamList[id].notifyOffline == "boolean")? streamList[id].notifyOffline : getPreferences("notify_offline")) == true && streamData.notificationStatus == true){
 			if(streamLogo != ""){
-				doNotif(_("Stream_offline"),streamName, streamLogo);
+				doNotif(_("Stream offline"),streamName, streamLogo);
 			} else {
-				doNotif(_("Stream_offline"),streamName);
+				doNotif(_("Stream offline"),streamName);
 			}
 		}
 	}

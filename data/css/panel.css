@@ -282,6 +282,9 @@ footer, footer *{
 .item-stream.offlineItem .stream_control span{
 	margin-left: 5px;
 }
+.item-stream.onlineItem:hover{
+	min-height: 60px;
+}
 .item-stream.onlineItem:hover > #stream_right_container > .stream_control{
 	position: relative;
 	float: right;
