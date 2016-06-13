@@ -16,6 +16,43 @@ function unloadListeners() {
 	self.port.removeListener('unloadListeners', unloadListeners);
 }
 
+/*				---- Global functions ----				*/
+function encodeString(string){
+	if(typeof string != "string"){
+		console.warn(`encodeString: wrong type ${typeof string}`);
+		return string;
+	} else {
+		// Using a regexp with g flag, in a replace method let it replace all
+		string = string.replace(/%/g,"%25");
+		string = string.replace(/\:/g,"%3A");
+		string = string.replace(/,/g,"%2C");
+	}
+	return string;
+}
+function decodeString(string){
+	if(typeof string != "string"){
+		console.warn(`encodeString: wrong type ${typeof string}`);
+		return string;
+	} else {
+		// Using a regexp with g flag, in a replace method let it replace all
+		string = string.replace(/%3A/g,":");
+		string = string.replace(/%2C/g,",");
+		string = string.replace(/%25/g,"%");
+	}
+	return string;
+}
+function getFilterListFromPreference(string){
+	let list = string.split(",");
+	for(let i in list){
+		if(list[i].length == 0){
+			delete list[i];
+			// Keep a null item, but this null is not considered in for..in loops
+		} else {
+			list[i] = decodeString(list[i]);
+		}
+	}
+	return list;
+}
 function getBooleanFromVar(string){
 	switch(typeof string){
 		case "boolean":
@@ -37,9 +74,20 @@ function getBooleanFromVar(string){
 	}
 }
 function getValueFromNode(node){
-	if(node.type == "checkbox") {
+	let tagName = node.tagName.toLowerCase();
+	if(tagName == "textarea"){
+		if(node.getAttribute("data-string-list") == "true"){
+			let list = node.value.split("\n");
+			for(let i in list){
+				list[i] = encodeString(list[i]);
+			}
+			return list.join(",");
+		} else {
+			return node.value;
+		}
+	} else if(node.type == "checkbox"){
 		return node.checked;
-	} else if(node.tagName == "input" && node.type == "number"){
+	} else if(tagName == "input" && node.type == "number"){
 		return parseInt(node.value);
 	} else if(typeof node.value == "string"){
 		return node.value;
@@ -47,6 +95,8 @@ function getValueFromNode(node){
 		console.error("Problem with node trying to get value");
 	}
 }
+/*			---- Global functions end ----			*/
+
 
 self.port.on('unloadListeners', unloadListeners);
 
@@ -286,9 +336,17 @@ function newPreferenceNode(parent, id, prefObj){
 	let prefNode = null;
 	switch(prefObj.type){
 		case "string":
-			prefNode = document.createElement("input");
-			prefNode.type = "text";
-			//prefNode.value = getPreferences(id);
+			if(typeof prefObj.stringList == "boolean" && prefObj.stringList == true){
+				prefNode = document.createElement("textarea");
+				prefNode.setAttribute("data-string-list", "true");
+				//prefNode.value = getFilterListFromPreference(getPreferences(id)).join("\n");
+				
+				node.className += " stringList";
+			} else {
+				prefNode = document.createElement("input");
+				prefNode.type = "text";
+				//prefNode.value = getPreferences(id);
+			}
 			break;
 		case "integer":
 			prefNode = document.createElement("input");
@@ -397,6 +455,12 @@ function settingNodesUpdate(data){
 	if(settingNode !== null){
 		switch(options[data.settingName].type){
 			case "string":
+				if(typeof options[data.settingName].stringList == "boolean" && options[data.settingName].stringList == true){
+					settingNode.value = getFilterListFromPreference(data.settingValue).join("\n");
+				} else {
+					settingNode.value = data.settingValue;
+				}
+				break;
 			case "color":
 			case "menulist":
 				settingNode.value = data.settingValue;

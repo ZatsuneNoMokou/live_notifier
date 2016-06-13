@@ -1,3 +1,7 @@
+# 5.23.0:
+* +: List support using textarea in settings (option and panel, except Firefox option page)
+* +: Better support for global filters
+
 # 5.22.0:
 * +: Global filters (blacklist/whitelist status and game)
 * Fix: Notifications using not "cleaned" status

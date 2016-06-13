@@ -354,14 +354,20 @@ footer, footer *{
 .preferenceContainer{
 	display: flex;
 }
-.preferenceContainer label{
+.preferenceContainer:not(.stringList) label{
 	flex: 4;
+}
+.preferenceContainer.stringList label{
+	flex: 1;
 }
 .preferenceContainer .preferenceInput{
 	align-items: flex-end;
 }
-.preferenceContainer .preferenceInput:not(select){
+.preferenceContainer:not(.stringList) .preferenceInput:not(select){
 	flex: 1;
+}
+.preferenceContainer.stringList .preferenceInput:not(select){
+	flex: 2;
 }
 .preference{
 	display: inline;

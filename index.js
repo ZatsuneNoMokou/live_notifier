@@ -799,10 +799,15 @@ function doActionNotif(title, message, action, imgurl){
 	});
 }
 
-function getFilterFromPreference(string){
+function getFilterListFromPreference(string){
 	let list = string.split(",");
 	for(let i in list){
-		list[i] = decodeString(list[i]);
+		if(list[i].length == 0){
+			delete list[i];
+			// Keep a null item, but this null is not considered in for..in loops
+		} else {
+			list[i] = decodeString(list[i]);
+		}
 	}
 	return list;
 }
@@ -824,7 +829,7 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 				}
 			}
 			if(getPreferences("statusWhitelist") != ""){
-				let statusWhitelist_List = getFilterFromPreference(getPreferences("statusWhitelist"));
+				let statusWhitelist_List = getFilterListFromPreference(getPreferences("statusWhitelist"));
 				for(let i in statusWhitelist_List){
 					if(lowerCase_status.indexOf(statusWhitelist_List[i].toLowerCase()) != -1){
 						whitelisted = true;
@@ -848,7 +853,7 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 				}
 			}
 			if(getPreferences("statusBlacklist") != ""){
-				let statusBlacklist_List = getFilterFromPreference(getPreferences("statusBlacklist"));
+				let statusBlacklist_List = getFilterListFromPreference(getPreferences("statusBlacklist"));
 				for(let i in statusBlacklist_List){
 					if(lowerCase_status.indexOf(statusBlacklist_List[i].toLowerCase()) != -1){
 						blacklisted = true;
@@ -876,7 +881,7 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 				}
 			}
 			if(getPreferences("gameWhitelist") != ""){
-				let gameWhitelist_List = getFilterFromPreference(getPreferences("gameWhitelist"));
+				let gameWhitelist_List = getFilterListFromPreference(getPreferences("gameWhitelist"));
 				for(let i in gameWhitelist_List){
 					if(lowerCase_streamGame.indexOf(gameWhitelist_List[i].toLowerCase()) != -1){
 						whitelisted = true;
@@ -899,7 +904,7 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 				}
 			}
 			if(getPreferences("gameBlacklist") != ""){
-				let gameBlacklist_List = getFilterFromPreference(getPreferences("gameBlacklist"));
+				let gameBlacklist_List = getFilterListFromPreference(getPreferences("gameBlacklist"));
 				for(let i in gameBlacklist_List){
 					if(lowerCase_streamGame.indexOf(gameBlacklist_List[i].toLowerCase()) != -1){
 						blacklisted = true;
@@ -1721,9 +1726,9 @@ exports.onUnload = function (reason) {
 		panel.port.removeListener("addStream", addStreamFromPanel);
 		panel.port.removeListener("deleteStream", deleteStreamFromPanel);
 		panel.port.removeListener("openTab", openTabIfNotExist);
+		panel.port.emit('unloadListeners', "");
 		sp.removeListener("twitch_import", importTwitchButton);
 		windows.removeListener("activate", windowsFocusChange);
-		panel.port.emit('unloadListeners', "");
 	}
 	catch(err){
 		console.warn(err);

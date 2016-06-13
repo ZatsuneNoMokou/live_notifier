@@ -132,24 +132,28 @@ var options = {
 	"statusBlacklist":{
 		"title": "Status blacklist",
 		"type": "string",
+		"stringList": true,
 		"value": "",
 		"group": "filters"
 	},
 	"statusWhitelist":{
 		"title": "Status whitelist",
 		"type": "string",
+		"stringList": true,
 		"value": "",
 		"group": "filters"
 	},
 	"gameBlacklist":{
 		"title": "Game blacklist",
 		"type": "string",
+		"stringList": true,
 		"value": "",
 		"group": "filters"
 	},
 	"gameWhitelist":{
 		"title": "Game whitelist",
 		"type": "string",
+		"stringList": true,
 		"value": "",
 		"group": "filters"
 	},
