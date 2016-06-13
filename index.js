@@ -673,6 +673,7 @@ function updatePanelData(){
 							}
 							streamInfo.streamSettings = streamList[id];
 							
+							doStreamNotif(website, id, contentId, streamList[id]);
 							panel.port.emit("updateData", streamInfo);
 						}
 					}
@@ -701,6 +702,10 @@ function updatePanelData(){
 		"dailymotion_check_delay",
 		"notify_online",
 		"notify_offline",
+		"statusBlacklist",
+		"statusWhitelist",
+		"gameBlacklist",
+		"gameWhitelist",
 		"group_streams_by_websites",
 		"show_offline_in_panel",
 		"confirm_addStreamFromPanel",
@@ -770,7 +775,7 @@ function notifAction(type,data){
 	this.data = data;
 }
 function doActionNotif(title, message, action, imgurl){
-	console.info("Notification (" + ((typeof action.type == "string")? action.type : "Unknown/No action" ) + '): "' + message + '"');
+	console.info(`Notification (${(typeof action.type == "string")? action.type : "Unknown/No action"}): "${message}" (${imgurl})`);
 	notifications.notify({
 		title: title,
 		text: message,
@@ -794,34 +799,64 @@ function doActionNotif(title, message, action, imgurl){
 	});
 }
 
+function getFilterFromPreference(string){
+	let list = string.split(",");
+	for(let i in list){
+		list[i] = decodeString(list[i]);
+	}
+	return list;
+}
 function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamOnline){
 	let streamData = liveStatus[website][id][contentId];
 	
 	if(streamData.streamStatus != ""){
 		let lowerCase_status = (streamData.streamStatus).toLowerCase();
-		if(isStreamOnline && streamSetting.statusWhitelist){
-			let statusWhitelist = streamSetting.statusWhitelist;
+		if(isStreamOnline){
 			let whitelisted = false;
-			for(let i in statusWhitelist){
-				if(lowerCase_status.indexOf(statusWhitelist[i].toLowerCase()) != -1){
-					whitelisted = true;
-					break;
+			
+			if(streamSetting.statusWhitelist){
+				let statusWhitelist = streamSetting.statusWhitelist;
+				for(let i in statusWhitelist){
+					if(lowerCase_status.indexOf(statusWhitelist[i].toLowerCase()) != -1){
+						whitelisted = true;
+						break;
+					}
 				}
 			}
-			if(whitelisted == false){
+			if(getPreferences("statusWhitelist") != ""){
+				let statusWhitelist_List = getFilterFromPreference(getPreferences("statusWhitelist"));
+				for(let i in statusWhitelist_List){
+					if(lowerCase_status.indexOf(statusWhitelist_List[i].toLowerCase()) != -1){
+						whitelisted = true;
+						break;
+					}
+				}
+			}
+			if((streamSetting.statusWhitelist || getPreferences("statusWhitelist") != "") && whitelisted == false){
 				isStreamOnline = false;
 				console.info(`${id} current status does not contain whitelist element(s)`);
 			}
-		}
-		if(isStreamOnline && streamSetting.statusBlacklist){
-			let statusBlacklist = streamSetting.statusBlacklist;
+			
 			let blacklisted = false;
-			for(let i in statusBlacklist){
-				if(lowerCase_status.indexOf(statusBlacklist[i].toLowerCase()) != -1){
-					blacklisted = true;
+			
+			if(streamSetting.statusBlacklist){
+				let statusBlacklist = streamSetting.statusBlacklist;
+				for(let i in statusBlacklist){
+					if(lowerCase_status.indexOf(statusBlacklist[i].toLowerCase()) != -1){
+						blacklisted = true;
+					}
 				}
 			}
-			if(blacklisted == true){
+			if(getPreferences("statusBlacklist") != ""){
+				let statusBlacklist_List = getFilterFromPreference(getPreferences("statusBlacklist"));
+				for(let i in statusBlacklist_List){
+					if(lowerCase_status.indexOf(statusBlacklist_List[i].toLowerCase()) != -1){
+						blacklisted = true;
+						break;
+					}
+				}
+			}
+			if((streamSetting.statusBlacklist || getPreferences("statusBlacklist") != "") && blacklisted == true){
 				isStreamOnline = false;
 				console.info(`${id} current status contain blacklist element(s)`);
 			}
@@ -829,33 +864,55 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 	}
 	if(typeof streamData.streamGame == "string" && streamData.streamGame != ""){
 		let lowerCase_streamGame = (streamData.streamGame).toLowerCase();
-		if(isStreamOnline && streamSetting.gameWhitelist){
-			let gameWhitelist = streamSetting.gameWhitelist;
+		if(isStreamOnline){
 			let whitelisted = false;
-			for(let i in gameWhitelist){
-				if(lowerCase_streamGame.indexOf(gameWhitelist[i].toLowerCase()) != -1){
-					whitelisted = true;
-					break;
+			if(streamSetting.gameWhitelist){
+				let gameWhitelist = streamSetting.gameWhitelist;
+				for(let i in gameWhitelist){
+					if(lowerCase_streamGame.indexOf(gameWhitelist[i].toLowerCase()) != -1){
+						whitelisted = true;
+						break;
+					}
 				}
 			}
-			if(whitelisted == false){
+			if(getPreferences("gameWhitelist") != ""){
+				let gameWhitelist_List = getFilterFromPreference(getPreferences("gameWhitelist"));
+				for(let i in gameWhitelist_List){
+					if(lowerCase_streamGame.indexOf(gameWhitelist_List[i].toLowerCase()) != -1){
+						whitelisted = true;
+						break;
+					}
+				}
+			}
+			if((streamSetting.gameWhitelist || getPreferences("gameWhitelist") != "") && whitelisted == false){
 				isStreamOnline = false;
 				console.info(`${id} current game does not contain whitelist element(s)`);
 			}
-		}
-		if(isStreamOnline && streamSetting.gameBlacklist){
-			let gameBlacklist = streamSetting.gameBlacklist;
+			
 			let blacklisted = false;
-			for(let i in gameBlacklist){
-				if(lowerCase_streamGame.indexOf(gameBlacklist[i].toLowerCase()) != -1){
-					blacklisted = true;
+			if(streamSetting.gameBlacklist){
+				let gameBlacklist = streamSetting.gameBlacklist;
+				for(let i in gameBlacklist){
+					if(lowerCase_streamGame.indexOf(gameBlacklist[i].toLowerCase()) != -1){
+						blacklisted = true;
+					}
 				}
 			}
-			if(blacklisted == true){
+			if(getPreferences("gameBlacklist") != ""){
+				let gameBlacklist_List = getFilterFromPreference(getPreferences("gameBlacklist"));
+				for(let i in gameBlacklist_List){
+					if(lowerCase_streamGame.indexOf(gameBlacklist_List[i].toLowerCase()) != -1){
+						blacklisted = true;
+						break;
+					}
+				}
+			}
+			if((streamSetting.gameBlacklist || getPreferences("gameBlacklist") != "") && blacklisted == true){
 				isStreamOnline = false;
 				console.info(`${id} current game contain blacklist element(s)`);
 			}
 		}
+		
 	}
 	streamData.online_cleaned = isStreamOnline;
 	return isStreamOnline;
@@ -896,7 +953,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 			}
 		}
 	}
-	streamData.notificationStatus = online;
+	streamData.notificationStatus = isStreamOnline_cleaned;
 }
 
 function getOfflineCount(){
@@ -957,8 +1014,7 @@ function setIcon() {
 			badge: onlineCount,
 			badgeColor: ""
 		});
-	}
-	else {
+	} else {
 		firefox_button.state("window", {
 			"label": _("No stream online"),
 			"icon": myIconURL_offline,

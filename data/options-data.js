@@ -128,6 +128,31 @@ var options = {
 		"value": false,
 		"group": "notifications"
 	},
+	/*				Filters				*/
+	"statusBlacklist":{
+		"title": "Status blacklist",
+		"type": "string",
+		"value": "",
+		"group": "filters"
+	},
+	"statusWhitelist":{
+		"title": "Status whitelist",
+		"type": "string",
+		"value": "",
+		"group": "filters"
+	},
+	"gameBlacklist":{
+		"title": "Game blacklist",
+		"type": "string",
+		"value": "",
+		"group": "filters"
+	},
+	"gameWhitelist":{
+		"title": "Game whitelist",
+		"type": "string",
+		"value": "",
+		"group": "filters"
+	},
 	/*			Show in panel			*/
 	"group_streams_by_websites": {
 		"title": "Group streams by website",

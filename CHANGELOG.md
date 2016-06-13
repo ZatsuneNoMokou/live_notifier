@@ -1,3 +1,7 @@
+# 5.22.0:
+* +: Global filters (blacklist/whitelist status and game)
+* Fix: Notifications using not "cleaned" status
+
 # 5.20.1:
 * Fix: Tempory replaced "via" with hashtag with stream share
 * Fix: Min height on online streams, in panel

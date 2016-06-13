@@ -129,8 +129,6 @@ footer, footer *{
 	background-position: 3px center;
 	justify-content: space-between;
 	flex-direction: column;
-	
-	max-width: 80%;
 }
 .item-stream.offlineItem{
 	padding: 7px;

@@ -2,7 +2,7 @@
 	"name": "livenotifier",
 	"title": "Live notifier (Dev)",
 	"id": "live_notifier@zatsunenomokou.eu",
-	"version": "5.20.1",
+	"version": "5.22.0",
 	"description": "Be notified of streams from Dailymotion, Hitbox, Twitch and Beam",
 	"main": "index.js",
 	"author": "Zatsune No Mokou",
@@ -128,6 +128,32 @@
 			"type": "bool",
 			"value": false
 		},
+		
+		{
+			"name": "statusBlacklist",
+			"title": "Status blacklist",
+			"type": "string",
+			"value": ""
+		},
+		{
+			"name": "statusWhitelist",
+			"title": "Status whitelist",
+			"type": "string",
+			"value": ""
+		},
+		{
+			"name": "gameBlacklist",
+			"title": "Game blacklist",
+			"type": "string",
+			"value": ""
+		},
+		{
+			"name": "gameWhitelist",
+			"title": "Game whitelist",
+			"type": "string",
+			"value": ""
+		},
+		
 		{
 			"name": "group_streams_by_websites",
 			"title": "Group streams by website",

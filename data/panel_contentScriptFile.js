@@ -202,6 +202,9 @@ function setting_Toggle(){
 	
 	if(setting_Enabled){
 		setting_Enabled = false;
+		
+		self.port.emit("refreshPanel","");
+		
 		unhideClassNode(streamList);
 		hideClassNode(settings_node);
 		
@@ -258,7 +261,7 @@ function getPreferenceGroupNode(parent, groupId){
 function import_onClick(){
 	let getWebsite = /^(\w+)_import$/i;
 	let website = getWebsite.exec(this.id)[1];
-	port_options.sendData("importStreams", website);
+	self.port.emit("importStreams", website);
 }
 function newPreferenceNode(parent, id, prefObj){
 	let node = document.createElement("div");
@@ -332,7 +335,7 @@ function newPreferenceNode(parent, id, prefObj){
 	if(prefObj.type == "control"){
 		self.port.emit("translate", JSON.stringify({"translate-node-id": `#${id}`, "data-l10n-id": `${id}_label`}));
 	}
-	if(id.indexOf("_keys_list") != -1 || id.indexOf("_user_id") != -1){
+	if(id.indexOf("_keys_list") != -1 || id.indexOf("_user_id") != -1 || id == "statusBlacklist" || id == "statusWhitelist" || id == "gameBlacklist" || id == "gameWhitelist"){
 		node.className += " flex_input_text";
 	}
 	prefNode.setAttribute("data-setting-type", prefObj.type);
