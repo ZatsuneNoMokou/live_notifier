@@ -1,3 +1,14 @@
+# 6.0.1
+* Fix: Copy/Paste error
+
+# 6.0.0
+* i: Start using class system, Firefox 45 min requied because of it (ES6)
+* +: Fused website preferences, avoiding one pref per website
+* +: streamListFromSetting use a variable as cache to not re-process each time
+* Fix: Header min height
+* Fix: streamListFromSetting send empty objects if no stream of a website, to avoid errors or undefined
+* Fix: Renamed getPreferences to getPreference, because it make more sense
+
 # 5.23.0:
 * +: List support using textarea in settings (option and panel, except Firefox option page)
 * +: Better support for global filters
@@ -278,7 +289,7 @@
 
 # 4.0.0
 * +: New addon icon (SVG). Source picture from https://pixabay.com/fr/surveiller-live-%C3%A9cran-978055/ in CC0 (Public Domain)
-* i: Début portage Chrome
+* i: Starting Webextension version
 
 # 3.3.5
 * Fix: Locale

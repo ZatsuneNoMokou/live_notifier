@@ -9,11 +9,11 @@
 
         <RDF:li>
           <RDF:Description>
-            <em:version>5.23.0</em:version>
+            <em:version>6.0.1</em:version>
             <em:targetApplication>
               <RDF:Description>
                 <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-                <em:minVersion>38.0a1</em:minVersion>
+                <em:minVersion>45.0a1</em:minVersion>
                 <em:maxVersion>*</em:maxVersion>
                 <em:updateLink>https://gitlab.com/ZatsuneNoMokou/live_notifier/raw/master/dist/live_notifier.xpi</em:updateLink>
               </RDF:Description>

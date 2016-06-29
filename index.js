@@ -11,7 +11,7 @@ let simplePrefs = require('sdk/simple-prefs').prefs;
 let clipboard = require("sdk/clipboard");
 
 function dailymotion_check_delay_onChange(){
-	if(getPreferences("dailymotion_check_delay") <1){
+	if(getPreference("dailymotion_check_delay") <1){
 		savePreference("dailymotion_check_delay") = 1;
 	}
 }
@@ -24,7 +24,7 @@ let ContextMenu = require("sdk/context-menu");
 
 let {setInterval, setTimeout, clearInterval} = require("sdk/timers");
 
-function getPreferences(prefId){
+function getPreference(prefId){
 	return simplePrefs[prefId];
 }
 function savePreference(prefId, value, updatePanel){
@@ -81,6 +81,25 @@ for(website of websites){
 	channelInfos[website] = {};
 }
 
+if(getPreference("stream_keys_list") == ""){
+	(function(){
+		let somethingElseThanSpaces = /[^\s]+/;
+		let newPrefTable = new Array();
+		for(let website of websites){
+			let pref = getPreference(`${website}_keys_list`);
+			if(pref != "" && somethingElseThanSpaces.test(pref)){
+				let myTable = pref.split(",");
+				for(let i in myTable){
+					newPrefTable.push(`${website}::${myTable[i]}`);
+				}
+			}
+		}
+		savePreference("stream_keys_list", newPrefTable.join(", "));
+		for(let website of websites){
+			//savePreference(`${website}_keys_list`, "");
+		}
+	})();
+}
 function encodeString(string){
 	if(typeof string != "string"){
 		console.warn(`encodeString: wrong type ${typeof string}`);
@@ -105,88 +124,119 @@ function decodeString(string){
 	}
 	return string;
 }
-function streamListFromSetting(website){
-	let somethingElseThanSpaces = /[^\s]+/;
-	let pref = this.stringData = new String(getPreferences(`${website}_keys_list`));
-	
-	let obj = {};
-	if(pref != "" && somethingElseThanSpaces.test(pref)){
-		let myTable = pref.split(",");
-		let reg= /\s*([^\s]+)\s*(.*)?/;
-		if(myTable.length > 0){
-			for(let i in myTable){
-				let url = /((?:http|https):\/\/.*)\s*$/;
-				let filters = /\s*(?:(\w+)\:\:(.+)\s*)/;
-				let cleanEndingSpace = /(.*)\s+$/;
-				
-				let result=reg.exec(myTable[i]);
-				let id = result[1];
-				let data = result[2];
-				
-				obj[id] = {hide: false, ignore: false, notifyOnline: getPreferences("notify_online"), notifyOffline: getPreferences("notify_offline"), streamURL: ""};
-				
-				if(typeof data != "undefined"){
-					if(url.test(data) == true){
-						let url_result = url.exec(data);
-						obj[id].streamURL = url_result[1];
-						data = data.replace(url_result[0],"");
-					}
+let streamListFromSetting_cache = null;
+class streamListFromSetting{
+	constructor(requested_website){
+		let somethingElseThanSpaces = /[^\s]+/;
+		this.stringData = getPreference("stream_keys_list");
+		let pref = new String(this.stringData);
+		
+		if(streamListFromSetting_cache != null && streamListFromSetting_cache.hasOwnProperty("stringData") && streamListFromSetting_cache.stringData == pref){
+			//console.log("[Live notifier] streamListFromSetting: Using cache")
+			if(typeof requested_website == "string" && requested_website != ""){
+				this.objData = streamListFromSetting_cache.obj[requested_website];
+				this.website = requested_website;
+			}
+			this.objDataAll = streamListFromSetting_cache.obj;
+		}
+		
+		let obj = {};
+		for(let i in websites){
+			obj[websites[i]] = {};
+		}
+		if(pref != "" && somethingElseThanSpaces.test(pref)){
+			let myTable = pref.split(",");
+			let reg= /\s*([^\s\:]+)\:\:([^\s]+)\s*(.*)?/;
+			if(myTable.length > 0){
+				for(let i in myTable){
+					let url = /((?:http|https):\/\/.*)\s*$/;
+					let filters = /\s*(?:(\w+)\:\:(.+)\s*)/;
+					let cleanEndingSpace = /(.*)\s+$/;
 					
-					if(filters.test(data)){
-						let filters_array = new Array();
+					let result=reg.exec(myTable[i]);
+					let website = result[1];
+					let id = result[2];
+					let data = result[3];
+					
+					obj[website][id] = {hide: false, ignore: false, notifyOnline: getPreference("notify_online"), notifyOffline: getPreference("notify_offline"), streamURL: ""};
+					
+					if(typeof data != "undefined"){
+						if(url.test(data) == true){
+							let url_result = url.exec(data);
+							obj[website][id].streamURL = url_result[1];
+							data = data.replace(url_result[0],"");
+						}
 						
-						let filter_id = /(?:(\w+)\:\:)/;
-						let scan_string = data;
-						while(filter_id.test(scan_string) == true){
-							let current_filter_result = scan_string.match(filter_id);
+						if(filters.test(data)){
+							let filters_array = new Array();
 							
-							let current_filter_id = current_filter_result[1];
-							
-							scan_string = scan_string.substring(current_filter_result.index+current_filter_result[0].length, scan_string.length);
-							
-							let next_filter_result = scan_string.match(filter_id);
-							let next_pos = (next_filter_result !== null)? next_filter_result.index : scan_string.length;
-							
-							let current_data;
-							if(next_filter_result !== null){
-								current_data = scan_string.substring(current_filter_result.index, next_filter_result.index);
-							} else {
-								current_data = scan_string.substring(current_filter_result.index, scan_string.length);
-							}
-							if(cleanEndingSpace.test(current_data)){
-								current_data = cleanEndingSpace.exec(current_data)[1];
-							}
-							
-							if(typeof obj[id][current_filter_id] == "undefined"){
-								obj[id][current_filter_id] = new Array();
-							}
-							
-							if(current_filter_id == "hide" || current_filter_id == "ignore" || current_filter_id == "notifyOnline" || current_filter_id == "notifyOffline"){
-								let boolean = getBooleanFromVar(current_data);
-								if(typeof boolean == "boolean"){
-									current_data = boolean;
+							let filter_id = /(?:(\w+)\:\:)/;
+							let scan_string = data;
+							while(filter_id.test(scan_string) == true){
+								let current_filter_result = scan_string.match(filter_id);
+								
+								let current_filter_id = current_filter_result[1];
+								
+								scan_string = scan_string.substring(current_filter_result.index+current_filter_result[0].length, scan_string.length);
+								
+								let next_filter_result = scan_string.match(filter_id);
+								let next_pos = (next_filter_result !== null)? next_filter_result.index : scan_string.length;
+								
+								let current_data;
+								if(next_filter_result !== null){
+									current_data = scan_string.substring(current_filter_result.index, next_filter_result.index);
 								} else {
-									console.warn(`${current_filter_id} of ${id} should be a boolean`);
+									current_data = scan_string.substring(current_filter_result.index, scan_string.length);
 								}
-								obj[id][current_filter_id] = current_data;
-							} else if(current_filter_id == "facebook" || current_filter_id == "twitter"){
-								obj[id][current_filter_id] = decodeString(current_data);
-							} else {
-								obj[id][current_filter_id].push(decodeString(current_data));
+								if(cleanEndingSpace.test(current_data)){
+									current_data = cleanEndingSpace.exec(current_data)[1];
+								}
+								
+								if(typeof obj[website][id][current_filter_id] == "undefined"){
+									obj[website][id][current_filter_id] = new Array();
+								}
+								
+								if(current_filter_id == "hide" || current_filter_id == "ignore" || current_filter_id == "notifyOnline" || current_filter_id == "notifyOffline"){
+									let boolean = getBooleanFromVar(current_data);
+									if(typeof boolean == "boolean"){
+										current_data = boolean;
+									} else {
+										console.warn(`${current_filter_id} of ${id} should be a boolean`);
+									}
+									obj[website][id][current_filter_id] = current_data;
+								} else if(current_filter_id == "facebook" || current_filter_id == "twitter"){
+									obj[website][id][current_filter_id] = decodeString(current_data);
+								}else {
+									obj[website][id][current_filter_id].push(decodeString(current_data));
+								}
+								scan_string = scan_string.substring(next_pos, scan_string.length);
 							}
-							
-							scan_string = scan_string.substring(next_pos, scan_string.length);
 						}
 					}
 				}
 			}
+			if(typeof requested_website == "string" && requested_website != ""){
+				this.objData = obj[requested_website];
+				this.website = requested_website;
+			}
+			this.objDataAll = obj;
+		} else {
+			if(typeof requested_website == "string" && requested_website != ""){
+				this.objData = obj[requested_website];
+				this.website = requested_website;
+			}
+			this.objDataAll = obj;
+		}
+		
+		// Update cache
+		streamListFromSetting_cache = {
+			"stringData": this.stringData,
+			"obj": obj
 		}
 	}
-	this.objData = obj;
-	this.website = website;
 	
-	this.streamExist = function(id){
-		for(let i in this.objData){
+	streamExist(website, id){
+		for(let i in this.objDataAll[website]){
 			if(i.toLowerCase() == id.toLowerCase()){
 				return true;
 			}
@@ -194,66 +244,71 @@ function streamListFromSetting(website){
 		return false;
 	}
 	
-	this.addStream = function(id, url){
-		if(this.streamExist(id) == false){
-			this.objData[id] = {streamURL: url};
+	addStream(website, id, url){
+		if(this.streamExist(website, id) == false){
+			this.objDataAll[website][id] = {streamURL: url};
+			this.objData = this.objDataAll[website];
 			console.log(`${id} has been added`);
 			
 			try{
-				getPrimary(id, this.website, id);
+				getPrimary(id, website, id);
 			}
 			catch(error){
 				console.warn(`[Live notifier] ${error}`);
 			}
 		}
 	}
-	this.deleteStream = function(id){
-		if(this.streamExist(id)){
+	deleteStream(website, id){
+		if(this.streamExist(website, id)){
+			delete this.objDataAll[website][id];
 			delete this.objData[id];
 			console.log(`${id} has been deleted`);
 		}
 	}
-	this.update = function(){
+	update(){
 		let array = new Array();
-		for(let id in this.objData){
-			let filters = "";
-			for(let j in this.objData[id]){
-				if(j != "streamURL"){
-					if(typeof this.objData[id][j] == "object" && JSON.stringify(this.objData[id][j]) == "[null]"){
-						continue;
-					}
-					if((j == "facebook" || j == "twitter") && this.objData[id][j] == ""){
-						continue;
-					}
-					if((j == "hide" || j == "ignore") && this.objData[id][j] == false){
-						continue;
-					}
-					if(j == "notifyOnline" && this.objData[id][j] == getPreferences("notify_online")){
-						continue;
-					}
-					if(j == "notifyOffline" && this.objData[id][j] == getPreferences("notify_offline")){
-						continue;
-					}
-					if(typeof this.objData[id][j] == "boolean"){
-						filters = filters + " " + j + "::" + this.objData[id][j];
-					}
-					if(j == "facebook" || j == "twitter"){
-						filters = filters + " " + j + "::" + encodeString(this.objData[id][j]);
-					} else {
-						for(let k in this.objData[id][j]){
-							filters = filters + " " + j + "::" + encodeString(this.objData[id][j][k]);
+		for(let website in this.objDataAll){
+			for(let id in this.objDataAll[website]){
+				let filters = "";
+				for(let j in this.objDataAll[website][id]){
+					if(j != "streamURL"){
+						if(typeof this.objDataAll[website][id][j] == "object" && JSON.stringify(this.objDataAll[website][id][j]) == "[null]"){
+							continue;
+						}
+						if((j == "facebook" || j == "twitter") && this.objDataAll[website][id][j] == ""){
+							continue;
+						}
+						if((j == "hide" || j == "ignore") && this.objDataAll[website][id][j] == false){
+							continue;
+						}
+						if(j == "notifyOnline" && this.objDataAll[website][id][j] == getPreference("notify_online")){
+							continue;
+						}
+						if(j == "notifyOffline" && this.objDataAll[website][id][j] == getPreference("notify_offline")){
+							continue;
+						}
+						if(typeof this.objDataAll[website][id][j] == "boolean"){
+							filters = filters + " " + j + "::" + this.objDataAll[website][id][j];
+						}
+						if(j == "facebook" || j == "twitter"){
+							filters = filters + " " + j + "::" + encodeString(this.objDataAll[website][id][j]);
+						} else {
+							for(let k in this.objDataAll[website][id][j]){
+								filters = filters + " " + j + "::" + encodeString(this.objDataAll[website][id][j][k]);
+							}
 						}
 					}
 				}
+				
+				let URL = (typeof this.objDataAll[website][id].streamURL != "undefined" && this.objDataAll[website][id].streamURL != "")? (" " + this.objDataAll[website][id].streamURL) : "";
+				
+				array.push(`${website}::${id}${filters}${URL}`);
 			}
-			
-			let URL = (typeof this.objData[id].streamURL != "undefined" && this.objData[id].streamURL != "")? (" " + this.objData[id].streamURL) : "";
-			
-			array.push(`${id}${filters}${URL}`);
 		}
 		let newSettings = array.join(",");
-		savePreference(`${this.website}_keys_list`, newSettings);
-		console.log(`New settings (${this.website}): ${getPreferences(`${this.website}_keys_list`)}`);
+		savePreference("stream_keys_list", newSettings);
+		setIcon();
+		console.log(`Stream key list update: ${getPreference("stream_keys_list")}`);
 	}
 }
 
@@ -399,7 +454,7 @@ function addStreamFromPanel(data){
 				let id = "";
 				if(pattern.test(url)){
 					id = pattern.exec(url)[1];
-					if(streamListSetting.streamExist(id)){
+					if(streamListSetting.streamExist(website, id)){
 						doNotif("Live notifier",`${display_id(id)} ${_("is already configured.")}`);
 						return true;
 					} else {
@@ -430,7 +485,7 @@ function addStreamFromPanel(data){
 										
 										// Use username (login) as channel id
 										id = id_username;
-										if(streamListSetting.streamExist(id_username) || streamListSetting.streamExist(id_owner)){
+										if(streamListSetting.streamExist(website, id_username) || streamListSetting.streamExist(website, id_owner)){
 											doNotif("Live notifier",`${display_id(id)} ${_("is already configured.")}`);
 											return true;
 										}
@@ -439,24 +494,16 @@ function addStreamFromPanel(data){
 										return null;
 									}
 								}
-								if(getPreferences("confirm_addStreamFromPanel")){
-									let addstreamNotifAction = new notifAction("function", function(){
-										streamListSetting.addStream(id, ((type == "embed")? active_tab_url : ""));
-										streamListSetting.update();
-										doNotif("Live notifier", `${display_id(id)} ${_("have been added.")}`);
-										// Update the panel for the new stream added
-										setTimeout(function(){
-											refreshPanel(false);
-										}, 5000);
-										})
+								if(getPreference("confirm_addStreamFromPanel")){
+									let addstreamNotifAction = new notifAction("addStream", {id: id, website: website, url: ((type == "embed")? active_tab_url : "")});
 									doActionNotif(`Live notifier (${_("click to confirm")})`, `${display_id(id)} ${_("wasn't configured, and can be added.")}`, addstreamNotifAction);
 								} else {
-									streamListSetting.addStream(id, ((type == "embed")? active_tab_url : ""));
+									streamListSetting.addStream(website, id, ((type == "embed")? active_tab_url : ""));
 									streamListSetting.update();
 									doNotif("Live notifier", `${display_id(id)} ${_("wasn't configured, and have been added.")}`);
 									// Update the panel for the new stream added
 									setTimeout(function(){
-										refreshPanel(false);
+										refreshPanel();
 									}, 5000);
 								}
 							}
@@ -483,18 +530,13 @@ function deleteStreamFromPanel(data){
 	let streamListSetting = new streamListFromSetting(data.website);
 	let streamList = streamListSetting.objData;
 	let id = data.id;
-	if(streamListSetting.streamExist(id)){
-		if(getPreferences("confirm_deleteStreamFromPanel")){
-			let deletestreamNotifAction = new notifAction("function", function(){
-				delete streamListSetting.objData[id];
-				streamListSetting.update();
-				doNotif("Live notifier", `${display_id(id)} ${_("has been deleted.")}`);
-				// Update the panel for the new stream added
-				refreshPanel();
-				})
-			doActionNotif(`Live notifier (${_("click to confirm")})`, `${display_id(id)} ${_("will be deleted, are you sure?")}`, deletestreamNotifAction);
+	let website = data.website;
+	if(streamListSetting.streamExist(website, id)){
+		if(getPreference("confirm_deleteStreamFromPanel")){
+			let deletestreamNotifAction = new notifAction("deleteStream", {id: id, website: website});
+			doActionNotif(`Live notifier`, `${display_id(id)} ${_("will be deleted, are you sure?")}`, deletestreamNotifAction);
 		} else {
-			delete streamListSetting.objData[id];
+			streamListSetting.deleteStream(website, id);
 			streamListSetting.update();
 			doNotif("Live notifier", `${display_id(id)} ${_("has been deleted.")}`);
 			// Update the panel for the new stream added
@@ -512,12 +554,12 @@ function settingUpdate(data){
 		updatePanel = data.updatePanel;
 	}
 	
-	if(typeof getPreferences(settingName) == "number" && typeof settingValue == "string"){
+	if(typeof getPreference(settingName) == "number" && typeof settingValue == "string"){
 		settingValue = parseInt(settingValue);
 	}
 	console.log(`${settingName} - ${settingValue} (Update panel: ${updatePanel})`);
-	if(typeof getPreferences(settingName) != typeof settingValue){
-		console.warn(`Setting (${settingName}) type: ${typeof getPreferences(settingName)} - Incoming type: ${typeof settingValue}`);
+	if(typeof getPreference(settingName) != typeof settingValue){
+		console.warn(`Setting (${settingName}) type: ${typeof getPreference(settingName)} - Incoming type: ${typeof settingValue}`);
 	}
 	savePreference(settingName, settingValue, updatePanel);
 }
@@ -599,15 +641,15 @@ panel.port.on("shareStream", shareStream);
 panel.port.on("streamSetting_Update", streamSetting_Update);
 
 function updatePanelData(){
-	if((typeof current_panel_theme != "string" && typeof current_background_color != "string") || current_panel_theme != getPreferences("panel_theme") || current_background_color != getPreferences("background_color")){
+	if((typeof current_panel_theme != "string" && typeof current_background_color != "string") || current_panel_theme != getPreference("panel_theme") || current_background_color != getPreference("background_color")){
 		console.log("Sending panel theme data");
-		panel.port.emit("panel_theme", {"theme": getPreferences("panel_theme"), "background_color": getPreferences("background_color")});
+		panel.port.emit("panel_theme", {"theme": getPreference("panel_theme"), "background_color": getPreference("background_color")});
 	}
-	current_panel_theme = getPreferences("panel_theme");
-	current_background_color = getPreferences("background_color");
+	current_panel_theme = getPreference("panel_theme");
+	current_background_color = getPreference("background_color");
 	
 	//Clear stream list in the panel
-	panel.port.emit("initList", {"group_streams_by_websites": getPreferences("group_streams_by_websites"), "show_offline_in_panel": getPreferences("show_offline_in_panel")});
+	panel.port.emit("initList", {"group_streams_by_websites": getPreference("group_streams_by_websites"), "show_offline_in_panel": getPreference("show_offline_in_panel")});
 	
 	for(let website in liveStatus){
 		var streamList = (new streamListFromSetting(website)).objData;
@@ -654,7 +696,7 @@ function updatePanelData(){
 						
 						getCleanedStreamStatus(website, id, contentId, streamList[id], streamData.online);
 						
-						if(streamData.online_cleaned || (getPreferences("show_offline_in_panel") && !streamData.online_cleaned)){
+						if(streamData.online_cleaned || (getPreference("show_offline_in_panel") && !streamData.online_cleaned)){
 							let streamInfo = {
 								id: id,
 								type: "live",
@@ -687,7 +729,7 @@ function updatePanelData(){
 	//Update online steam count in the panel
 	panel.port.emit("updateOnlineCount", (firefox_button.state("window").badge == 0)? _("No stream online") :  _("%d stream(s) online",firefox_button.state("window").badge));
 	
-	if(getPreferences("show_offline_in_panel")){
+	if(getPreference("show_offline_in_panel")){
 		var offlineCount = getOfflineCount();
 		panel.port.emit("updateOfflineCount", (offlineCount == 0)? _("No stream offline") :  _("%d stream(s) offline",offlineCount));
 	} else {
@@ -714,7 +756,7 @@ function updatePanelData(){
 		"livestreamer_cmd_quality"
 	];
 	for(let i in updateSettings){
-		panel.port.emit("settingNodesUpdate", {settingName: updateSettings[i], settingValue: getPreferences(updateSettings[i])});
+		panel.port.emit("settingNodesUpdate", {settingName: updateSettings[i], settingValue: getPreference(updateSettings[i])});
 	}
 	
 	if(current_version != ""){
@@ -734,7 +776,7 @@ function handleChange(state) {
 var notifications = require("sdk/notifications");
 
 function copyLivestreamerCmd(data){
-	let cmd = `livestreamer ${getStreamURL(data.website, data.id, data.contentId, false)} ${getPreferences("livestreamer_cmd_quality")}`;
+	let cmd = `livestreamer ${getStreamURL(data.website, data.id, data.contentId, false)} ${getPreference("livestreamer_cmd_quality")}`;
 	let clipboard_success = clipboard.set(cmd, "text");
 	if(clipboard_success){
 		doNotif("Live notifier", _("Livestreamer command copied into the clipboard"));
@@ -742,7 +784,7 @@ function copyLivestreamerCmd(data){
 }
 function openOnlineLive(data){
 	openTabIfNotExist(data.streamUrl);
-	if(getPreferences("livestreamer_cmd_to_clipboard")){
+	if(getPreference("livestreamer_cmd_to_clipboard")){
 		copyLivestreamerCmd(data);
 	}
 }
@@ -781,7 +823,32 @@ function doActionNotif(title, message, action, imgurl){
 		text: message,
 		iconURL: ((typeof imgurl == "string" && imgurl != "")? imgurl : myIconURL),
 		onClick: function(){
+			let website;
+			let id;
+			let streamList;
+			if(action.type == "addStream" || action.type == "deleteStream"){
+				website = action.data.website;
+				streamListSetting = new streamListFromSetting(website);
+				id = action.data.id;
+			}
 			switch(action.type){
+				case "addStream":
+					let url = action.data.url;
+					streamListSetting.addStream(website, id, url);
+					streamListSetting.update();
+					// Update the panel for the new stream added
+					setTimeout(function(){
+						refreshPanel();
+					}, 5000);
+					doNotif("Live notifier", `${display_id(id)} ${_("have been added.")}`);
+					break;
+				case "deleteStream":
+					streamListSetting.deleteStream(website, id);
+					streamListSetting.update();
+					// Update the panel for the deleted stream
+					refreshPanel();
+					doNotif("Live notifier", `${display_id(id)} ${_("has been deleted.")}`);
+					break;
 				case "openUrl":
 					// Notification with openUrl action
 					openTabIfNotExist(action.data);
@@ -828,8 +895,8 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 					}
 				}
 			}
-			if(getPreferences("statusWhitelist") != ""){
-				let statusWhitelist_List = getFilterListFromPreference(getPreferences("statusWhitelist"));
+			if(getPreference("statusWhitelist") != ""){
+				let statusWhitelist_List = getFilterListFromPreference(getPreference("statusWhitelist"));
 				for(let i in statusWhitelist_List){
 					if(lowerCase_status.indexOf(statusWhitelist_List[i].toLowerCase()) != -1){
 						whitelisted = true;
@@ -837,7 +904,7 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 					}
 				}
 			}
-			if((streamSetting.statusWhitelist || getPreferences("statusWhitelist") != "") && whitelisted == false){
+			if((streamSetting.statusWhitelist || getPreference("statusWhitelist") != "") && whitelisted == false){
 				isStreamOnline = false;
 				console.info(`${id} current status does not contain whitelist element(s)`);
 			}
@@ -852,8 +919,8 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 					}
 				}
 			}
-			if(getPreferences("statusBlacklist") != ""){
-				let statusBlacklist_List = getFilterListFromPreference(getPreferences("statusBlacklist"));
+			if(getPreference("statusBlacklist") != ""){
+				let statusBlacklist_List = getFilterListFromPreference(getPreference("statusBlacklist"));
 				for(let i in statusBlacklist_List){
 					if(lowerCase_status.indexOf(statusBlacklist_List[i].toLowerCase()) != -1){
 						blacklisted = true;
@@ -861,7 +928,7 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 					}
 				}
 			}
-			if((streamSetting.statusBlacklist || getPreferences("statusBlacklist") != "") && blacklisted == true){
+			if((streamSetting.statusBlacklist || getPreference("statusBlacklist") != "") && blacklisted == true){
 				isStreamOnline = false;
 				console.info(`${id} current status contain blacklist element(s)`);
 			}
@@ -880,8 +947,8 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 					}
 				}
 			}
-			if(getPreferences("gameWhitelist") != ""){
-				let gameWhitelist_List = getFilterListFromPreference(getPreferences("gameWhitelist"));
+			if(getPreference("gameWhitelist") != ""){
+				let gameWhitelist_List = getFilterListFromPreference(getPreference("gameWhitelist"));
 				for(let i in gameWhitelist_List){
 					if(lowerCase_streamGame.indexOf(gameWhitelist_List[i].toLowerCase()) != -1){
 						whitelisted = true;
@@ -889,7 +956,7 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 					}
 				}
 			}
-			if((streamSetting.gameWhitelist || getPreferences("gameWhitelist") != "") && whitelisted == false){
+			if((streamSetting.gameWhitelist || getPreference("gameWhitelist") != "") && whitelisted == false){
 				isStreamOnline = false;
 				console.info(`${id} current game does not contain whitelist element(s)`);
 			}
@@ -903,8 +970,8 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 					}
 				}
 			}
-			if(getPreferences("gameBlacklist") != ""){
-				let gameBlacklist_List = getFilterListFromPreference(getPreferences("gameBlacklist"));
+			if(getPreference("gameBlacklist") != ""){
+				let gameBlacklist_List = getFilterListFromPreference(getPreference("gameBlacklist"));
 				for(let i in gameBlacklist_List){
 					if(lowerCase_streamGame.indexOf(gameBlacklist_List[i].toLowerCase()) != -1){
 						blacklisted = true;
@@ -912,7 +979,7 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 					}
 				}
 			}
-			if((streamSetting.gameBlacklist || getPreferences("gameBlacklist") != "") && blacklisted == true){
+			if((streamSetting.gameBlacklist || getPreference("gameBlacklist") != "") && blacklisted == true){
 				isStreamOnline = false;
 				console.info(`${id} current game contain blacklist element(s)`);
 			}
@@ -941,7 +1008,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 	let isStreamOnline_cleaned = getCleanedStreamStatus(website, id, contentId, streamSetting, online);
 	
 	if(isStreamOnline_cleaned){
-		if(((typeof streamList[id].notifyOnline == "boolean")? streamList[id].notifyOnline : getPreferences("notify_online")) == true && streamData.notificationStatus == false){
+		if(((typeof streamList[id].notifyOnline == "boolean")? streamList[id].notifyOnline : getPreference("notify_online")) == true && streamData.notificationStatus == false){
 			let streamStatus = streamData.streamStatus + ((streamData.streamGame != "")? (" (" + streamData.streamGame + ")") : "");
 				if(streamLogo != ""){
 					doNotifUrl(_("Stream online"), streamName + ": " + streamStatus, getStreamURL(website, id, contentId, true), streamLogo);
@@ -950,7 +1017,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 				}
 		}
 	} else {
-		if(((typeof streamList[id].notifyOffline == "boolean")? streamList[id].notifyOffline : getPreferences("notify_offline")) == true && streamData.notificationStatus == true){
+		if(((typeof streamList[id].notifyOffline == "boolean")? streamList[id].notifyOffline : getPreference("notify_offline")) == true && streamData.notificationStatus == true){
 			if(streamLogo != ""){
 				doNotif(_("Stream offline"),streamName, streamLogo);
 			} else {
@@ -1227,7 +1294,7 @@ function checkLives(){
 	console.groupEnd();
 	
 	clearInterval(interval);
-	interval = setInterval(checkLives, getPreferences('dailymotion_check_delay') * 60000);
+	interval = setInterval(checkLives, getPreference('dailymotion_check_delay') * 60000);
 }
 
 
@@ -1541,17 +1608,17 @@ seconderyInfo = {
 function importButton(website){
 	if(website == "beam"){
 		Request({
-			url: `https://beam.pro/api/v1/channels/${getPreferences(`${website}_user_id`)}`,
+			url: `https://beam.pro/api/v1/channels/${getPreference(`${website}_user_id`)}`,
 			overrideMimeType: "text/plain; charset=utf-8",
 			onComplete: function (response) {
 				let data = response.json;
 				
 				if(!isValidResponse(website, data)){
-					console.warn(`Sometimes bad things just happen - ${website} - https://beam.pro/api/v1/channels/${getPreferences(`${website}_user_id`)}`);
+					console.warn(`Sometimes bad things just happen - ${website} - https://beam.pro/api/v1/channels/${getPreference(`${website}_user_id`)}`);
 					doNotif("Live notifier", _("beam import error"));
 				} else {
 					console.group();
-					console.info(`${website} - https://beam.pro/api/v1/channels/${getPreferences(`${website}_user_id`)}`);
+					console.info(`${website} - https://beam.pro/api/v1/channels/${getPreference(`${website}_user_id`)}`);
 					console.dir(data);
 					
 					let numerical_id = data.user.id;
@@ -1563,7 +1630,7 @@ function importButton(website){
 			}
 		}).get();
 	} else {
-		importStreams(website, getPreferences(`${website}_user_id`));
+		importStreams(website, getPreference(`${website}_user_id`));
 	}
 }
 function importStreams(website, id, url, pageNumber){
@@ -1607,7 +1674,7 @@ let importStreamWebsites = {
 		let streamList = streamListSetting.objData;
 		if(typeof data == "object"){
 			for(let item of data){
-				streamListSetting.addStream(item["token"], "");
+				streamListSetting.addStream("beam", item["token"], "");
 			}
 			streamListSetting.update();
 		}
@@ -1619,8 +1686,8 @@ let importStreamWebsites = {
 		
 		if(data.total > 0){
 			for(let item of data.list){
-				if(!streamListSetting.streamExist(`channel::${item.id}`) && !streamListSetting.streamExist(`channel::${item.username}`)){
-					streamListSetting.addStream(`channel::${item.id}`, "");
+				if(!streamListSetting.streamExist("dailymotion", `channel::${item.id}`) && !streamListSetting.streamExist("dailymotion", `channel::${item.username}`)){
+					streamListSetting.addStream("dailymotion", `channel::${item.id}`, "");
 				} else {
 					console.log(`${item.username} already exist`);
 				}
@@ -1641,7 +1708,7 @@ let importStreamWebsites = {
 		let streamList = streamListSetting.objData;
 		if(typeof data.following == "object"){
 			for(let item of data.following){
-				streamListSetting.addStream(item["user_name"], "");
+				streamListSetting.addStream("hitbox", item["user_name"], "");
 			}
 			streamListSetting.update();
 			if(data.following.length > 0){
@@ -1658,7 +1725,7 @@ let importStreamWebsites = {
 		let streamList = streamListSetting.objData;
 		if(typeof data.follows == "object"){
 			for(let item of data.follows){
-				streamListSetting.addStream(item["channel"]["display_name"], "");
+				streamListSetting.addStream("twitch", item["channel"]["display_name"], "");
 			}
 			streamListSetting.update();
 			if(data.follows.length > 0 && typeof data._links.next == "string"){
@@ -1689,7 +1756,7 @@ checkLives();
 let current_version = "";
 (function checkIfUpdated(){
 	let getVersionNumbers =  /^(\d*)\.(\d*)\.(\d*)$/;
-	let last_executed_version = getPreferences("livenotifier_version");
+	let last_executed_version = getPreference("livenotifier_version");
 	current_version = self.version;
 	
 	let last_executed_version_numbers = getVersionNumbers.exec(last_executed_version);

@@ -43,6 +43,7 @@ header{
 	display: flex;
 	flex-direction: row;
 	padding: 5px 2px;
+	min-height: 36px;
 }
 header button{
 	flex: 1;
