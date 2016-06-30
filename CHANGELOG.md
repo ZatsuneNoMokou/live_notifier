@@ -1,3 +1,7 @@
+# 6.1.0
+* i: The function importing stream key list (before 6.x.x) now delete the old preferences, not only keeping empty strings
+* Fix: Space after comma when streamListFromSetting update the stream list
+
 # 6.0.1
 * Fix: Copy/Paste error
 

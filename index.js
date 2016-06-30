@@ -82,23 +82,27 @@ for(website of websites){
 }
 
 if(getPreference("stream_keys_list") == ""){
-	(function(){
+	let importSreamsFromOldVersion = function(){
 		let somethingElseThanSpaces = /[^\s]+/;
 		let newPrefTable = new Array();
 		for(let website of websites){
 			let pref = getPreference(`${website}_keys_list`);
-			if(pref != "" && somethingElseThanSpaces.test(pref)){
+			if(typeof pref != "undefined" && pref != "" && somethingElseThanSpaces.test(pref)){
 				let myTable = pref.split(",");
 				for(let i in myTable){
 					newPrefTable.push(`${website}::${myTable[i]}`);
 				}
 			}
 		}
-		savePreference("stream_keys_list", newPrefTable.join(", "));
+		savePreference("stream_keys_list", newPrefTable.join(", "), false);
 		for(let website of websites){
-			//savePreference(`${website}_keys_list`, "");
+			let pref = getPreference(`${website}_keys_list`);
+			if(typeof pref != "undefined"){
+				delete simplePrefs[`${website}_keys_list`];
+			}
 		}
-	})();
+	}
+	importSreamsFromOldVersion();
 }
 function encodeString(string){
 	if(typeof string != "string"){
@@ -305,7 +309,7 @@ class streamListFromSetting{
 				array.push(`${website}::${id}${filters}${URL}`);
 			}
 		}
-		let newSettings = array.join(",");
+		let newSettings = array.join(", ");
 		savePreference("stream_keys_list", newSettings);
 		setIcon();
 		console.log(`Stream key list update: ${getPreference("stream_keys_list")}`);

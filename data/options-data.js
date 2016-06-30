@@ -1,11 +1,19 @@
 'use strict';
 
 var options = {
+	"stream_keys_list": {
+		"title": "Stream keys to notify",
+		"description": "Stream list in a comma separated list.",
+		"type": "string",
+		"stringTextArea": true,
+		"value": "",
+		"showPrefInPanel": false
+	},
 	/*			Dailymotion			*/
 	"dailymotion_keys_list": {
 		"title": "Dailymotion keys to notify",
 		"description": "Stream list in a comma separated list.",
-		"type": "string",
+		"type": "hidden",
 		"value": "",
 		"showPrefInPanel": false,
 		"group": "dailymotion"
@@ -27,7 +35,7 @@ var options = {
 	"hitbox_keys_list": {
 		"title": "Hitbox keys to notify",
 		"description": "Stream list in a comma separated list.",
-		"type": "string",
+		"type": "hidden",
 		"value": "",
 		"showPrefInPanel": false,
 		"group": "hitbox"
@@ -49,7 +57,7 @@ var options = {
 	"twitch_keys_list": {
 		"title": "Twitch keys to notify",
 		"description": "Stream list in a comma separated list.",
-		"type": "string",
+		"type": "hidden",
 		"value": "",
 		"showPrefInPanel": false,
 		"group": "twitch"
@@ -71,7 +79,7 @@ var options = {
 	"beam_keys_list": {
 		"title": "Beam keys to notify",
 		"description": "Stream list in a comma separated list.",
-		"type": "string",
+		"type": "hidden",
 		"value": "",
 		"showPrefInPanel": false,
 		"group": "beam"
@@ -94,7 +102,7 @@ var options = {
 		"tittle": "Notification type",
 		"description": "",
 		"type": "menulist",
-		"value": "web",
+		"value": "chrome_api",
 		"options": [
 				{
 					"value": "web",
@@ -107,7 +115,7 @@ var options = {
 			]
 	},*/
 	/*			Check delay			*/
-	"dailymotion_check_delay": {
+	"check_delay": {
 		"title": "Streams status delay",
 		"description": "Delay between checks, in minute",
 		"type": "integer",
@@ -246,4 +254,5 @@ for(var id in options){
 			options_default_sync[id] = option.value;
 		}
 	}
-}*/
+}
+*/
