@@ -436,7 +436,7 @@ function settingNode_onChange(event){
 	let node = this;
 	let setting_Name = this.id;
 	let value = getValueFromNode(node);
-	if(setting_Name == "dailymotion_check_delay" && value < 1){
+	if(setting_Name == "check_delay" && value < 1){
 		value = 1;
 	}
 	

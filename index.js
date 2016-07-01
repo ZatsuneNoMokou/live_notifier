@@ -10,12 +10,12 @@ let sp = require('sdk/simple-prefs');
 let simplePrefs = require('sdk/simple-prefs').prefs;
 let clipboard = require("sdk/clipboard");
 
-function dailymotion_check_delay_onChange(){
-	if(getPreference("dailymotion_check_delay") <1){
-		savePreference("dailymotion_check_delay") = 1;
+function check_delay_onChange(){
+	if(getPreference("check_delay") <1){
+		savePreference("check_delay") = 1;
 	}
 }
-sp.on("dailymotion_check_delay", dailymotion_check_delay_onChange);
+sp.on("check_delay", check_delay_onChange);
 
 let tabs = require("sdk/tabs");
 let windows = require("sdk/windows").browserWindows;
@@ -81,6 +81,12 @@ for(website of websites){
 	channelInfos[website] = {};
 }
 
+/* 		----- Importation of old preferences -----		*/
+if(typeof getPreference("dailymotion_check_delay") == "number" && getPreference("dailymotion_check_delay") > 0 && getPreference("dailymotion_check_delay") != 5){
+	console.info("[Live Notifier] Importing the check delay from the old preference");
+	savePreference("check_delay", getPreference("dailymotion_check_delay"), false);
+	delete simplePrefs["dailymotion_check_delay"];
+}
 if(getPreference("stream_keys_list") == ""){
 	let importSreamsFromOldVersion = function(){
 		let somethingElseThanSpaces = /[^\s]+/;
@@ -104,6 +110,8 @@ if(getPreference("stream_keys_list") == ""){
 	}
 	importSreamsFromOldVersion();
 }
+/* 		----- Fin Importation des vieux paramères -----		*/
+
 function encodeString(string){
 	if(typeof string != "string"){
 		console.warn(`encodeString: wrong type ${typeof string}`);
@@ -745,7 +753,7 @@ function updatePanelData(){
 		"hitbox_user_id",
 		"twitch_user_id",
 		"beam_user_id",
-		"dailymotion_check_delay",
+		"check_delay",
 		"notify_online",
 		"notify_offline",
 		"statusBlacklist",
@@ -1298,7 +1306,7 @@ function checkLives(){
 	console.groupEnd();
 	
 	clearInterval(interval);
-	interval = setInterval(checkLives, getPreference('dailymotion_check_delay') * 60000);
+	interval = setInterval(checkLives, getPreference('check_delay') * 60000);
 }
 
 
@@ -1790,7 +1798,7 @@ windows.on('activate', windowsFocusChange);
 exports.onUnload = function (reason) {
 	try{
 		clearInterval(interval);
-		sp.removeListener("dailymotion_check_delay", dailymotion_check_delay_onChange);
+		sp.removeListener("check_delay", check_delay_onChange);
 		panel.port.removeListener("refreshPanel", refreshPanel);
 		panel.port.removeListener("importStreams", importButton_Panel);
 		panel.port.removeListener('refreshStreams', refreshStreamsFromPanel);
