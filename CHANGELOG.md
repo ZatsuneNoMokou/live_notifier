@@ -1,3 +1,9 @@
+# 6.1.3
+* Fix: Revert of 6.1.2 and renaming the old preference dailymotion_check_delay to check_delay to have same preference name as the Webextension version
+
+# 6.1.2
+* Fix: Copy/Paste error in options-data.js
+
 # 6.1.1
 * Fix: Twitter share back with via instead of hashtag
 
