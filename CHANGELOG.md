@@ -1,3 +1,6 @@
+# 6.2.0
+* +: Now use Element.classList to change classes
+
 # 6.1.3
 * Fix: Revert of 6.1.2 and renaming the old preference dailymotion_check_delay to check_delay to have same preference name as the Webextension version
 

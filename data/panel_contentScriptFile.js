@@ -134,23 +134,23 @@ function drop(event) {
 	event.preventDefault();
 	
 	let dropDiv = document.querySelector("#deleteStream");
-	dropDiv.className = dropDiv.className.replace(/\s*active/i,"");
+	dropDiv.classList.remove("active");
 	
 	let data = JSON.parse(event.dataTransfer.getData("text"));
 	
-	self.port.emit("deleteStream", {id: data.id, website: data.website});
+	sendDataToMain("deleteStream", {id: data.id, website: data.website});
 }
 function dragenter(event){
-	if(event.target.className.indexOf('dragover') != -1){
+	if(event.target.classList.contains('dragover') == true){
 		let dropDiv = document.querySelector("#deleteStream");
-		dropDiv.className += " active";
+		dropDiv.classList.add("active");
 	}
 }
 function dragleave(event){
 	let node = event.target;
-	if(event.target.className.indexOf('dragover') != -1){
+	if(event.target.classList.contains('dragover') == false){
 		let dropDiv = document.querySelector("#deleteStream");
-		dropDiv.className = dropDiv.className.replace(/\s*active/i,"");
+		dropDiv.classList.remove("active");
 	}
 }
 let dropDiv = document.querySelector("#deleteStream");
@@ -165,20 +165,14 @@ function deleteStreamButtonClick(){
 	let deleteStreamTooltip = document.querySelector("#deleteStreamTooltip");
 	if(!showDeleteTooltip){
 		showDeleteTooltip = true;
-		deleteStreamTooltip.className = deleteStreamTooltip.className.replace(/\s*hide/i,"");
+		deleteStreamTooltip.classList.remove("hide");
 		setTimeout(function() {
 			showDeleteTooltip = false;
-			deleteStreamTooltip.className += " hide";
+			deleteStreamTooltip.classList.add("hide");
 		}, 1250);
 	}
 	
-	let streamListNode = document.querySelector("#streamList");
-	let deleteButtonMode_reg = /\s*deleteButtonMode/;
-	if(deleteButtonMode_reg.test(streamListNode.className)){
-		streamListNode.className = streamListNode.className.replace(deleteButtonMode_reg,"");
-	} else {
-		streamListNode.className += " deleteButtonMode";
-	}
+	document.querySelector("#streamList").classList.toggle("deleteButtonMode");
 }
 deleteStreamButton.addEventListener("click",deleteStreamButtonClick,false);
 
@@ -187,7 +181,6 @@ let toggle_search_button = document.querySelector("button#searchStream");
 let searchInput_onInput_Loaded = false;
 function searchContainer_Toggle(){
 	let searchInputContainer = document.querySelector("#searchInputContainer");
-	let hiddenClass = /\s*hide/i;
 	
 	let searchInput = document.querySelector("input#searchInput");
 	if(!searchInput_onInput_Loaded){
@@ -197,13 +190,10 @@ function searchContainer_Toggle(){
 		searchLabel.addEventListener("click", searchInput_onInput);
 	}
 	
-	if(hiddenClass.test(searchInputContainer.className)){
-		searchInputContainer.className = searchInputContainer.className.replace(/\s*hide/i,"");
-	} else {
-		searchInputContainer.className += " hide";
-		searchInput.value = "";
-		searchInput_onInput();
-	}
+	searchInputContainer.classList.toggle("hide");
+	searchInput.value = "";
+	searchInput_onInput();
+	
 	scrollbar_streamList_update();
 }
 toggle_search_button.addEventListener("click", searchContainer_Toggle);
@@ -232,18 +222,10 @@ function searchInput_onInput(){
 let settings_button = document.querySelector("#settings");
 let setting_Enabled = false;
 function unhideClassNode(node){
-	let hideClass_reg = /\s*hide/i;
-	
-	if(hideClass_reg.test(node.className) == true){
-		node.className = node.className.replace(/\s*hide/i,"");
-	}
+	node.classList.remove("hide");
 }
 function hideClassNode(node){
-	let hideClass_reg = /\s*hide/i;
-	
-	if(hideClass_reg.test(node.className) == false){
-		node.className += " hide";
-	}
+	node.classList.add("hide");
 }
 function setting_Toggle(){
 	let streamList = document.querySelector("#streamList");
@@ -260,7 +242,7 @@ function setting_Toggle(){
 		unhideClassNode(streamList);
 		hideClassNode(settings_node);
 		
-		settings_node.className += " hide";
+		settings_node.classList.add("hide");
 		
 		scrollbar_streamList_update();
 	} else {
@@ -268,7 +250,7 @@ function setting_Toggle(){
 		unhideClassNode(settings_node);
 		hideClassNode(streamList);
 		
-		settings_node.className = settings_node.className.replace(/\s*hide/i,"");
+		settings_node.classList.remove("hide");
 		
 		scrollbar_settings_container_update();
 	}
@@ -302,9 +284,9 @@ function getPreferenceGroupNode(parent, groupId){
 	if(groupNode == null){
 		groupNode = document.createElement("p");
 		groupNode.id = groupId;
-		groupNode.className = "pref_group";
+		groupNode.classList.add("pref_group");
 		if(groupId == "dailymotion" || groupId == "hitbox" || groupId == "twitch" || groupId == "beam"){
-			groupNode.className += " website_pref"
+			groupNode.classList.add("website_pref");
 		}
 		parent.appendChild(groupNode);
 	}
@@ -317,10 +299,10 @@ function import_onClick(){
 }
 function newPreferenceNode(parent, id, prefObj){
 	let node = document.createElement("div");
-	node.className = "preferenceContainer";
+	node.classList.add("preferenceContainer");
 	
 	let labelNode = document.createElement("label");
-	labelNode.className = "preference";
+	labelNode.classList.add("preference");
 	if(typeof prefObj.description == "string"){
 		labelNode.title = prefObj.description;
 	}
@@ -343,7 +325,7 @@ function newPreferenceNode(parent, id, prefObj){
 				prefNode.setAttribute("data-string-list", "true");
 				//prefNode.value = getFilterListFromPreference(getPreferences(id)).join("\n");
 				
-				node.className += " stringList";
+				node.classList.add("stringList");
 			} else {
 				prefNode = document.createElement("input");
 				prefNode.type = "text";
@@ -390,13 +372,13 @@ function newPreferenceNode(parent, id, prefObj){
 	}
 	prefNode.id = id;
 	if(prefObj.type != "control"){
-		prefNode.className = "preferenceInput";
+		prefNode.classList.add("preferenceInput");
 	}
 	if(prefObj.type == "control"){
 		self.port.emit("translate", JSON.stringify({"translate-node-id": `#${id}`, "data-l10n-id": `${id}_label`}));
 	}
 	if(id.indexOf("_keys_list") != -1 || id.indexOf("_user_id") != -1 || id == "statusBlacklist" || id == "statusWhitelist" || id == "gameBlacklist" || id == "gameWhitelist"){
-		node.className += " flex_input_text";
+		node.classList.add("flex_input_text");
 	}
 	prefNode.setAttribute("data-setting-type", prefObj.type);
 	
@@ -558,7 +540,7 @@ function initList(data){
 		node.removeEventListener("click", streamItemClick);
 		node.parentNode.removeChild(node);
 	}
-	document.querySelector("#streamListOffline").className = (showOffline)? "" : "hide";
+	document.querySelector("#streamListOffline").classList.toggle("hide", !showOffline)
 }
 
 function listenerOnlineCount(data){
@@ -584,12 +566,12 @@ function newDeleteStreamButton_onClick(event){
 }
 function newDeleteStreamButton(id, website){
 	let node = document.createElement("span");
-	node.className = "deleteStreamButton";
+	node.classList.add("deleteStreamButton");
 	node.setAttribute("data-id", id);
 	node.setAttribute("data-website", website);
 	
 	let node_img =  document.createElement("i");
-	node_img.className = "material-icons";
+	node_img.classList.add("material-icons");
 	node_img.textContent = "delete";
 	node.appendChild(node_img);
 	
@@ -612,7 +594,7 @@ function newShareStreamButton(id, contentId, website, streamName, streamUrl, str
 	node.setAttribute("data-contentId", contentId);
 	
 	let node_img =  document.createElement("i");
-	node_img.className = "material-icons";
+	node_img.classList.add("material-icons");
 	node_img.textContent = "share";
 	node.appendChild(node_img);
 	
@@ -667,7 +649,7 @@ function newEditStreamButton(id, contentId, website, title, streamSettings){
 	node.setAttribute("data-streamSettings", JSON.stringify(streamSettings));
 	
 	let node_img =  document.createElement("i");
-	node_img.className = "material-icons";
+	node_img.classList.add("material-icons");
 	node_img.textContent = "settings";
 	node.appendChild(node_img);
 	
@@ -690,7 +672,7 @@ function newCopyLivestreamerCmdButton(id, contentId, website){
 	node.setAttribute("data-website", website);
 	
 	let node_img =  document.createElement("i");
-	node_img.className = "material-icons";
+	node_img.classList.add("material-icons");
 	node_img.textContent = "content_copy";
 	node.appendChild(node_img);
 	
@@ -717,8 +699,10 @@ function showNonEmptySitesBlocks(){
 	for(let onlineStatus in streamNodes){
 		for(let website in streamNodes[onlineStatus]){
 			current_node = streamNodes[onlineStatus][website];
-			current_node.className = current_node.className.replace(/\s*hide/i,"");
-			current_node.className = current_node.className + ((current_node.hasChildNodes())? "" : " hide");
+			current_node.classList.remove("hide");
+			if(current_node.hasChildNodes() == false){
+				current_node.classList.add("hide");
+			}
 		}
 	}
 }
@@ -765,13 +749,13 @@ function listener(data){
 		stream_right_container_node.id = "stream_right_container";
 		
 		var viewerCountNode = document.createElement("span");
-		viewerCountNode.className = "streamCurrentViewers";
+		viewerCountNode.classList.add("streamCurrentViewers");
 		
 		let viewer_number = (typeof data.streamCurrentViewers == "number")? data.streamCurrentViewers : parseInt(data.streamCurrentViewers);
 		viewerCountNode.textContent = (viewer_number < 1000)? viewer_number : ((Math.round(viewer_number / 100)/10)+ "k");
 		
 		var viewerCountLogoNode = document.createElement("i");
-		viewerCountLogoNode.className = "material-icons";
+		viewerCountLogoNode.classList.add("material-icons");
 		viewerCountLogoNode.textContent ="visibility";
 		viewerCountNode.appendChild(viewerCountLogoNode);
 		stream_right_container_node.appendChild(viewerCountNode);
@@ -790,14 +774,14 @@ function listener(data){
 	
 	if(typeof streamLogo == "string" && streamLogo != ""){
 		newLine.style.backgroundImage = "url('" + streamLogo + "')";
-		newLine.className = "streamLogo";
+		newLine.classList.add("streamLogo");
 	}
 
 	var titleLine = document.createElement("span");
-	titleLine.className = "streamTitle";
+	titleLine.classList.add("streamTitle");
 	if(typeof streamLogo == "string" && streamLogo != ""){
 		var imgStreamStatusLogo = document.createElement("img");
-		imgStreamStatusLogo.className = "streamStatusLogo";
+		imgStreamStatusLogo.classList.add("streamStatusLogo");
 		imgStreamStatusLogo.src = (data.online)? "online-stream.svg" : "offline-stream.svg";
 		titleLine.appendChild(imgStreamStatusLogo);
 	}
@@ -807,7 +791,7 @@ function listener(data){
 	if(data.online){
 		if(data.streamStatus != ""){
 			var statusLine = document.createElement("span");
-			statusLine.className = "streamStatus";
+			statusLine.classList.add("streamStatus");
 			statusLine.textContent = data.streamStatus + ((typeof data.streamGame == "string" && data.streamGame.length > 0)? (" (" + data.streamGame + ")") : "");
 			newLine.appendChild(statusLine);
 			
@@ -820,13 +804,13 @@ function listener(data){
 			newLine.setAttribute("data-streamGameLowerCase", data.streamGame.toLowerCase());
 		}
 		
-		newLine.className += " item-stream onlineItem";
+		newLine.classList.add("item-stream", "onlineItem");
 		insertStreamNode(newLine, data);
 	} else {
-		newLine.className += " item-stream offlineItem";
+		newLine.classList.add("item-stream", "offlineItem");
 		insertStreamNode(newLine, data);
 	}
-	newLine.className += " cursor";
+	newLine.classList.add("cursor");
 	
 	newLine.setAttribute("data-streamId", data.id);
 	newLine.setAttribute("data-contentId", data.contentId);
@@ -846,7 +830,7 @@ function listener(data){
 	
 	/*			---- Control span ----			*/
 	let control_span = document.createElement("span");
-	control_span.className = "stream_control";
+	control_span.classList.add("stream_control");
 	let deleteButton_node = newDeleteStreamButton(data.id, data.website);
 	control_span.appendChild(deleteButton_node);
 	
