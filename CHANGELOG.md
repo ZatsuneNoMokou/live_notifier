@@ -1,3 +1,6 @@
+# 6.3.1
+* Fix: Syntax error for the empty Twitch status fix
+
 # 6.3.0
 * +: Replaced setAttribute and getAttribute for data-* attribute by dataset.*
 * +: Some material icons now inserted by CSS instead of js created node

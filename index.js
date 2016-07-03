@@ -1559,7 +1559,7 @@ let checkLiveStatus = {
 				data = data["stream"];
 				if(data != null){
 					streamData.streamName = data["channel"]["display_name"];
-					streamData.streamStatus = (data["channel"]["status"] != null) data["channel"]["status"] : "";
+					streamData.streamStatus = (data["channel"]["status"] != null)? data["channel"]["status"] : "";
 					streamData.streamGame = (data["game"] !== null && typeof data["game"] == "string")? data["game"] : "";
 					if(typeof data.channel["logo"] == "string" && data.channel["logo"] != "") {
 						streamData.streamOwnerLogo = data.channel["logo"];
