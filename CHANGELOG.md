@@ -1,3 +1,9 @@
+# 6.3.0
+* +: Replaced setAttribute and getAttribute for data-* attribute by dataset.*
+* +: Some material icons now inserted by CSS instead of js created node
+* Fix: Case when no current viewer provided
+* Fix: Empty Twitch status
+
 # 6.2.0
 * +: Now use Element.classList to change classes
 

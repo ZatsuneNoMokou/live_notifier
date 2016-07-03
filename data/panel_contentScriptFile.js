@@ -76,9 +76,9 @@ function getBooleanFromVar(string){
 function getValueFromNode(node){
 	let tagName = node.tagName.toLowerCase();
 	if(tagName == "textarea"){
-		if(node.getAttribute("data-string-textarea") == "true"){
+		if(node.dataset.stringTextarea == "true"){
 			return node.value.replace(/\n/g, "");
-		} else if(node.getAttribute("data-string-list") == "true"){
+		} else if(node.dataset.stringList == "true"){
 			let list = node.value.split("\n");
 			for(let i in list){
 				list[i] = encodeString(list[i]);
@@ -121,9 +121,9 @@ function allowDrop(event){
 }
 function drag(event) {
 	let node = event.target;
-	if(node.draggable = true && node.getAttribute("data-streamId") !== null){
-		let id = node.getAttribute("data-streamId");
-		let website = node.getAttribute("data-streamWebsite");
+	if(node.draggable = true && node.dataset.streamId !== null){
+		let id = node.dataset.streamId;
+		let website = node.dataset.streamWebsite;
 		
 		let data = {id: id, website: website};
 		
@@ -138,7 +138,7 @@ function drop(event) {
 	
 	let data = JSON.parse(event.dataTransfer.getData("text"));
 	
-	sendDataToMain("deleteStream", {id: data.id, website: data.website});
+	self.port.emit("deleteStream", {id: data.id, website: data.website});
 }
 function dragenter(event){
 	if(event.target.classList.contains('dragover') == true){
@@ -147,8 +147,7 @@ function dragenter(event){
 	}
 }
 function dragleave(event){
-	let node = event.target;
-	if(event.target.classList.contains('dragover') == false){
+	if(event.target.classList.contains('dragover') == true){//Firefox only: TRUE
 		let dropDiv = document.querySelector("#deleteStream");
 		dropDiv.classList.remove("active");
 	}
@@ -205,7 +204,7 @@ function searchInput_onInput(){
 	let searchCSS_Node = document.querySelector("#search-cssSelector");
 	if(search.length > 0 && somethingElseThanSpaces.test(search)){
 		searchCSS_Node.textContent =  `
-.item-stream:not([data-streamnamelowercase*="${search}"]):not([data-streamstatuslowercase*="${search}"]):not([data-streamgamelowercase*="${search}"]):not([data-streamwebsitelowercase*="${search}"]){
+.item-stream:not([data-stream-name-lowercase*="${search}"]):not([data-stream-status-lowercase*="${search}"]):not([data-stream-game-lowercase*="${search}"]):not([data-stream-website-lowercase*="${search}"]){
 	display: none;
 	visibility: hidden;
 }
@@ -307,12 +306,12 @@ function newPreferenceNode(parent, id, prefObj){
 		labelNode.title = prefObj.description;
 	}
 	labelNode.htmlFor = id;
-	labelNode.setAttribute("data-translate-title",`${id}_description`)
+	labelNode.dataset.translateTitle = `${id}_description`;
 	
 	let title = document.createElement("span");
 	title.id = `${id}_title`;
-	title.textContent = prefObj.title
-	title.setAttribute("data-l10n-id",`${id}_title`)
+	title.textContent = prefObj.title;
+	title.dataset.l10nId = `${id}_title`;
 	labelNode.appendChild(title);
 	
 	self.port.emit("translate", JSON.stringify({"translate-node-id": `#${id}_title`, "data-l10n-id": `${id}_title`}));
@@ -322,7 +321,7 @@ function newPreferenceNode(parent, id, prefObj){
 		case "string":
 			if(typeof prefObj.stringList == "boolean" && prefObj.stringList == true){
 				prefNode = document.createElement("textarea");
-				prefNode.setAttribute("data-string-list", "true");
+				prefNode.dataset.stringList = true;
 				//prefNode.value = getFilterListFromPreference(getPreferences(id)).join("\n");
 				
 				node.classList.add("stringList");
@@ -361,7 +360,7 @@ function newPreferenceNode(parent, id, prefObj){
 				optionNode.id = option.value;
 				optionNode.text = option.label;
 				optionNode.value = option.value;
-				optionNode.setAttribute("data-l10n-id",`${id}_options.${option.label}`);
+				optionNode.dataset.l10nId = `${id}_options.${option.label}`;
 				
 				self.port.emit("translate", JSON.stringify({"translate-node-id": `#${id} #${option.value}`, "data-l10n-id": `${id}_options.${option.label}`}));
 				
@@ -380,10 +379,10 @@ function newPreferenceNode(parent, id, prefObj){
 	if(id.indexOf("_keys_list") != -1 || id.indexOf("_user_id") != -1 || id == "statusBlacklist" || id == "statusWhitelist" || id == "gameBlacklist" || id == "gameWhitelist"){
 		node.classList.add("flex_input_text");
 	}
-	prefNode.setAttribute("data-setting-type", prefObj.type);
+	prefNode.dataset.settingType = prefObj.type;
 	
 	if(prefObj.type != "menulist"){
-		prefNode.setAttribute("data-l10n-id", id);
+		prefNode.dataset.l10nId = id;
 	}
 	
 	node.appendChild(labelNode);
@@ -482,9 +481,9 @@ let saveEditedStreamButton = document.querySelector("#saveEditedStream");
 function saveEditedStreamButton_onClick(event){
 	let node = this;
 	
-	let website = node.getAttribute("data-website");
-	let id = node.getAttribute("data-id");
-	let contentId = node.getAttribute("data-contentId");
+	let website = node.dataset.website;
+	let id = node.dataset.id;
+	let contentId = node.dataset.contentId;
 	
 	let customURL_node = document.querySelector("#customURL");
 	
@@ -559,21 +558,16 @@ function newDeleteStreamButton_onClick(event){
 	event.stopPropagation();
 	
 	let node = this;
-	let id = node.getAttribute("data-id");
-	let website = node.getAttribute("data-website");
+	let id = node.dataset.id;
+	let website = node.dataset.website;
 	
 	self.port.emit("deleteStream", {id: id, website: website});
 }
 function newDeleteStreamButton(id, website){
 	let node = document.createElement("span");
 	node.classList.add("deleteStreamButton");
-	node.setAttribute("data-id", id);
-	node.setAttribute("data-website", website);
-	
-	let node_img =  document.createElement("i");
-	node_img.classList.add("material-icons");
-	node_img.textContent = "delete";
-	node.appendChild(node_img);
+	node.dataset.id = id;
+	node.dataset.website = website;
 	
 	return node;
 }
@@ -582,21 +576,17 @@ function newShareStreamButton_onClick(event){
 	let node = this;
 	
 	self.port.emit("shareStream", {
-		website: node.getAttribute("data-website"),
-		id: node.getAttribute("data-id"),
-		contentId: node.getAttribute("data-contentId"),
+		website: node.dataset.website,
+		id: node.dataset.id,
+		contentId: node.dataset.contentId,
 	});
 }
 function newShareStreamButton(id, contentId, website, streamName, streamUrl, streamStatus, facebookID, twitterID){
 	let node = document.createElement("span");
-	node.setAttribute("data-website", website);
-	node.setAttribute("data-id", id);
-	node.setAttribute("data-contentId", contentId);
-	
-	let node_img =  document.createElement("i");
-	node_img.classList.add("material-icons");
-	node_img.textContent = "share";
-	node.appendChild(node_img);
+	node.classList.add("shareStreamButton");
+	node.dataset.website = website;
+	node.dataset.id = id;
+	node.dataset.contentId = contentId;
 	
 	return node;
 }
@@ -604,12 +594,12 @@ function newEditStreamButton_onClick(event){
 	event.stopPropagation();
 	
 	let node = this;
-	let id = node.getAttribute("data-id");
-	let contentId = node.getAttribute("data-contentId");
-	let website = node.getAttribute("data-website");
-	let title = node.getAttribute("data-title");
+	let id = node.dataset.id;
+	let contentId = node.dataset.contentId;
+	let website = node.dataset.website;
+	let title = node.dataset.title;
 	
-	let streamSettings = JSON.parse(node.getAttribute("data-streamSettings"));
+	let streamSettings = JSON.parse(node.dataset.streamSettings);
 	
 	let streamList = document.querySelector("#streamList");
 	let streamEditor = document.querySelector("#streamEditor");
@@ -622,9 +612,9 @@ function newEditStreamButton_onClick(event){
 	titleNode.textContent = title;
 	
 	let saveEditedStream = document.querySelector("#saveEditedStream");
-	saveEditedStream.setAttribute("data-id", id);
-	saveEditedStream.setAttribute("data-contentId", contentId);
-	saveEditedStream.setAttribute("data-website", website);
+	saveEditedStream.dataset.id = id;
+	saveEditedStream.dataset.contentId = contentId;
+	saveEditedStream.dataset.website = website;
 	
 	document.querySelector("#streamEditor #customURL").value = streamSettings.streamURL;
 	document.querySelector("#streamEditor #status_blacklist").value = (streamSettings.statusBlacklist)? streamSettings.statusBlacklist.join("\n") : "";
@@ -642,16 +632,12 @@ function newEditStreamButton_onClick(event){
 }
 function newEditStreamButton(id, contentId, website, title, streamSettings){
 	let node = document.createElement("span");
-	node.setAttribute("data-id", id);
-	node.setAttribute("data-contentId", contentId);
-	node.setAttribute("data-website", website);
-	node.setAttribute("data-title", title);
-	node.setAttribute("data-streamSettings", JSON.stringify(streamSettings));
-	
-	let node_img =  document.createElement("i");
-	node_img.classList.add("material-icons");
-	node_img.textContent = "settings";
-	node.appendChild(node_img);
+	node.classList.add("editStreamButton");
+	node.dataset.id = id;
+	node.dataset.contentId = contentId;
+	node.dataset.website = website;
+	node.dataset.title = title;
+	node.dataset.streamSettings = JSON.stringify(streamSettings);
 	
 	return node;
 }
@@ -659,22 +645,18 @@ function newCopyLivestreamerCmdButton_onClick(event){
 	event.stopPropagation();
 	
 	let node = this;
-	let id = node.getAttribute("data-id");
-	let contentId = node.getAttribute("data-contentId");
-	let website = node.getAttribute("data-website");
+	let id = node.dataset.id;
+	let contentId = node.dataset.contentId;
+	let website = node.dataset.website;
 	
 	self.port.emit("copyLivestreamerCmd", {id: id, contentId: contentId, website: website});
 }
 function newCopyLivestreamerCmdButton(id, contentId, website){
 	let node = document.createElement("span");
-	node.setAttribute("data-id", id);
-	node.setAttribute("data-contentId", contentId);
-	node.setAttribute("data-website", website);
-	
-	let node_img =  document.createElement("i");
-	node_img.classList.add("material-icons");
-	node_img.textContent = "content_copy";
-	node.appendChild(node_img);
+	node.classList.add("copyLivestreamerCmdButton");
+	node.dataset.id = id;
+	node.dataset.contentId = contentId;
+	node.dataset.website = website;
 	
 	return node;
 }
@@ -725,8 +707,8 @@ function insertStreamNode(newLine, data){
 		if(statusStreamList.length > 0){
 			for(let i in statusStreamList){
 				let streamNode = statusStreamList[i];
-				if(typeof streamNode.getAttribute == "function"){
-					let streamNode_title = streamNode.getAttribute("data-streamName");
+				if(typeof streamNode.tagName == "string"){
+					let streamNode_title = streamNode.dataset.streamName;
 					if(data.streamName.toLowerCase() < streamNode_title.toLowerCase()){
 						streamNode.parentNode.insertBefore(newLine,streamNode);
 						return true;
@@ -743,23 +725,22 @@ function listener(data){
 	var newLine = document.createElement("div");
 	newLine.id = `${data.website}/${data.id}/${data.contentId}`;
 	
-	let stream_right_container_node;
-	if(data.online && typeof data.streamCurrentViewers == "number"){
+	if(data.online){
 		stream_right_container_node = document.createElement("span");
 		stream_right_container_node.id = "stream_right_container";
-		
-		var viewerCountNode = document.createElement("span");
-		viewerCountNode.classList.add("streamCurrentViewers");
-		
-		let viewer_number = (typeof data.streamCurrentViewers == "number")? data.streamCurrentViewers : parseInt(data.streamCurrentViewers);
-		viewerCountNode.textContent = (viewer_number < 1000)? viewer_number : ((Math.round(viewer_number / 100)/10)+ "k");
-		
-		var viewerCountLogoNode = document.createElement("i");
-		viewerCountLogoNode.classList.add("material-icons");
-		viewerCountLogoNode.textContent ="visibility";
-		viewerCountNode.appendChild(viewerCountLogoNode);
-		stream_right_container_node.appendChild(viewerCountNode);
 		newLine.appendChild(stream_right_container_node);
+		
+		let streamCurrentViewers = data.streamCurrentViewers;
+		
+		if(data.online && typeof streamCurrentViewers == "number"){
+			var viewerCountNode = document.createElement("span");
+			viewerCountNode.classList.add("streamCurrentViewers");
+			
+			let viewer_number = (typeof streamCurrentViewers == "number")? streamCurrentViewers : parseInt(streamCurrentViewers);
+			viewerCountNode.dataset.streamCurrentViewers = (viewer_number < 1000)? viewer_number : ((Math.round(viewer_number / 100)/10)+ "k");
+			
+			stream_right_container_node.appendChild(viewerCountNode);
+		}
 	}
 	
 	let streamOwnerLogo = data.streamOwnerLogo;
@@ -795,13 +776,13 @@ function listener(data){
 			statusLine.textContent = data.streamStatus + ((typeof data.streamGame == "string" && data.streamGame.length > 0)? (" (" + data.streamGame + ")") : "");
 			newLine.appendChild(statusLine);
 			
-			newLine.setAttribute("data-streamStatus", data.streamStatus);
-			newLine.setAttribute("data-streamStatusLowerCase", data.streamStatus.toLowerCase());
+			newLine.dataset.streamStatus = data.streamStatus;
+			newLine.dataset.streamStatusLowercase = data.streamStatus.toLowerCase();
 		}
 		
 		if(data.streamGame.length > 0){
-			if(typeof data.streamGame == "string"){newLine.setAttribute("data-streamGame", data.streamGame)};
-			newLine.setAttribute("data-streamGameLowerCase", data.streamGame.toLowerCase());
+			if(typeof data.streamGame == "string"){newLine.dataset.streamGame = data.streamGame};
+			newLine.dataset.streamGameLowercase = data.streamGame.toLowerCase();
 		}
 		
 		newLine.classList.add("item-stream", "onlineItem");
@@ -812,19 +793,22 @@ function listener(data){
 	}
 	newLine.classList.add("cursor");
 	
-	newLine.setAttribute("data-streamId", data.id);
-	newLine.setAttribute("data-contentId", data.contentId);
-	newLine.setAttribute("data-online", data.online);
-	newLine.setAttribute("data-streamName", data.streamName);
-	newLine.setAttribute("data-streamNameLowerCase", data.streamName.toLowerCase());
-	newLine.setAttribute("data-streamWebsite", data.website);
-	newLine.setAttribute("data-streamWebsiteLowerCase", data.website.toLowerCase());
-	newLine.setAttribute("data-streamUrl", data.streamUrl);
+	newLine.dataset.streamId = data.id;
+	newLine.dataset.contentId = data.contentId;
+	newLine.dataset.online = data.online;
+	newLine.dataset.streamName = data.streamName;
+	newLine.dataset.streamNameLowercase = data.streamName.toLowerCase();
+	newLine.dataset.streamWebsite = data.website;
+	newLine.dataset.streamWebsiteLowercase = data.website.toLowerCase();
+	newLine.dataset.streamUrl = data.streamUrl;
+	
+	newLine.dataset.streamSettings = JSON.stringify(data.streamSettings);
+	
 	if(typeof data.facebookID == "string" && data.facebookID != ""){
-		newLine.setAttribute("data-facebookID", data.facebookID);
+		newLine.dataset.facebookId = data.facebookID;
 	}
-	if(typeof data.facebookID == "string" && data.twitterID != ""){
-		newLine.setAttribute("data-twitterID", data.twitterID);
+	if(typeof data.twitterID == "string" && data.twitterID != ""){
+		newLine.dataset.twitterId = data.twitterID;
 	}
 	newLine.addEventListener("click", streamItemClick);
 	
@@ -869,10 +853,10 @@ function listener(data){
 }
 function streamItemClick(){
 	let node = this;
-	let id = node.getAttribute("data-streamId");
-	let online = node.getAttribute("data-online");
-	let website = node.getAttribute("data-streamWebsite");
-	let streamUrl = node.getAttribute("data-streamUrl");
+	let id = node.dataset.streamId;
+	let online = node.dataset.online;
+	let website = node.dataset.streamWebsite;
+	let streamUrl = node.dataset.streamUrl;
 	
 	if(online){
 		self.port.emit("openOnlineLive", {id: id, website: website, streamUrl: streamUrl});

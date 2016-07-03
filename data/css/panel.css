@@ -145,6 +145,7 @@ footer, footer *{
 .item-stream.onlineItem.streamLogo{
 	padding-left: 58px;
 	background-size: 50px auto;
+	min-height: 37px;
 }
 .item-stream.offlineItem.streamLogo{
 	padding-left: 58px;
@@ -161,16 +162,16 @@ footer, footer *{
 	padding-top: 3px;
 	vertical-align: middle;
 }
-.item-stream[data-streamwebsite=dailymotion] .streamTitle::before{
+.item-stream[data-stream-website=dailymotion] .streamTitle::before{
 	background-image: url("/data/images/dailymotion-icon.png");
 }
-.item-stream[data-streamwebsite=hitbox] .streamTitle::before{
+.item-stream[data-stream-website=hitbox] .streamTitle::before{
 	background-image: url("/data/images/hitbox-icon.svg");
 }
-.item-stream[data-streamwebsite=twitch] .streamTitle::before{
+.item-stream[data-stream-website=twitch] .streamTitle::before{
 	background-image: url("/data/images/GlitchIcon_WhiteonPurple.png");
 }
-.item-stream[data-streamwebsite=beam] .streamTitle::before{
+.item-stream[data-stream-website=beam] .streamTitle::before{
 	background-image: url("/data/images/beam_ball_color.svg");
 }
 .item-stream.onlineItem .streamTitle{
@@ -190,6 +191,15 @@ footer, footer *{
 }*/
 .streamCurrentViewers{
 	display: block;
+}
+.streamCurrentViewers:before{
+	content: attr(data-stream-current-viewers);
+	width: 12px;
+	height: 12px;
+}
+.streamCurrentViewers:after {
+	content: "visibility";
+	font-family: 'Material Icons';
 }
 .item-stream.streamLogo .streamCurrentViewers{
 	top: -10px;
@@ -261,6 +271,26 @@ footer, footer *{
 	visibility: hidden;
 	font-weight: normal;
 }
+.deleteStreamButton:before{
+	content: "delete";
+	font-family: "Material Icons";
+	font-size: 17px;
+}
+.shareStreamButton:before{
+	content: "share";
+	font-family: "Material Icons";
+	font-size: 17px;
+}
+.editStreamButton:before{
+	content: "settings";
+	font-family: "Material Icons";
+	font-size: 17px;
+}
+.copyLivestreamerCmdButton:before{
+	content: "content_copy";
+	font-family: "Material Icons";
+	font-size: 17px;
+}
 #streamList:not(.deleteButtonMode) .item-stream .stream_control .deleteStreamButton{
 	display: none;
 	visibility: hidden;
@@ -268,9 +298,6 @@ footer, footer *{
 #streamList.deleteButtonMode .item-stream .stream_control span:not(.deleteStreamButton){
 	display: none;
 	visibility: hidden;
-}
-.stream_control i.material-icons{
-	font-size: 17px;
 }
 .item-stream.offlineItem .stream_control{
 	position: relative;
