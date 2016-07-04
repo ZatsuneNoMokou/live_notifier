@@ -1,4 +1,4 @@
-function unloadListeners() {
+/*function unloadListeners() {
 	let refreshStreamsButton = document.querySelector("#refreshStreams");
 	refreshStreamsButton.removeEventListener("click",refreshButtonClick);
 	
@@ -14,7 +14,7 @@ function unloadListeners() {
 	self.port.removeListener('updateData', listener);
 	self.port.removeListener('panel_theme', theme_update);
 	self.port.removeListener('unloadListeners', unloadListeners);
-}
+}*/
 
 /*				---- Global functions ----				*/
 function encodeString(string){
@@ -100,7 +100,7 @@ function getValueFromNode(node){
 /*			---- Global functions end ----			*/
 
 
-self.port.on('unloadListeners', unloadListeners);
+//self.port.on('unloadListeners', unloadListeners);
 
 var refreshStreamsButton = document.querySelector("#refreshStreams");
 

@@ -255,7 +255,6 @@ class streamListFromSetting{
 		}
 		return false;
 	}
-	
 	addStream(website, id, url){
 		if(this.streamExist(website, id) == false){
 			this.objDataAll[website][id] = {streamURL: url};
@@ -274,6 +273,9 @@ class streamListFromSetting{
 		if(this.streamExist(website, id)){
 			delete this.objDataAll[website][id];
 			delete this.objData[id];
+			if(typeof liveStatus[website][id] != "undefined"){
+				delete liveStatus[website][id];
+			}
 			console.log(`${id} has been deleted`);
 		}
 	}
@@ -652,7 +654,12 @@ panel.port.on("setting_Update", settingUpdate);
 panel.port.on("shareStream", shareStream);
 panel.port.on("streamSetting_Update", streamSetting_Update);
 
+let addon_fully_loaded = false;
 function updatePanelData(){
+	if(addon_fully_loaded == false){
+		return;
+	}
+	
 	if((typeof current_panel_theme != "string" && typeof current_background_color != "string") || current_panel_theme != getPreference("panel_theme") || current_background_color != getPreference("background_color")){
 		console.log("Sending panel theme data");
 		panel.port.emit("panel_theme", {"theme": getPreference("panel_theme"), "background_color": getPreference("background_color")});
@@ -681,7 +688,7 @@ function updatePanelData(){
 					let streamData = channelInfos[website][id];
 					let contentId = id;
 					
-					console.info(`No data found, using channel infos: ${id} (${website})`);
+					//console.info(`No data found, using channel infos: ${id} (${website})`);
 					
 					let streamInfo = {
 						id: id,
@@ -732,10 +739,34 @@ function updatePanelData(){
 						}
 					}
 				}
+			} else {
+				delete liveStatus[website][id];
+				console.info(`${id} from ${website} was already deleted but not from liveStatus`);
 			}
 		}
 	}
-	
+	let notCheckedYet = false;
+	for(let i in websites){
+		let website = websites[i];
+		var streamList = (new streamListFromSetting(website)).objData;
+		for(let id in streamList){
+			if(!(id in liveStatus[website])){
+				notCheckedYet = true;
+				console.info(`${id} from ${website} is not checked yet`);
+				try{
+					getPrimary(id, website, id);
+				}
+				catch(error){
+					console.warn(`[Live notifier] ${error}`);
+				}
+			}
+		}
+	}
+	if(notCheckedYet == true){
+		setTimeout(function(){
+			refreshPanel();
+		}, 5000);
+	}
 	setIcon();
 	
 	//Update online steam count in the panel
@@ -1021,7 +1052,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 	
 	if(isStreamOnline_cleaned){
 		if(((typeof streamList[id].notifyOnline == "boolean")? streamList[id].notifyOnline : getPreference("notify_online")) == true && streamData.notificationStatus == false){
-			let streamStatus = (streamData.streamStatus != "")? streamData.streamStatus : "" + ((streamData.streamGame != "")? (" (" + streamData.streamGame + ")") : "");
+			let streamStatus = ((streamData.streamStatus != "")? ": " + streamData.streamStatus : "") + ((streamData.streamGame != "")? (" (" + streamData.streamGame + ")") : "");
 				if(streamLogo != ""){
 					doNotifUrl(_("Stream online"), `${streamName}${streamStatus}`, getStreamURL(website, id, contentId, true), streamLogo);
 				} else {
@@ -1050,7 +1081,7 @@ function getOfflineCount(){
 		for(let id in streamList){
 			if(typeof streamList[id].ignore == "boolean" && streamList[id].ignore == true){
 				// Ignoring stream with ignore set to true from online count
-				console.log(`[Live notifier - getOfflineCount] ${id} of ${website} is ignored`);
+				//console.log(`[Live notifier - getOfflineCount] ${id} of ${website} is ignored`);
 				continue;
 			}
 			
@@ -1079,7 +1110,7 @@ function setIcon() {
 		for(let id in liveStatus[website]){
 			if(id in streamList && (typeof streamList[id].ignore == "boolean" && streamList[id].ignore == true)){
 				// Ignoring stream with ignore set to true from online count
-				console.log(`[Live notifier - setIcon] ${id} of ${website} is ignored`);
+				//console.log(`[Live notifier - setIcon] ${id} of ${website} is ignored`);
 				continue;
 			} else {
 				for(let contentId in liveStatus[website][id]){
@@ -1204,12 +1235,13 @@ function isValidResponse(website, data){
 	}
 	switch(website){
 		case "dailymotion":
-			if(data.mode != "live" && typeof data.list == "undefined"){
-				console.warn(`[${website}] Unable to get stream state (not a stream).`);
-				return false;
-			}
 			if(typeof data.error == "object"){
 				console.warn(`[${website}] Unable to get stream state (error detected).`);
+				return false;
+			} else if(typeof data.id == "string"){
+				return true;
+			} else if(data.mode != "live" && typeof data.list == "undefined"){
+				console.warn(`[${website}] Unable to get stream state (not a stream).`);
 				return false;
 			}
 			break;
@@ -1288,7 +1320,6 @@ function checkLives(){
 		console.info(website);
 		console.dir(streamList);
 		console.groupEnd();
-		//console.info(`${website}: ${JSON.stringify(streamList)}`);
 		
 		for(let id in streamList){
 			if(typeof checkingLives_processState.data[website]){
@@ -1296,7 +1327,7 @@ function checkLives(){
 			}
 			checkingLives_processState.data[website][id] = 0;
 			if(typeof streamList[id].ignore == "boolean" && streamList[id].ignore == true){
-				console.info(`Ignoring ${id}`);
+				//console.info(`Ignoring ${id}`);
 				continue;
 			}
 			getPrimary(id, website, streamList[id]);
@@ -1311,7 +1342,6 @@ function checkLives(){
 
 
 function getPrimary(id, website, streamSetting, url, pageNumber){
-	//let request_id = id;
 	let current_API = new API(website, id);
 	if(typeof url == "string"){
 		current_API.url = url;
@@ -1325,11 +1355,6 @@ function getPrimary(id, website, streamSetting, url, pageNumber){
 		onComplete: function (response) {
 			let id = current_API.id;
 			data = response.json;
-			if(isValidResponse(website, data) == false){
-				console.timeEnd(id);
-				console.groupEnd();
-				return null;
-			}
 			
 			console.group();
 			console.info(`${website} - ${id} (${current_API.url})`);
@@ -1388,36 +1413,36 @@ function processPrimary(id, contentId, website, streamSetting, data){
 	if(typeof liveStatus[website][id][contentId] == "undefined"){
 		liveStatus[website][id][contentId] = {"online": false, "notificationStatus": false, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
 	}
-	let liveState = checkLiveStatus[website](id, contentId, data);
-	if(liveState !== null){
-		//let second_API = new API_second(website, id);
-		let second_API = new API_second(website, contentId);
-		
-		if(second_API.url !== null && second_API.overrideMimeType !== null){
-			Request({
-				url: second_API.url,
-				overrideMimeType: second_API.overrideMimeType,
-				onComplete: function (response) {
-					let data_second = response.json;
-					
-					console.info(website + " - " + id + " (" + second_API.url + ")");
-					console.dir(data_second);
-					
-					seconderyInfo[website](id, contentId, data_second, liveState);
-					
-					doStreamNotif(website, id, contentId, streamSetting, liveState);
-					checkLiveEnd();
-					setIcon();
-				}
-			}).get();
+	if(isValidResponse(website, data) == true){
+		let liveState = checkLiveStatus[website](id, contentId, data);
+		if(liveState !== null){
+			let second_API = new API_second(website, contentId);
+			
+			if(second_API.url !== null && second_API.overrideMimeType !== null){
+				Request({
+					url: second_API.url,
+					overrideMimeType: second_API.overrideMimeType,
+					onComplete: function (response) {
+						let data_second = response.json;
+						
+						console.info(website + " - " + id + " (" + second_API.url + ")");
+						console.dir(data_second);
+						
+						seconderyInfo[website](id, contentId, data_second, liveState);
+						
+						doStreamNotif(website, id, contentId, streamSetting, liveState);
+						checkLiveEnd();
+						setIcon();
+					}
+				}).get();
+			} else {
+				doStreamNotif(website, id, contentId, streamSetting, liveState);
+				checkLiveEnd();
+			}
 		} else {
-			doStreamNotif(website, id, contentId, streamSetting, liveState);
-			checkLiveEnd();
+			console.warn("Unable to get stream state.");
 		}
-	} else {
-		console.warn("Unable to get stream state.");
 	}
-	
 	setIcon();
 	
 	console.timeEnd(id);
@@ -1427,7 +1452,7 @@ function getChannelInfo(website, id){
 	let channelInfos_API = new API_channelInfos(website, id);
 	
 	if(typeof channelInfos["dailymotion"][id] == "undefined"){
-		channelInfos["dailymotion"][id] = {"online": false, "notificationStatus": false, "streamName": id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
+		channelInfos["dailymotion"][id] = {"online": false, "notificationStatus": false, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
 	}
 	
 	if(channelInfos_API.url !== null && channelInfos_API.overrideMimeType !== null){
@@ -1440,7 +1465,9 @@ function getChannelInfo(website, id){
 				console.info(website + " - " + id + " (" + channelInfos_API.url + ")");
 				console.dir(data_channelInfos);
 				
-				channelInfosProcess[website](id, data_channelInfos);
+				if(isValidResponse(website, data_channelInfos) == true){
+					channelInfosProcess[website](id, data_channelInfos);
+				}
 			}
 		}).get();
 	}
@@ -1526,9 +1553,9 @@ let checkLiveStatus = {
 				if(streamData.streamCategoryLogo = "http://edge.sf.hitbox.tv/static/img/generic/blank.gif"){
 					streamData.streamCategoryLogo = "";
 				}
-				if(data.channel["user_logo"] !== null){
+				if(typeof data.channel["user_logo"] !== "string" && data.channel["user_logo"].indexOf("/static/img/generic/default-user-") == -1){
 					streamData.streamOwnerLogo = "http://edge.sf.hitbox.tv" + data.channel["user_logo"];
-				} else if(data["user_logo_small"] !== null){
+				} else if(typeof data.channel["user_logo"] !== "string" && data.channel["user_logo"].indexOf("/static/img/generic/default-user-") == -1){
 					streamData.streamOwnerLogo = "http://edge.sf.hitbox.tv" + data.channel["user_logo_small"];
 				} else {
 					streamData.streamOwnerLogo = "";
@@ -1785,7 +1812,7 @@ let current_version = "";
 			}
 		}
 	}
-	savePreference("livenotifier_version", current_version);
+	savePreference("livenotifier_version", current_version, false);
 })();
 
 function windowsFocusChange(window){
@@ -1794,10 +1821,13 @@ function windowsFocusChange(window){
 }
 windows.on('activate', windowsFocusChange);
 
+// Avoid panel data update before this variable
+addon_fully_loaded = true;
 
 exports.onUnload = function (reason) {
 	try{
 		clearInterval(interval);
+		//panel.port.emit('unloadListeners', "");
 		sp.removeListener("check_delay", check_delay_onChange);
 		panel.port.removeListener("refreshPanel", refreshPanel);
 		panel.port.removeListener("importStreams", importButton_Panel);
@@ -1805,7 +1835,6 @@ exports.onUnload = function (reason) {
 		panel.port.removeListener("addStream", addStreamFromPanel);
 		panel.port.removeListener("deleteStream", deleteStreamFromPanel);
 		panel.port.removeListener("openTab", openTabIfNotExist);
-		panel.port.emit('unloadListeners', "");
 		sp.removeListener("twitch_import", importTwitchButton);
 		windows.removeListener("activate", windowsFocusChange);
 	}
