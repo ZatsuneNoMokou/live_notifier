@@ -10,14 +10,6 @@ var options = {
 		"showPrefInPanel": false
 	},
 	/*			Dailymotion			*/
-	"dailymotion_keys_list": {
-		"title": "Dailymotion keys to notify",
-		"description": "Stream list in a comma separated list.",
-		"type": "hidden",
-		"value": "",
-		"showPrefInPanel": false,
-		"group": "dailymotion"
-	},
 	"dailymotion_user_id": {
 		"title": "Your Dailymotion id",
 		"description": "Enter your Dailymotion id to be able to import the stream(s) you follow.",
@@ -32,14 +24,6 @@ var options = {
 		"group": "dailymotion"
 	},
 	/*			Hitbox			*/
-	"hitbox_keys_list": {
-		"title": "Hitbox keys to notify",
-		"description": "Stream list in a comma separated list.",
-		"type": "hidden",
-		"value": "",
-		"showPrefInPanel": false,
-		"group": "hitbox"
-	},
 	"hitbox_user_id": {
 		"title": "Your Hitbox id",
 		"description": "Enter your Hitbox id to be able to import the stream(s) you follow.",
@@ -54,14 +38,6 @@ var options = {
 		"group": "hitbox"
 	},
 	/*			Twitch			*/
-	"twitch_keys_list": {
-		"title": "Twitch keys to notify",
-		"description": "Stream list in a comma separated list.",
-		"type": "hidden",
-		"value": "",
-		"showPrefInPanel": false,
-		"group": "twitch"
-	},
 	"twitch_user_id": {
 		"title": "Your Twitch id",
 		"description": "Enter your Twitch id to be able to import the stream(s) you follow.",
@@ -234,11 +210,6 @@ var options = {
 		"type": "string",
 		"value": "best",
 		"group": "livestreamer"
-	},
-	"livenotifier_version": {
-		"type": "hidden",
-		"sync": false,
-		"value": "0.0.0"
 	}
 }
 /*

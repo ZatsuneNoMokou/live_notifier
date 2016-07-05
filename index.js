@@ -81,7 +81,7 @@ for(website of websites){
 	channelInfos[website] = {};
 }
 
-/* 		----- Importation of old preferences -----		*/
+/* 		----- Importation/Removal of old preferences -----		*/
 if(typeof getPreference("dailymotion_check_delay") == "number" && getPreference("dailymotion_check_delay") > 0 && getPreference("dailymotion_check_delay") != 5){
 	console.info("[Live Notifier] Importing the check delay from the old preference");
 	savePreference("check_delay", getPreference("dailymotion_check_delay"), false);
@@ -110,7 +110,10 @@ if(getPreference("stream_keys_list") == ""){
 	}
 	importSreamsFromOldVersion();
 }
-/* 		----- Fin Importation des vieux paramères -----		*/
+if(typeof getPreference("livenotifier_version") == "string" && getPreference("livenotifier_version") != "0.0.0"){
+	delete simplePrefs["livenotifier_version"];
+}
+/* 		----- Fin Importation/Removal des vieux paramères -----		*/
 
 function encodeString(string){
 	if(typeof string != "string"){
@@ -1791,38 +1794,22 @@ sp.on("beam_import", importBeamButton);
 var interval
 checkLives();
 
-// Checking if updated
-let current_version = "";
-(function checkIfUpdated(){
-	let getVersionNumbers =  /^(\d*)\.(\d*)\.(\d*)$/;
-	let last_executed_version = getPreference("livenotifier_version");
-	current_version = self.version;
-	
-	let last_executed_version_numbers = getVersionNumbers.exec(last_executed_version);
-	let current_version_numbers = getVersionNumbers.exec(current_version);
-	
-	if(last_executed_version != current_version && last_executed_version != "0.0.0"){
-		if(current_version_numbers.length == 4 && last_executed_version_numbers.length == 4){
-			if(current_version_numbers[1] > last_executed_version_numbers[1]){
-				doNotif("Live notifier", _("Addon have been updated (version %d)", current_version));
-			} else if((current_version_numbers[1] == last_executed_version_numbers[1]) && (current_version_numbers[2] > last_executed_version_numbers[2])){
-				doNotif("Live notifier", _("Addon have been updated (version %d)", current_version));
-			} else if((current_version_numbers[1] == last_executed_version_numbers[1]) && (current_version_numbers[2] == last_executed_version_numbers[2]) && (current_version_numbers[3] > last_executed_version_numbers[3])){
-				doNotif("Live notifier", _("Addon have been updated (version %d)", current_version));
-			}
-		}
-	}
-	savePreference("livenotifier_version", current_version, false);
-})();
-
 function windowsFocusChange(window){
 	console.log("[Live notifier] Active window change: icon update");
 	setIcon();
 }
 windows.on('activate', windowsFocusChange);
 
-// Avoid panel data update before this variable
-addon_fully_loaded = true;
+let current_version = self.version;
+let loadReason = "unknown";
+exports.main = function(options, callbacks){
+	// Checking if updated
+	loadReason = options.loadReason;
+	console.info(`Load reason: ${loadReason}`);
+	if(loadReason == "upgrade"){
+		doNotif("Live notifier", _("Addon have been updated (version %d)", current_version));
+	}
+}
 
 exports.onUnload = function (reason) {
 	try{
@@ -1842,3 +1829,6 @@ exports.onUnload = function (reason) {
 		console.warn(err);
 	}
 }
+
+// Avoid panel data update before this variable
+addon_fully_loaded = true;
