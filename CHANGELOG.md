@@ -5,7 +5,7 @@
 * Fix: Ignore default Hitbox user logos
 * Fix: Online stream notification
 * Fix: Unload error
-* Fix: Make sure there no panel data refresh too soon
+* Fix: Make sure there's no panel data refresh too soon
 
 # 6.3.1
 * Fix: Syntax error for the empty Twitch status fix
