@@ -1,3 +1,10 @@
+# 7.0.0-pre1
+* i: Now display offline streams in panel by default
+* i: Moved JS files
+* +: Make variable from API const instead of let;
+* +: Moved stream platforms related code to other script files
+* +: Custom Request function to fit avoid copy/paste fails
+
 # 6.3.3
 * -: Old settings, option-data.js
 * Fix: No longer store live notifier version in a pref, using load or install reason to make update notification

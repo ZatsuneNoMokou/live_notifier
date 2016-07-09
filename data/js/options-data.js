@@ -153,7 +153,7 @@ var options = {
 		"title": "Show offline streams in the panel",
 		"description": "Shown when checked",
 		"type": "bool",
-		"value": false,
+		"value": true,
 		"group": "showInPanel"
 	},
 	/*			Confirm add / delete			*/
