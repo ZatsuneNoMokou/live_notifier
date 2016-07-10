@@ -196,6 +196,19 @@ var options = {
 		"value": "#000000",
 		"group": "theme"
 	},
+	/*			Import/Export Prefs			*/
+	"export_preferences": {
+		"title": "Export preferences from a file",
+		"label": "Export preferences",
+		"type": "control",
+		"group": "importexport_prefs"
+	},
+	"import_preferences": {
+		"title": "Import preferences from a file",
+		"label": "Import preferences",
+		"type": "control",
+		"group": "importexport_prefs"
+	},
 	/*			Livestreamer			*/
 	"livestreamer_cmd_to_clipboard": {
 		"title": "Copy Livestreamer command on stream click.",
@@ -212,7 +225,7 @@ var options = {
 		"group": "livestreamer"
 	}
 }
-/*
+
 var options_default = {};
 var options_default_sync = {};
 
@@ -226,4 +239,4 @@ for(var id in options){
 		}
 	}
 }
-*/
+

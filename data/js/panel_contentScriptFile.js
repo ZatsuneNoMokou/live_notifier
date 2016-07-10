@@ -400,8 +400,12 @@ function newPreferenceNode(parent, id, prefObj){
 			prefNode.addEventListener("change", settingNode_onChange, false);
 			break;
 		case "control":
-			if(id.indexOf("_import") != -1){
-				prefNode.addEventListener("click", import_onClick, false);
+			if(id == "export_preferences"){
+				prefNode.addEventListener("click", getSyncPreferences);
+			} else if(id == "import_preferences"){
+				prefNode.addEventListener("click", importPrefsFromFile);
+			} else if(id.indexOf("_import") != -1){
+				prefNode.addEventListener("click", import_onClick);
 			}
 			break;
 	}
@@ -461,6 +465,65 @@ function settingNodesUpdate(data){
 	} else {
 		console.warn(`${data.settingName} node is null`);
 	}
+}
+function getSyncPreferences(){
+	self.port.emit("getSyncPreferences", options_default_sync);
+}
+function exportPrefsToFile(data){
+	let exportData = {
+		"live_notifier_version": current_version,
+		"preferences": data
+	}
+	
+	let link = document.createElement("a");
+	link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData));
+	link.download = "live_notifier_preferences.json";
+	
+	document.querySelector("body").appendChild(link);
+	link.click();
+	link.parentNode.removeChild(link);
+}
+function importPrefsFromFile(event){
+	let node = document.createElement("input");
+	node.type = "file";
+	node.addEventListener("change", function(){
+		let fileLoader=new FileReader();
+		if(node.files.length == 0 || node.files.length > 1){
+			console.warn(`[Input error] ${node.files.length} file(s) selected `);
+		} else if(node.files[0].type == "" || node.files[0].type == "text/plain"|| node.files[0].type == "text/json"){
+			fileLoader.readAsText(node.files[0]);
+			fileLoader.onloadend = function(event){
+				let rawFileData = event.target.result;
+				let file_JSONData = null;
+				try{
+					file_JSONData = JSON.parse(rawFileData);
+				}
+				catch(error){
+					if(new String(error).indexOf("SyntaxError") != -1){
+						console.warn(`An error occurred when trying to parse file (Check the file you have used)`);
+					} else {
+						console.warn(`An error occurred when trying to parse file (${error})`);
+					}
+				}
+				let preferences = {};
+				if(file_JSONData != null){
+					if(file_JSONData.hasOwnProperty("live_notifier_version") == true){
+						for(let prefId in file_JSONData.preferences){
+							if(typeof options[prefId].type != "undefined" && options[prefId].type != "control" && options[prefId].type != "file" && typeof file_JSONData.preferences[prefId] == typeof options_default_sync[prefId]){
+								preferences[prefId] = file_JSONData.preferences[prefId];
+							} else {
+								console.warn(`Erreur trying to import ${prefId}`);
+							}
+						}
+						self.port.emit("importPrefsFromFile", preferences);
+					}
+				}
+			}
+		} else {
+			console.warn("Wrong file type");
+		}
+	});
+	node.click();
 }
 /*			---- Settings end ----			*/
 
@@ -865,9 +928,10 @@ function streamItemClick(){
 	}
 }
 
-function current_version(data){
+let current_version;
+function getCurrentVersion(data){
 	let current_version_node = document.querySelector("#current_version");
-	current_version_node.textContent = data.current_version;
+	current_version_node.textContent = current_version = data.current_version;
 }
 
 function color(hexColorCode) {
@@ -965,7 +1029,9 @@ self.port.on('updateOfflineCount', listenerOfflineCount);
 self.port.on('updateData', listener);
 self.port.on('settingNodesUpdate', settingNodesUpdate);
 self.port.on('panel_theme', theme_update);
-self.port.on('current_version', current_version);
+self.port.on('current_version', getCurrentVersion);
+
+self.port.on('exportPrefsToFile', exportPrefsToFile);
 
 function translateNode(data){
 	let translate_data = JSON.parse(data);

@@ -638,6 +638,21 @@ function importButton_Panel(website){
 	importButton(website);
 }
 
+function importPrefsFromFile(data){
+	for(let prefId in data){
+		savePreference(prefId, data[prefId], false);
+	}
+	updatePanelData();
+}
+function getSyncPreferences(data){
+	let obj = {};
+	for(let prefId in data){
+		obj[prefId] = getPreference(prefId)
+	}
+	panel.port.emit("exportPrefsToFile", obj)
+}
+
+
 function sendTranslation(data){
 	let result = JSON.parse(data);
 	let translation = _(result["data-l10n-id"]);
@@ -659,6 +674,9 @@ panel.port.on("openTab", openTabIfNotExist);
 panel.port.on("setting_Update", settingUpdate);
 panel.port.on("shareStream", shareStream);
 panel.port.on("streamSetting_Update", streamSetting_Update);
+panel.port.on("importPrefsFromFile", importPrefsFromFile);
+panel.port.on("getSyncPreferences", getSyncPreferences);
+
 
 let addon_fully_loaded = false;
 function updatePanelData(){
