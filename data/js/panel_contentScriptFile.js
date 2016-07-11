@@ -490,7 +490,7 @@ function importPrefsFromFile(event){
 		let fileLoader=new FileReader();
 		if(node.files.length == 0 || node.files.length > 1){
 			console.warn(`[Input error] ${node.files.length} file(s) selected `);
-		} else if(node.files[0].type == "" || node.files[0].type == "text/plain"|| node.files[0].type == "text/json"){
+		} else {
 			fileLoader.readAsText(node.files[0]);
 			fileLoader.onloadend = function(event){
 				let rawFileData = event.target.result;
@@ -507,7 +507,7 @@ function importPrefsFromFile(event){
 				}
 				let preferences = {};
 				if(file_JSONData != null){
-					if(file_JSONData.hasOwnProperty("live_notifier_version") == true){
+					if(file_JSONData.hasOwnProperty("live_notifier_version") == true && file_JSONData.hasOwnProperty("preferences") == true && typeof file_JSONData.preferences == "object"){
 						for(let prefId in file_JSONData.preferences){
 							if(typeof options[prefId].type != "undefined" && options[prefId].type != "control" && options[prefId].type != "file" && typeof file_JSONData.preferences[prefId] == typeof options_default_sync[prefId]){
 								preferences[prefId] = file_JSONData.preferences[prefId];
@@ -519,8 +519,6 @@ function importPrefsFromFile(event){
 					}
 				}
 			}
-		} else {
-			console.warn("Wrong file type");
 		}
 	});
 	node.click();
@@ -1032,6 +1030,8 @@ self.port.on('panel_theme', theme_update);
 self.port.on('current_version', getCurrentVersion);
 
 self.port.on('exportPrefsToFile', exportPrefsToFile);
+self.port.on('import_preferences', importPrefsFromFile);
+self.port.on('export_preferences', getSyncPreferences);
 
 function translateNode(data){
 	let translate_data = JSON.parse(data);

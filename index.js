@@ -652,6 +652,14 @@ function getSyncPreferences(data){
 	panel.port.emit("exportPrefsToFile", obj)
 }
 
+function export_preferences(){
+	panel.port.emit("export_preferences");
+}
+sp.on("export_preferences", export_preferences);
+function import_preferences(){
+	panel.port.emit("import_preferences");
+}
+sp.on("import_preferences", import_preferences);
 
 function sendTranslation(data){
 	let result = JSON.parse(data);
