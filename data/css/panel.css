@@ -79,7 +79,7 @@ header button{
 .cursor{
 	cursor: pointer;
 }
-#streamList, #settings_container, #streamEditor{
+#streamList, #settings_container, #streamEditor, #debugSection{
 	overflow: hidden;
 	position: relative;
 	/*flex: 1;*/
@@ -162,16 +162,16 @@ footer, footer *{
 	padding-top: 3px;
 	vertical-align: middle;
 }
-.item-stream[data-stream-website=dailymotion] .streamTitle::before{
+.item-stream[data-stream-website=dailymotion] .streamTitle::before, .debugItem[data-stream-website=dailymotion] .debugTitle::before{
 	background-image: url("/data/images/dailymotion-icon.png");
 }
-.item-stream[data-stream-website=hitbox] .streamTitle::before{
+.item-stream[data-stream-website=hitbox] .streamTitle::before, .debugItem[data-stream-website=hitbox] .debugTitle::before{
 	background-image: url("/data/images/hitbox-icon.svg");
 }
-.item-stream[data-stream-website=twitch] .streamTitle::before{
+.item-stream[data-stream-website=twitch] .streamTitle::before, .debugItem[data-stream-website=twitch] .debugTitle::before{
 	background-image: url("/data/images/GlitchIcon_WhiteonPurple.png");
 }
-.item-stream[data-stream-website=beam] .streamTitle::before{
+.item-stream[data-stream-website=beam] .streamTitle::before, .debugItem[data-stream-website=beam] .debugTitle::before{
 	background-image: url("/data/images/beam_ball_color.svg");
 }
 .item-stream.onlineItem .streamTitle{
@@ -433,6 +433,38 @@ input[type=checkbox]{
 }
 input[type=number]{
 	max-width: 42px;
+}
+
+#debugInfo{
+	display: block;
+	font-weight: 700;
+	margin-right: 30px;
+}
+#close_debugSection{
+	position: absolute;
+	right: 0px;
+	height: 30px;
+	width: 30px;
+}
+#debugDataLabel, .debugItem{
+	margin-top: 6px;
+}
+.debugItem[data-stream-website] .debugTitle::before{
+	display: inline-block;
+	content:"";
+	height: 15px;
+	width: 15px;
+	background-size: 15px 15px;
+	background-repeat: no-repeat;
+	padding-left: 3px;
+	padding-top: 3px;
+	vertical-align: middle;
+}
+#debugDataLabel, .debugItem[data-stream-website] .debugTitle{
+	font-weight: 600;
+}
+.debugItem[data-stream-website] .debugTitle::after{
+	content: ": ";
 }
 
 #current_version::before{

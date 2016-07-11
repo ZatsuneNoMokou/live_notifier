@@ -27,12 +27,18 @@ let twitch = {
 			}
 			return obj;
 		},
-	"isValidResponse":
+	"checkResponseValidity":
 		function(data){
-			if(data.error == "Not Found"){
-				return "error";
+			if(data.hasOwnProperty("error")){
+				if(typeof data.message == "string"){
+					return data.message;
+				} else if(typeof data.error == "string"){
+					return data.error;
+				} else {
+					return "error";
+				}
 			} else {
-				return "";
+				return "success";
 			}
 		},
 	"checkLiveStatus":
@@ -40,6 +46,7 @@ let twitch = {
 			let streamData = currentLiveStatus;
 			if(data.hasOwnProperty("stream")){
 				data = data["stream"];
+				streamData.liveStatus.API_Status = (data != null);
 				if(data != null){
 					streamData.streamName = data["channel"]["display_name"];
 					streamData.streamStatus = (data["channel"]["status"] != null)? data["channel"]["status"] : "";
@@ -52,14 +59,12 @@ let twitch = {
 					}
 					streamData.streamCurrentViewers = parseInt(data["viewers"]);
 					
-					streamData.online = true;
-					return streamData.online;
+					return streamData.liveStatus.API_Status;
 				} else {
 					if(streamData.streamName == ""){
 						streamData.streamName = id;
 					}
-					streamData.online = false;
-					return streamData.online;
+					return streamData.liveStatus.API_Status;
 				}
 			} else {
 				return null;

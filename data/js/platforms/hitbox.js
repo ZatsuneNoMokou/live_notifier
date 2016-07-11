@@ -19,13 +19,14 @@ let hitbox = {
 			}
 			return obj;
 		},
-	"isValidResponse":
+	"checkResponseValidity":
 		function(data){
 			if(data.error == "live"){
 				return "error";
 			}
 			if(data.error == true){
-				return "error";
+				let error_msg = (data.hasOwnProperty("error_msg") == true)? data.error_msg : "error";
+				return error_msg;
 			}
 			return "success";
 		},
@@ -34,7 +35,7 @@ let hitbox = {
 			let streamData = currentLiveStatus;
 			if(data.hasOwnProperty("livestream") == false){
 				if(data.error_msg="no_media_found"){
-					streamData.online = false;
+					streamData.liveStatus.API_Status = false;
 				}
 				streamData.streamName = id;
 				return null;
@@ -69,11 +70,11 @@ let hitbox = {
 				}
 				streamData.streamCurrentViewers = parseInt(data["media_views"]);
 				
-				streamData.online = (data["media_is_live"] == "1")? true : false;
+				streamData.liveStatus.API_Status = (data["media_is_live"] == "1")? true : false;
 				if(typeof data.channel["twitter_account"] == "string" && data.channel["twitter_account"] != "" && typeof data.channel["twitter_account"] == "string" && data.channel["twitter_enabled"] == "1"){
 					streamData.twitterID = data.channel["twitter_account"];
 				}
-				return streamData.online;
+				return streamData.liveStatus.API_Status;
 			} else {
 				return null;
 			}

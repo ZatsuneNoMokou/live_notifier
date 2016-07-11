@@ -1,10 +1,13 @@
-# 7.0.0-pre3
+# 7.0.0
 * i: Now display offline streams in panel by default
 * i: Moved JS files
-* +: Make variable from API const instead of let;
+* +: Make variable from API const instead of let
 * +: Moved stream platforms related code to other script files
-* +: Custom Request function to fit avoid copy/paste fails
+* +: Custom Request function to fit Webextension version, to avoid copy/paste fails
 * +: Import and export of preferences (functions use the panel in Firefox)
+* +: Display streams errors in hidden section, in the panel
+* +: Sending stream data to panel simplified, "alike" the way of the Webextension version
+* +: Single function to load scrollbars
 
 # 6.3.3
 * -: Old settings, option-data.js

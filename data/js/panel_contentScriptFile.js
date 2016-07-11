@@ -193,7 +193,7 @@ function searchContainer_Toggle(){
 	searchInput.value = "";
 	searchInput_onInput();
 	
-	scrollbar_streamList_update();
+	scrollbar_update("streamList");
 }
 toggle_search_button.addEventListener("click", searchContainer_Toggle);
 
@@ -214,7 +214,7 @@ function searchInput_onInput(){
 		searchInput.value = "";
 		searchInput_onInput();
 	}
-	scrollbar_streamList_update();
+	scrollbar_update("streamList");
 }
 
 /*				---- Settings ----				*/
@@ -226,36 +226,66 @@ function unhideClassNode(node){
 function hideClassNode(node){
 	node.classList.add("hide");
 }
-function setting_Toggle(){
+function selectSection(sectionNodeId){
 	let streamList = document.querySelector("#streamList");
 	let streamEditor = document.querySelector("#streamEditor");
 	let settings_node = document.querySelector("#settings_container");
+	let debugSection = document.querySelector("section#debugSection");
 	
-	hideClassNode(streamEditor);
-	
+	if(typeof sectionNodeId == "string" && sectionNodeId != ""){
+		let sectionList = [streamList, streamEditor, settings_node, debugSection];
+		
+		let sectionEnabled = false;
+		for(let i in sectionList){
+			if(sectionList[i].id == sectionNodeId){
+				sectionEnabled = true;
+				unhideClassNode(sectionList[i]);
+				scrollbar_update(sectionNodeId);
+				
+				switch(sectionNodeId){
+					case "streamList":
+						setting_Enabled = false;
+						self.port.emit("refreshPanel", "");
+						break;
+					case "settings_container":
+						setting_Enabled = true;
+						break;
+				}
+			} else {
+				hideClassNode(sectionList[i]);
+			}
+		}
+		if(sectionEnabled == false){
+			unhideClassNode(streamList);
+		}
+	}
+}
+function setting_Toggle(sectionNodeId){
 	if(setting_Enabled){
 		setting_Enabled = false;
-		
-		self.port.emit("refreshPanel","");
-		
-		unhideClassNode(streamList);
-		hideClassNode(settings_node);
-		
-		settings_node.classList.add("hide");
-		
-		scrollbar_streamList_update();
+		selectSection("streamList");
 	} else {
 		setting_Enabled = true;
-		unhideClassNode(settings_node);
-		hideClassNode(streamList);
-		
-		settings_node.classList.remove("hide");
-		
-		scrollbar_settings_container_update();
+		selectSection("settings_container");
 	}
 }
 settings_button.addEventListener("click", setting_Toggle, false);
 
+/*				---- Debug section ----				*/
+
+let close_debugSection = document.querySelector("#close_debugSection");
+close_debugSection.addEventListener("click", function(event){
+	selectSection("streamList");
+}, false);
+
+let versionNode = document.querySelector("#current_version");
+versionNode.addEventListener("dblclick", enableDebugSection);
+
+function enableDebugSection(){
+	selectSection("debugSection");
+}
+
+/*				---- End Debug section ----				*/
 
 /*				---- Setting nodes generator ----				*/
 function loadPreferences(){
@@ -600,6 +630,10 @@ function initList(data){
 		node.removeEventListener("click", streamItemClick);
 		node.parentNode.removeChild(node);
 	}
+	
+	unhideClassNode(document.querySelector("#noErrorToShow"));
+	removeAllChildren(document.querySelector("#debugData"));
+	
 	document.querySelector("#streamListOffline").classList.toggle("hide", !showOffline)
 }
 
@@ -689,7 +723,7 @@ function newEditStreamButton_onClick(event){
 	document.querySelector("#streamEditor #notifyOffline").checked = (typeof streamSettings.notifyOffline == "boolean")? streamSettings.notifyOffline : false;
 	
 	unhideClassNode(streamEditor);
-	scrollbar_streamEditor_update();
+	scrollbar_update("streamEditor");
 }
 function newEditStreamButton(id, contentId, website, title, streamSettings){
 	let node = document.createElement("span");
@@ -749,11 +783,11 @@ function showNonEmptySitesBlocks(){
 		}
 	}
 }
-function insertStreamNode(newLine, data){
+function insertStreamNode(newLine, website, id, contentId, type, streamData, online){
 	let statusNode;
 	let statusStreamList;
 	
-	if(data.online){
+	if(online){
 		statusNode = document.querySelector("#streamListOnline");
 		statusStreamList = document.querySelectorAll("#streamListOnline .item-stream");
 	} else {
@@ -762,7 +796,7 @@ function insertStreamNode(newLine, data){
 	}
 	
 	if(group_streams_by_websites){
-		streamNodes[((data.online)? "online" : "offline")][data.website].appendChild(newLine);
+		streamNodes[((online)? "online" : "offline")][website].appendChild(newLine);
 		return true;
 	} else {
 		if(statusStreamList.length > 0){
@@ -770,7 +804,7 @@ function insertStreamNode(newLine, data){
 				let streamNode = statusStreamList[i];
 				if(typeof streamNode.tagName == "string"){
 					let streamNode_title = streamNode.dataset.streamName;
-					if(data.streamName.toLowerCase() < streamNode_title.toLowerCase()){
+					if(streamData.streamName.toLowerCase() < streamNode_title.toLowerCase()){
 						streamNode.parentNode.insertBefore(newLine,streamNode);
 						return true;
 					}
@@ -783,17 +817,35 @@ function insertStreamNode(newLine, data){
 }
 
 function listener(data){
-	var newLine = document.createElement("div");
-	newLine.id = `${data.website}/${data.id}/${data.contentId}`;
+	let website = data.website;
+	let id = data.id;
+	let contentId = data.contentId;
+	let type = data.type;
+	let streamData = data.streamData;
+	let streamSettings = data.streamSettings;
+	let streamUrl = data.streamUrl;
 	
-	if(data.online){
+	let online = (type == "channel")? streamData.liveStatus.API_Status : streamData.liveStatus.filteredStatus;
+	let liveStatus = streamData.liveStatus;
+	
+	let streamName = streamData.streamName;
+	let streamStatus = streamData.streamStatus;
+	let streamGame = streamData.streamGame;
+	let streamOwnerLogo = streamData.streamOwnerLogo;
+	let streamCategoryLogo = streamData.streamCategoryLogo;
+	let streamCurrentViewers = streamData.streamCurrentViewers;
+	let facebookID = streamData.facebookID;
+	let twitterID = streamData.twitterID;
+	
+	var newLine = document.createElement("div");
+	newLine.id = `${website}/${id}/${contentId}`;
+	
+	if(online){
 		stream_right_container_node = document.createElement("span");
 		stream_right_container_node.id = "stream_right_container";
 		newLine.appendChild(stream_right_container_node);
 		
-		let streamCurrentViewers = data.streamCurrentViewers;
-		
-		if(data.online && typeof streamCurrentViewers == "number"){
+		if(online && typeof streamCurrentViewers == "number"){
 			var viewerCountNode = document.createElement("span");
 			viewerCountNode.classList.add("streamCurrentViewers");
 			
@@ -804,11 +856,9 @@ function listener(data){
 		}
 	}
 	
-	let streamOwnerLogo = data.streamOwnerLogo;
-	let streamCategoryLogo = data.streamCategoryLogo;
 	let streamLogo = "";
 	
-	if(data.online && typeof streamCategoryLogo == "string" && streamCategoryLogo != ""){
+	if(online && typeof streamCategoryLogo == "string" && streamCategoryLogo != ""){
 		streamLogo  = streamCategoryLogo;
 	} else if(typeof streamOwnerLogo == "string" && streamOwnerLogo != ""){
 		streamLogo  = streamOwnerLogo;
@@ -824,51 +874,51 @@ function listener(data){
 	if(typeof streamLogo == "string" && streamLogo != ""){
 		var imgStreamStatusLogo = document.createElement("img");
 		imgStreamStatusLogo.classList.add("streamStatusLogo");
-		imgStreamStatusLogo.src = (data.online)? "online-stream.svg" : "offline-stream.svg";
+		imgStreamStatusLogo.src = (online)? "online-stream.svg" : "offline-stream.svg";
 		titleLine.appendChild(imgStreamStatusLogo);
 	}
-	titleLine.textContent = data.streamName;
+	titleLine.textContent = streamName;
 	newLine.appendChild(titleLine);
 	
-	if(data.online){
-		if(data.streamStatus != ""){
+	if(online){
+		if(streamStatus != ""){
 			var statusLine = document.createElement("span");
 			statusLine.classList.add("streamStatus");
-			statusLine.textContent = data.streamStatus + ((typeof data.streamGame == "string" && data.streamGame.length > 0)? (" (" + data.streamGame + ")") : "");
+			statusLine.textContent = streamStatus + ((typeof streamGame == "string" && streamGame.length > 0)? (" (" + streamGame + ")") : "");
 			newLine.appendChild(statusLine);
 			
-			newLine.dataset.streamStatus = data.streamStatus;
-			newLine.dataset.streamStatusLowercase = data.streamStatus.toLowerCase();
+			newLine.dataset.streamStatus = streamStatus;
+			newLine.dataset.streamStatusLowercase = streamStatus.toLowerCase();
 		}
 		
-		if(data.streamGame.length > 0){
-			if(typeof data.streamGame == "string"){newLine.dataset.streamGame = data.streamGame};
-			newLine.dataset.streamGameLowercase = data.streamGame.toLowerCase();
+		if(streamGame.length > 0){
+			if(typeof data.streamGame == "string"){newLine.dataset.streamGame = streamGame};
+			newLine.dataset.streamGameLowercase = streamGame.toLowerCase();
 		}
 		
 		newLine.classList.add("item-stream", "onlineItem");
-		insertStreamNode(newLine, data);
+		insertStreamNode(newLine, website, id, contentId, type, streamData, online);
 	} else {
 		newLine.classList.add("item-stream", "offlineItem");
-		insertStreamNode(newLine, data);
+		insertStreamNode(newLine, website, id, contentId, type, streamData, online);
 	}
 	newLine.classList.add("cursor");
 	
-	newLine.dataset.streamId = data.id;
-	newLine.dataset.contentId = data.contentId;
-	newLine.dataset.online = data.online;
-	newLine.dataset.streamName = data.streamName;
-	newLine.dataset.streamNameLowercase = data.streamName.toLowerCase();
-	newLine.dataset.streamWebsite = data.website;
-	newLine.dataset.streamWebsiteLowercase = data.website.toLowerCase();
-	newLine.dataset.streamUrl = data.streamUrl;
+	newLine.dataset.streamId = id;
+	newLine.dataset.contentId = contentId;
+	newLine.dataset.online = online;
+	newLine.dataset.streamName = streamName;
+	newLine.dataset.streamNameLowercase = streamName.toLowerCase();
+	newLine.dataset.streamWebsite = website;
+	newLine.dataset.streamWebsiteLowercase = website.toLowerCase();
+	newLine.dataset.streamUrl = streamUrl;
 	
-	newLine.dataset.streamSettings = JSON.stringify(data.streamSettings);
+	newLine.dataset.streamSettings = JSON.stringify(streamSettings);
 	
-	if(typeof data.facebookID == "string" && data.facebookID != ""){
+	if(typeof facebookID == "string" && facebookID != ""){
 		newLine.dataset.facebookId = data.facebookID;
 	}
-	if(typeof data.twitterID == "string" && data.twitterID != ""){
+	if(typeof data.twitterID == "string" && twitterID != ""){
 		newLine.dataset.twitterId = data.twitterID;
 	}
 	newLine.addEventListener("click", streamItemClick);
@@ -876,20 +926,20 @@ function listener(data){
 	/*			---- Control span ----			*/
 	let control_span = document.createElement("span");
 	control_span.classList.add("stream_control");
-	let deleteButton_node = newDeleteStreamButton(data.id, data.website);
+	let deleteButton_node = newDeleteStreamButton(id, website);
 	control_span.appendChild(deleteButton_node);
 	
 	let copyLivestreamerCmd_node = null;
 	let editStream_node = null;
 	let shareStream_node = null;
-	if(data.type == "live"){
-		copyLivestreamerCmd_node = newCopyLivestreamerCmdButton(data.id, data.contentId, data.website);
+	if(type == "live"){
+		copyLivestreamerCmd_node = newCopyLivestreamerCmdButton(id, contentId, website);
 		control_span.appendChild(copyLivestreamerCmd_node);
 	}
-	editStream_node = newEditStreamButton(data.id, data.contentId, data.website, data.streamName, data.streamSettings);
+	editStream_node = newEditStreamButton(id, contentId, website, streamName, streamSettings);
 	control_span.appendChild(editStream_node);
-	if(data.online){
-		shareStream_node = newShareStreamButton(data.id, data.contentId, data.website, data.streamName, data.streamUrl, data.streamStatus, (typeof data.facebookID == "string")? data.facebookID: "", (typeof data.twitterID == "string")? data.twitterID: "");
+	if(online){
+		shareStream_node = newShareStreamButton(id, contentId, website, streamName, streamUrl, streamStatus, (typeof facebookID == "string")? facebookID: "", (typeof twitterID == "string")? twitterID: "");
 		control_span.appendChild(shareStream_node);
 		
 		stream_right_container_node.appendChild(control_span);
@@ -910,7 +960,30 @@ function listener(data){
 	newLine.draggable = true;
 	
 	showNonEmptySitesBlocks();
-	scrollbar_streamList_update();
+	scrollbar_update("streamList");
+	
+	if(typeof liveStatus.lastCheckStatus == "string" && liveStatus.lastCheckStatus != "" && liveStatus.lastCheckStatus != "success"){
+		let debugDataNode = document.querySelector("#debugData");
+		let newDebugItem = document.createElement('div');
+		newDebugItem.classList.add("debugItem");
+		newDebugItem.dataset.streamWebsite = website;
+		
+		let newDebugItem_title = document.createElement('span');
+		newDebugItem_title.classList.add("debugTitle");
+		newDebugItem_title.textContent = streamName;
+		newDebugItem.appendChild(newDebugItem_title);
+		
+		let newDebugItem_status = document.createElement('span');
+		newDebugItem_status.textContent = `${liveStatus.lastCheckStatus}`;
+		newDebugItem.appendChild(newDebugItem_status);
+		
+		debugDataNode.appendChild(newDebugItem);
+		
+		let noErrorToShow = document.querySelector("#noErrorToShow");
+		hideClassNode(noErrorToShow);
+		
+		scrollbar_update("debugSection");
+	}
 }
 function streamItemClick(){
 	let node = this;
@@ -1069,27 +1142,26 @@ function load_scrollbar(id){
 		suppressScrollX: true
 	});
 }
-function scrollbar_streamList_update(){
-	let scroll_node = document.querySelector('#streamList');
-	Ps.update(scroll_node);
-}
-function scrollbar_streamEditor_update(){
-	let scroll_node = document.querySelector('#streamEditor');
-	Ps.update(scroll_node);
-}
-function scrollbar_settings_container_update(){
-	let scroll_node = document.querySelector('#settings_container');
-	Ps.update(scroll_node);
+
+function scrollbar_update(nodeId){
+	if(typeof nodeId == "string" && nodeId != ""){
+		let scrollbar_node = document.querySelector(`#${nodeId}`);
+		if(scrollbar_node != null){
+			Ps.update(scrollbar_node);
+		}
+	}
 }
 
 window.onload = function(){
 	load_scrollbar("streamList");
 	load_scrollbar("streamEditor");
 	load_scrollbar("settings_container");
+	load_scrollbar("debugSection");
 	
 	window.onresize = function(){
-		scrollbar_streamList_update();
-		scrollbar_streamEditor_update();
-		scrollbar_settings_container_update();
+		scrollbar_update("streamList");
+		scrollbar_update("streamEditor");
+		scrollbar_update("settings_container");
+		scrollbar_update("debugSection");
 	}
 }
