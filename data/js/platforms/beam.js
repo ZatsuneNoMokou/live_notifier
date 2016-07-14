@@ -59,4 +59,4 @@ let beam = {
 			return obj;
 		}
 }
-module.exports = beam;
+module.exports = Object.freeze(beam);

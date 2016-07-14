@@ -1,22 +1,5 @@
-/*function unloadListeners() {
-	let refreshStreamsButton = document.querySelector("#refreshStreams");
-	refreshStreamsButton.removeEventListener("click",refreshButtonClick);
-	
-	let addStreamButton = document.querySelector("#addStream");
-	addStreamButton.removeEventListener("click",addStreamButtonClick);
-	
-	let deleteStreamButton = document.querySelector("#deleteStream");
-	deleteStreamButton.removeEventListener("click",deleteStreamButtonClick);
-	
-	self.port.removeListener('initList', initList);
-	self.port.removeListener('updateOnlineCount', listenerOnlineCount);
-	self.port.removeListener('updateOfflineCount', listenerOfflineCount);
-	self.port.removeListener('updateData', listener);
-	self.port.removeListener('panel_theme', theme_update);
-	self.port.removeListener('unloadListeners', unloadListeners);
-}*/
-
 /*				---- Global functions ----				*/
+
 function encodeString(string){
 	if(typeof string != "string"){
 		console.warn(`encodeString: wrong type ${typeof string}`);
@@ -99,9 +82,6 @@ function getValueFromNode(node){
 }
 /*			---- Global functions end ----			*/
 
-
-//self.port.on('unloadListeners', unloadListeners);
-
 var refreshStreamsButton = document.querySelector("#refreshStreams");
 
 function refreshButtonClick(){
@@ -121,9 +101,9 @@ function allowDrop(event){
 }
 function drag(event) {
 	let node = event.target;
-	if(node.draggable = true && node.dataset.streamId !== null){
+	if(node.draggable == true && node.dataset.streamId != null){
 		let id = node.dataset.streamId;
-		let website = node.dataset.streamWebsite;
+		let website = node.daftaset.streamWebsite;
 		
 		let data = {id: id, website: website};
 		
@@ -431,7 +411,7 @@ function newPreferenceNode(parent, id, prefObj){
 			break;
 		case "control":
 			if(id == "export_preferences"){
-				prefNode.addEventListener("click", getSyncPreferences);
+				prefNode.addEventListener("click", export_preferences);
 			} else if(id == "import_preferences"){
 				prefNode.addEventListener("click", importPrefsFromFile);
 			} else if(id.indexOf("_import") != -1){
@@ -469,7 +449,7 @@ function settingNode_onChange(event){
 
 function settingNodesUpdate(data){
 	let settingNode = document.querySelector(`#${data.settingName}`);
-	if(settingNode !== null){
+	if(settingNode != null){
 		switch(options[data.settingName].type){
 			case "string":
 				if(typeof options[data.settingName].stringList == "boolean" && options[data.settingName].stringList == true){
@@ -496,8 +476,8 @@ function settingNodesUpdate(data){
 		console.warn(`${data.settingName} node is null`);
 	}
 }
-function getSyncPreferences(){
-	self.port.emit("getSyncPreferences", options_default_sync);
+function export_preferences(){
+	self.port.emit("export_preferences", "");
 }
 function exportPrefsToFile(data){
 	let exportData = {
@@ -947,13 +927,13 @@ function listener(data){
 		newLine.appendChild(control_span);
 	}
 	deleteButton_node.addEventListener("click", newDeleteStreamButton_onClick, false);
-	if(copyLivestreamerCmd_node !== null){
+	if(copyLivestreamerCmd_node != null){
 		copyLivestreamerCmd_node.addEventListener("click", newCopyLivestreamerCmdButton_onClick, false);
 	}
-	if(editStream_node !== null){
+	if(editStream_node != null){
 		editStream_node.addEventListener("click", newEditStreamButton_onClick, false);
 	}
-	if(shareStream_node !== null){
+	if(shareStream_node != null){
 		shareStream_node.addEventListener("click", newShareStreamButton_onClick, false);
 	}
 	
@@ -999,11 +979,12 @@ function streamItemClick(){
 	}
 }
 
-let current_version;
-function getCurrentVersion(data){
+let current_version = self.options.current_version;
+function getCurrentVersion(){
 	let current_version_node = document.querySelector("#current_version");
-	current_version_node.textContent = current_version = data.current_version;
+	current_version_node.textContent = current_version = current_version;
 }
+getCurrentVersion();
 
 function color(hexColorCode) {
 	let getCodes =  /^#([\da-fA-F]{2,2})([\da-fA-F]{2,2})([\da-fA-F]{2,2})$/;
@@ -1056,8 +1037,9 @@ function theme_update(data){
 	if(typeof baseColor != "object"){return null;}
 	panelColorStylesheet = document.createElement("style");
 	panelColorStylesheet.id = "panel-color-stylesheet";
-	baseColor_hsl = baseColor.getHSL();
+	let baseColor_hsl = baseColor.getHSL();
 	let baseColor_L = JSON.parse(baseColor_hsl.L.replace("%",""))/100;
+	let values;
 	if(data.theme == "dark"){
 		var textColor_stylesheet = "@import url(css/panel-text-color-white.css);\n";
 		if(baseColor_L > 0.5 || baseColor_L < 0.1){
@@ -1100,11 +1082,16 @@ self.port.on('updateOfflineCount', listenerOfflineCount);
 self.port.on('updateData', listener);
 self.port.on('settingNodesUpdate', settingNodesUpdate);
 self.port.on('panel_theme', theme_update);
-self.port.on('current_version', getCurrentVersion);
 
 self.port.on('exportPrefsToFile', exportPrefsToFile);
 self.port.on('import_preferences', importPrefsFromFile);
-self.port.on('export_preferences', getSyncPreferences);
+self.port.on('export_preferences', exportPrefsToFile);
+
+function debug_checkingLivesState(data){
+	let debug_checkingLivesState_node = document.querySelector("#debug_checkingLivesState");
+	debug_checkingLivesState_node.className = data;
+}
+self.port.on('debug_checkingLivesState', debug_checkingLivesState);
 
 function translateNode(data){
 	let translate_data = JSON.parse(data);
@@ -1132,6 +1119,8 @@ function load_scrollbar(id){
 		scroll_node = document.querySelector('#settings_container');
 	} else if(id == "streamEditor"){
 		scroll_node = document.querySelector('#streamEditor');
+	} else if(id == "debugSection"){
+		scroll_node = document.querySelector('#debugSection');
 	} else {
 		console.warn(`[Live notifier] Unkown scrollbar id (${id})`);
 		return null;

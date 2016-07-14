@@ -1,3 +1,14 @@
+# 7.1.1
+* Fix: Forgotten test
+* Fix: Stream refresh end init
+
+# 7.1.0
+* i: Freeze Objects from js files, used with require
+* i: The variable of the version displayed in panel is transmited by the contentScriptOptions property (and not by port)
+* i: Simplified Preferences export because using a require, index.js can now access to option-data.js data
+* +: Detection of the end when checking streams (used in the panel debug only, for now)
+* Fix: Various fixes
+
 # 7.0.0
 * i: Now display offline streams in panel by default
 * i: Moved JS files

@@ -50,7 +50,7 @@ let twitch = {
 				if(data != null){
 					streamData.streamName = data["channel"]["display_name"];
 					streamData.streamStatus = (data["channel"]["status"] != null)? data["channel"]["status"] : "";
-					streamData.streamGame = (data["game"] !== null && typeof data["game"] == "string")? data["game"] : "";
+					streamData.streamGame = (data["game"] != null && typeof data["game"] == "string")? data["game"] : "";
 					if(typeof data.channel["logo"] == "string" && data.channel["logo"] != "") {
 						streamData.streamOwnerLogo = data.channel["logo"];
 					}
@@ -101,4 +101,4 @@ let twitch = {
 			return obj;
 		}
 }
-module.exports = twitch;
+module.exports = Object.freeze(twitch);

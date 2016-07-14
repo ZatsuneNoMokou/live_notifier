@@ -1,29 +1,26 @@
 {
 	"name": "livenotifier",
-	"title": "Live notifier (Dev)",
-	"id": "live_notifier@zatsunenomokou.eu",
-	"version": "7.0.0",
 	"description": "Be notified of streams from Dailymotion, Hitbox, Twitch and Beam",
-	"main": "index.js",
+	"version": "7.1.1",
 	"author": "Zatsune No Mokou",
-	"homepage": "https://gitlab.com/ZatsuneNoMokou/live_notifier",
-	"updateLink": "https://gitlab.com/ZatsuneNoMokou/live_notifier/raw/master/dist/live_notifier.xpi",
-	"updateURL": "https://gitlab.com/ZatsuneNoMokou/live_notifier/raw/master/dist/live_notifier.update.rdf",
 	"engines": {
 		"firefox": ">=45.0a1"
 	},
-	"permissions": {
-		"multiprocess": true
-	},
+	"id": "live_notifier@zatsunenomokou.eu",
+	"homepage": "https://gitlab.com/ZatsuneNoMokou/live_notifier",
 	"license": "GPL-3.0",
 	"locales": {
 		"fr": {
 			"description": "Soyez notifiés de vos streams de Beam, Dailymotion, Hitbox et Twitch"
 		}
 	},
-	"keywords": [
-		"jetpack"
-	],
+	"main": "index.js",
+	"permissions": {
+		"multiprocess": true
+	},
+	"title": "Live notifier (Dev)",
+	"updateLink": "https://gitlab.com/ZatsuneNoMokou/live_notifier/raw/master/dist/live_notifier.xpi",
+	"updateURL": "https://gitlab.com/ZatsuneNoMokou/live_notifier/raw/master/dist/live_notifier.update.rdf",
 	"preferences": [{
 			"name": "stream_keys_list",
 			"title": "Stream keys to notify",

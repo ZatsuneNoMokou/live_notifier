@@ -75,7 +75,7 @@ let dailymotion = {
 			if(data.hasOwnProperty("user.screenname")){
 				if(isStreamOnline){
 					streamData.streamStatus = streamData.streamName;
-					streamData.streamGame = (data["game.title"] !== null && typeof data["game.title"] == "string")? data["game.title"] : "";
+					streamData.streamGame = (data["game.title"] != null && typeof data["game.title"] == "string")? data["game.title"] : "";
 				}
 				if(typeof data["user.avatar_720_url"] == "string" && data["user.avatar_720_url"] != ""){
 					streamData.streamOwnerLogo = data["user.avatar_720_url"];
@@ -160,4 +160,4 @@ let dailymotion = {
 			return obj;
 		}
 }
-module.exports = dailymotion;
+module.exports = Object.freeze(dailymotion);

@@ -52,14 +52,6 @@ var options = {
 		"group": "twitch"
 	},
 	/*			Beam			*/
-	"beam_keys_list": {
-		"title": "Beam keys to notify",
-		"description": "Stream list in a comma separated list.",
-		"type": "hidden",
-		"value": "",
-		"showPrefInPanel": false,
-		"group": "beam"
-	},
 	"beam_user_id": {
 		"title": "Your Beam id",
 		"description": "Enter your Beam id to be able to import the stream(s) you follow.",
@@ -240,3 +232,10 @@ for(var id in options){
 	}
 }
 
+if(typeof module == "object"){
+	module.exports = Object.freeze({
+		"options": options,
+		"options_default": options_default,
+		"options_default_sync": options_default_sync
+	});
+}

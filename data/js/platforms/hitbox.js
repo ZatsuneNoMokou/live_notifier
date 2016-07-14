@@ -28,16 +28,15 @@ let hitbox = {
 				let error_msg = (data.hasOwnProperty("error_msg") == true)? data.error_msg : "error";
 				return error_msg;
 			}
+			if(data.hasOwnProperty("livestream") == false){
+				return "data missing";
+			}
 			return "success";
 		},
 	"checkLiveStatus":
 		function(id, contentId, data, currentLiveStatus){
 			let streamData = currentLiveStatus;
 			if(data.hasOwnProperty("livestream") == false){
-				if(data.error_msg="no_media_found"){
-					streamData.liveStatus.API_Status = false;
-				}
-				streamData.streamName = id;
 				return null;
 			}
 			if(typeof data["livestream"][0] == "object"){
@@ -47,20 +46,20 @@ let hitbox = {
 				if(typeof data["category_name"] == "string" && data["category_name"] != ""){
 					streamData.streamGame = data["category_name"];
 				}
-				if(data["category_logo_large"] !== null){
+				if(data["category_logo_large"] != null){
 					streamData.streamCategoryLogo = "http://edge.sf.hitbox.tv" + data["category_logo_large"];
-				} else if(data["category_logo_small"] !== null){
+				} else if(data["category_logo_small"] != null){
 					streamData.streamCategoryLogo = "http://edge.sf.hitbox.tv" + data["category_logo_small"];
 				} else {
 					streamData.streamCategoryLogo = "";
 				}
-				if(streamData.streamCategoryLogo = "http://edge.sf.hitbox.tv/static/img/generic/blank.gif"){
+				if(streamData.streamCategoryLogo == "http://edge.sf.hitbox.tv/static/img/generic/blank.gif"){
 					streamData.streamCategoryLogo = "";
 				}
 				
 				if(typeof data.channel["user_logo"] == "string" && data.channel["user_logo"].indexOf("/static/img/generic/default-user-") == -1){
 					streamData.streamOwnerLogo = "http://edge.sf.hitbox.tv" + data.channel["user_logo"];
-				} else if(typeof data.channel["user_logo"] !== "string" && data.channel["user_logo"].indexOf("/static/img/generic/default-user-") == -1){
+				} else if(typeof data.channel["user_logo"] != "string" && data.channel["user_logo"].indexOf("/static/img/generic/default-user-") == -1){
 					streamData.streamOwnerLogo = "http://edge.sf.hitbox.tv" + data.channel["user_logo_small"];
 				} else {
 					streamData.streamOwnerLogo = "";
@@ -102,4 +101,4 @@ let hitbox = {
 			return obj;
 		}
 }
-module.exports = hitbox;
+module.exports = Object.freeze(hitbox);

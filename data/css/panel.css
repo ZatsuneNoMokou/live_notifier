@@ -466,6 +466,20 @@ input[type=number]{
 .debugItem[data-stream-website] .debugTitle::after{
 	content: ": ";
 }
+#debug_checkingLivesState{
+	margin-top: 9px;
+}
+#debug_checkingLivesState.true::after{
+	content: ": done";
+	font-family: "Material Icons";
+}
+#debug_checkingLivesState.false::after{
+	content: ": warning";
+	font-family: "Material Icons";
+}
+#debug_checkingLivesState:not(.true):not(.false)::after{
+	content: ": ?";
+}
 
 #current_version::before{
 	content: "v";
