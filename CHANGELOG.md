@@ -1,3 +1,6 @@
+# 7.1.2
+* Fix: Notification not saved as done
+
 # 7.1.1
 * Fix: Forgotten test
 * Fix: Stream refresh end init

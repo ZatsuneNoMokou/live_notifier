@@ -1076,7 +1076,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 			}
 		}
 	}
-	streamData.notifiedStatus = isStreamOnline_filtered;
+	streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
 }
 
 function getOfflineCount(){
