@@ -103,7 +103,7 @@ function drag(event) {
 	let node = event.target;
 	if(node.draggable == true && node.dataset.streamId != null){
 		let id = node.dataset.streamId;
-		let website = node.daftaset.streamWebsite;
+		let website = node.dataset.streamWebsite;
 		
 		let data = {id: id, website: website};
 		

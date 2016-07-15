@@ -3,6 +3,11 @@ const website_channel_id = /channel\:\:(.*)/,
 	twitterID_from_url = /(?:http|https):\/\/(?:www\.)?twitter.com\/([^\/]+)(?:\/.*)?/;
 
 let twitch = {
+	"addStream_URLpatterns": {
+		"twitch": [
+			/^(?:http|https):\/\/www\.twitch\.tv\/([^\/\?\&]+).*$/,/^(?:http|https):\/\/player\.twitch\.tv\/\?channel\=([\w\-]+).*$/
+		]
+	},
 	"API":
 		function(id){
 			let obj = {

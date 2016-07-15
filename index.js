@@ -95,7 +95,7 @@ if(typeof getPreference("dailymotion_check_delay") == "number" && getPreference(
 if(getPreference("stream_keys_list") == ""){
 	(function(){
 		let somethingElseThanSpaces = /[^\s]+/;
-		let newPrefTable = new Array();
+		let newPrefTable = [];
 		for(let website in websites){
 			let pref = getPreference(`${website}_keys_list`);
 			if(typeof pref != "undefined" && pref != "" && somethingElseThanSpaces.test(pref)){
@@ -191,7 +191,7 @@ class streamListFromSetting{
 						}
 						
 						if(filters.test(data)){
-							let filters_array = new Array();
+							let filters_array = [];
 							
 							let filter_id = /(?:(\w+)\:\:)/;
 							let scan_string = data;
@@ -216,7 +216,7 @@ class streamListFromSetting{
 								}
 								
 								if(typeof obj[website][id][current_filter_id] == "undefined"){
-									obj[website][id][current_filter_id] = new Array();
+									obj[website][id][current_filter_id] = [];
 								}
 								
 								if(current_filter_id == "hide" || current_filter_id == "ignore" || current_filter_id == "notifyOnline" || current_filter_id == "notifyOffline"){
@@ -291,7 +291,7 @@ class streamListFromSetting{
 		}
 	}
 	update(){
-		let array = new Array();
+		let array = [];
 		for(let website in this.objDataAll){
 			for(let id in this.objDataAll[website]){
 				let filters = "";
@@ -406,15 +406,11 @@ function refreshStreamsFromPanel(){
 	setTimeout(waitToUpdatePanel, 5000);
 }
 
-const addStream_URLpatterns = {"dailymotion": [/^(?:http|https):\/\/games\.dailymotion\.com\/(?:live|video)\/([a-zA-Z0-9]+).*$/, /^(?:http|https):\/\/www\.dailymotion\.com\/(?:embed\/)?video\/([a-zA-Z0-9]+).*$/, /^(?:http|https):\/\/games\.dailymotion\.com\/[^\/]+\/v\/([a-zA-Z0-9]+).*$/],
-		"channel::dailymotion": [/^(?:http|https):\/\/(?:games\.|www\.)dailymotion\.com\/user\/([^\s\t\/]+).*$/, /^(?:http|https):\/\/(?:games\.|www\.)dailymotion\.com\/(?!user\/|monetization\/|archived\/|fr\/|us\/|en\/|legal\/|stream|rss)([^\s\t\/]+).*$/],
-		"hitbox": [/^(?:http|https):\/\/www\.hitbox\.tv\/(?:embedchat\/)?([^\/\?\&]+).*$/],
-		"twitch": [/^(?:http|https):\/\/www\.twitch\.tv\/([^\/\?\&]+).*$/,/^(?:http|https):\/\/player\.twitch\.tv\/\?channel\=([\w\-]+).*$/],
-		"beam": [/^(?:http|https):\/\/beam\.pro\/([^\/\?\&]+)/]
-	};
-let URLContext_Array = new Array();
-for(let website in addStream_URLpatterns){
-	URLContext_Array = URLContext_Array.concat(addStream_URLpatterns[website]);
+let URLContext_Array = [];
+for(let website in websites){
+	for(let source_website in websites[website].addStream_URLpatterns){
+		URLContext_Array = URLContext_Array.concat(websites[website].addStream_URLpatterns[source_website]);
+	}
 }
 ContextMenu.Item({
 	label: _("Add this"),
@@ -443,7 +439,6 @@ function display_id(id){
 		return _("The stream %d", id);
 	}
 }
-let addStreamFromPanel_pageListener = new Array();
 function addStreamFromPanel(data){
 	let current_tab = tabs.activeTab;
 	let active_tab_url = current_tab.url;
@@ -458,9 +453,6 @@ function addStreamFromPanel(data){
 		} else if(data.hasOwnProperty("embed_list")){
 			console.log("[Live notifier] AddStream - Embed list");
 			url_list = data.embed_list;
-			for(let i of addStreamFromPanel_pageListener){
-				i.port.removeListener("addStream", addStreamFromPanel);
-			}
 			type = "embed";
 		}
 	} else {
@@ -468,74 +460,70 @@ function addStreamFromPanel(data){
 		url_list = [active_tab_url];
 	}
 	for(let url of url_list){
-		for(let source_website in addStream_URLpatterns){
-			let website = source_website;
-			if(website_channel_id.test(source_website)){
-				website = website_channel_id.exec(source_website)[1];
-			}
-			
-			let streamListSetting = new streamListFromSetting(website);
-			let streamList = streamListSetting.objData;
-			for(let pattern of addStream_URLpatterns[source_website]){
-				let id = "";
-				if(pattern.test(url)){
-					id = pattern.exec(url)[1];
-					if(streamListSetting.streamExist(website, id)){
-						doNotif("Live notifier",`${display_id(id)} ${_("is already configured.")}`);
-						return true;
-					} else {
-						let id_toChecked = id;
-						let current_API = websites[website].API(id);
-						
-						if(website_channel_id.test(source_website)){
-							current_API = websites[website].API_channelInfos(`channel::${id}`);
-						}
-						
-						Request({
-							url: current_API.url,
-							overrideMimeType: current_API.overrideMimeType,
-							onComplete: function (response) {
-								let id = id_toChecked;
-								data = response.json;
-								
-								console.group();
-								console.info(`${website} - ${response.url}`);
-								console.dir(data);
-								console.groupEnd();
-								
-								let responseValidity = checkResponseValidity(website, data);
-								
-								if(website == "dailymotion" && responseValidity.indexOf("error") == -1){
-									let username = (data.mode == "vod")? data["user.username"] : data.username;
-									let id_username = `channel::${username}`;
-									let id_owner = `channel::${(data.mode == "vod")? data.owner : data.id}`;
-									
-									// Use username (login) as channel id
-									id = id_owner;
-									if(streamListSetting.streamExist(website, id_username) || streamListSetting.streamExist(website, id_owner)){
-										doNotif("Live notifier",`${display_id(id)} ${_("is_already_configured")}`);
-										return true;
-									}
-								} else if(checkResponseValidity(website, data) != "success"){
-									doNotif("Live notifier", `${display_id(id)} ${_("wasnt_configured_but_error_retrieving_data")}`);
-									return null;
-								}
-								
-								if(getPreference("confirm_addStreamFromPanel")){
-									let addstreamNotifAction = new notifAction("addStream", {id: id, website: website, url: ((type == "embed")? active_tab_url : "")});
-									doActionNotif(`Live notifier (${_("click to confirm")})`, `${display_id(id)} ${_("wasn't configured, and can be added.")}`, addstreamNotifAction);
-								} else {
-									streamListSetting.addStream(website, id, ((type == "embed")? active_tab_url : ""));
-									streamListSetting.update();
-									doNotif("Live notifier", `${display_id(id)} ${_("wasn't configured, and have been added.")}`);
-									// Update the panel for the new stream added
-									setTimeout(function(){
-										refreshPanel();
-									}, 5000);
-								}
+		for(let website in websites){
+			for(let source_website in websites[website].addStream_URLpatterns){
+				let streamListSetting = new streamListFromSetting(website);
+				let streamList = streamListSetting.objData;
+				for(let pattern of websites[website].addStream_URLpatterns[source_website]){
+					if(pattern.test(url)){
+						let id = pattern.exec(url)[1];
+						if(streamListSetting.streamExist(website, id)){
+							doNotif("Live notifier",`${display_id(id)} ${_("is already configured.")}`);
+							return true;
+						} else {
+							let current_API = websites[website].API(id);
+							
+							if(website_channel_id.test(source_website)){
+								current_API = websites[website].API_channelInfos(`channel::${id}`);
 							}
-						}).get();
-						return true;
+							
+							Request({
+								url: current_API.url,
+								overrideMimeType: current_API.overrideMimeType,
+								onComplete: function (response) {
+									let data = response.json;
+									
+									console.group();
+									console.info(`${website} - ${response.url}`);
+									console.dir(data);
+									console.groupEnd();
+									
+									let responseValidity = checkResponseValidity(website, data);
+									
+									if(website == "dailymotion" && responseValidity.indexOf("error") == -1){
+										let username = (typeof data.mode == "string")? data["user.username"] : data.username;
+										let id_username = `channel::${username}`;
+										let id_owner = `channel::${(typeof data.mode == "string")? data.owner : data.id}`;
+										
+										console.warn(id_username + " - " + id_owner)
+										
+										// Use username (login) as channel id
+										id = id_owner;
+										if(streamListSetting.streamExist(website, id_username) || streamListSetting.streamExist(website, id_owner)){
+											doNotif("Live notifier",`${display_id(id)} ${_("is_already_configured")}`);
+											return true;
+										}
+									} else if(checkResponseValidity(website, data) != "success"){
+										doNotif("Live notifier", `${display_id(id)} ${_("wasnt_configured_but_error_retrieving_data")}`);
+										return null;
+									}
+									
+									if(getPreference("confirm_addStreamFromPanel")){
+										let addstreamNotifAction = new notifAction("addStream", {id: id, website: website, url: ((type == "embed")? active_tab_url : "")});
+										doActionNotif(`Live notifier (${_("click to confirm")})`, `${display_id(id)} ${_("wasn't configured, and can be added.")}`, addstreamNotifAction);
+									} else {
+										streamListSetting.addStream(website, id, ((type == "embed")? active_tab_url : ""));
+										streamListSetting.update();
+										doNotif("Live notifier", `${display_id(id)} ${_("wasn't configured, and have been added.")}`);
+										// Update the panel for the new stream added
+										setTimeout(function(){
+											refreshPanel();
+										}, 5000);
+									}
+								}
+							}).get();
+							return true;
+						}
 					}
 				}
 			}
@@ -543,11 +531,13 @@ function addStreamFromPanel(data){
 	}
 	if(typeof data != "object" && type != "ContextMenu"){
 		if(!data.hasOwnProperty("embed_list")){
-			let page_port = current_tab.attach({
+			let worker = current_tab.attach({
 				contentScriptFile: self.data.url("js/page_getEmbedList.js")
 			});
-			addStreamFromPanel_pageListener.push(page_port);
-			page_port.port.on("addStream", addStreamFromPanel);
+			worker.port.on("addStream", function(data){
+				addStreamFromPanel(data);
+				worker.detach();
+			})
 		}
 	} else {
 		doNotif("Live notifier", _("No supported stream detected in the current tab, so, nothing to add."));
@@ -773,26 +763,28 @@ function updatePanelData(){
 			}
 		}
 	}
-	let notCheckedYet = false;
-	for(let website in websites){
-		var streamList = (new streamListFromSetting(website)).objData;
-		for(let id in streamList){
-			if(!(id in liveStatus[website])){
-				notCheckedYet = true;
-				console.info(`${id} from ${website} is not checked yet`);
-				try{
-					getPrimary(id, website, id);
-				}
-				catch(error){
-					console.warn(`[Live notifier] ${error}`);
+	if(checkingLivesState == null){
+		let notCheckedYet = false;
+		for(let website in websites){
+			var streamList = (new streamListFromSetting(website)).objData;
+			for(let id in streamList){
+				if(!(id in liveStatus[website])){
+					notCheckedYet = true;
+					console.info(`${id} from ${website} is not checked yet`);
+					try{
+						getPrimary(id, website, id);
+					}
+					catch(error){
+						console.warn(`[Live notifier] ${error}`);
+					}
 				}
 			}
 		}
-	}
-	if(notCheckedYet == true){
-		setTimeout(function(){
-			refreshPanel();
-		}, 5000);
+		if(notCheckedYet == true){
+			setTimeout(function(){
+				refreshPanel();
+			}, 5000);
+		}
 	}
 	setIcon();
 	
@@ -1500,6 +1492,10 @@ var interval
 
 let current_version = self.version;
 let loadReason = "unknown";
+function windowsFocusChange(window){
+	console.log("[Live notifier] Active window change: icon update");
+	setIcon();
+}
 exports.main = function(options, callbacks){
 	checkLives();
 	
@@ -1510,10 +1506,6 @@ exports.main = function(options, callbacks){
 		doNotif("Live notifier", _("Addon have been updated (version %d)", current_version));
 	}
 	
-	function windowsFocusChange(window){
-		console.log("[Live notifier] Active window change: icon update");
-		setIcon();
-	}
 	windows.on('activate', windowsFocusChange);
 	
 	// Avoid panel data update before this variable
@@ -1526,10 +1518,19 @@ exports.onUnload = function (reason) {
 		sp.removeListener("check_delay", check_delay_onChange);
 		panel.port.removeListener("refreshPanel", refreshPanel);
 		panel.port.removeListener("importStreams", importButton_Panel);
-		panel.port.removeListener('refreshStreams', refreshStreamsFromPanel);
+		panel.port.removeListener("refreshStreams", refreshStreamsFromPanel);
 		panel.port.removeListener("addStream", addStreamFromPanel);
 		panel.port.removeListener("deleteStream", deleteStreamFromPanel);
 		panel.port.removeListener("openTab", openTabIfNotExist);
+		panel.port.removeListener("translate", sendTranslation);
+		panel.port.removeListener("copyLivestreamerCmd", copyLivestreamerCmd);
+		panel.port.removeListener("openOnlineLive", openOnlineLive);
+		panel.port.removeListener("openTab", openTabIfNotExist);
+		panel.port.removeListener("setting_Update", settingUpdate);
+		panel.port.removeListener("shareStream", shareStream);
+		panel.port.removeListener("streamSetting_Update", streamSetting_Update);
+		panel.port.removeListener("importPrefsFromFile", importPrefsFromFile);
+		panel.port.removeListener("export_preferences", export_preferences);
 		sp.removeListener("twitch_import", importTwitchButton);
 		windows.removeListener("activate", windowsFocusChange);
 	}

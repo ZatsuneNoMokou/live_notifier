@@ -1,3 +1,11 @@
+# 7.2.0
+* i: Avoid using unrecommended "new Array()"
+* i: Detaching port when receiving embed from page instead of removing listener after
+* i: Remove panel listeners
+* +: Moved URL patterns to the websites JS
+* Fix: Avoid re-requesting refresh if checkingLivesState not null (previous refresh not ended, or not well)
+* Fix: Adding Dailymotion channels
+
 # 7.1.2
 * Fix: Notification not saved as done
 

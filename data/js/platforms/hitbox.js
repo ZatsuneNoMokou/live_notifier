@@ -3,6 +3,11 @@ const website_channel_id = /channel\:\:(.*)/,
 	twitterID_from_url = /(?:http|https):\/\/(?:www\.)?twitter.com\/([^\/]+)(?:\/.*)?/;
 
 let hitbox = {
+	"addStream_URLpatterns": {
+		"hitbox": [
+			/^(?:http|https):\/\/www\.hitbox\.tv\/(?:embedchat\/)?([^\/\?\&]+).*$/
+		]
+	},
 	"API":
 		function(id){
 			let obj = {

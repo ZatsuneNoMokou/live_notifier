@@ -3,6 +3,17 @@ const website_channel_id = /channel\:\:(.*)/,
 	twitterID_from_url = /(?:http|https):\/\/(?:www\.)?twitter.com\/([^\/]+)(?:\/.*)?/;
 
 let dailymotion = {
+	"addStream_URLpatterns": {
+		"dailymotion": [
+			/^(?:http|https):\/\/games\.dailymotion\.com\/(?:live|video)\/([a-zA-Z0-9]+).*$/,
+			/^(?:http|https):\/\/www\.dailymotion\.com\/(?:embed\/)?video\/([a-zA-Z0-9]+).*$/,
+			/^(?:http|https):\/\/games\.dailymotion\.com\/[^\/]+\/v\/([a-zA-Z0-9]+).*$/
+		],
+		"channel::dailymotion": [
+			/^(?:http|https):\/\/(?:games\.|www\.)dailymotion\.com\/user\/([^\s\t\/]+).*$/,
+			/^(?:http|https):\/\/(?:games\.|www\.)dailymotion\.com\/([^\s\t\/]+).*$/
+		]
+	},
 	"API":
 		function(id){
 			let obj = {

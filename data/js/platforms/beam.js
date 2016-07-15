@@ -3,6 +3,11 @@ const website_channel_id = /channel\:\:(.*)/,
 	twitterID_from_url = /(?:http|https):\/\/(?:www\.)?twitter.com\/([^\/]+)(?:\/.*)?/;
 
 let beam = {
+	"addStream_URLpatterns": {
+		"beam": [
+			/^(?:http|https):\/\/beam\.pro\/([^\/\?\&]+)/
+		]
+	},
 	"API":
 		function(id){
 			let obj = {
