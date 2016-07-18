@@ -1,3 +1,6 @@
+# 7.2.2
+* Fix: Copy/Paste problem
+
 # 7.2.1
 * Fix: Dailymotion pattern
 * Fix: Panel detection of stream not refreshed yet, not respecting ignored setting

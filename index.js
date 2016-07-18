@@ -1180,7 +1180,7 @@ function checkResponseValidity(website, data){
 }
 
 let checkingLivesState_wait = false,
-	checkingLivesState = appGlobal["checkingLivesState"] = null;
+	checkingLivesState = null;
 function checkLivesProgress_init(){
 	if(checkingLivesState != null){
 		console.warn("[checkLivesProgress_init] Previous progress wasn't finished?");
