@@ -1,6 +1,6 @@
 # 7.2.1
 * Fix: Dailymotion pattern
-* Fix: Panel detection of stream not refreshed yet not respecting ignored setting
+* Fix: Panel detection of stream not refreshed yet, not respecting ignored setting
 
 # 7.2.0
 * i: Avoid using unrecommended "new Array()"
