@@ -242,10 +242,8 @@ function selectSection(sectionNodeId){
 }
 function setting_Toggle(sectionNodeId){
 	if(setting_Enabled){
-		setting_Enabled = false;
 		selectSection("streamList");
 	} else {
-		setting_Enabled = true;
 		selectSection("settings_container");
 	}
 }

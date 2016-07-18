@@ -10,8 +10,8 @@ let dailymotion = {
 			/^(?:http|https):\/\/games\.dailymotion\.com\/[^\/]+\/v\/([a-zA-Z0-9]+).*$/
 		],
 		"channel::dailymotion": [
-			/^(?:http|https):\/\/(?:games\.|www\.)dailymotion\.com\/user\/([^\s\t\/]+).*$/,
-			/^(?:http|https):\/\/(?:games\.|www\.)dailymotion\.com\/([^\s\t\/]+).*$/
+			/^(?:http|https):\/\/(?:games\.|www\.)dailymotion\.com\/user\/([^\s\t\/\?]+).*$/,
+			/^(?:http|https):\/\/(?:games\.|www\.)dailymotion\.com\/([^\s\t\/\?]+).*$/
 		]
 	},
 	"API":

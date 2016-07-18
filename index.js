@@ -490,7 +490,7 @@ function addStreamFromPanel(data){
 									
 									let responseValidity = checkResponseValidity(website, data);
 									
-									if(website == "dailymotion" && responseValidity.indexOf("error") == -1){
+									if(website == "dailymotion" && (responseValidity == "success" || responseValidity == "vod" || responseValidity == "notstream")){
 										let username = (typeof data.mode == "string")? data["user.username"] : data.username;
 										let id_username = `channel::${username}`;
 										let id_owner = `channel::${(typeof data.mode == "string")? data.owner : data.id}`;
@@ -503,6 +503,9 @@ function addStreamFromPanel(data){
 											doNotif("Live notifier",`${display_id(id)} ${_("is_already_configured")}`);
 											return true;
 										}
+									} else if(website == "dailymotion" && responseValidity == "invalid_parameter"){
+										doNotif("Live notifier", _("No_supported_stream_detected_in_the_current_tab_so_nothing_to_add"));
+										return null;
 									} else if(checkResponseValidity(website, data) != "success"){
 										doNotif("Live notifier", `${display_id(id)} ${_("wasnt_configured_but_error_retrieving_data")}`);
 										return null;
@@ -768,6 +771,9 @@ function updatePanelData(){
 		for(let website in websites){
 			var streamList = (new streamListFromSetting(website)).objData;
 			for(let id in streamList){
+				if(typeof streamList[id].ignore == "boolean" && streamList[id].ignore == true){
+					continue;
+				}
 				if(!(id in liveStatus[website])){
 					notCheckedYet = true;
 					console.info(`${id} from ${website} is not checked yet`);
@@ -1173,7 +1179,8 @@ function checkResponseValidity(website, data){
 	return "success";
 }
 
-let checkingLivesState = null;
+let checkingLivesState_wait = false,
+	checkingLivesState = appGlobal["checkingLivesState"] = null;
 function checkLivesProgress_init(){
 	if(checkingLivesState != null){
 		console.warn("[checkLivesProgress_init] Previous progress wasn't finished?");
@@ -1211,21 +1218,24 @@ function checkLivesProgress_checkStreamEnd(website, id){
 	checkLivesProgress_checkLivesEnd();
 }
 function checkLivesProgress_checkLivesEnd(){
-	for(let website in websites){
-		if(JSON.stringify(checkingLivesState[website]) == "{}"){
-			delete checkingLivesState[website];
+	if(checkingLivesState_wait == false){
+		for(let website in websites){
+			if(JSON.stringify(checkingLivesState[website]) == "{}"){
+				delete checkingLivesState[website];
+			}
 		}
-	}
-	
-	if(JSON.stringify(checkingLivesState) == "{}"){
-		checkingLivesState = null;
-		console.info("[Live notifier] Live check end");
+		
+		if(JSON.stringify(checkingLivesState) == "{}"){
+			checkingLivesState = null;
+			console.info("[Live notifier] Live check end");
+		}
 	}
 }
 
 function checkLives(){
 	console.group();
 	
+	checkingLivesState_wait = true;
 	checkLivesProgress_init();
 	
 	for(let website in websites){
@@ -1245,6 +1255,7 @@ function checkLives(){
 		}
 	}
 	
+	checkingLivesState_wait = false;
 	console.groupEnd();
 	
 	clearInterval(interval);
