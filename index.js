@@ -644,9 +644,14 @@ function importButton_Panel(website){
 
 function importPrefsFromFile(data){
 	for(let prefId in data){
-		savePreference(prefId, data[prefId], false);
+		if(typeof options[prefId].type != "undefined" && options[prefId].type != "control" && options[prefId].type != "file" && typeof data[prefId] == typeof options_default_sync[prefId]){
+			savePreference(prefId, data[prefId], false);
+		} else {
+			console.warn(`Error trying to import ${prefId}`);
+		}
 	}
-	updatePanelData();
+	
+	refreshStreamsFromPanel();
 }
 function getSyncPreferences(){
 	let obj = {};
@@ -1224,7 +1229,7 @@ function checkLivesProgress_checkStreamEnd(website, id){
 function checkLivesProgress_checkLivesEnd(){
 	if(checkingLivesState_wait == false){
 		for(let website in websites){
-			if(JSON.stringify(checkingLivesState[website]) == "{}"){
+			if(checkingLivesState.hasOwnProperty(website) == true && JSON.stringify(checkingLivesState[website]) == "{}"){
 				delete checkingLivesState[website];
 			}
 		}
@@ -1260,6 +1265,10 @@ function checkLives(){
 	}
 	
 	checkingLivesState_wait = false;
+	if(JSON.stringify(checkingLivesState) == "{}"){
+		checkLivesProgress_checkLivesEnd();
+		setIcon();
+	}
 	console.groupEnd();
 	
 	clearInterval(interval);
