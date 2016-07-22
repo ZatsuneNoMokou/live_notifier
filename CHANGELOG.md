@@ -1,3 +1,12 @@
+# 7.2.4
+* Fix: Better fix to delete data from content disapearing from channels (A live id not returned anymore in the live list)
+* Fix: Stream check end (checkLivesProgress_checkStreamEnd)
+
+# 7.2.3
+* Fix: Ignore websites not supported
+* Fix: Dailymotion channels not going offline
+* Fix: Stream check end (checkLivesProgress_removeContent)
+
 # 7.2.2
 * Fix: Copy/Paste problem
 

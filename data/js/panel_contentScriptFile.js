@@ -529,7 +529,9 @@ function importPrefsFromFile(event){
 			}
 		}
 	});
+	document.querySelector("body").appendChild(node);
 	node.click();
+	node.parentNode.removeChild(node);
 }
 /*			---- Settings end ----			*/
 
