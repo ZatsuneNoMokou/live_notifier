@@ -54,7 +54,7 @@
 * +: Single function to load scrollbars
 
 # 6.3.3
-* -: Old settings, option-data.js
+* -: Cleaning old settings
 * Fix: No longer store live notifier version in a pref, using load or install reason to make update notification
 
 # 6.3.2
@@ -95,8 +95,8 @@
 * Fix: Copy/Paste error
 
 # 6.0.0
-* i: Start using class system, Firefox 45 min requied because of it (ES6)
-* +: Fused website preferences, avoiding one pref per website
+* i: Start using class system, Firefox 45 min requied because of it (ECMAScript 6)
+* +: Fused website preferences, avoiding one preference per website
 * +: streamListFromSetting use a variable as cache to not re-process each time
 * Fix: Header min height
 * Fix: streamListFromSetting send empty objects if no stream of a website, to avoid errors or undefined
