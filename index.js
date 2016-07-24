@@ -1104,7 +1104,7 @@ function getOfflineCount(){
 					offlineCount = offlineCount + 1;
 				} else {
 					for(let contentId in liveStatus[website][id]){
-						if(!liveStatus[website][id][contentId].filteredStatus && streamList.hasOwnProperty(id)){
+						if(!liveStatus[website][id][contentId].liveStatus.filteredStatus && streamList.hasOwnProperty(id)){
 							offlineCount = offlineCount + 1;
 						}
 					}

@@ -1,3 +1,6 @@
+# 7.2.6
+* Fix: Offline streams count
+
 # 7.2.5
 * Fix: "Detection" of the end when checking streams when no stream is configured
 * Fix: Stream check end (checkLivesProgress_checkLivesEnd)
