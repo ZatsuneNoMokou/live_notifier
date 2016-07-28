@@ -8,6 +8,10 @@ let twitch = {
 			/^(?:http|https):\/\/www\.twitch\.tv\/([^\/\?\&]+).*$/,/^(?:http|https):\/\/player\.twitch\.tv\/\?channel\=([\w\-]+).*$/
 		]
 	},
+	"API_addStream":
+		function(source_website, id, prefs){
+			return twitch.API(id);
+		},
 	"API":
 		function(id){
 			let obj = {
@@ -45,6 +49,14 @@ let twitch = {
 			} else {
 				return "success";
 			}
+		},
+	"addStream_getId":
+		function(id, response, streamListSetting, responseValidity){
+			let data = response.json;
+			if(responseValidity == "success"){
+				return id;
+			}
+			return null;
 		},
 	"checkLiveStatus":
 		function(id, contentId, data, currentLiveStatus){

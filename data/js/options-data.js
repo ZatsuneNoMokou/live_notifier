@@ -65,6 +65,19 @@ var options = {
 		"type": "control",
 		"group": "beam"
 	},
+	/*			Youtube			*/
+	"youtube_api_key": {
+		"type": "string",
+		"value": "",
+		"hidden": true,
+		"group": "youtube"
+	},
+	"youtube_api_referrer":  {
+		"type": "string",
+		"value": "",
+		"hidden": true,
+		"group": "youtube"
+	},
 	/*			Notifications type			*/
 	/*"notification_type": {
 		"tittle": "Notification type",

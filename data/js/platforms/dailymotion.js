@@ -14,6 +14,14 @@ let dailymotion = {
 			/^(?:http|https):\/\/(?:games\.|www\.)dailymotion\.com\/([^\s\t\/\?]+).*$/
 		]
 	},
+	"API_addStream":
+		function(source_website, id, prefs){
+			if(website_channel_id.test(source_website) == true){
+				return websites[website].API_channelInfos(`channel::${id}`, pref);
+			} else {
+				return dailymotion.API(id);
+			}
+		},
 	"API":
 		function(id){
 			let obj = {
@@ -66,6 +74,23 @@ let dailymotion = {
 			} else {
 				return "success";
 			}
+		},
+	"addStream_getId":
+		function(id, response, streamListSetting, responseValidity){
+			let data = response.json;
+			if(responseValidity == "success" || responseValidity == "vod" || responseValidity == "notstream"){
+				let username = (typeof data.mode == "string")? data["user.username"] : data.username;
+				let id_username = `channel::${username}`;
+				let id_owner = `channel::${(typeof data.mode == "string")? data.owner : data.id}`;
+				
+				// Use username (login) as channel id
+				let id = id_owner;
+				if(streamListSetting.streamExist("dailymotion", id_username) || streamListSetting.streamExist("dailymotion", id_owner)){
+					return true;
+				}
+				return id;
+			}
+			return null;
 		},
 	"checkLiveStatus":
 		function(id, contentId, data, currentLiveStatus){

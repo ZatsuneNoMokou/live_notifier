@@ -8,6 +8,10 @@ let hitbox = {
 			/^(?:http|https):\/\/www\.hitbox\.tv\/(?:embedchat\/)?([^\/\?\&]+).*$/
 		]
 	},
+	"API_addStream":
+		function(source_website, id, prefs){
+			return hitbox.API(id);
+		},
 	"API":
 		function(id){
 			let obj = {
@@ -37,6 +41,14 @@ let hitbox = {
 				return "data missing";
 			}
 			return "success";
+		},
+	"addStream_getId":
+		function(id, response, streamListSetting, responseValidity){
+			let data = response.json;
+			if(responseValidity == "success"){
+				return id;
+			}
+			return null;
 		},
 	"checkLiveStatus":
 		function(id, contentId, data, currentLiveStatus){

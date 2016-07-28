@@ -271,7 +271,10 @@ function loadPreferences(){
 	
 	for(let id in options){
 		let option = options[id];
-		if(typeof option.type == "undefined" || option.type == "hidden"){
+		if(typeof option.type == "undefined"){
+			continue;
+		}
+		if(typeof option.hidden == "boolean" && option.hidden == true){
 			continue;
 		}
 		if(typeof option.showPrefInPanel == "boolean" && option.showPrefInPanel == false){
@@ -741,13 +744,15 @@ let streamNodes = {
 		"beam": document.querySelector("#streamListOnline .beam"),
 		"dailymotion": document.querySelector("#streamListOnline .dailymotion"),
 		"hitbox": document.querySelector("#streamListOnline .hitbox"),
-		"twitch": document.querySelector("#streamListOnline .twitch")
+		"twitch": document.querySelector("#streamListOnline .twitch"),
+		"youtube": document.querySelector("#streamListOnline .youtube")
 	},
 	"offline": {
 		"beam": document.querySelector("#streamListOffline .beam"),
 		"dailymotion": document.querySelector("#streamListOffline .dailymotion"),
 		"hitbox": document.querySelector("#streamListOffline .hitbox"),
-		"twitch": document.querySelector("#streamListOffline .twitch")
+		"twitch": document.querySelector("#streamListOffline .twitch"),
+		"youtube": document.querySelector("#streamListOffline .youtube")
 	}
 }
 

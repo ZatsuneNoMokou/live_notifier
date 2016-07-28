@@ -1,7 +1,7 @@
 {
 	"name": "livenotifier",
-	"description": "Be notified of streams from Dailymotion, Hitbox, Twitch and Beam",
-	"version": "7.2.6",
+	"description": "Be notified of streams from Beam, Dailymotion, Hitbox, Twitch and Youtube",
+	"version": "8.0.0-pre1",
 	"author": "Zatsune No Mokou",
 	"engines": {
 		"firefox": ">=45.0a1"
@@ -11,7 +11,7 @@
 	"license": "GPL-3.0",
 	"locales": {
 		"fr": {
-			"description": "Soyez notifiés de vos streams de Beam, Dailymotion, Hitbox et Twitch"
+			"description": "Soyez notifiés de vos streams de Beam, Dailymotion, Hitbox, Twitch et Youtube"
 		}
 	},
 	"main": "index.js",
@@ -82,6 +82,20 @@
 			"title": "Import the Beam stream(s) you follow.",
 			"label": "Import",
 			"type": "control"
+		},
+		{
+			"name": "youtube_api_key",
+			"title": "Youtube api key (optional)",
+			"type": "string",
+			"value": "",
+			"hidden": true
+		},
+		{
+			"name": "youtube_api_referrer",
+			"title": "Youtube api referrer (optional)",
+			"type": "string",
+			"value": "",
+			"hidden": true
 		},
 		{
 			"name": "check_delay",

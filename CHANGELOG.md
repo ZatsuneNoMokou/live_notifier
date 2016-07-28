@@ -1,3 +1,10 @@
+# 8.0.0
+* i: perfect-scrollbar update (0.6.12)
+* +: Add headers support with the custom Request function 
+* +: Add Youtube support
+* +: Re-arranged function to add stream to allow getting IDs from user and video pages with Youtube
+* Fix: Unsuccessful channel list requests
+
 # 7.2.6
 * Fix: Offline streams count
 

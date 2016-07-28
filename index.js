@@ -75,7 +75,7 @@ let channelInfos = {};
 
 let {options, options_default, options_default_sync} = require("./data/js/options-data.js");
 (function(){
-	let websitesToLoad = ["beam","dailymotion","hitbox","twitch"];
+	let websitesToLoad = ["beam", "dailymotion", "hitbox", "twitch", "youtube"];
 	for(let i in websitesToLoad){
 		websites[websitesToLoad[i]] = require(`./data/js/platforms/${websitesToLoad[i]}.js`)
 	}
@@ -277,7 +277,7 @@ class streamListFromSetting{
 			console.log(`${id} has been added`);
 			
 			try{
-				getPrimary(id, website, id);
+				getPrimary(id, "", website, id);
 			}
 			catch(error){
 				console.warn(`[Live notifier] ${error}`);
@@ -373,6 +373,13 @@ function getStreamURL(website, id, contentId, usePrefUrl){
 				case "beam":
 					return `https://beam.pro/${id}`;
 					break;
+				case "youtube":
+					if(website_channel_id.test(contentId) == true){
+						return `https://youtube.com/channel/${website_channel_id.exec(id)[1]}`;
+					} else {
+						return `https://youtu.be/${contentId}`;
+					}
+					break;
 				default:
 					return null;
 			}
@@ -454,6 +461,9 @@ function addStreamFromPanel(data){
 		if(data.hasOwnProperty("ContextMenu_URL")){
 			url_list = [data.ContextMenu_URL];
 			type = "ContextMenu";
+		} else if(data.hasOwnProperty("url")){
+			url_list = [data.url];
+			type = "url";
 		} else if(data.hasOwnProperty("embed_list")){
 			console.log("[Live notifier] AddStream - Embed list");
 			url_list = data.embed_list;
@@ -475,11 +485,7 @@ function addStreamFromPanel(data){
 							doNotif("Live notifier",`${display_id(id)} ${_("is already configured.")}`);
 							return true;
 						} else {
-							let current_API = websites[website].API(id);
-							
-							if(website_channel_id.test(source_website)){
-								current_API = websites[website].API_channelInfos(`channel::${id}`);
-							}
+							let current_API = websites[website].API_addStream(source_website, id, (websites[website].hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites[website].APIs_RequiredPrefs) : {});
 							
 							Request({
 								url: current_API.url,
@@ -492,40 +498,40 @@ function addStreamFromPanel(data){
 									console.dir(data);
 									console.groupEnd();
 									
-									let responseValidity = checkResponseValidity(website, data);
+									let responseValidity = checkResponseValidity(website, response);
 									
-									if(website == "dailymotion" && (responseValidity == "success" || responseValidity == "vod" || responseValidity == "notstream")){
-										let username = (typeof data.mode == "string")? data["user.username"] : data.username;
-										let id_username = `channel::${username}`;
-										let id_owner = `channel::${(typeof data.mode == "string")? data.owner : data.id}`;
-										
-										console.warn(id_username + " - " + id_owner)
-										
-										// Use username (login) as channel id
-										id = id_owner;
-										if(streamListSetting.streamExist(website, id_username) || streamListSetting.streamExist(website, id_owner)){
-											doNotif("Live notifier",`${display_id(id)} ${_("is_already_configured")}`);
-											return true;
-										}
-									} else if(website == "dailymotion" && responseValidity == "invalid_parameter"){
+									let streamId = websites[website].addStream_getId(id, response, streamListSetting, responseValidity);
+									
+									if(website == "dailymotion" && responseValidity == "invalid_parameter"){
 										doNotif("Live notifier", _("No_supported_stream_detected_in_the_current_tab_so_nothing_to_add"));
 										return null;
-									} else if(checkResponseValidity(website, data) != "success"){
+									} else if(streamId == null){
 										doNotif("Live notifier", `${display_id(id)} ${_("wasnt_configured_but_error_retrieving_data")}`);
 										return null;
+									} else if(typeof streamId == "boolean" && streamId == true){
+										doNotif("Live notifier",`${display_id(id)} ${_("is_already_configured")}`);
+										return true;
+									} else if(typeof streamId == "object" && streamId.hasOwnProperty("url")){
+										addStreamFromPanel(streamId);
+										return true;
 									}
+
 									
-									if(getPreference("confirm_addStreamFromPanel")){
-										let addstreamNotifAction = new notifAction("addStream", {id: id, website: website, url: ((type == "embed")? active_tab_url : "")});
-										doActionNotif(`Live notifier (${_("click to confirm")})`, `${display_id(id)} ${_("wasn't configured, and can be added.")}`, addstreamNotifAction);
+									if(streamListSetting.streamExist(website, streamId) == true){
+										doNotif("Live notifier",`${display_id(streamId)} ${_("is_already_configured")}`);
 									} else {
-										streamListSetting.addStream(website, id, ((type == "embed")? active_tab_url : ""));
-										streamListSetting.update();
-										doNotif("Live notifier", `${display_id(id)} ${_("wasn't configured, and have been added.")}`);
-										// Update the panel for the new stream added
-										setTimeout(function(){
-											refreshPanel();
-										}, 5000);
+										if(getPreference("confirm_addStreamFromPanel")){
+											let addstreamNotifAction = new notifAction("addStream", {id: streamId, website: website, url: ((type == "embed")? active_tab_url : "")});
+											doActionNotif(`Live notifier (${_("click to confirm")})`, `${display_id(streamId)} ${_("wasn't configured, and can be added.")}`, addstreamNotifAction);
+										} else {
+											streamListSetting.addStream(website, streamId, ((type == "embed")? active_tab_url : ""));
+											streamListSetting.update();
+											doNotif("Live notifier", `${display_id(streamId)} ${_("wasn't configured, and have been added.")}`);
+											// Update the panel for the new stream added
+											setTimeout(function(){
+												refreshPanel();
+											}, 5000);
+										}
 									}
 								}
 							}).get();
@@ -536,7 +542,7 @@ function addStreamFromPanel(data){
 			}
 		}
 	}
-	if(typeof data != "object" && type != "ContextMenu"){
+	if(typeof data != "object" && type != "ContextMenu" && type != "url"){
 		if(!data.hasOwnProperty("embed_list")){
 			let worker = current_tab.attach({
 				contentScriptFile: self.data.url("js/page_getEmbedList.js")
@@ -787,7 +793,7 @@ function updatePanelData(){
 					notCheckedYet = true;
 					console.info(`${id} from ${website} is not checked yet`);
 					try{
-						getPrimary(id, website, id);
+						getPrimary(id, "", website, id);
 					}
 					catch(error){
 						console.warn(`[Live notifier] ${error}`);
@@ -817,7 +823,13 @@ function updatePanelData(){
 	
 	for(let prefId in options){
 		let option = options[prefId];
-		if(option.type == "control" || (option.hasOwnProperty("showPrefInPanel") == true && option.showPrefInPanel == false)){
+		if(option.hasOwnProperty("hidden") == true && typeof option.hidden == "boolean" && option.hidden == true){
+			continue;
+		}
+		if(option.hasOwnProperty("showPrefInPanel") == true && typeof option.showPrefInPanel == "boolean" && option.showPrefInPanel == false){
+			continue;
+		}
+		if(option.type == "control"){
 			continue;
 		} else {
 			panel.port.emit("settingNodesUpdate", {settingName: prefId, settingValue: getPreference(prefId)});
@@ -1157,10 +1169,19 @@ const website_channel_id = /channel\:\:(.*)/,
 	facebookID_from_url = /(?:http|https):\/\/(?:www\.)?facebook.com\/([^\/]+)(?:\/.*)?/,
 	twitterID_from_url = /(?:http|https):\/\/(?:www\.)?twitter.com\/([^\/]+)(?:\/.*)?/;
 
-function checkResponseValidity(website, data){
-	if(data == null || typeof data != "object" || JSON.stringify == "{}"){
-		console.warn("Unable to get stream state (no connection).");
-		return "parse_error";
+function checkResponseValidity(website, response){
+	let data = response.json;
+	
+	if(data == null || typeof data != "object" || JSON.stringify(data) == "{}"){ // Empty or invalid JSON
+		if(response.hasOwnProperty("status") && typeof response.hasOwnProperty("status") == "string" && /^4\d*$/.test(response.status) == true && /^5\d*$/.test(response.status) == true){
+			// Request Error
+			console.warn("Unable to get stream state (request error).");
+			return "request_error";
+		} else {
+			// Parse Error
+			console.warn("Unable to get stream state (response is empty or not valid JSON).");
+			return "parse_error";
+		}
 	}
 	let state = websites[website].checkResponseValidity(data);
 	switch(state){
@@ -1180,12 +1201,21 @@ function checkResponseValidity(website, data){
 		case "success":
 			return "success";
 		default:
-			console.warn(`[${website}] Unknown validation state (${state}).`);
+			console.warn(`[${website}] Unable to get stream state (${state}).`);
 			return state;
 			break;
 	}
 	
 	return "success";
+}
+function getAPIPrefsObject(prefList){
+	let obj = {}
+	
+	for(let prefID of prefList){
+		obj[prefID] = getPreference(prefID);
+	}
+	
+	return obj;
 }
 
 let checkingLivesState_wait = false,
@@ -1260,7 +1290,7 @@ function checkLives(){
 				//console.info(`Ignoring ${id}`);
 				continue;
 			}
-			getPrimary(id, website, streamList[id]);
+			getPrimary(id, "", website, streamList[id]);
 		}
 	}
 	
@@ -1276,36 +1306,37 @@ function checkLives(){
 }
 
 
-function getPrimary(id, website, streamSetting, url, pageNumber){
+function getPrimary(id, contentId, website, streamSetting, url, pageNumber){
 	checkLivesProgress_initStream(website, id);
 	
-	let current_API = websites[website].API(id);
+	let current_API = websites[website].API((typeof contentId == "string" && contentId != "")? contentId :  id, (websites[website].hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites[website].APIs_RequiredPrefs) : {});
 	if(typeof url == "string"){
 		current_API.url = url;
 	}
 	
 	console.time(`${website}::${id}`);
 	
-	Request_Get({
+	let getPrimary_RequestOptions = {
 		url: current_API.url,
 		overrideMimeType: current_API.overrideMimeType,
 		onComplete: function (response) {
 			let data = response.json;
 			
 			console.group();
-			console.info(`${website} - ${id} (${response.url})`);
+			console.info(`${website} - ${id} ${(typeof contentId == "string" && contentId != "")? ` - ${contentId}` : ""} (${response.url})`);
 			console.dir(data);
+			console.groupEnd();
 			
 			if(typeof liveStatus[website][id] == "undefined"){
 				liveStatus[website][id] = {};
 			}
 			
-			if(website_channel_id.test(id) == true){
+			if(!(typeof contentId == "string" && contentId != "") && website_channel_id.test(id) == true){
 				if(typeof channelInfos[website][id] == "undefined"){
 					let defaultChannelInfos = channelInfos[website][id] = {"liveStatus": {"API_Status": false, "notificationStatus": false, "lastCheckStatus": "", "liveList": {}}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
 				}
 				
-				if(checkResponseValidity(website, data) == "success"){
+				if(checkResponseValidity(website, response) == "success"){
 					let streamListData;
 					if(typeof pageNumber == "number"){
 						streamListData = websites[website].channelList(id, website, data, pageNumber);
@@ -1328,26 +1359,41 @@ function getPrimary(id, website, streamSetting, url, pageNumber){
 							let contentId = i;
 							channelInfos[website][id].liveStatus.liveList[contentId] = "";
 							checkLivesProgress_addContent(website, id, contentId);
-							processPrimary(id, contentId, website, streamSetting, streamListData.streamList[i]);
+							
+							if(streamListData.streamList[i] == null){
+								getPrimary(id, contentId, website, streamSetting, streamListData.url, streamListData.next_page_number);
+							} else {
+								processPrimary(id, contentId, website, streamSetting, {"json": streamListData.streamList[i]});
+							}
 						}
 						if(streamListData.hasOwnProperty("next") == true){
 							if(streamListData.next == null){
 								channelListEnd(website, id);
 							} else {
-								getPrimary(id, website, streamSetting, streamListData.url, streamListData.next_page_number);
+								getPrimary(id, "", website, streamSetting, streamListData.url, streamListData.next_page_number);
 							}
 						}
 					}
 				} else {
+					getChannelInfo(website, id);
 					channelListEnd(website, id);
+					checkLivesProgress_removeContent(website, id, (typeof contentId == "string" && contentId != "")? contentId :  id);
 				}
 			} else {
-				let contentId = id;
+				if(!(typeof contentId == "string" && contentId != "")){
+					contentId = id;
+				}
 				checkLivesProgress_addContent(website, id, contentId);
-				processPrimary(id, contentId, website, streamSetting, data);
+				processPrimary(id, contentId, website, streamSetting, response);
 			}
 		}
-	});
+	}
+	
+	if(current_API.hasOwnProperty("headers") == true){
+		getPrimary_RequestOptions.headers = current_API.headers;
+	}
+	
+	Request_Get(getPrimary_RequestOptions);
 }
 
 function channelListEnd(website, id){
@@ -1362,18 +1408,19 @@ function channelListEnd(website, id){
 	console.groupEnd();
 }
 
-function processPrimary(id, contentId, website, streamSetting, data){
+function processPrimary(id, contentId, website, streamSetting, response){
+	let data = response.json;
 	if(typeof liveStatus[website][id][contentId] == "undefined"){
 		let defaultChannelInfos = liveStatus[website][id][contentId] = {"liveStatus": {"API_Status": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
 	}
-	let responseValidity = liveStatus[website][id][contentId].liveStatus.lastCheckStatus = checkResponseValidity(website, data);
+	let responseValidity = liveStatus[website][id][contentId].liveStatus.lastCheckStatus = checkResponseValidity(website, response);
 	if(responseValidity == "success"){
 		let liveState = websites[website].checkLiveStatus(id, contentId, data, liveStatus[website][id][contentId]);
 		if(liveState != null){
 			if(websites[website].hasOwnProperty("API_second") == true){
-				let second_API = websites[website].API_second(contentId);
+				let second_API = websites[website].API_second(contentId, (websites[website].hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites[website].APIs_RequiredPrefs) : {});
 				
-				Request_Get({
+				let second_API_RequestOptions = {
 					url: second_API.url,
 					overrideMimeType: second_API.overrideMimeType,
 					onComplete: function (response) {
@@ -1388,7 +1435,13 @@ function processPrimary(id, contentId, website, streamSetting, data){
 						checkLivesProgress_removeContent(website, id, contentId);
 						setIcon();
 					}
-				});
+				}
+				
+				if(second_API.hasOwnProperty("headers") == true){
+					second_API_RequestOptions.headers = second_API.headers;
+				}
+				
+				Request_Get(second_API_RequestOptions);
 			} else {
 				doStreamNotif(website, id, contentId, streamSetting, liveState);
 				checkLivesProgress_removeContent(website, id, contentId);
@@ -1406,13 +1459,13 @@ function processPrimary(id, contentId, website, streamSetting, data){
 	console.groupEnd();
 }
 function getChannelInfo(website, id){
-	let channelInfos_API = websites[website].API_channelInfos(id);
+	let channelInfos_API = websites[website].API_channelInfos(id, (websites[website].hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites[website].APIs_RequiredPrefs) : {});
 	
 	if(typeof channelInfos[website][id] == "undefined"){
 		let defaultChannelInfos = channelInfos[website][id] = {"liveStatus": {"API_Status": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
 	}
 	if(websites[website].hasOwnProperty("API_channelInfos") == true){
-		Request_Get({
+		let getChannelInfo_RequestOptions = {
 			url: channelInfos_API.url,
 			overrideMimeType: channelInfos_API.overrideMimeType,
 			onComplete: function (response) {
@@ -1423,12 +1476,18 @@ function getChannelInfo(website, id){
 				console.dir(data_channelInfos);
 				console.groupEnd();
 				
-				let responseValidity = channelInfos[website][id].liveStatus.lastCheckStatus = checkResponseValidity(website, data_channelInfos);
+				let responseValidity = channelInfos[website][id].liveStatus.lastCheckStatus = checkResponseValidity(website, response);
 				if(responseValidity == "success"){
 					websites[website].channelInfosProcess(id, data_channelInfos, channelInfos[website][id]);
 				}
 			}
-		});
+		}
+		
+		if(channelInfos_API.hasOwnProperty("headers") == true){
+			getChannelInfo_RequestOptions.headers = channelInfos_API.headers;
+		}
+		
+		Request_Get(getChannelInfo_RequestOptions);
 	}
 }
 
@@ -1440,7 +1499,7 @@ function importButton(website){
 			onComplete: function (response) {
 				let data = response.json;
 				
-				if(checkResponseValidity(website, data) != "success"){
+				if(checkResponseValidity(website, response) != "success"){
 					console.warn(`Sometimes bad things just happen - ${website} - https://beam.pro/api/v1/channels/${getPreference(`${website}_user_id`)}`);
 					doNotif("Live notifier", _("beam import error"));
 				} else {
@@ -1461,13 +1520,13 @@ function importButton(website){
 	}
 }
 function importStreams(website, id, url, pageNumber){
-	let current_API = websites[website].importAPI(id);
+	let current_API = websites[website].importAPI(id, (websites[website].hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites[website].APIs_RequiredPrefs) : {});
 	if(typeof url == "string" && url != ""){
 		current_API.url = url;
 	} else {
 		console.time(`${website}::${id}`);
 	}
-	Request_Get({
+	let importStreams_RequestOptions = {
 		url: current_API.url,
 		overrideMimeType: current_API.overrideMimeType,
 		onComplete: function (response) {
@@ -1508,7 +1567,13 @@ function importStreams(website, id, url, pageNumber){
 				refreshPanel(false);
 			}, 5000);
 		}
-	});
+	}
+	
+	if(current_API.hasOwnProperty("headers") == true){
+		importStreams_RequestOptions.headers = current_API.headers;
+	}
+	
+	Request_Get(importStreams_RequestOptions);
 }
 function importStreamsEnd(website, id){
 	setIcon();

@@ -8,6 +8,10 @@ let beam = {
 			/^(?:http|https):\/\/beam\.pro\/([^\/\?\&]+)/
 		]
 	},
+	"API_addStream":
+		function(source_website, id, prefs){
+			return beam.API(id);
+		},
 	"API":
 		function(id){
 			let obj = {
@@ -31,6 +35,14 @@ let beam = {
 			} else {
 				return "success";
 			}
+		},
+	"addStream_getId":
+		function(id, response, streamListSetting, responseValidity){
+			let data = response.json;
+			if(responseValidity == "success"){
+				return id;
+			}
+			return null;
 		},
 	"checkLiveStatus":
 		function(id, contentId, data, currentLiveStatus){
