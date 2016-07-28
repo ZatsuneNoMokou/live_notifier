@@ -178,9 +178,9 @@ let youtube = {
 				if(typeof snippetData.title == "string" && snippetData.title != ""){
 					streamData.streamName = snippetData.title;
 				}
-				if(typeof snippetData.description == "string" && snippetData.description != ""){
+				/*if(typeof snippetData.description == "string" && snippetData.description != ""){
 					streamData.streamStatus = snippetData.description;
-				}
+				}*/
 				
 				if(snippetData.hasOwnProperty("thumbnails") == true){
 					if(snippetData.thumbnails.hasOwnProperty("high") == true && snippetData.thumbnails.high.hasOwnProperty("url") == true && typeof snippetData.thumbnails.high.url == "string"){
