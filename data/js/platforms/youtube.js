@@ -241,9 +241,9 @@ let youtube = {
 				if(typeof data.title == "string" && data.title != ""){
 					streamData.streamName = data.title;
 				}
-				if(typeof data.description == "string" && data.description != ""){
+				/*if(typeof data.description == "string" && data.description != ""){
 					streamData.streamStatus = data.description;
-				}
+				}*/
 				
 				if(data.hasOwnProperty("thumbnails") == true){
 					if(data.thumbnails.hasOwnProperty("high") == true && data.thumbnails.high.hasOwnProperty("url") == true && typeof data.thumbnails.high.url == "string"){
