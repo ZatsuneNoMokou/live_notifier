@@ -14,10 +14,6 @@ const { ToggleButton } = require('sdk/ui/button/toggle'),
 
 let simplePrefs = require('sdk/simple-prefs').prefs;
 
-function Request_Get(options){
-	Request(options).get();
-}
-
 function getPreference(prefId){
 	return simplePrefs[prefId];
 }
@@ -781,7 +777,7 @@ function updatePanelData(){
 			}
 		}
 	}
-	if(checkingLivesState == null){
+	if(checkingLivesFinished){
 		let notCheckedYet = false;
 		for(let website in websites){
 			var streamList = (new streamListFromSetting(website)).objData;
@@ -819,7 +815,7 @@ function updatePanelData(){
 		panel.port.emit("updateOfflineCount", "");
 	}
 	
-	panel.port.emit("debug_checkingLivesState", (checkingLivesState == null));
+	panel.port.emit("debug_checkingLivesState", checkingLivesFinished);
 	
 	for(let prefId in options){
 		let option = options[prefId];
@@ -1218,64 +1214,46 @@ function getAPIPrefsObject(prefList){
 	return obj;
 }
 
-let checkingLivesState_wait = false,
-	checkingLivesState = null;
-function checkLivesProgress_init(){
-	if(checkingLivesState != null){
-		console.warn("[checkLivesProgress_init] Previous progress wasn't finished?");
-	}
-	checkingLivesState = {};
-}
-function checkLivesProgress_initStream(website, id){
-	if(checkingLivesState == null){
-		checkingLivesState = {};
-	}
-	if(!checkingLivesState.hasOwnProperty(website)){
-		checkingLivesState[website] = {};
-	}
-	if(!checkingLivesState[website].hasOwnProperty(id)){
-		checkingLivesState[website][id] = {};
-	}
-}
-function checkLivesProgress_addContent(website, id, contentId){
+let checkingLivesFinished = false;
 
-	if(typeof checkingLivesState[website][id] != "object"){
-		checkLivesProgress_initStream(website, id);
-	}
-	checkingLivesState[website][id][contentId] = "";
-}
-function checkLivesProgress_removeContent(website, id, contentId){
-	if(checkingLivesState.hasOwnProperty(website) == true && checkingLivesState[website].hasOwnProperty(id) == true && typeof checkingLivesState[website][id][contentId] == "string"){
-		delete checkingLivesState[website][id][contentId];
-	}
-	checkLivesProgress_checkStreamEnd(website, id);
-}
-function checkLivesProgress_checkStreamEnd(website, id){
-	if(checkingLivesState.hasOwnProperty(website) == true && checkingLivesState[website].hasOwnProperty(id) == true && JSON.stringify(checkingLivesState[website][id]) == "{}"){
-		delete checkingLivesState[website][id];
-	}
-	checkLivesProgress_checkLivesEnd();
-}
-function checkLivesProgress_checkLivesEnd(){
-	if(checkingLivesState_wait == false){
-		for(let website in websites){
-			if(checkingLivesState.hasOwnProperty(website) == true && JSON.stringify(checkingLivesState[website]) == "{}"){
-				delete checkingLivesState[website];
+function PromiseWaitAll(promises){
+	if(Array.isArray(promises)){
+		let count = promises.length;
+		let p = new Promise(function(resolve, reject){
+			for(let item of promises){
+				if(item instanceof Promise){
+					item
+						.then(function(){
+							count = count - 1;
+							if(count == 0){
+								resolve();
+							}
+						})
+						.catch(function(){
+							count = count - 1;
+							if(count == 0){
+								resolve();
+							}
+						})
+				} else {
+					count = count - 1;
+				}
 			}
-		}
-		
-		if(JSON.stringify(checkingLivesState) == "{}"){
-			checkingLivesState = null;
-			console.info("[Live notifier] Live check end");
-		}
+			if(count == 0){
+				resolve();
+			}
+		});
+		return p;
+	} else {
+		return null;
 	}
 }
 
 function checkLives(){
 	console.group();
 	
-	checkingLivesState_wait = true;
-	checkLivesProgress_init();
+	let promises = [];
+	checkingLivesFinished = false;
 	
 	for(let website in websites){
 		let streamList = (new streamListFromSetting(website)).objData;
@@ -1290,16 +1268,24 @@ function checkLives(){
 				//console.info(`Ignoring ${id}`);
 				continue;
 			}
-			getPrimary(id, "", website, streamList[id]);
+			promises.push(getPrimary(id, "", website, streamList[id]));
 		}
 	}
+	console.groupEnd();
 	
-	checkingLivesState_wait = false;
-	if(JSON.stringify(checkingLivesState) == "{}"){
-		checkLivesProgress_checkLivesEnd();
+	let onPromiseEnd = function(){
+		console.info(`[Live notifier] Live check end`);
+		checkingLivesFinished = true;
 		setIcon();
 	}
-	console.groupEnd();
+	let onPromiseEndError = function(error){
+		console.warn(`[Live notifier] Live check end with errors ${(typeof error.message == "string")? `(${error.message})` : ""}`);
+		checkingLivesFinished = true;
+		setIcon();
+	}
+	PromiseWaitAll(promises)
+		.then(onPromiseEnd)
+		.catch(onPromiseEndError)
 	
 	clearInterval(interval);
 	interval = setInterval(checkLives, getPreference('check_delay') * 60000);
@@ -1307,98 +1293,130 @@ function checkLives(){
 
 
 function getPrimary(id, contentId, website, streamSetting, url, pageNumber){
-	checkLivesProgress_initStream(website, id);
-	
-	let current_API = websites[website].API((typeof contentId == "string" && contentId != "")? contentId :  id, (websites[website].hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites[website].APIs_RequiredPrefs) : {});
-	if(typeof url == "string"){
-		current_API.url = url;
-	}
-	
-	console.time(`${website}::${id}`);
-	
-	let getPrimary_RequestOptions = {
-		url: current_API.url,
-		overrideMimeType: current_API.overrideMimeType,
-		onComplete: function (response) {
-			let data = response.json;
-			
-			console.group();
-			console.info(`${website} - ${id} ${(typeof contentId == "string" && contentId != "")? ` - ${contentId}` : ""} (${response.url})`);
-			console.dir(data);
-			console.groupEnd();
-			
-			if(typeof liveStatus[website][id] == "undefined"){
-				liveStatus[website][id] = {};
-			}
-			
-			if(!(typeof contentId == "string" && contentId != "") && website_channel_id.test(id) == true){
-				if(typeof channelInfos[website][id] == "undefined"){
-					let defaultChannelInfos = channelInfos[website][id] = {"liveStatus": {"API_Status": false, "notificationStatus": false, "lastCheckStatus": "", "liveList": {}}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
+	let promise = new Promise(function(resolve, reject){
+		let current_API = websites[website].API((typeof contentId == "string" && contentId != "")? contentId :  id, (websites[website].hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites[website].APIs_RequiredPrefs) : {});
+		if(typeof url == "string"){
+			current_API.url = url;
+		}
+		
+		console.time(`${website}::${id}`);
+		
+		let getPrimary_RequestOptions = {
+			url: current_API.url,
+			overrideMimeType: current_API.overrideMimeType,
+			onComplete: function (response) {
+				let data = response.json;
+				
+				console.group();
+				console.info(`${website} - ${id} ${(typeof contentId == "string" && contentId != "")? ` - ${contentId}` : ""} (${response.url})`);
+				console.dir(data);
+				console.groupEnd();
+				
+				if(typeof liveStatus[website][id] == "undefined"){
+					liveStatus[website][id] = {};
 				}
 				
-				if(checkResponseValidity(website, response) == "success"){
-					let streamListData;
+				if(!(typeof contentId == "string" && contentId != "") && website_channel_id.test(id) == true){
 					if(typeof pageNumber == "number"){
-						streamListData = websites[website].channelList(id, website, data, pageNumber);
+						processChannelList(id, website, streamSetting, response, pageNumber)
+							.then(resolve)
+							.catch(reject)
 					} else {
-						streamListData = websites[website].channelList(id, website, data);
-					}
-					
-					if(typeof pageNumber != "number"){
-						// First loop
-						channelInfos[website][id].liveStatus.liveList = {};
-					}
-					
-					if(JSON.stringify(streamListData.streamList) == "{}"){
-						getChannelInfo(website, id);
-						channelListEnd(website, id);
-						
-						checkLivesProgress_checkStreamEnd(website, id);
-					} else {
-						for(let i in streamListData.streamList){
-							let contentId = i;
-							channelInfos[website][id].liveStatus.liveList[contentId] = "";
-							checkLivesProgress_addContent(website, id, contentId);
-							
-							if(streamListData.streamList[i] == null){
-								getPrimary(id, contentId, website, streamSetting, streamListData.url, streamListData.next_page_number);
-							} else {
-								processPrimary(id, contentId, website, streamSetting, {"json": streamListData.streamList[i]});
-							}
-						}
-						if(streamListData.hasOwnProperty("next") == true){
-							if(streamListData.next == null){
-								channelListEnd(website, id);
-							} else {
-								getPrimary(id, "", website, streamSetting, streamListData.url, streamListData.next_page_number);
-							}
-						}
+						getChannelInfo(website, id)
+							.then(function(){
+								processChannelList(id, website, streamSetting, response)
+									.then(resolve)
+									.catch(reject)
+							})
+							.catch(reject)
 					}
 				} else {
-					getChannelInfo(website, id);
-					channelListEnd(website, id);
-					checkLivesProgress_removeContent(website, id, (typeof contentId == "string" && contentId != "")? contentId :  id);
+					if(!(typeof contentId == "string" && contentId != "")){
+						contentId = id;
+					}
+					
+					processPrimary(id, contentId, website, streamSetting, response)
+						.then(resolve)
+						.catch(reject)
 				}
-			} else {
-				if(!(typeof contentId == "string" && contentId != "")){
-					contentId = id;
-				}
-				checkLivesProgress_addContent(website, id, contentId);
-				processPrimary(id, contentId, website, streamSetting, response);
+				
 			}
 		}
-	}
-	
-	if(current_API.hasOwnProperty("headers") == true){
-		getPrimary_RequestOptions.headers = current_API.headers;
-	}
-	
-	Request_Get(getPrimary_RequestOptions);
+		
+		if(current_API.hasOwnProperty("headers") == true){
+			getPrimary_RequestOptions.headers = current_API.headers;
+		}
+		
+		Request(getPrimary_RequestOptions).get();
+	});
+	return promise;
 }
 
-function channelListEnd(website, id){
+function processChannelList(id, website, streamSetting, response, pageNumber){
+	let promise = new Promise(function(resolve, reject){
+		let promises = [];
+		
+		let data = response.json;
+		
+		if(typeof channelInfos[website][id] == "undefined"){
+			let defaultChannelInfos = channelInfos[website][id] = {"liveStatus": {"API_Status": false, "notificationStatus": false, "lastCheckStatus": "", "liveList": {}}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
+		}
+
+		if(checkResponseValidity(website, response) == "success"){
+			let streamListData;
+			if(typeof pageNumber == "number"){
+				streamListData = websites[website].channelList(id, website, data, pageNumber);
+			} else {
+				streamListData = websites[website].channelList(id, website, data);
+			}
+			
+			if(typeof pageNumber != "number"){
+				// First loop
+				channelInfos[website][id].liveStatus.liveList = {};
+			}
+			
+			if(JSON.stringify(streamListData.streamList) == "{}"){
+				//getChannelInfo(website, id);
+				channelListEnd(website, id, streamSetting);
+				
+				resolve();
+			} else {
+				for(let i in streamListData.streamList){
+					let contentId = i;
+					channelInfos[website][id].liveStatus.liveList[contentId] = "";
+					
+					if(streamListData.streamList[i] == null){
+						promises.push(getPrimary(id, contentId, website, streamSetting));
+					} else {
+						promises.push(processPrimary(id, contentId, website, streamSetting, {"json": streamListData.streamList[i]}));
+					}
+				}
+				if(streamListData.hasOwnProperty("next") == true){
+					if(streamListData.next == null){
+						channelListEnd(website, id, streamSetting);
+					} else {
+						promises.push(getPrimary(id, "", website, streamSetting, streamListData.url, streamListData.next_page_number));
+					}
+				}
+				
+				PromiseWaitAll(promises)
+					.then(resolve)
+					.catch(reject)
+			}
+		} else {
+			//getChannelInfo(website, id);
+			channelListEnd(website, id, streamSetting);
+			
+			resolve();
+		}
+	});
+	return promise;
+}
+function channelListEnd(website, id, streamSetting){
 	for(let contentId in liveStatus[website][id]){
 		if(channelInfos[website][id].liveStatus.liveList.hasOwnProperty(contentId) == false){
+			liveStatus[website][id][contentId].liveStatus.API_Status = false;
+			doStreamNotif(website, id, contentId, streamSetting);
 			delete liveStatus[website][id][contentId];
 		}
 	}
@@ -1409,91 +1427,99 @@ function channelListEnd(website, id){
 }
 
 function processPrimary(id, contentId, website, streamSetting, response){
-	let data = response.json;
-	if(typeof liveStatus[website][id][contentId] == "undefined"){
-		let defaultChannelInfos = liveStatus[website][id][contentId] = {"liveStatus": {"API_Status": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
-	}
-	let responseValidity = liveStatus[website][id][contentId].liveStatus.lastCheckStatus = checkResponseValidity(website, response);
-	if(responseValidity == "success"){
-		let liveState = websites[website].checkLiveStatus(id, contentId, data, liveStatus[website][id][contentId]);
-		if(liveState != null){
-			if(websites[website].hasOwnProperty("API_second") == true){
-				let second_API = websites[website].API_second(contentId, (websites[website].hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites[website].APIs_RequiredPrefs) : {});
-				
-				let second_API_RequestOptions = {
-					url: second_API.url,
-					overrideMimeType: second_API.overrideMimeType,
-					onComplete: function (response) {
-						let data_second = response.json;
-						
-						console.info(`${website} - ${id} (${response.url})`);
-						console.dir(data_second);
-						
-						websites[website].seconderyInfo(id, contentId, data_second, liveStatus[website][id][contentId], liveState);
-						
-						doStreamNotif(website, id, contentId, streamSetting, liveState);
-						checkLivesProgress_removeContent(website, id, contentId);
-						setIcon();
+	let promise = new Promise(function(resolve, reject){
+		let data = response.json;
+		if(typeof liveStatus[website][id][contentId] == "undefined"){
+			let defaultStatus = liveStatus[website][id][contentId] = {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
+		}
+		let responseValidity = liveStatus[website][id][contentId].liveStatus.lastCheckStatus = checkResponseValidity(website, response);
+		if(responseValidity == "success"){
+			let liveState = websites[website].checkLiveStatus(id, contentId, data, liveStatus[website][id][contentId], (channelInfos.hasOwnProperty(website) && channelInfos[website].hasOwnProperty(id))? channelInfos[website][id] : null);
+			if(liveState != null){
+				if(websites[website].hasOwnProperty("API_second") == true){
+					let second_API = websites[website].API_second(contentId, (websites[website].hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites[website].APIs_RequiredPrefs) : {});
+					
+					let second_API_RequestOptions = {
+						url: second_API.url,
+						overrideMimeType: second_API.overrideMimeType,
+						onComplete: function (response) {
+							let data_second = response.json;
+							
+							console.info(`${website} - ${id} (${response.url})`);
+							console.dir(data_second);
+							
+							websites[website].seconderyInfo(id, contentId, data_second, liveStatus[website][id][contentId], liveState);
+							
+							resolve();
+							doStreamNotif(website, id, contentId, streamSetting, liveState);
+							setIcon();
+						}
 					}
+					
+					if(second_API.hasOwnProperty("headers") == true){
+						second_API_RequestOptions.headers = second_API.headers;
+					}
+					
+					Request(second_API_RequestOptions).get();
+				} else {
+					resolve();
+					doStreamNotif(website, id, contentId, streamSetting, liveState);
 				}
-				
-				if(second_API.hasOwnProperty("headers") == true){
-					second_API_RequestOptions.headers = second_API.headers;
-				}
-				
-				Request_Get(second_API_RequestOptions);
 			} else {
-				doStreamNotif(website, id, contentId, streamSetting, liveState);
-				checkLivesProgress_removeContent(website, id, contentId);
+				console.warn("Unable to get stream state.");
+				resolve();
 			}
 		} else {
-			console.warn("Unable to get stream state.");
-			checkLivesProgress_removeContent(website, id, contentId);
+			resolve();
 		}
-	} else {
-		checkLivesProgress_removeContent(website, id, contentId);
-	}
-	setIcon();
-	
-	console.timeEnd(`${website}::${id}`);
-	console.groupEnd();
+		setIcon();
+		
+		console.timeEnd(`${website}::${id}`);
+		console.groupEnd();
+	});
+	return promise;
 }
 function getChannelInfo(website, id){
-	let channelInfos_API = websites[website].API_channelInfos(id, (websites[website].hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites[website].APIs_RequiredPrefs) : {});
-	
-	if(typeof channelInfos[website][id] == "undefined"){
-		let defaultChannelInfos = channelInfos[website][id] = {"liveStatus": {"API_Status": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
-	}
-	if(websites[website].hasOwnProperty("API_channelInfos") == true){
-		let getChannelInfo_RequestOptions = {
-			url: channelInfos_API.url,
-			overrideMimeType: channelInfos_API.overrideMimeType,
-			onComplete: function (response) {
-				let data_channelInfos = response.json;
-				
-				console.group();
-				console.info(`${website} - ${id} (${response.url})`);
-				console.dir(data_channelInfos);
-				console.groupEnd();
-				
-				let responseValidity = channelInfos[website][id].liveStatus.lastCheckStatus = checkResponseValidity(website, response);
-				if(responseValidity == "success"){
-					websites[website].channelInfosProcess(id, data_channelInfos, channelInfos[website][id]);
+	let promise = new Promise(function(resolve, reject){
+		let channelInfos_API = websites[website].API_channelInfos(id, (websites[website].hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites[website].APIs_RequiredPrefs) : {});
+		
+		if(typeof channelInfos[website][id] == "undefined"){
+			let defaultChannelInfos = channelInfos[website][id] = {"liveStatus": {"API_Status": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
+		}
+		if(websites[website].hasOwnProperty("API_channelInfos") == true){
+			let getChannelInfo_RequestOptions = {
+				url: channelInfos_API.url,
+				overrideMimeType: channelInfos_API.overrideMimeType,
+				onComplete: function (response) {
+					let data_channelInfos = response.json;
+					
+					console.group();
+					console.info(`${website} - ${id} (${response.url})`);
+					console.dir(data_channelInfos);
+					console.groupEnd();
+					
+					let responseValidity = channelInfos[website][id].liveStatus.lastCheckStatus = checkResponseValidity(website, response);
+					if(responseValidity == "success"){
+						websites[website].channelInfosProcess(id, data_channelInfos, channelInfos[website][id]);
+					}
+					
+					resolve();
 				}
 			}
+			
+			if(channelInfos_API.hasOwnProperty("headers") == true){
+				getChannelInfo_RequestOptions.headers = channelInfos_API.headers;
+			}
+			
+			Request(getChannelInfo_RequestOptions).get();
 		}
-		
-		if(channelInfos_API.hasOwnProperty("headers") == true){
-			getChannelInfo_RequestOptions.headers = channelInfos_API.headers;
-		}
-		
-		Request_Get(getChannelInfo_RequestOptions);
-	}
+	});
+	return promise;
 }
 
 function importButton(website){
 	if(website == "beam"){
-		Request_Get({
+		Request({
 			url: `https://beam.pro/api/v1/channels/${getPreference(`${website}_user_id`)}`,
 			overrideMimeType: "text/plain; charset=utf-8",
 			onComplete: function (response) {
@@ -1514,7 +1540,7 @@ function importButton(website){
 					importStreams(website, numerical_id);
 				}
 			}
-		});
+		}).get();
 	} else {
 		importStreams(website, getPreference(`${website}_user_id`));
 	}
@@ -1573,7 +1599,7 @@ function importStreams(website, id, url, pageNumber){
 		importStreams_RequestOptions.headers = current_API.headers;
 	}
 	
-	Request_Get(importStreams_RequestOptions);
+	Request(importStreams_RequestOptions).get();
 }
 function importStreamsEnd(website, id){
 	setIcon();

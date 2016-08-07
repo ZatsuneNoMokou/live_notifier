@@ -17,7 +17,7 @@ let dailymotion = {
 	"API_addStream":
 		function(source_website, id, prefs){
 			if(website_channel_id.test(source_website) == true){
-				return websites[website].API_channelInfos(`channel::${id}`, pref);
+				return dailymotion.API_channelInfos(`channel::${id}`, prefs);
 			} else {
 				return dailymotion.API(id);
 			}
@@ -25,7 +25,7 @@ let dailymotion = {
 	"API":
 		function(id){
 			let obj = {
-				url: `https://api.dailymotion.com/video/${id}?fields=title,owner,user.username,audience,url,mode,onair?_=${new Date().getTime()}`,
+				url: `https://api.dailymotion.com/video/${id}?fields=title,owner,user.username,audience,url,game.title,mode,onair?_=${new Date().getTime()}`,
 				overrideMimeType: "text/plain; charset=latin1"
 			}
 			if(website_channel_id.test(id)){
@@ -35,8 +35,9 @@ let dailymotion = {
 		},
 	"API_channelInfos":
 		function(id){
+			id = (website_channel_id.test(id))? website_channel_id.exec(id)[1] : id;
 			let obj = {
-				url: `https://api.dailymotion.com/user/${website_channel_id.exec(id)[1]}?fields=id,username,screenname,url,avatar_720_url,facebook_url,twitter_url`,
+				url: `https://api.dailymotion.com/user/${id}?fields=id,username,screenname,url,avatar_720_url,facebook_url,twitter_url`,
 				overrideMimeType: "text/plain; charset=latin1"
 			}
 			return obj;
@@ -44,7 +45,7 @@ let dailymotion = {
 	"API_second":
 		function(id){
 			let obj = {
-				url: `https://api.dailymotion.com/video/${id}?fields=id,user.screenname,game.title,user.avatar_720_url,user.facebook_url,user.twitter_url`,
+				url: `https://api.dailymotion.com/video/${id}?fields=id,user.screenname,user.avatar_720_url,user.facebook_url,user.twitter_url`,
 				overrideMimeType: "text/plain; charset=latin1"
 			}
 			return obj;
@@ -93,7 +94,7 @@ let dailymotion = {
 			return null;
 		},
 	"checkLiveStatus":
-		function(id, contentId, data, currentLiveStatus){
+		function(id, contentId, data, currentLiveStatus, currentChannelInfo){
 			let streamData = currentLiveStatus;
 			streamData.streamName = data.title;
 			streamData.streamCurrentViewers = JSON.parse(data.audience);

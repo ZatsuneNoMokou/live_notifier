@@ -10,10 +10,10 @@ let twitch = {
 	},
 	"API_addStream":
 		function(source_website, id, prefs){
-			return twitch.API(id);
+			return twitch.API(id, prefs);
 		},
 	"API":
-		function(id){
+		function(id, prefs){
 			let obj = {
 				url: `https://api.twitch.tv/kraken/streams/${id}`,
 				overrideMimeType: "application/vnd.twitchtv.v3+json; charset=utf-8" //"text/plain; charset=utf-8"
@@ -21,7 +21,7 @@ let twitch = {
 			return obj;
 		},
 	"API_second":
-		function(id){
+		function(id, prefs){
 			let obj = {
 				url: `https://api.twitch.tv/kraken/users/${id}`,
 				overrideMimeType: "application/vnd.twitchtv.v3+json; charset=utf-8" //"text/plain; charset=utf-8"
@@ -29,7 +29,7 @@ let twitch = {
 			return obj;
 		},
 	"importAPI":
-		function(id){
+		function(id, prefs){
 			let obj = {
 				url: `https://api.twitch.tv/kraken/users/${id}/follows/channels`,
 				overrideMimeType: "application/vnd.twitchtv.v3+json; charset=utf-8"
@@ -59,7 +59,7 @@ let twitch = {
 			return null;
 		},
 	"checkLiveStatus":
-		function(id, contentId, data, currentLiveStatus){
+		function(id, contentId, data, currentLiveStatus, currentChannelInfo){
 			let streamData = currentLiveStatus;
 			if(data.hasOwnProperty("stream")){
 				data = data["stream"];

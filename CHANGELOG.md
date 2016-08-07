@@ -1,8 +1,11 @@
 # 8.0.0
 * i: perfect-scrollbar update (0.6.12)
-* +: Add headers support with the custom Request function 
+* i: Channel information before stream process to use Youtube channel name in stream name
+* +: Add headers support with the custom Request function
 * +: Add Youtube support
 * +: Re-arranged function to add stream to allow getting IDs from user and video pages with Youtube
+* +: Replaced checkLivesProgress_* function to detect end by promise system (ES6)
+* -: Deleted Request_Get function, no longer needed to avoid copy/paste problem
 * Fix: Unsuccessful channel list requests
 
 # 7.2.6

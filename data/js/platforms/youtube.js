@@ -119,7 +119,7 @@ let youtube = {
 				obj.url = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${website_channel_id.exec(id)[1]}&fields=items(snippet)&key=${apiKey}`;
 				obj.overrideMimeType = "text/plain; charset=utf-8";
 			} else {
-				obj.url = `https://livenotifier.zatsunenomokou.eu/youtube_getChannel.php?id=${id}`;
+				obj.url = `https://livenotifier.zatsunenomokou.eu/youtube_getChannel.php?id=${website_channel_id.exec(id)[1]}`;
 				obj.overrideMimeType = "text/plain; charset=utf-8";
 			}
 			return obj;
@@ -168,7 +168,7 @@ let youtube = {
 			return null;
 		},
 	"checkLiveStatus":
-		function(id, contentId, data, currentLiveStatus){
+		function(id, contentId, data, currentLiveStatus, currentChannelInfo){
 			let streamData = currentLiveStatus;
 			
 			if(data.hasOwnProperty("items") == true && typeof data.items.length == "number" && data.items.length == 1){
@@ -181,6 +181,10 @@ let youtube = {
 				/*if(typeof snippetData.description == "string" && snippetData.description != ""){
 					streamData.streamStatus = snippetData.description;
 				}*/
+				if(typeof currentChannelInfo == "object" && currentChannelInfo != null && typeof currentChannelInfo.streamName == "string"){
+					streamData.streamStatus = streamData.streamName;
+					streamData.streamName = currentChannelInfo.streamName;
+				}
 				
 				if(snippetData.hasOwnProperty("thumbnails") == true){
 					if(snippetData.thumbnails.hasOwnProperty("high") == true && snippetData.thumbnails.high.hasOwnProperty("url") == true && typeof snippetData.thumbnails.high.url == "string"){

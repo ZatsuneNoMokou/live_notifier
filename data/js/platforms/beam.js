@@ -10,10 +10,10 @@ let beam = {
 	},
 	"API_addStream":
 		function(source_website, id, prefs){
-			return beam.API(id);
+			return beam.API(id, prefs);
 		},
 	"API":
-		function(id){
+		function(id, prefs){
 			let obj = {
 				url: `https://beam.pro/api/v1/channels/${id}`,
 				overrideMimeType: "text/plain; charset=utf-8"
@@ -21,7 +21,7 @@ let beam = {
 			return obj;
 		},
 	"importAPI":
-		function(id){
+		function(id, prefs){
 			let obj = {
 				url: `https://beam.pro/api/v1/users/${id}/follows?limit=-1&fields=id,token`,
 				overrideMimeType: "text/plain; charset=utf-8"
@@ -45,7 +45,7 @@ let beam = {
 			return null;
 		},
 	"checkLiveStatus":
-		function(id, contentId, data, currentLiveStatus){
+		function(id, contentId, data, currentLiveStatus, currentChannelInfo){
 			let streamData = currentLiveStatus;
 			
 			streamData.streamName = data.user["username"];
