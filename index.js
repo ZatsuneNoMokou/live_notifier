@@ -1217,42 +1217,41 @@ function getAPIPrefsObject(prefList){
 let checkingLivesFinished = false;
 
 function PromiseWaitAll(promises){
-	if(Array.isArray(promises)){
-		let count = promises.length;
-		let p = new Promise(function(resolve, reject){
-			for(let item of promises){
-				if(item instanceof Promise){
-					item
-						.then(function(){
-							count = count - 1;
-							if(count == 0){
-								resolve();
-							}
-						})
-						.catch(function(){
-							count = count - 1;
-							if(count == 0){
-								resolve();
-							}
-						})
-				} else {
-					count = count - 1;
+	if(Array.isArray(promises) || promises instanceof Map){
+		let count = (promises instanceof Map)? promises.size : promises.length;
+		let results = {};
+		return new Promise(function(resolve, reject){
+			promises.forEach((promise, index, array) => {
+				let handler = data => {
+					results[index] = data;
+					if(--count == 0){
+						resolve(results);
+					}
 				}
-			}
+				
+				if(promise instanceof Promise){
+					promise.then(handler);
+					promise.catch(handler);
+				} else {
+					handler(promise);
+				}
+			})
 			if(count == 0){
-				resolve();
+				resolve(results);
 			}
 		});
-		return p;
 	} else {
-		return null;
+		throw {
+				message: 'promises should be an Array or Map of Promise',
+				name: "TypeError"
+			}
 	}
 }
 
 function checkLives(){
 	console.group();
 	
-	let promises = [];
+	let promises = new Map();
 	checkingLivesFinished = false;
 	
 	for(let website in websites){
@@ -1268,24 +1267,22 @@ function checkLives(){
 				//console.info(`Ignoring ${id}`);
 				continue;
 			}
-			promises.push(getPrimary(id, "", website, streamList[id]));
+			promises.set(`${website}/${id}`, getPrimary(id, "", website, streamList[id]));
 		}
 	}
 	console.groupEnd();
 	
-	let onPromiseEnd = function(){
+	let onPromiseEnd = function(result){
+		console.group();
 		console.info(`[Live notifier] Live check end`);
-		checkingLivesFinished = true;
-		setIcon();
-	}
-	let onPromiseEndError = function(error){
-		console.warn(`[Live notifier] Live check end with errors ${(typeof error.message == "string")? `(${error.message})` : ""}`);
+		console.dir(result);
+		console.groupEnd();
 		checkingLivesFinished = true;
 		setIcon();
 	}
 	PromiseWaitAll(promises)
 		.then(onPromiseEnd)
-		.catch(onPromiseEndError)
+		.catch(onPromiseEnd)
 	
 	clearInterval(interval);
 	interval = setInterval(checkLives, getPreference('check_delay') * 60000);
@@ -1339,7 +1336,6 @@ function getPrimary(id, contentId, website, streamSetting, url, pageNumber){
 						.then(resolve)
 						.catch(reject)
 				}
-				
 			}
 		}
 		
@@ -1361,8 +1357,9 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 		if(typeof channelInfos[website][id] == "undefined"){
 			let defaultChannelInfos = channelInfos[website][id] = {"liveStatus": {"API_Status": false, "notificationStatus": false, "lastCheckStatus": "", "liveList": {}}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
 		}
-
-		if(checkResponseValidity(website, response) == "success"){
+		
+		let responseValidity = checkResponseValidity(website, response);
+		if(responseValidity == "success"){
 			let streamListData;
 			if(typeof pageNumber == "number"){
 				streamListData = websites[website].channelList(id, website, data, pageNumber);
@@ -1379,7 +1376,7 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 				//getChannelInfo(website, id);
 				channelListEnd(website, id, streamSetting);
 				
-				resolve();
+				resolve("EmptyList");
 			} else {
 				for(let i in streamListData.streamList){
 					let contentId = i;
@@ -1407,7 +1404,7 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 			//getChannelInfo(website, id);
 			channelListEnd(website, id, streamSetting);
 			
-			resolve();
+			resolve(responseValidity);
 		}
 	});
 	return promise;
@@ -1448,9 +1445,13 @@ function processPrimary(id, contentId, website, streamSetting, response){
 							console.info(`${website} - ${id} (${response.url})`);
 							console.dir(data_second);
 							
-							websites[website].seconderyInfo(id, contentId, data_second, liveStatus[website][id][contentId], liveState);
-							
-							resolve();
+							let responseValidity = checkResponseValidity(website, response);
+							if(responseValidity == "success"){
+								websites[website].seconderyInfo(id, contentId, data_second, liveStatus[website][id][contentId], liveState);
+								resolve("StreamChecked_With2ndAPI");
+							} else {
+								resolve(responseValidity);
+							}
 							doStreamNotif(website, id, contentId, streamSetting, liveState);
 							setIcon();
 						}
@@ -1462,15 +1463,15 @@ function processPrimary(id, contentId, website, streamSetting, response){
 					
 					Request(second_API_RequestOptions).get();
 				} else {
-					resolve();
+					resolve("StreamChecked");
 					doStreamNotif(website, id, contentId, streamSetting, liveState);
 				}
 			} else {
 				console.warn("Unable to get stream state.");
-				resolve();
+				resolve("liveState is null");
 			}
 		} else {
-			resolve();
+			resolve(responseValidity);
 		}
 		setIcon();
 		
@@ -1502,8 +1503,7 @@ function getChannelInfo(website, id){
 					if(responseValidity == "success"){
 						websites[website].channelInfosProcess(id, data_channelInfos, channelInfos[website][id]);
 					}
-					
-					resolve();
+					resolve(responseValidity);
 				}
 			}
 			
