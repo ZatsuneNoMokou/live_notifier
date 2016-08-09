@@ -3,11 +3,11 @@ const website_channel_id = /channel\:\:(.*)/,
 	twitterID_from_url = /(?:http|https):\/\/(?:www\.)?twitter.com\/([^\/]+)(?:\/.*)?/;
 
 let hitbox = {
-	"addStream_URLpatterns": {
-		"hitbox": [
+	"addStream_URLpatterns": new Map([
+		["hitbox", [
 			/^(?:http|https):\/\/www\.hitbox\.tv\/(?:embedchat\/)?([^\/\?\&]+).*$/
-		]
-	},
+		]]
+	]),
 	"API_addStream":
 		function(source_website, id, prefs){
 			return hitbox.API(id, prefs);
@@ -43,7 +43,7 @@ let hitbox = {
 			return "success";
 		},
 	"addStream_getId":
-		function(id, response, streamListSetting, responseValidity){
+		function(source_website, id, response, streamListSetting, responseValidity){
 			let data = response.json;
 			if(responseValidity == "success"){
 				return id;

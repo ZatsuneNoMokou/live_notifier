@@ -3,15 +3,29 @@ const website_channel_id = /channel\:\:(.*)/,
 	twitterID_from_url = /(?:http|https):\/\/(?:www\.)?twitter.com\/([^\/]+)(?:\/.*)?/;
 
 let dailymotion = {
-	"addStream_URLpatterns": {
-		"dailymotion": [
+	"addStream_URLpatterns": new Map([
+		["dailymotion", [
 			/^(?:http|https):\/\/games\.dailymotion\.com\/(?:live|video)\/([a-zA-Z0-9]+).*$/,
 			/^(?:http|https):\/\/www\.dailymotion\.com\/(?:embed\/)?video\/([a-zA-Z0-9]+).*$/,
-			/^(?:http|https):\/\/games\.dailymotion\.com\/[^\/]+\/v\/([a-zA-Z0-9]+).*$/
-		],
-		"channel::dailymotion": [
+			/^(?:http|https):\/\/games\.dailymotion\.com\/[^\/]+\/v\/([a-zA-Z0-9]+).*$/,
+			/^(?:http|https):\/\/games\.dailymotion\.com\/[^\/]+\/([a-zA-Z0-9]+).*$/
+		]],
+		["channel::dailymotion", [
 			/^(?:http|https):\/\/(?:games\.|www\.)dailymotion\.com\/user\/([^\s\t\/\?]+).*$/,
 			/^(?:http|https):\/\/(?:games\.|www\.)dailymotion\.com\/([^\s\t\/\?]+).*$/
+		]]
+	]),
+	"addStream_URLpatterns_strings": {
+		"dailymotion": [
+			"*://games.dailymotion.com/live/*",
+			"*://games.dailymotion.com/video/*",
+			"*://www.dailymotion.com/video/*",
+			"*://www.dailymotion.com/live/*",
+			"*://games.dailymotion.com/v/.*"
+		],
+		"channel::dailymotion": [
+			"*://www.dailymotion.com/*",
+			"*://games.dailymotion.com/*"
 		]
 	},
 	"API_addStream":
@@ -19,13 +33,13 @@ let dailymotion = {
 			if(website_channel_id.test(source_website) == true){
 				return dailymotion.API_channelInfos(`channel::${id}`, prefs);
 			} else {
-				return dailymotion.API(id);
+				return dailymotion.API(id, prefs);
 			}
 		},
 	"API":
-		function(id){
+		function(id, prefs){
 			let obj = {
-				url: `https://api.dailymotion.com/video/${id}?fields=title,owner,user.username,audience,url,game.title,mode,onair?_=${new Date().getTime()}`,
+				url: `https://api.dailymotion.com/video/${id}?fields=id,title,owner,user.username,audience,url,game.title,mode,onair?_=${new Date().getTime()}`,
 				overrideMimeType: "text/plain; charset=latin1"
 			}
 			if(website_channel_id.test(id)){
@@ -34,7 +48,7 @@ let dailymotion = {
 			return obj;
 		},
 	"API_channelInfos":
-		function(id){
+		function(id, prefs){
 			id = (website_channel_id.test(id))? website_channel_id.exec(id)[1] : id;
 			let obj = {
 				url: `https://api.dailymotion.com/user/${id}?fields=id,username,screenname,url,avatar_720_url,facebook_url,twitter_url`,
@@ -43,14 +57,14 @@ let dailymotion = {
 			return obj;
 		},
 	"API_second":
-		function(id){
+		function(id, prefs){
 			let obj = {
 				url: `https://api.dailymotion.com/video/${id}?fields=id,user.screenname,user.avatar_720_url,user.facebook_url,user.twitter_url`,
 				overrideMimeType: "text/plain; charset=latin1"
 			}
 			return obj;
 		},
-	"importAPI": function(id){
+	"importAPI": function(id, prefs){
 		let obj = {
 			url: `https://api.dailymotion.com/user/${id}/following?fields=id,username,facebook_url,twitter_url?_=${new Date().getTime()}`,
 			overrideMimeType: "text/plain; charset=latin1"
@@ -77,7 +91,7 @@ let dailymotion = {
 			}
 		},
 	"addStream_getId":
-		function(id, response, streamListSetting, responseValidity){
+		function(source_website, id, response, streamListSetting, responseValidity){
 			let data = response.json;
 			if(responseValidity == "success" || responseValidity == "vod" || responseValidity == "notstream"){
 				let username = (typeof data.mode == "string")? data["user.username"] : data.username;
@@ -99,6 +113,7 @@ let dailymotion = {
 			streamData.streamName = data.title;
 			streamData.streamCurrentViewers = JSON.parse(data.audience);
 			streamData.streamURL = data.url;
+			streamData.streamGame = (data.hasOwnProperty("game.title") && data["game.title"] != null && typeof data["game.title"] == "string")? data["game.title"] : "";
 			if(typeof data.onair == "boolean"){
 				streamData.liveStatus.API_Status = data.onair;
 				return streamData.liveStatus.API_Status;
@@ -132,14 +147,14 @@ let dailymotion = {
 			let list = data.list;
 			
 			let obj = {
-				streamList: {}
+				streamList: new Map()
 			}
 			if(data.total == 0){
 				return obj;
 			} else {
 				for(let i in list){
 					let contentId = list[i].id;
-					obj.streamList[contentId] = list[i];
+					obj.streamList.set(contentId, list[i]);
 				}
 				
 				if(data.has_more){

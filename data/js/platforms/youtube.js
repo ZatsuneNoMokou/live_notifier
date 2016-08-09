@@ -3,21 +3,21 @@ const website_channel_id = /channel\:\:(.*)/,
 	twitterID_from_url = /(?:http|https):\/\/(?:www\.)?twitter.com\/([^\/]+)(?:\/.*)?/;
 
 let youtube = {
-	"addStream_URLpatterns": {
-		"channel::youtube": [
+	"addStream_URLpatterns": new Map([
+		["channel::youtube", [
 			/(?:http|https):\/\/(?:www\.)?youtube\.com\/channel\/([^\/\?\&\#]+)*.*/
-		],
-		"user::youtube": [
+		]],
+		["user::youtube", [
 			/(?:http|https):\/\/(?:www\.)?youtube\.com\/user\/([^\/\?\&\#]+)*.*/
-		],
-		"video::youtube": [
+		]],
+		["video::youtube", [
 			/(?:http|https):\/\/(?:www\.)?youtube\.com\/watch\?v\=([^\/\?\&\#]+)*.*/,
 			/(?:http|https):\/\/(?:www\.)?youtu\.be\/([^\/\?\&\#]+)*.*/
-		],
-		"c::youtube": [
+		]],
+		["c::youtube", [
 			/(?:http|https):\/\/(?:www\.)?youtube\.com\/c\/([^\/\?\&\#]+)*.*/
-		]
-	},
+		]]
+	]),
 	"addStream_URLpatterns_strings": {
 		"channel::youtube": [
 			"*://www.youtube.com/channel/*",
@@ -46,6 +46,7 @@ let youtube = {
 			if(source_website == "c::youtube"){
 					obj.url = `https://www.youtube.com/c/${id}`;
 					obj.overrideMimeType = "text/plain; charset=utf-8";
+
 			} else if(typeof apiKey == "string" && apiKey != ""){
 				if(typeof referrer == "string" && referrer != ""){
 					obj.headers = {
@@ -144,7 +145,7 @@ let youtube = {
 			}
 		},
 	"addStream_getId":
-		function(id, response, streamListSetting, responseValidity){
+		function(source_website, id, response, streamListSetting, responseValidity){
 			let data = response.json;
 			if(responseValidity == "success" && data.hasOwnProperty("items") == true && typeof data.items.length == "number" && data.items.length == 1){
 				if(data.items[0].hasOwnProperty("snippet") == true && data.items[0].snippet.hasOwnProperty("channelId") == true){
@@ -213,7 +214,7 @@ let youtube = {
 	"channelList":
 		function(id, website, data, pageNumber){
 			let obj = {
-				streamList: {}
+				streamList: new Map()
 			}
 			if(data.hasOwnProperty('items') == false){
 				return obj;
@@ -222,7 +223,7 @@ let youtube = {
 				
 				for(let i in list){
 					let contentId = list[i].id.videoId;
-					obj.streamList[contentId] = null;
+					obj.streamList.set(contentId, null);
 				}
 				
 				if(data.hasOwnProperty("nextPageToken") == true){

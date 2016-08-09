@@ -3,11 +3,11 @@ const website_channel_id = /channel\:\:(.*)/,
 	twitterID_from_url = /(?:http|https):\/\/(?:www\.)?twitter.com\/([^\/]+)(?:\/.*)?/;
 
 let beam = {
-	"addStream_URLpatterns": {
-		"beam": [
+	"addStream_URLpatterns": new Map([
+		["beam", [
 			/^(?:http|https):\/\/beam\.pro\/([^\/\?\&]+)/
-		]
-	},
+		]]
+	]),
 	"API_addStream":
 		function(source_website, id, prefs){
 			return beam.API(id, prefs);
@@ -20,10 +20,18 @@ let beam = {
 			}
 			return obj;
 		},
+	"importAPIGetUserId":
+		function(id, prefs){
+			let obj = {
+				url: `https://beam.pro/api/v1/channels/${id}`,
+				overrideMimeType: "text/plain; charset=utf-8"
+			}
+			return obj;
+		},
 	"importAPI":
 		function(id, prefs){
 			let obj = {
-				url: `https://beam.pro/api/v1/users/${id}/follows?limit=-1&fields=id,token`,
+				url: `https://beam.pro/api/v1/users/${id}/follows?fields=id,token`,
 				overrideMimeType: "text/plain; charset=utf-8"
 			}
 			return obj;
@@ -37,7 +45,7 @@ let beam = {
 			}
 		},
 	"addStream_getId":
-		function(id, response, streamListSetting, responseValidity){
+		function(source_website, id, response, streamListSetting, responseValidity){
 			let data = response.json;
 			if(responseValidity == "success"){
 				return id;
@@ -61,6 +69,10 @@ let beam = {
 			
 			streamData.liveStatus.API_Status = data["online"];
 			return streamData.liveStatus.API_Status;
+		},
+	"importGetUserId":
+		function(data){
+			return data.user.id;
 		},
 	"importStreamWebsites":
 		function(id, data, streamListSetting){

@@ -3,11 +3,11 @@ const website_channel_id = /channel\:\:(.*)/,
 	twitterID_from_url = /(?:http|https):\/\/(?:www\.)?twitter.com\/([^\/]+)(?:\/.*)?/;
 
 let twitch = {
-	"addStream_URLpatterns": {
-		"twitch": [
+	"addStream_URLpatterns": new Map([
+		["twitch", [
 			/^(?:http|https):\/\/www\.twitch\.tv\/([^\/\?\&]+).*$/,/^(?:http|https):\/\/player\.twitch\.tv\/\?channel\=([\w\-]+).*$/
-		]
-	},
+		]]
+	]),
 	"API_addStream":
 		function(source_website, id, prefs){
 			return twitch.API(id, prefs);
@@ -51,7 +51,7 @@ let twitch = {
 			}
 		},
 	"addStream_getId":
-		function(id, response, streamListSetting, responseValidity){
+		function(source_website, id, response, streamListSetting, responseValidity){
 			let data = response.json;
 			if(responseValidity == "success"){
 				return id;
