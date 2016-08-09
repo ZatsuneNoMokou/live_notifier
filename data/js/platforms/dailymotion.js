@@ -114,16 +114,14 @@ let dailymotion = {
 			streamData.streamCurrentViewers = JSON.parse(data.audience);
 			streamData.streamURL = data.url;
 			streamData.streamGame = (data.hasOwnProperty("game.title") && data["game.title"] != null && typeof data["game.title"] == "string")? data["game.title"] : "";
-			if(typeof data.onair == "boolean"){
-				streamData.liveStatus.API_Status = data.onair;
-				return streamData.liveStatus.API_Status;
-			} else {
-				return null;
-			}
+			
+			streamData.liveStatus.API_Status = (typeof data.onair == "boolean" && data.onair == true)? data.onair : false;
+			return streamData;
 		},
 	"seconderyInfo":
-		function(id, contentId, data, currentLiveStatus, isStreamOnline){
+		function(id, contentId, data, currentLiveStatus){
 			let streamData = currentLiveStatus;
+			let isStreamOnline = streamData.liveStatus.API_Status;
 			if(data.hasOwnProperty("user.screenname")){
 				if(isStreamOnline){
 					streamData.streamStatus = streamData.streamName;
@@ -141,6 +139,7 @@ let dailymotion = {
 					streamData.facebookID = twitterID_from_url.exec(data["user.twitter_url"])[1];
 				}
 			}
+			return streamData;
 		},
 	"channelList":
 		function(id, website, data, pageNumber){

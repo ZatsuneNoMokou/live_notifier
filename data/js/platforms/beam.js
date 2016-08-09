@@ -68,7 +68,7 @@ let beam = {
 			}
 			
 			streamData.liveStatus.API_Status = data["online"];
-			return streamData.liveStatus.API_Status;
+			return streamData;
 		},
 	"importGetUserId":
 		function(data){

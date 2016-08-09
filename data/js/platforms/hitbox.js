@@ -90,7 +90,7 @@ let hitbox = {
 				if(typeof data.channel["twitter_account"] == "string" && data.channel["twitter_account"] != "" && typeof data.channel["twitter_account"] == "string" && data.channel["twitter_enabled"] == "1"){
 					streamData.twitterID = data.channel["twitter_account"];
 				}
-				return streamData.liveStatus.API_Status;
+				return streamData;
 			} else {
 				return null;
 			}

@@ -208,7 +208,9 @@ let youtube = {
 				}
 				
 				streamData.liveStatus.API_Status = true;
-				return streamData.liveStatus.API_Status;
+				return streamData;
+			} else {
+				return null;
 			}
 		},
 	"channelList":

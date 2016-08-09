@@ -76,19 +76,19 @@ let twitch = {
 					}
 					streamData.streamCurrentViewers = parseInt(data["viewers"]);
 					
-					return streamData.liveStatus.API_Status;
+					return streamData;
 				} else {
 					if(streamData.streamName == ""){
 						streamData.streamName = id;
 					}
-					return streamData.liveStatus.API_Status;
+					return streamData;
 				}
 			} else {
 				return null;
 			}
 		},
 	"seconderyInfo":
-		function(id, contentId, data, currentLiveStatus, isStreamOnline){
+		function(id, contentId, data, currentLiveStatus){
 			let streamData = currentLiveStatus;
 			if(typeof data["display_name"] == "string"){
 				streamData.streamName = data["display_name"];
@@ -96,6 +96,7 @@ let twitch = {
 			if(typeof data["logo"] == "string" && data["logo"] != ""){
 				streamData.streamOwnerLogo = data["logo"];
 			}
+			return streamData;
 		},
 	"importStreamWebsites":
 		function(id, data, streamListSetting){
