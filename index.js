@@ -67,7 +67,7 @@ const myIconURL = self.data.url("live_offline_64.svg"),
 
 let websites = new Map();
 let liveStatus = {};
-let channelInfos = {};
+let channelInfos = new Map();
 
 let {options, options_default, options_default_sync} = require("./data/js/options-data.js");
 (function(){
@@ -82,7 +82,7 @@ let {options, options_default, options_default_sync} = require("./data/js/option
 
 websites.forEach((websiteAPI, website, array) => {
 	liveStatus[website] = {};
-	channelInfos[website] = {};
+	channelInfos.set(website, new Map());
 })
 
 /* 		----- Importation/Removal of old preferences -----		*/
@@ -371,9 +371,9 @@ function getStreamURL(website, id, contentId, usePrefUrl){
 					return streamData.streamURL;
 				}
 			}
-			if(typeof channelInfos[website][id] != "undefined"){
-				if(typeof channelInfos[website][id].streamURL == "string" && channelInfos[website][id].streamURL != ""){
-						return channelInfos[website][id].streamURL;
+			if(channelInfos.get(website).has(id)){
+				if(typeof channelInfos.get(website).get(id).streamURL == "string" && channelInfos.get(website).get(id).streamURL != ""){
+						return channelInfos.get(website).get(id).streamURL
 				}
 			}
 			switch(website){
@@ -761,8 +761,8 @@ function updatePanelData(){
 				}
 				
 				if(JSON.stringify(liveStatus[website][id]) == "{}"){
-					if(typeof channelInfos[website][id] != "undefined"){
-						let streamData = channelInfos[website][id];
+					if(typeof channelInfos.get(website).get(id) != "undefined"){
+						let streamData = channelInfos.get(website).get(id);
 						let contentId = id;
 						
 						panel.port.emit("updateData", {
@@ -1212,7 +1212,9 @@ function getAPIPrefsObject(prefList){
 	return obj;
 }
 
-
+function isMap(myMap){
+	return (myMap instanceof Map || myMap.constructor.name == "Map");
+}
 function PromiseWaitAll(promises){
 	if(Array.isArray(promises) || promises instanceof Map){
 		let count = (promises instanceof Map)? promises.size : promises.length;
@@ -1393,8 +1395,8 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 		
 		let data = response.json;
 		
-		if(typeof channelInfos[website][id] == "undefined"){
-			let defaultChannelInfos = channelInfos[website][id] = {"liveStatus": {"API_Status": false, "notificationStatus": false, "lastCheckStatus": "", "liveList": {}}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
+		if(!channelInfos.get(website).has(id)){
+			let defaultChannelInfos = channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notificationStatus": false, "lastCheckStatus": "", "liveList": {}}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
 		}
 		
 		let responseValidity = checkResponseValidity(website, response);
@@ -1408,17 +1410,17 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 			
 			if(typeof pageNumber != "number"){
 				// First loop
-				channelInfos[website][id].liveStatus.liveList = {};
+				channelInfos.get(website).get(id).liveStatus.liveList = {};
 			}
 			
-			if(!(streamListData.streamList instanceof Map) || streamListData.streamList.size == 0){
+			if(!isMap(streamListData.streamList) || streamListData.streamList.size == 0){
 				//getChannelInfo(website, id);
 				channelListEnd(website, id, streamSetting);
 				
-				resolve((streamListData.streamList instanceof Map)? "EmptyList" : "InvalidList");
+				resolve((isMap(streamListData.streamList))? "EmptyList" : "InvalidList");
 			} else {
 				streamListData.streamList.forEach((value, contentId, array) => {
-					channelInfos[website][id].liveStatus.liveList[contentId] = "";
+					channelInfos.get(website).get(id).liveStatus.liveList[contentId] = "";
 					
 					if(value == null){
 						promises.set(contentId, contentId, getPrimary(id, contentId, website, streamSetting));
@@ -1450,7 +1452,7 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 }
 function channelListEnd(website, id, streamSetting){
 	for(let contentId in liveStatus[website][id]){
-		if(channelInfos[website][id].liveStatus.liveList.hasOwnProperty(contentId) == false){
+		if(channelInfos.get(website).get(id).liveStatus.liveList.hasOwnProperty(contentId) == false){
 			liveStatus[website][id][contentId].liveStatus.API_Status = false;
 			doStreamNotif(website, id, contentId, streamSetting);
 			delete liveStatus[website][id][contentId];
@@ -1470,7 +1472,7 @@ function processPrimary(id, contentId, website, streamSetting, response){
 		}
 		let responseValidity = liveStatus[website][id][contentId].liveStatus.lastCheckStatus = checkResponseValidity(website, response);
 		if(responseValidity == "success"){
-			let liveState = websites.get(website).checkLiveStatus(id, contentId, data, liveStatus[website][id][contentId], (channelInfos.hasOwnProperty(website) && channelInfos[website].hasOwnProperty(id))? channelInfos[website][id] : null);
+			let liveState = websites.get(website).checkLiveStatus(id, contentId, data, liveStatus[website][id][contentId], (channelInfos.has(website) && channelInfos.get(website).has(id))? channelInfos.get(website).get(id) : null);
 			if(liveState != null){
 				if(websites.get(website).hasOwnProperty("API_second") == true){
 					let second_API = websites.get(website).API_second(contentId, (websites.get(website).hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites.get(website).APIs_RequiredPrefs) : {});
@@ -1523,8 +1525,8 @@ function getChannelInfo(website, id){
 	let promise = new Promise(function(resolve, reject){
 		let channelInfos_API = websites.get(website).API_channelInfos(id, (websites.get(website).hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites.get(website).APIs_RequiredPrefs) : {});
 		
-		if(typeof channelInfos[website][id] == "undefined"){
-			let defaultChannelInfos = channelInfos[website][id] = {"liveStatus": {"API_Status": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
+		if(!channelInfos.get(website).has(id)){
+			let defaultChannelInfos = channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
 		}
 		if(websites.get(website).hasOwnProperty("API_channelInfos") == true){
 			let getChannelInfo_RequestOptions = {
@@ -1538,9 +1540,12 @@ function getChannelInfo(website, id){
 					console.dir(data_channelInfos);
 					console.groupEnd();
 					
-					let responseValidity = channelInfos[website][id].liveStatus.lastCheckStatus = checkResponseValidity(website, response);
+					let responseValidity = channelInfos.get(website).get(id).liveStatus.lastCheckStatus = checkResponseValidity(website, response);
 					if(responseValidity == "success"){
-						websites.get(website).channelInfosProcess(id, data_channelInfos, channelInfos[website][id]);
+						let newChannelInfos = websites.get(website).channelInfosProcess(id, data_channelInfos, channelInfos.get(website).get(id));
+						if(typeof newChannelInfos == "object" && newChannelInfos != null){
+							channelInfos.get(website).set(id, newChannelInfos);
+						}
 					}
 					resolve(responseValidity);
 				}

@@ -1,7 +1,7 @@
 # 8.0.0
 * i: perfect-scrollbar update (0.6.12)
 * i: Channel information before stream process to use Youtube channel name in stream name
-* i: Changed websites and streamListFromSetting from object to Map
+* i: Changed websites, streamListFromSetting, channelInfos from object to Map
 * i: Replaced some for...in loops with array.forEach like ones
 * +: Add headers support with the custom Request function
 * +: Add Youtube support

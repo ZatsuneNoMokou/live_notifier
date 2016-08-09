@@ -184,6 +184,7 @@ let dailymotion = {
 					streamData.facebookID = twitterID_from_url.exec(data["twitter_url"])[1];
 				}
 			}
+			return streamData;
 		},
 	"importStreamWebsites":
 		function(id, data, streamListSetting, pageNumber){
