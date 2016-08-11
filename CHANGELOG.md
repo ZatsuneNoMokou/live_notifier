@@ -3,6 +3,8 @@
 * i: Channel information before stream process to use Youtube channel name in stream name
 * i: Changed websites, streamListFromSetting, and live data (live status and channel info) from object to Map
 * i: Replaced some for...in loops with array.forEach like ones
+* i: Moved all console.* from stream Requests to one result
+* i: Moved steam check timing
 * +: Add headers support with the custom Request function
 * +: Add Youtube support
 * +: Re-arranged function to add stream to allow getting IDs from user and video pages with Youtube

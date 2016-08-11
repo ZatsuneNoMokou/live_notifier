@@ -1234,17 +1234,17 @@ function PromiseWaitAll(promises){
 			}
 		});
 	} else {
-		throw {
-				message: 'promises should be an Array or Map of Promise',
-				name: "TypeError"
-			}
+		throw "promises should be an Array or Map of Promise"
 	}
 }
 
-let checkingLivesFinished = false;
+let checkingLivesFinished = false,
+	DATAs = new Map();
 function checkLives(idArray){
 	return new Promise(function(resolve, reject){
 		let promises = new Map();
+		
+		DATAs = new Map();
 		checkingLivesFinished = false;
 		
 		let streamListSetting = new streamListFromSetting();
@@ -1267,19 +1267,27 @@ function checkLives(idArray){
 						//console.info(`Ignoring ${id}`);
 						return;
 					}
+					console.time(`${website}::${id}`);
 					promises.set(`${website}/${id}`, getPrimary(id, "", website, streamList));
+					promises.get(`${website}/${id}`)
+						.then(onStreamCheckEnd)
+						.catch(onStreamCheckEnd)
 				})
 			}
 		})
 		
+		let onStreamCheckEnd = function(){
+			console.timeEnd(`${website}::${id}`);
+			setIcon();
+		}
 		let onPromiseEnd = function(result){
 			console.group();
 			console.info(`[Live notifier] Live check end`);
 			console.dir(result);
+			console.dir(mapToObj(DATAs));
 			console.groupEnd();
 			checkingLivesFinished = true;
 			resolve(result);
-			setIcon();
 		}
 		PromiseWaitAll(promises)
 			.then(onPromiseEnd)
@@ -1331,18 +1339,23 @@ function getPrimary(id, contentId, website, streamSetting, url, pageNumber){
 			current_API.url = url;
 		}
 		
-		console.time(`${website}::${id}`);
-		
 		let getPrimary_RequestOptions = {
 			url: current_API.url,
 			overrideMimeType: current_API.overrideMimeType,
 			onComplete: function (response) {
 				let data = response.json;
 				
-				console.group();
-				console.info(`${website} - ${id} ${(typeof contentId == "string" && contentId != "")? ` - ${contentId}` : ""} (${response.url})`);
-				console.dir(data);
-				console.groupEnd();
+				if(!DATAs.has(`${website}/${id}`)){
+					DATAs.set(`${website}/${id}`, new Map());
+				}
+				if(typeof contentId == "string" && contentId != ""){
+					if(!DATAs.get(`${website}/${id}`).has(contentId)){
+						DATAs.get(`${website}/${id}`).set(contentId, new Map());
+					}
+					DATAs.get(`${website}/${id}`).get(contentId).set("getPrimary", {"url": response.url, "data": data});
+				} else {
+					DATAs.get(`${website}/${id}`).set("getPrimary", {"url": response.url, "data": data});
+				}
 				
 				if(!liveStatus.get(website).has(id)){
 					liveStatus.get(website).set(id, new Map());
@@ -1453,9 +1466,9 @@ function channelListEnd(website, id, streamSetting){
 		}
 	}
 	
-	setIcon();
-	console.timeEnd(`${website}::${id}`);
-	console.groupEnd();
+	//setIcon();
+	//console.timeEnd(`${website}::${id}`);
+	//console.groupEnd();
 }
 
 function processPrimary(id, contentId, website, streamSetting, response){
@@ -1479,8 +1492,10 @@ function processPrimary(id, contentId, website, streamSetting, response){
 						onComplete: function (response) {
 							let data_second = response.json;
 							
-							console.info(`${website} - ${id} (${response.url})`);
-							console.dir(data_second);
+							if(!DATAs.get(`${website}/${id}`).has(contentId)){
+								DATAs.get(`${website}/${id}`).set(contentId, new Map())
+							}
+							DATAs.get(`${website}/${id}`).get(contentId).set("getSecond", {"url": response.url, "data": data_second});
 							
 							let responseValidity = checkResponseValidity(website, response);
 							if(responseValidity == "success"){
@@ -1515,10 +1530,10 @@ function processPrimary(id, contentId, website, streamSetting, response){
 		} else {
 			resolve(responseValidity);
 		}
-		setIcon();
 		
-		console.timeEnd(`${website}::${id}`);
-		console.groupEnd();
+		//setIcon();
+		//console.timeEnd(`${website}::${id}`);
+		//console.groupEnd();
 	});
 	return promise;
 }
@@ -1536,10 +1551,10 @@ function getChannelInfo(website, id){
 				onComplete: function (response) {
 					let data_channelInfos = response.json;
 					
-					console.group();
-					console.info(`${website} - ${id} (${response.url})`);
-					console.dir(data_channelInfos);
-					console.groupEnd();
+					if(!DATAs.has(`${website}/${id}`)){
+						DATAs.set(`${website}/${id}`, new Map());
+					}
+					DATAs.get(`${website}/${id}`).set("getChannelInfo", {"url": response.url, "data": data_channelInfos});
 					
 					let responseValidity = channelInfos.get(website).get(id).liveStatus.lastCheckStatus = checkResponseValidity(website, response);
 					if(responseValidity == "success"){
