@@ -1161,7 +1161,7 @@ function checkResponseValidity(website, response){
 	let data = response.json;
 	
 	if(data == null || typeof data != "object" || JSON.stringify(data) == "{}"){ // Empty or invalid JSON
-		if(response.hasOwnProperty("status") && typeof response.hasOwnProperty("status") == "string" && /^4\d*$/.test(response.status) == true && /^5\d*$/.test(response.status) == true){
+		if(typeof response == object && response.hasOwnProperty("status") && typeof response.hasOwnProperty("status") == "string" && /^4\d*$/.test(response.status) == true && /^5\d*$/.test(response.status) == true){
 			// Request Error
 			console.warn("Unable to get stream state (request error).");
 			return "request_error";
@@ -1267,6 +1267,10 @@ function checkLives(idArray){
 						//console.info(`Ignoring ${id}`);
 						return;
 					}
+					let onStreamCheckEnd = function(){
+						console.timeEnd(`${website}::${id}`);
+						setIcon();
+					}
 					console.time(`${website}::${id}`);
 					promises.set(`${website}/${id}`, getPrimary(id, "", website, streamList));
 					promises.get(`${website}/${id}`)
@@ -1276,10 +1280,6 @@ function checkLives(idArray){
 			}
 		})
 		
-		let onStreamCheckEnd = function(){
-			console.timeEnd(`${website}::${id}`);
-			setIcon();
-		}
 		let onPromiseEnd = function(result){
 			console.group();
 			console.info(`[Live notifier] Live check end`);
