@@ -198,7 +198,7 @@ class streamListFromSetting{
 						//continue;
 						mapDataAll.set(website, new Map());
 					}
-					mapDataAll.get(website).set(id, {hide: false, ignore: false, notifyOnline: getPreference("notify_online"), notifyOffline: getPreference("notify_offline"), streamURL: ""});
+					mapDataAll.get(website).set(id, {hide: false, ignore: false, iconIgnore: false, notifyOnline: getPreference("notify_online"), notifyOffline: getPreference("notify_offline"), streamURL: ""});
 					
 					if(typeof data != "undefined"){
 						if(url.test(data) == true){
@@ -236,7 +236,7 @@ class streamListFromSetting{
 									mapDataAll.get(website).get(id)[current_filter_id] = [];
 								}
 								
-								if(current_filter_id == "hide" || current_filter_id == "ignore" || current_filter_id == "notifyOnline" || current_filter_id == "notifyOffline"){
+								if(current_filter_id == "hide" || current_filter_id == "ignore" || current_filter_id == "iconIgnore" || current_filter_id == "notifyOnline" || current_filter_id == "notifyOffline"){
 									let boolean = getBooleanFromVar(current_data);
 									if(typeof boolean == "boolean"){
 										current_data = boolean;
@@ -318,7 +318,7 @@ class streamListFromSetting{
 						if((j == "facebook" || j == "twitter") && streamSettings[j] == ""){
 							continue;
 						}
-						if((j == "hide" || j == "ignore") && streamSettings[j] == false){
+						if((j == "hide" || j == "ignore" || j == "iconIgnore") && streamSettings[j] == false){
 							continue;
 						}
 						if(j == "notifyOnline" && streamSettings[j] == getPreference("notify_online")){
@@ -430,11 +430,14 @@ function refreshStreamsFromPanel(){
 }
 
 let URLContext_Array = [];
-for(let website in websites){
-	for(let source_website in websites[website].addStream_URLpatterns){
-		URLContext_Array = URLContext_Array.concat(websites[website].addStream_URLpatterns[source_website]);
-	}
-}
+websites.forEach((websiteAPI, website, array) => {
+	websiteAPI.addStream_URLpatterns.forEach((source_website_patterns, source_website, array) => {
+		for(let pattern of source_website_patterns){
+			URLContext_Array.push(pattern);
+		}
+	})
+})
+
 ContextMenu.Item({
 	label: _("Add this"),
 	image: self.data.url("../icon.png"),
@@ -488,15 +491,15 @@ function addStreamFromPanel(data){
 	let pattern_found = false;
 	for(let url of url_list){
 		websites.forEach((websiteAPI, website, array) => {
-			for(let source_website in websiteAPI.addStream_URLpatterns){
+			websiteAPI.addStream_URLpatterns.forEach((patterns, source_website, array) => {
 				let streamListSetting = new streamListFromSetting(website);
-				for(let pattern of websiteAPI.addStream_URLpatterns[source_website]){
+				patterns.forEach((pattern, index, array) => {
 					let id = "";
-					if(pattern.test(url) &&  !pattern_found){
+					if(pattern.test(url) && !pattern_found){
 						pattern_found = true;
-						let id = pattern.exec(url)[1];
+						id = pattern.exec(url)[1];
 						if(streamListSetting.streamExist(website, id)){
-							doNotif("Live notifier",`${display_id(id)} ${_("is already configured.")}`);
+							doNotif("Live notifier",`${display_id(id)} ${_("is_already_configured")}`);
 							return true;
 						} else {
 							let current_API = websiteAPI.API_addStream(source_website, id, (websiteAPI.hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websiteAPI.APIs_RequiredPrefs) : {});
@@ -507,43 +510,42 @@ function addStreamFromPanel(data){
 								onComplete: function (response) {
 									let data = response.json;
 									
-									console.group();
+									console.group()
 									console.info(`${website} - ${response.url}`);
 									console.dir(data);
 									console.groupEnd();
 									
 									let responseValidity = checkResponseValidity(website, response);
 									
-									let streamId = websiteAPI.addStream_getId(id, response, streamListSetting, responseValidity);
+									let streamId = websiteAPI.addStream_getId(source_website, id, response, streamListSetting, responseValidity);
 									
 									if(website == "dailymotion" && responseValidity == "invalid_parameter"){
-										doNotif("Live notifier", _("No_supported_stream_detected_in_the_current_tab_so_nothing_to_add"));
+										doNotif("Live notifier", _("No supported stream detected in the current tab, so, nothing to add."));
 										return null;
 									} else if(streamId == null){
-										doNotif("Live notifier", `${display_id(id)} ${_("wasnt_configured_but_error_retrieving_data")}`);
+										doNotif("Live notifier", `${display_id(id)} ${_("wasn't configured, but an error occurred when retrieving data.")}`);
 										return null;
 									} else if(typeof streamId == "boolean" && streamId == true){
-										doNotif("Live notifier",`${display_id(id)} ${_("is_already_configured")}`);
+										doNotif("Live notifier",`${display_id(id)} ${_("is already configured.")}`);
 										return true;
 									} else if(typeof streamId == "object" && streamId.hasOwnProperty("url")){
 										addStreamFromPanel(streamId);
 										return true;
 									}
-
 									
 									if(streamListSetting.streamExist(website, streamId) == true){
-										doNotif("Live notifier",`${display_id(streamId)} ${_("is_already_configured")}`);
+										doNotif("Live notifier",`${display_id(streamId)} ${_("is already configured.")}`);
 									} else {
 										if(getPreference("confirm_addStreamFromPanel")){
 											let addstreamNotifAction = new notifAction("addStream", {id: streamId, website: website, url: ((type == "embed")? active_tab_url : "")});
-											doActionNotif(`Live notifier (${_("click to confirm")})`, `${display_id(streamId)} ${_("wasn't configured, and can be added.")}`, addstreamNotifAction);
+											doActionNotif(`Live notifier`, `${display_id(streamId)} ${_("wasn't configured, and can be added.")}`, addstreamNotifAction);
 										} else {
 											streamListSetting.addStream(website, streamId, ((type == "embed")? active_tab_url : ""));
 											streamListSetting.update();
 											doNotif("Live notifier", `${display_id(streamId)} ${_("wasn't configured, and have been added.")}`);
 											// Update the panel for the new stream added
 											setTimeout(function(){
-												refreshPanel();
+												refreshPanel(false);
 											}, 5000);
 										}
 									}
@@ -552,8 +554,8 @@ function addStreamFromPanel(data){
 							return true;
 						}
 					}
-				}
-			}
+				})
+			})
 		})
 	}
 	if(pattern_found){
@@ -799,11 +801,11 @@ function updatePanelData(){
 	checkMissing();
 	
 	//Update online steam count in the panel
-	panel.port.emit("updateOnlineCount", (firefox_button.state("window").badge == 0)? _("No stream online") :  _("%d stream(s) online",firefox_button.state("window").badge));
+	panel.port.emit("updateOnlineCount", (onlineCount == 0)? _("No stream online") :  _("%d stream(s) online", onlineCount));
 	
 	if(getPreference("show_offline_in_panel")){
 		var offlineCount = getOfflineCount();
-		panel.port.emit("updateOfflineCount", (offlineCount == 0)? _("No stream offline") :  _("%d stream(s) offline",offlineCount));
+		panel.port.emit("updateOfflineCount", (offlineCount == 0)? _("No stream offline") :  _("%d stream(s) offline", offlineCount));
 	} else {
 		panel.port.emit("updateOfflineCount", "");
 	}
@@ -1100,12 +1102,12 @@ function getOfflineCount(){
 			}
 			
 			if(liveStatus.get(website).has(id)){
-				if(JSON.stringify(liveStatus.get(website).get(id)) == "{}"){
-					offlineCount = offlineCount + 1;
+				if(liveStatus.get(website).get(id).size == 0){
+					offlineCount++;
 				} else {
 					liveStatus.get(website).get(id).forEach((streamData, contentId, array) => {
 						if(!streamData.liveStatus.filteredStatus){
-							offlineCount = offlineCount + 1;
+							offlineCount++;
 						}
 					})
 				}
@@ -1116,8 +1118,10 @@ function getOfflineCount(){
 }
 
 //Changement de l'icone
+let onlineCount = 0;
 function setIcon() {
-	var onlineCount = 0;
+	onlineCount = 0;
+	let badgeOnlineCount = 0;
 	
 	liveStatus.forEach((website_liveStatus, website, array) => {
 		let streamList = (new streamListFromSetting(website)).mapData;
@@ -1129,25 +1133,29 @@ function setIcon() {
 			} else {
 				id_liveStatus.forEach((streamData, contentId, array) => {
 					if(streamData.liveStatus.filteredStatus && streamList.has(id)){
-						onlineCount = onlineCount + 1;
+						onlineCount++;
+						if(streamList.has(id) && !(typeof streamList.get(id).iconIgnore == "boolean" && streamList.get(id).iconIgnore == true)){
+							badgeOnlineCount++;
+						}
 					}
 				})
 			}
 		})
 	})
 	
-	if (onlineCount > 0){
+	
+	if(badgeOnlineCount > 0){
 		firefox_button.state("window", {
-			"label": _("%d stream(s) online",onlineCount),
+			"label": _("%d stream(s) online", badgeOnlineCount),
 			"icon": myIconURL_online,
-			badge: onlineCount,
+			badge: badgeOnlineCount,
 			badgeColor: ""
 		});
 	} else {
 		firefox_button.state("window", {
 			"label": _("No stream online"),
 			"icon": myIconURL_offline,
-			badge: onlineCount,
+			badge: badgeOnlineCount,
 			badgeColor: "#424242"
 		});
 	}
@@ -1161,7 +1169,7 @@ function checkResponseValidity(website, response){
 	let data = response.json;
 	
 	if(data == null || typeof data != "object" || JSON.stringify(data) == "{}"){ // Empty or invalid JSON
-		if(typeof response == object && response.hasOwnProperty("status") && typeof response.hasOwnProperty("status") == "string" && /^4\d*$/.test(response.status) == true && /^5\d*$/.test(response.status) == true){
+		if(typeof response == "object" && response.hasOwnProperty("status") && typeof response.hasOwnProperty("status") == "string" && /^4\d*$/.test(response.status) == true && /^5\d*$/.test(response.status) == true){
 			// Request Error
 			console.warn("Unable to get stream state (request error).");
 			return "request_error";
@@ -1237,15 +1245,46 @@ function PromiseWaitAll(promises){
 		throw "promises should be an Array or Map of Promise"
 	}
 }
+function convertMS(ms) { // From https://gist.github.com/remino/1563878 with the ms rest added
+	let d, h, m, s, new_ms;
+	s = Math.floor(ms / 1000);
+	new_ms = Math.floor((ms % 1000) * 1000) / 1000;
+	m = Math.floor(s / 60);
+	s = s % 60;
+	h = Math.floor(m / 60);
+	m = m % 60;
+	d = Math.floor(h / 24);
+	h = h % 24;
+	return { d: d, h: h, m: m, s: s, ms: new_ms };
+}
+function timing(id){
+	performance.mark(id);
+}
+function timingEnd(id){
+	let result = {};
+	performance.measure(id, id);
+	let measures = performance.getEntriesByName(id, "measure");
+	if(measures.length > 0){
+		let duration = measures[measures.length -1].duration;
+		let extracted = convertMS(duration);
+		return {
+			"raw": duration,
+			"timing": `${(extracted.d != 0)? `${extracted.d}d` : ""}${(extracted.h != 0)? `${extracted.h}h` : ""}${(extracted.m != 0)? `${extracted.m}m` : ""}${(extracted.s != 0)? `${extracted.s}s` : ""}${extracted.ms}ms`
+		}
+	} else {
+		throw `${id} not started`
+	}
+}
 
 let checkingLivesFinished = false,
-	DATAs = new Map();
+	DATAs;
 function checkLives(idArray){
 	return new Promise(function(resolve, reject){
 		let promises = new Map();
 		
 		DATAs = new Map();
 		checkingLivesFinished = false;
+		console.time("checkLives");
 		
 		let streamListSetting = new streamListFromSetting();
 		
@@ -1283,8 +1322,19 @@ function checkLives(idArray){
 		let onPromiseEnd = function(result){
 			console.group();
 			console.info(`[Live notifier] Live check end`);
+			
+			console.group();
+			console.info(`Promises result:`);
 			console.dir(result);
+			console.groupEnd();
+			
+			console.timeEnd("checkLives");
+			
+			console.group();
+			console.info(`DATAs:`);
 			console.dir(mapToObj(DATAs));
+			console.groupEnd();
+			
 			console.groupEnd();
 			checkingLivesFinished = true;
 			resolve(result);
@@ -1465,10 +1515,6 @@ function channelListEnd(website, id, streamSetting){
 			liveStatus.get(website).get(id).delete(contentId);
 		}
 	}
-	
-	//setIcon();
-	//console.timeEnd(`${website}::${id}`);
-	//console.groupEnd();
 }
 
 function processPrimary(id, contentId, website, streamSetting, response){
@@ -1510,7 +1556,7 @@ function processPrimary(id, contentId, website, streamSetting, response){
 								resolve(responseValidity);
 							}
 							doStreamNotif(website, id, contentId, streamSetting, liveState);
-							setIcon();
+							//setIcon();
 						}
 					}
 					
@@ -1530,10 +1576,6 @@ function processPrimary(id, contentId, website, streamSetting, response){
 		} else {
 			resolve(responseValidity);
 		}
-		
-		//setIcon();
-		//console.timeEnd(`${website}::${id}`);
-		//console.groupEnd();
 	});
 	return promise;
 }

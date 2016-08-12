@@ -1,3 +1,7 @@
+# TODO
+* +: Réccupérer les images des streams en base64 et l'intégrer (notification, panel)
+* +: Affichage streams avec site inconnu
+
 # 8.0.0
 * i: perfect-scrollbar update (0.6.12)
 * i: Channel information before stream process to use Youtube channel name in stream name
@@ -11,6 +15,8 @@
 * +: Replaced checkLivesProgress_* function to detect end by promise system (ES6)
 * +: Moved importation real user id
 * +: Now using the promise system to detect end and refresh panel after
+* +: Global timing for checkLives
+* +: Stream setting to ignore streams on the icon
 * -: Deleted Request_Get function, no longer needed to avoid copy/paste problem
 * Fix: Unsuccessful channel list requests
 * Fix: Beam importation

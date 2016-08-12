@@ -579,6 +579,7 @@ function saveEditedStreamButton_onClick(event){
 		twitter: document.querySelector("#streamEditor #twitter").value,
 		hide: document.querySelector("#streamEditor #hideStream").checked,
 		ignore: document.querySelector("#streamEditor #ignoreStream").checked,
+		iconIgnore: document.querySelector("#streamEditor #iconIgnore").checked,
 		notifyOnline: document.querySelector("#streamEditor #notifyOnline").checked,
 		notifyOffline: document.querySelector("#streamEditor #notifyOffline").checked
 	}
@@ -702,6 +703,7 @@ function newEditStreamButton_onClick(event){
 	document.querySelector("#streamEditor #twitter").value = (streamSettings.twitter)? streamSettings.twitter : "";
 	document.querySelector("#streamEditor #hideStream").checked = (typeof streamSettings.hide == "boolean")? streamSettings.hide : false;
 	document.querySelector("#streamEditor #ignoreStream").checked = (typeof streamSettings.ignore == "boolean")? streamSettings.ignore : false;
+	document.querySelector("#streamEditor #iconIgnore").checked = (typeof streamSettings.iconIgnore == "boolean")? streamSettings.iconIgnore : false;
 	document.querySelector("#streamEditor #notifyOnline").checked = (typeof streamSettings.notifyOnline == "boolean")? streamSettings.notifyOnline : true;
 	document.querySelector("#streamEditor #notifyOffline").checked = (typeof streamSettings.notifyOffline == "boolean")? streamSettings.notifyOffline : false;
 	
