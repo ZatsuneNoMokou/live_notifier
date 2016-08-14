@@ -193,6 +193,10 @@ class streamListFromSetting{
 					let id = result[2];
 					let data = result[3];
 					
+					if(!(result.length == 3 || result.length == 4)){
+						// Skip invalid items
+						continue;
+					}
 					if(websites.has(website) == false){
 						// Skip websites not supported, or not yet
 						//continue;
@@ -299,7 +303,7 @@ class streamListFromSetting{
 		if(this.streamExist(website, id)){
 			this.mapDataAll.get(website).delete(id);
 			this.mapData.delete(id);
-			if(liveStatus.get(website).has(id)){
+			if(liveStatus.has(website) && liveStatus.get(website).has(id)){
 				liveStatus.get(website).delete(id);
 			}
 			console.log(`${id} has been deleted`);
@@ -334,7 +338,7 @@ class streamListFromSetting{
 							filters = filters + " " + j + "::" + encodeString(streamSettings[j]);
 						} else {
 							for(let k in streamSettings[j]){
-								filters = filters + " " + j + "::" + encodeString(streamSettings[k]);
+								filters = filters + " " + j + "::" + encodeString(streamSettings[j][k]);
 							}
 						}
 					}
@@ -421,12 +425,15 @@ function refreshPanel(data){
 	updatePanelData();
 }
 function refreshStreamsFromPanel(){
-	checkLives();
-	updatePanelData();
-	function waitToUpdatePanel(){
+	if(appGlobal["checkingLivesFinished"]){
+		checkLives()
+			.then(done)
+			.catch(done)
+	}
+	
+	let done = function(reason){
 		updatePanelData();
 	}
-	setTimeout(waitToUpdatePanel, 5000);
 }
 
 let URLContext_Array = [];
@@ -744,22 +751,37 @@ function updatePanelData(){
 	//Clear stream list in the panel
 	panel.port.emit("initList", {"group_streams_by_websites": getPreference("group_streams_by_websites"), "show_offline_in_panel": getPreference("show_offline_in_panel")});
 	
-	liveStatus.forEach((website_liveStatus, website, array) => {
-		let streamList = (new streamListFromSetting(website)).mapData;
-		website_liveStatus.forEach((id_liveStatus, id, array) => {
-			// Make sure that the stream from the status is still in the settings
-			if(streamList.has(id)){
-				if(typeof streamList.get(id).ignore == "boolean" && streamList.get(id).ignore == true){
-					//console.info(`[Live notifier - Panel] Ignoring ${id}`);
-					return;
-				}
-				if(typeof streamList.get(id).hide == "boolean" && streamList.get(id).hide == true){
-					//console.info(`[Live notifier - Panel] Hiding ${id}`);
-					return;
-				}
-				
-				if(id_liveStatus.size == 0){
-					if(channelInfos.get(website).has(id)){
+	let streamListSettings = new streamListFromSetting().mapDataAll;
+	streamListSettings.forEach((streamList, website, array) => {
+		streamList.forEach((value, id, array) => {
+			if(typeof streamList.get(id).ignore == "boolean" && streamList.get(id).ignore == true){
+				//console.info(`[Live notifier - Panel] Ignoring ${id}`);
+				return;
+			}
+			if(typeof streamList.get(id).hide == "boolean" && streamList.get(id).hide == true){
+				//console.info(`[Live notifier - Panel] Hiding ${id}`);
+				return;
+			}
+			
+			if(liveStatus.has(website) && liveStatus.get(website).has(id) && liveStatus.get(website).get(id).size > 0){
+				liveStatus.get(website).get(id).forEach((streamData, contentId, array) => {
+					getCleanedStreamStatus(website, id, contentId, streamList.get(id), streamData.liveStatus.API_Status);
+					
+					if(streamData.liveStatus.filteredStatus || (getPreference("show_offline_in_panel") && !streamData.liveStatus.filteredStatus)){
+						doStreamNotif(website, id, contentId, streamList.get(id));
+						panel.port.emit("updateData", {
+							"website": website,
+							"id": id,
+							"contentId": contentId,
+							"type": "live",
+							"streamData": streamData,
+							"streamSettings": streamList.get(id),
+							"streamUrl": getStreamURL(website, id, contentId, true)
+						});
+					}
+				})
+			} else {
+				if(channelInfos.has(website) && channelInfos.get(website).has(id)){
 						let streamData = channelInfos.get(website).get(id);
 						let contentId = id;
 						
@@ -772,28 +794,36 @@ function updatePanelData(){
 							"streamSettings": streamList.get(id),
 							"streamUrl": getStreamURL(website, id, contentId, true)
 						});
-					}
+				} else if(websites.has(website)){
+					console.info(`Currrently no data for ${id} (${website})`);
 				} else {
-					id_liveStatus.forEach((streamData, contentId, array) => {
-						getCleanedStreamStatus(website, id, contentId, streamList.get(id), streamData.liveStatus.API_Status);
-						
-						if(streamData.liveStatus.filteredStatus || (getPreference("show_offline_in_panel") && !streamData.liveStatus.filteredStatus)){
-							doStreamNotif(website, id, contentId, streamList.get(id));
-							panel.port.emit("updateData", {
-								"website": website,
-								"id": id,
-								"contentId": contentId,
-								"type": "live",
-								"streamData": streamData,
-								"streamSettings": streamList.get(id),
-								"streamUrl": getStreamURL(website, id, contentId, true)
-							});
-						}
-					})
+					let contentId = id;
+					let streamData = {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
+					
+					console.warn(`The website of ${id} ("${website}") is not supported or not loaded`);
+					panel.port.emit("updateData", {
+						"website": website,
+						"id": id,
+						"contentId": contentId,
+						"type": "unsupported",
+						"streamData": streamData,
+						"streamSettings": streamList.get(id),
+						"streamUrl": ""
+					});
 				}
-			} else {
+			}
+		})
+	})
+	
+	liveStatus.forEach((website_liveStatus, website, array) => {
+		website_liveStatus.forEach((id_liveStatus, id, array) => {
+			// Clean the streams already deleted but status still exist
+			if(!streamListSettings.get(website).has(id)){
+				console.info(`${id} from ${website} was already deleted but not from liveStatus ${(channelInfos.get(website).has(id))? "and channelInfos" : ""}`);
 				liveStatus.get(website).delete(id);
-				console.info(`${id} from ${website} was already deleted but not from liveStatus`);
+				if(channelInfos.get(website).has(id)){
+					channelInfos.get(website).remove(id);
+				}
 			}
 		})
 	})
@@ -1275,9 +1305,36 @@ function timingEnd(id){
 		throw `${id} not started`
 	}
 }
+function getBase64Picture(url){
+	return new Promise(function(resolve, reject){
+		let getPictureRequest_options = {
+			"url": url,
+			"contentType": "blob",
+			"onComplete": function (RequestEvent) {
+				let blob = RequestEvent.response;
+				if(blob.type.indexOf("image/") == 0){
+					let reader = new FileReader();
+					reader.onload = function(event){
+						if(typeof event.target.result == "string"){
+							resolve(event.target.result);
+						} else {
+							throw "Error loading picture"
+						}
+					}
+					reader.readAsDataURL(blob); //Convert the blob to base64
+				} else {
+					throw "Not image file type"
+				}
+			}
+		}
+		
+		Request(getPictureRequest_options).get();
+	})
+}
 
 let checkingLivesFinished = false,
-	DATAs;
+	DATAs,
+	needCheckMissing = false;
 function checkLives(idArray){
 	return new Promise(function(resolve, reject){
 		let promises = new Map();
@@ -1306,9 +1363,16 @@ function checkLives(idArray){
 						//console.info(`Ignoring ${id}`);
 						return;
 					}
-					let onStreamCheckEnd = function(){
+					let onStreamCheckEnd = function(reason){
 						console.timeEnd(`${website}::${id}`);
 						setIcon();
+						if((typeof promiseResult == "string" && promiseResult.indexOf("StreamChecked") != -1) || (typeof promiseResult == "object" && JSON.stringify(promiseResult).indexOf("StreamChecked") != -1)){
+							liveStatus.get(website).get(id).forEach((value, contentId, array) => {
+								if((typeof promiseResult == "string" && promiseResult.indexOf("StreamChecked") != -1) || (typeof promiseResult == "object" && typeof promiseResult[contentId] == "string" && promiseResult[contentId].indexOf("StreamChecked") != -1)){
+									doStreamNotif(website, id, contentId, streamList);
+								}
+							})
+						}
 					}
 					console.time(`${website}::${id}`);
 					promises.set(`${website}/${id}`, getPrimary(id, "", website, streamList));
@@ -1338,13 +1402,24 @@ function checkLives(idArray){
 			console.groupEnd();
 			checkingLivesFinished = true;
 			resolve(result);
+			
+			if(!(typeof idArray != "undefined" && idArray instanceof Map)){ // Only reset interval if it's a "full" check
+				clearInterval(interval);
+				interval = setInterval(checkLives, getPreference('check_delay') * 60000);
+			}
+			
+			if(needCheckMissing){
+				checkMissing();
+			}
 		}
 		PromiseWaitAll(promises)
 			.then(onPromiseEnd)
 			.catch(onPromiseEnd)
 		
-		clearInterval(interval);
-		interval = setInterval(checkLives, getPreference('check_delay') * 60000);
+		if(!(typeof idArray != "undefined" && idArray instanceof Map)){ // Only reset interval if it's a "full" check
+			clearInterval(interval);
+			interval = setInterval(checkLives, getPreference('check_delay') * 60000);
+		}
 	})
 }
 function checkMissing(){
@@ -1379,6 +1454,8 @@ function checkMissing(){
 				.then(refresh)
 				.catch(refresh)
 		}
+	} else {
+		needCheckMissing = true;
 	}
 }
 
@@ -1555,7 +1632,7 @@ function processPrimary(id, contentId, website, streamSetting, response){
 							} else {
 								resolve(responseValidity);
 							}
-							doStreamNotif(website, id, contentId, streamSetting, liveState);
+							//doStreamNotif(website, id, contentId, streamSetting);
 							//setIcon();
 						}
 					}
@@ -1567,7 +1644,7 @@ function processPrimary(id, contentId, website, streamSetting, response){
 					Request(second_API_RequestOptions).get();
 				} else {
 					resolve("StreamChecked");
-					doStreamNotif(website, id, contentId, streamSetting, liveState);
+					//doStreamNotif(website, id, contentId, streamSetting);
 				}
 			} else {
 				console.warn("Unable to get stream state.");

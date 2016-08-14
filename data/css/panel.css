@@ -182,6 +182,10 @@ footer, footer *{
 	background-image: url("/data/images/YouTube-icon-full_color.png");
 	background-size: 15px auto;
 }
+.item-stream[data-stream-type=unsupported] .streamTitle::before, .debugItem[data-stream-type=unsupported] .debugTitle::before{
+	background-image: url("/data/images/warning-34621.svg");
+	background-size: 15px auto;
+}
 .item-stream.onlineItem .streamTitle{
 	width: 160px;
 }

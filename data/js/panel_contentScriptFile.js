@@ -764,11 +764,19 @@ function showNonEmptySitesBlocks(){
 		for(let website in streamNodes[onlineStatus]){
 			current_node = streamNodes[onlineStatus][website];
 			current_node.classList.remove("hide");
-			if(current_node.hasChildNodes() == false){
+			if(!current_node.hasChildNodes()){
 				current_node.classList.add("hide");
 			}
 		}
 	}
+	let unsupportedWebsiteNodes = ["#streamListOnline .unsupported", "#streamListOffline .unsupported"]
+	unsupportedWebsiteNodes.forEach((selector, index, array) => {
+		let node  = document.querySelector(selector)
+		node.classList.remove("hide");
+		if(!node.hasChildNodes()){
+			node.classList.add("hide");
+		}
+	})
 }
 function insertStreamNode(newLine, website, id, contentId, type, streamData, online){
 	let statusNode;
@@ -783,7 +791,11 @@ function insertStreamNode(newLine, website, id, contentId, type, streamData, onl
 	}
 	
 	if(group_streams_by_websites){
-		streamNodes[((online)? "online" : "offline")][website].appendChild(newLine);
+		if(streamNodes.hasOwnProperty(((online)? "online" : "offline")) && streamNodes[((online)? "online" : "offline")].hasOwnProperty(website)){
+			streamNodes[((online)? "online" : "offline")][website].appendChild(newLine);
+		} else {
+			document.querySelector(`#streamList${((online)? "Online" : "Offline")} .unsupported`).appendChild(newLine);
+		}
 		return true;
 	} else {
 		if(statusStreamList.length > 0){
@@ -812,7 +824,15 @@ function listener(data){
 	let streamSettings = data.streamSettings;
 	let streamUrl = data.streamUrl;
 	
-	let online = (type == "channel")? streamData.liveStatus.API_Status : streamData.liveStatus.filteredStatus;
+	let online = false;
+	switch(type){
+		case "live":
+			online = streamData.liveStatus.filteredStatus;
+			break;
+		case "channel":
+			online = streamData.liveStatus.API_Status;
+			break;
+	}
 	let liveStatus = streamData.liveStatus;
 	
 	let streamName = streamData.streamName;
@@ -899,6 +919,7 @@ function listener(data){
 	newLine.dataset.streamWebsite = website;
 	newLine.dataset.streamWebsiteLowercase = website.toLowerCase();
 	newLine.dataset.streamUrl = streamUrl;
+	newLine.dataset.streamType = type;
 	
 	newLine.dataset.streamSettings = JSON.stringify(streamSettings);
 	
@@ -979,10 +1000,12 @@ function streamItemClick(){
 	let website = node.dataset.streamWebsite;
 	let streamUrl = node.dataset.streamUrl;
 	
-	if(online){
-		self.port.emit("openOnlineLive", {id: id, website: website, streamUrl: streamUrl});
-	} else {
-		self.port.emit("openTab", streamUrl);
+	if(streamUrl != ""){
+		if(online){
+			self.port.emit("openOnlineLive", {id: id, website: website, streamUrl: streamUrl});
+		} else {
+			self.port.emit("openTab", streamUrl);
+		}
 	}
 }
 

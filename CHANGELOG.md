@@ -1,6 +1,5 @@
 # TODO
 * +: Réccupérer les images des streams en base64 et l'intégrer (notification, panel)
-* +: Affichage streams avec site inconnu
 
 # 8.0.0
 * i: perfect-scrollbar update (0.6.12)
@@ -9,6 +8,7 @@
 * i: Replaced some for...in loops with array.forEach like ones
 * i: Moved all console.* from stream Requests to one result
 * i: Moved steam check timing
+* i: Moved stream notification call to checkLives (except for channel, with empty lists)
 * +: Add headers support with the custom Request function
 * +: Add Youtube support
 * +: Re-arranged function to add stream to allow getting IDs from user and video pages with Youtube
@@ -17,9 +17,11 @@
 * +: Now using the promise system to detect end and refresh panel after
 * +: Global timing for checkLives
 * +: Stream setting to ignore streams on the icon
+* +: Streams configured with unsupported / not load website are now shown in the panel
 * -: Deleted Request_Get function, no longer needed to avoid copy/paste problem
 * Fix: Unsuccessful channel list requests
 * Fix: Beam importation
+* Fix: Some French translations
 
 # 7.2.6
 * Fix: Offline streams count
