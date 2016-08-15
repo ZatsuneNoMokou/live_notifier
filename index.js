@@ -904,9 +904,11 @@ function doNotifUrl(title,message,url,imgurl){
 }
 
 
-function notifAction(type,data){
-	this.type = type;
-	this.data = data;
+class notifAction{
+	constructor(type, data){
+		this.type = type;
+		this.data = data;
+	}
 }
 function doActionNotif(title, message, action, imgurl){
 	console.info(`Notification (${(typeof action.type == "string")? action.type : "Unknown/No action"}): "${message}" (${imgurl})`);
@@ -1411,6 +1413,9 @@ function checkLives(idArray){
 			if(needCheckMissing){
 				checkMissing();
 			}
+		}
+		if(promises.size == 0){
+			setIcon();
 		}
 		PromiseWaitAll(promises)
 			.then(onPromiseEnd)

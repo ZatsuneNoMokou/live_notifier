@@ -22,6 +22,7 @@
 * Fix: Unsuccessful channel list requests
 * Fix: Beam importation
 * Fix: Some French translations
+* Fix: Useless translations on preference nodes
 
 # 7.2.6
 * Fix: Offline streams count

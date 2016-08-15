@@ -385,16 +385,13 @@ function newPreferenceNode(parent, id, prefObj){
 		prefNode.classList.add("preferenceInput");
 	}
 	if(prefObj.type == "control"){
+		prefNode.dataset.translateId = `${id}`;
 		self.port.emit("translate", JSON.stringify({"translate-node-id": `#${id}`, "data-l10n-id": `${id}_label`}));
 	}
 	if(id.indexOf("_keys_list") != -1 || id.indexOf("_user_id") != -1 || id == "statusBlacklist" || id == "statusWhitelist" || id == "gameBlacklist" || id == "gameWhitelist"){
 		node.classList.add("flex_input_text");
 	}
 	prefNode.dataset.settingType = prefObj.type;
-	
-	if(prefObj.type != "menulist"){
-		prefNode.dataset.l10nId = id;
-	}
 	
 	node.appendChild(labelNode);
 	node.appendChild(prefNode);
