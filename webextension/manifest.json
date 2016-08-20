@@ -1,0 +1,55 @@
+{
+	"applications": {
+		"gecko": {
+			"id": "livenotifier_dev@zatsunenomokou.eu",
+			"strict_min_version": "48.0",
+			"update_url": "https://gitlab.com/ZatsuneNoMokou/live_notifier/raw/master/dist/live_notifier_dev.update.json"
+		}
+	},
+	"manifest_version": 2,
+	"name": "Live notifier (Dev)",
+	"short_name": "LiveNotifierDev",
+	"description": "__MSG_extShortDesc__",
+	"author": "ZatsuneNoMokou",
+	"version": "7.2.5",
+	"icons": {
+		"16": "/icon_16.png",
+		"48": "/icon_48.png",
+		"96": "/icon_96.png",
+		"128": "/icon_128.png"
+	},
+	"background": {
+		"scripts": [ "/data/js/loadJS.js", "/data/js/options-data.js", "/data/js/options-api.js", "index.js" ]
+	},
+	"browser_action": {
+		"browser_style": false,
+		"default_icon": {
+			"16": "/icon_16.png",
+			"48": "/icon_48.png",
+			"96": "/icon_96.png",
+			"128": "/icon_128.png"
+		},
+		"default_popup": "/data/panel.html"
+	},
+	"default_locale": "en",
+	"offline_enabled": false,
+	"permissions": [
+		"tabs",
+		"activeTab",
+		"contextMenus",
+		"notifications",
+		"storage",
+		"unlimitedStorage",
+		"http://*/*",
+		"https://*/*"
+	],
+	"optional_permissions": [
+		"clipboardWrite"
+	],
+	"options_ui": {
+		"page": "data/options.html",
+		"chrome_style": false
+	},
+	"minimum_chrome_version": "42.0",
+	"web_accessible_resources": [ "/icon_128.png" ]
+}

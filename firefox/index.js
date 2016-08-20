@@ -1201,7 +1201,7 @@ function checkResponseValidity(website, response){
 	let data = response.json;
 	
 	if(data == null || typeof data != "object" || JSON.stringify(data) == "{}"){ // Empty or invalid JSON
-		if(typeof response == "object" && response.hasOwnProperty("status") && typeof response.hasOwnProperty("status") == "string" && /^4\d*$/.test(response.status) == true && /^5\d*$/.test(response.status) == true){
+		if(typeof response == "object" && response.hasOwnProperty("status") && typeof response.status == "number" && (/^4\d*$/.test(response.status) == true || /^5\d*$/.test(response.status) == true)){
 			// Request Error
 			console.warn("Unable to get stream state (request error).");
 			return "request_error";

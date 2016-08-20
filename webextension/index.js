@@ -1,0 +1,2027 @@
+'use strict';
+
+let _ = chrome.i18n.getMessage;
+
+// appGlobal: Accessible with chrome.extension.getBackgroundPage();
+var appGlobal = {
+	loadJS: loadJS
+}
+
+let options = optionsData.options,
+	options_default = optionsData.options_default,
+	options_default_sync = optionsData.options_default_sync;
+
+let myIconURL = "/data/live_offline.svg";
+
+let websites = new Map();
+appGlobal["websites"] = websites;
+let liveStatus = new Map();
+appGlobal["liveStatus"] = liveStatus;
+let channelInfos = new Map();
+appGlobal["channelInfos"] = channelInfos;
+
+function Request(options){
+	if(typeof options.url != "string" && typeof options.onComplete != "function"){
+		console.warn("Error in options");
+	} else {
+		let core = function(method){
+			let xhr;
+			if(typeof options.anonymous == "boolean"){
+				xhr = new XMLHttpRequest({anonymous:true});
+			} else {
+				xhr = new XMLHttpRequest();
+			}
+			
+			xhr.open(method, options.url, true);
+			
+			if(typeof options.contentType == "string"){
+				xhr.responseType = options.contentType;
+			}
+			if(typeof options.overrideMimeType == "string"){
+				xhr.overrideMimeType(options.overrideMimeType);
+			}
+			
+			xhr.timeout = 30000;
+			
+			if(options.hasOwnProperty("headers") == true && typeof options.headers == "object"){
+				for(let header in options.headers){
+					let value = options.headers[header];
+					xhr.setRequestHeader(header, value);
+				}
+			}
+			
+			xhr.addEventListener("loadend", function(){
+				let response = {
+					"url": xhr.responseURL,
+					"json": null,
+					"status": xhr.status,
+					"statusText": xhr.statusText,
+					"header": xhr.getAllResponseHeaders()
+				}
+				if(xhr.responseType == "" || xhr.responseType == "text"){
+					response.text= xhr.responseText;
+				}
+				if(typeof xhr.response != "undefined"){
+					response.response = xhr.response;
+				}
+				try{response.json = JSON.parse(xhr.responseText);}
+				catch(error){response.json = null;}
+				options.onComplete(response);
+			});
+			
+			xhr.send();
+		}
+		
+		let methods = {
+			'get' : function() {
+				return core('GET');
+			}
+		};
+		return methods;
+	}
+}
+
+function mapToObj(myMap){
+	if(myMap instanceof Map){
+		let obj = {};
+		myMap.forEach((value, index, array) => {
+			obj[index] = (value instanceof Map)? mapToObj(value) : value;
+		})
+		return obj;
+	} else {
+		throw 'myMap should be an Map';
+	}
+}
+let streamListFromSetting_cache = null;
+class streamListFromSetting{
+	constructor(requested_website, checkDuplicates){
+		if(typeof checkDuplicates != "boolean"){
+			var checkDuplicates = false;
+		}
+		
+		let somethingElseThanSpaces = /[^\s]+/;
+		this.stringData = getPreference("stream_keys_list");
+		let pref = new String(this.stringData);
+		
+		if(streamListFromSetting_cache != null && streamListFromSetting_cache.hasOwnProperty("stringData") && streamListFromSetting_cache.stringData == pref){
+			//console.log("[Live notifier] streamListFromSetting: Using cache")
+			this.mapDataAll = streamListFromSetting_cache.mapDataAll;
+			//this.objDataAll = mapToObj(this.mapDataAll);
+			if(typeof requested_website == "string" && requested_website != ""){
+				this.mapData = this.mapDataAll.get(requested_website);
+				//this.objData = this.objDataAll[requested_website];
+				this.website = requested_website;
+			}
+			return this;
+		}
+		
+		let mapDataAll = new Map();
+		
+		websites.forEach((websiteAPI, website, array) => {
+			mapDataAll.set(website, new Map());
+		})
+		
+		if(pref != "" && somethingElseThanSpaces.test(pref)){
+			let myTable = pref.split(",");
+			let reg= /\s*([^\s\:]+)\:\:([^\s]+)\s*(.*)?/;
+			if(myTable.length > 0){
+				for(let i in myTable){
+					let url = /((?:http|https):\/\/.*)\s*$/;
+					let filters = /\s*(?:(\w+)\:\:(.+)\s*)/;
+					let cleanEndingSpace = /(.*)\s+$/;
+					
+					let result=reg.exec(myTable[i]);
+					if(result == null){
+						console.warn(`Error with ${myTable[i]}`);
+						continue;
+					}
+					let website = result[1];
+					let id = result[2];
+					let data = result[3];
+					
+					if(!(result.length == 3 || result.length == 4)){
+						// Skip invalid items
+						continue;
+					}
+					
+					if(websites.has(website) == false){
+						// Basic information for websites not supported, or not yet
+						mapDataAll.set(website, new Map());
+					}
+					
+					if(checkDuplicates){
+						let checkDuplicates_result = "";
+						mapDataAll.get(website).forEach((value, i, array) => {
+							if(i.toLowerCase() == id.toLowerCase()){
+								checkDuplicates_result = i;
+							}
+						})
+						if(checkDuplicates_result != ""){
+							console.warn(`Found duplicate (${checkDuplicates_result} and ${id})`);
+							id = checkDuplicates_result;
+						}
+					}
+					
+					if(mapDataAll.get(website).has(id) == false){
+						mapDataAll.get(website).set(id, {hide: false, ignore: false, iconIgnore: false, notifyOnline: getPreference("notify_online"), notifyOffline: getPreference("notify_offline"), streamURL: ""});
+					}
+					
+					if(typeof data != "undefined"){
+						if(url.test(data) == true){
+							let url_result = url.exec(data);
+							mapDataAll.get(website).get(id).streamURL = url_result[1];
+							data = data.replace(url_result[0],"");
+						}
+						
+						if(filters.test(data)){
+							let filters_array = new Array();
+							
+							let filter_id = /(?:(\w+)\:\:)/;
+							let scan_string = data;
+							while(filter_id.test(scan_string) == true){
+								let current_filter_result = scan_string.match(filter_id);
+								
+								let current_filter_id = current_filter_result[1];
+								
+								scan_string = scan_string.substring(current_filter_result.index+current_filter_result[0].length, scan_string.length);
+								
+								let next_filter_result = scan_string.match(filter_id);
+								let next_pos = (next_filter_result != null)? next_filter_result.index : scan_string.length;
+								
+								let current_data;
+								if(next_filter_result != null){
+									current_data = scan_string.substring(current_filter_result.index, next_filter_result.index);
+								} else {
+									current_data = scan_string.substring(current_filter_result.index, scan_string.length);
+								}
+								if(cleanEndingSpace.test(current_data)){
+									current_data = cleanEndingSpace.exec(current_data)[1];
+								}
+								
+								if(typeof mapDataAll.get(website).get(id)[current_filter_id] == "undefined"){
+									mapDataAll.get(website).get(id)[current_filter_id] = [];
+								}
+								
+								if(current_filter_id == "hide" || current_filter_id == "ignore" || current_filter_id == "iconIgnore" || current_filter_id == "notifyOnline" || current_filter_id == "notifyOffline"){
+									let boolean = getBooleanFromVar(current_data);
+									if(typeof boolean == "boolean"){
+										current_data = boolean;
+									} else {
+										console.warn(`${current_filter_id} of ${id} should be a boolean`);
+									}
+									mapDataAll.get(website).get(id)[current_filter_id] = current_data;
+								} else if(current_filter_id == "facebook" || current_filter_id == "twitter"){
+									mapDataAll.get(website).get(id)[current_filter_id] = decodeString(current_data);
+								} else {
+									if(checkDuplicates){
+										let toLowerCase = function(str){return str.toLowerCase();}
+										if(mapDataAll.get(website).get(id)[current_filter_id].map(toLowerCase).indexOf(decodeString(current_data).toLowerCase()) == -1){
+											mapDataAll.get(website).get(id)[current_filter_id].push(decodeString(current_data));
+										} else {
+											console.warn(`Found duplicate for the setting "${current_filter_id}" from "${id}" (${website}): ${decodeString(current_data)}`);
+										}
+									} else {
+										mapDataAll.get(website).get(id)[current_filter_id].push(decodeString(current_data));
+									}
+								}
+								scan_string = scan_string.substring(next_pos, scan_string.length);
+							}
+						}
+					}
+				}
+			}
+			this.mapDataAll = mapDataAll;
+			//this.objDataAll = mapToObj(this.mapDataAll);
+			if(typeof requested_website == "string" && requested_website != ""){
+				this.mapData = this.mapDataAll.get(requested_website);
+				//this.objData = this.objDataAll[requested_website];
+				this.website = requested_website;
+			}
+		} else {
+			this.mapDataAll = mapDataAll;
+			//this.objDataAll = mapToObj(this.mapDataAll);
+			if(typeof requested_website == "string" && requested_website != ""){
+				this.mapData = this.mapDataAll.get(requested_website);
+				//this.objData = this.objDataAll[requested_website];
+				this.website = requested_website;
+			}
+		}
+		
+		// Update cache
+		streamListFromSetting_cache = {
+			"stringData": this.stringData,
+			"mapDataAll": mapDataAll
+		}
+	}
+	
+	streamExist(website, id){
+		let result = false
+		this.mapDataAll.get(website).forEach((value, i, array) => {
+			if(i.toLowerCase() == id.toLowerCase()){
+				result = true;
+			}
+		})
+		return result;
+	}
+	addStream(website, id, url){
+		if(this.streamExist(website, id) == false){
+			this.mapDataAll.get(website).set(id, {streamURL: url});
+			this.mapData = this.mapDataAll.get(website);
+			console.log(`${id} has been added`);
+		}
+	}
+	deleteStream(website, id){
+		if(this.streamExist(website, id)){
+			this.mapDataAll.get(website).delete(id);
+			this.mapData.delete(id);
+			if(liveStatus.has(website) && liveStatus.get(website).has(id)){
+				liveStatus.get(website).delete(id);
+			}
+			console.log(`${id} has been deleted`);
+		}
+	}
+	update(){
+		let newStreamPrefArray = [];
+		this.mapDataAll.forEach((websiteData, website, array) => {
+			websiteData.forEach((streamSettings, id, array) => {
+				let filters = "";
+				for(let j in streamSettings){
+					if(j != "streamURL"){
+						if(typeof streamSettings[j] == "object" && JSON.stringify(streamSettings[j]) == "[null]"){
+							continue;
+						}
+						if((j == "facebook" || j == "twitter") && streamSettings[j] == ""){
+							continue;
+						}
+						if((j == "hide" || j == "ignore" || j == "iconIgnore") && streamSettings[j] == false){
+							continue;
+						}
+						if(j == "notifyOnline" && streamSettings[j] == getPreference("notify_online")){
+							continue;
+						}
+						if(j == "notifyOffline" && streamSettings[j] == getPreference("notify_offline")){
+							continue;
+						}
+						if(typeof streamSettings[j] == "boolean"){
+							filters = filters + " " + j + "::" + streamSettings[j];
+						}
+						if(j == "facebook" || j == "twitter"){
+							filters = filters + " " + j + "::" + encodeString(streamSettings[j]);
+						} else {
+							for(let k in streamSettings[j]){
+								filters = filters + " " + j + "::" + encodeString(streamSettings[j][k]);
+							}
+						}
+					}
+				}
+				
+				let URL = (typeof streamSettings.streamURL != "undefined" && streamSettings.streamURL != "")? (" " + streamSettings.streamURL) : "";
+				
+				newStreamPrefArray.push(`${website}::${id}${filters}${URL}`);
+			})
+		})
+		
+		let newSettings = newStreamPrefArray.join(", ");
+		savePreference("stream_keys_list", newSettings);
+		
+		// Update cache
+		streamListFromSetting_cache = {
+			"stringData": newSettings,
+			"mapDataAll": this.mapDataAll
+		}
+		
+		setIcon();
+		console.log(`Stream key list update: ${getPreference(`stream_keys_list`)}`);
+		checkMissing();
+	}
+}
+appGlobal["streamListFromSetting"] = streamListFromSetting;
+
+function getStreamURL(website, id, contentId, usePrefUrl){
+	var streamList = (new streamListFromSetting(website)).mapData;
+	
+	if(streamList.has(id)){
+		if(streamList.get(id).streamURL != "" && usePrefUrl == true){
+			return streamList.get(id).streamURL;
+		} else {
+			if(liveStatus.get(website).get(id).has(contentId)){
+				let streamData = liveStatus.get(website).get(id).get(contentId);
+				if(typeof streamData.streamURL == "string" && streamData.streamURL != ""){
+					return streamData.streamURL;
+				}
+			}
+			if(channelInfos.get(website).has(id)){
+				if(typeof channelInfos.get(website).get(id).streamURL == "string" && channelInfos.get(website).get(id).streamURL != ""){
+						return channelInfos.get(website).get(id).streamURL
+				}
+			}
+			switch(website){
+				case "dailymotion":
+					return `http://www.dailymotion.com/video/${id}`;
+					break;
+				case "hitbox":
+					return `http://www.hitbox.tv/${id}`;
+					break;
+				case "twitch":
+					return `http://www.twitch.tv/${id}`;
+					break;
+				case "beam":
+					return `https://beam.pro/${id}`;
+					break;
+				case "youtube":
+					if(website_channel_id.test(contentId) == true){
+						return `https://youtube.com/channel/${website_channel_id.exec(id)[1]}`;
+					} else {
+						return `https://youtu.be/${contentId}`;
+					}
+					break;
+				default:
+					return null;
+			}
+		}
+	}
+}
+appGlobal["getStreamURL"] = getStreamURL;
+
+function refreshPanel(data){
+	let doUpdateTheme = false;
+	if(typeof data != "undefined"){
+		if(typeof data.doUpdateTheme != "undefined"){
+			doUpdateTheme = data.doUpdateTheme;
+		}
+	}
+	updatePanelData(doUpdateTheme);
+}
+function refreshStreamsFromPanel(){
+	let done = function(reason){
+		updatePanelData();
+	}
+	if(appGlobal["checkingLivesFinished"]){
+		checkLives()
+			.then(done)
+			.catch(done)
+	}
+	
+}
+
+function display_id(id){
+	if(website_channel_id.test(id)){
+		return _("The_channel", website_channel_id.exec(id)[1]);
+	} else {
+		return _("The_stream", id);
+	}
+}
+let activeTab;
+function addStreamFromPanel(data){
+	let current_tab = activeTab;
+	let active_tab_url = current_tab.url;
+	
+	let http_url = /^(?:http|https):\/\//;
+	if(!http_url.test(active_tab_url)){
+		console.info("Current tab isn't a http/https url");
+		return false;
+	}
+	let active_tab_title = current_tab.title;
+	let type;
+	let url_list;
+
+	if(typeof data == "object"){
+		console.dir(data);
+		if(data.hasOwnProperty("ContextMenu_URL")){
+			url_list = [data.ContextMenu_URL];
+			type = "ContextMenu";
+		} else if(data.hasOwnProperty("url")){
+			url_list = [data.url];
+			type = "url";
+		} else if(data.hasOwnProperty("embed_list")){
+			console.log("[Live notifier] AddStream - Embed list");
+			url_list = data.embed_list;
+			type = "embed";
+		}
+	} else {
+		console.info("Current active tab: " + active_tab_url);
+		url_list = [active_tab_url];
+	}
+	let pattern_found = false;
+	for(let url of url_list){
+		websites.forEach((websiteAPI, website, array) => {
+			websiteAPI.addStream_URLpatterns.forEach((patterns, source_website, array) => {
+				let streamListSetting = new streamListFromSetting(website);
+				patterns.forEach((pattern, index, array) => {
+					let id = "";
+					if(pattern.test(url) && !pattern_found){
+						pattern_found = true;
+						id = pattern.exec(url)[1];
+						if(streamListSetting.streamExist(website, id)){
+							doNotif("Live notifier",`${display_id(id)} ${_("is_already_configured")}`);
+							return true;
+						} else {
+							let current_API = websiteAPI.API_addStream(source_website, id, (websiteAPI.hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websiteAPI.APIs_RequiredPrefs) : {});
+							
+							Request({
+								url: current_API.url,
+								overrideMimeType: current_API.overrideMimeType,
+								onComplete: function (response) {
+									let data = response.json;
+									
+									console.group()
+									console.info(`${website} - ${response.url}`);
+									console.dir(data);
+									console.groupEnd();
+									
+									let responseValidity = checkResponseValidity(website, response);
+									
+									let streamId = websiteAPI.addStream_getId(source_website, id, response, streamListSetting, responseValidity);
+									
+									if(website == "dailymotion" && responseValidity == "invalid_parameter"){
+										doNotif("Live notifier", _("No_supported_stream_detected_in_the_current_tab_so_nothing_to_add"));
+										return null;
+									} else if(streamId == null){
+										doNotif("Live notifier", `${display_id(id)} ${_("wasnt_configured_but_error_retrieving_data")}`);
+										return null;
+									} else if(typeof streamId == "boolean" && streamId == true){
+										doNotif("Live notifier",`${display_id(id)} ${_("is_already_configured")}`);
+										return true;
+									} else if(typeof streamId == "object" && streamId.hasOwnProperty("url")){
+										addStreamFromPanel(streamId);
+										return true;
+									}
+									
+									if(streamListSetting.streamExist(website, streamId) == true){
+										doNotif("Live notifier",`${display_id(streamId)} ${_("is_already_configured")}`);
+									} else {
+										if(getPreference("confirm_addStreamFromPanel")){
+											let addstreamNotifAction = new notifAction("addStream", {id: streamId, website: website, url: ((type == "embed")? active_tab_url : "")});
+											doActionNotif(`Live notifier`, `${display_id(streamId)} ${_("wasnt_configured_and_can_be_added")}`, addstreamNotifAction);
+										} else {
+											streamListSetting.addStream(website, streamId, ((type == "embed")? active_tab_url : ""));
+											streamListSetting.update();
+											doNotif("Live notifier", `${display_id(streamId)} ${_("wasnt_configured_and_have_been_added")}`);
+											// Update the panel for the new stream added
+											setTimeout(function(){
+												refreshPanel(false);
+											}, 5000);
+										}
+									}
+								}
+							}).get();
+							return true;
+						}
+					}
+				})
+			})
+		})
+	}
+	if(pattern_found){
+		return true;
+	}
+	if(typeof data != "object" && type != "ContextMenu" && type != "url"){
+		if(!data.hasOwnProperty("embed_list")){
+			chrome.tabs.executeScript(current_tab.id, {file: "/data/js/page_getEmbedList.js"});
+		}
+	} else {
+		doNotif("Live notifier", _("No_supported_stream_detected_in_the_current_tab_so_nothing_to_add"));
+	}
+}
+function deleteStreamFromPanel(data){
+	let streamListSetting = new streamListFromSetting(data.website);
+	let id = data.id;
+	let website = data.website;
+	if(streamListSetting.streamExist(website, id)){
+		if(getPreference("confirm_deleteStreamFromPanel")){
+			let deletestreamNotifAction = new notifAction("deleteStream", {id: id, website: website});
+			doActionNotif(`Live notifier`, `${display_id(id)} ${_("will_be_deleted_are_you_sure")}`, deletestreamNotifAction);
+		} else {
+			streamListSetting.deleteStream(website, id);
+			streamListSetting.update();
+			doNotif("Live notifier", `${display_id(id)} ${_("has_been_deleted")}`);
+			// Update the panel for the new stream added
+			refreshPanel(false);
+		}
+	}
+}
+
+function settingUpdate(data){
+	let settingName = data.settingName;
+	let settingValue = data.settingValue;
+	
+	let updatePanel = true;
+	if(typeof data.updatePanel != "undefined"){
+		updatePanel = data.updatePanel;
+	}
+	
+	console.log(`${settingName} - ${settingValue}`);
+	savePreference(settingName, settingValue);
+}
+
+function shareStream(data){
+	let website = data.website;
+	let id = data.id;
+	let contentId = data.contentId;
+	
+	let streamList = (new streamListFromSetting(website)).mapData;
+	
+	let streamData = liveStatus.get(website).get(id).get(contentId);
+	let streamName = streamData.streamName;
+	let streamURL = getStreamURL(website, id, contentId, true);
+	let streamStatus = streamData.streamStatus;
+	
+	let facebookID = (typeof streamList.get(id).facebook == "string" && streamList.get(id).facebook != "")? streamList.get(id).facebook : streamData.twitterID;
+	let twitterID = (typeof streamList.get(id).twitter == "string" && streamList.get(id).twitter != "")? streamList.get(id).twitter : streamData.twitterID;
+	
+	let streamerAlias = streamName;
+	/*
+	if(facebookID != null && facebookID != ""){
+		
+	}*/
+	let reg_testTwitterId= /\s*@(.+)/;
+	if(twitterID != null && twitterID != ""){
+		streamerAlias = ((reg_testTwitterId.test(twitterID))? "" : "@") + twitterID;
+		console.info(`${id}/${contentId} (${website}) twitter ID: ${twitterID}`);
+	}
+	
+	let shareMessage = `${_("I_am_watching_the_stream_of")} ${streamerAlias}, "${streamStatus}"`;
+	
+	//let url = `https:\/\/twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${streamURL}&hashtags=LiveNotifier${(twitterID != "")? `&related=${twitterID}` : ""}`;
+	let url = `https:\/\/twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${streamURL}${(twitterID != "")? `&related=${twitterID}` : ""}&via=LiveNotifier`;
+	chrome.tabs.create({ "url": url });
+}
+
+function streamSetting_Update(data){
+	let website = data.website;
+	let id = data.id;
+	let contentId = data.contentId;
+	
+	let streamSettingsData = data.streamSettingsData;
+	
+	let streamListSetting = new streamListFromSetting(website);
+	let streamList = streamListSetting.mapData;
+	
+	for(let i in streamSettingsData){
+		streamList.get(id)[i] = streamSettingsData[i];
+	}
+	streamListSetting.update();
+}
+
+function sendDataToPanel(id, data){
+	function responseCallback(response){
+		if(typeof response != "undefined"){
+			console.group();
+			console.info(`Port response of ${id}: `);
+			console.dir(response);
+			console.groupEnd();
+		}
+	}
+	chrome.runtime.sendMessage({"sender": "Live_Notifier_Main","receiver": "Live_Notifier_Panel", "id": id, "data": data}, responseCallback);
+}
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse){
+	if(message.receiver == "Live_Notifier_Main"){
+		console.group()
+		console.info("Message:");
+		console.dir(message);
+		console.groupEnd();
+		
+		let id = message.id;
+		let data = message.data;
+		
+		if(message.sender == "Live_Notifier_Panel" || message.sender == "Live_Notifier_Embed" || message.sender == "Live_Notifier_Options"){
+			switch(id){
+				case "refreshPanel":
+					refreshPanel(data);
+					break;
+				case "importStreams":
+					let website = message.data;
+					console.info(`Importing ${website}...`);
+					importButton(website);
+					break;
+				case "refreshStreams":
+					refreshStreamsFromPanel(data);
+					break;
+				case "addStream":
+					// Make sure to have up-to-date active tab AND its url
+					chrome.tabs.query({active: true, lastFocusedWindow: true}, function(tabs) {
+						activeTab = tabs[0];
+						addStreamFromPanel(data);
+					});
+					break;
+				case "deleteStream":
+					deleteStreamFromPanel(data);
+					break;
+				case "copyLivestreamerCmd":
+					copyLivestreamerCmd(data);
+					break;
+				case "openOnlineLive":
+					openOnlineLive(data);
+					break;
+				case "openTab":
+					openTabIfNotExist(data);
+					break;
+				case "panel_onload":
+					handleChange(data);
+					break;
+				case "shareStream":
+					shareStream(data);
+					break;
+				case "streamSetting_Update":
+					streamSetting_Update(data);
+					break;
+				default:
+					console.warn(`Unkown message id (${id})`);
+			}
+		} else if(message.sender == "Live_Streamer_Embed"){
+			switch(message.id){
+				case "addStream":
+					addStreamFromPanel(data);
+					break;
+			}
+		} else {
+			console.warn("Unknown sender");
+		}
+	}
+});
+
+
+function updatePanelData(doUpdateTheme){
+	// Update panel data
+	sendDataToPanel("updatePanelData", {"doUpdateTheme": (typeof doUpdateTheme != "undefined")? doUpdateTheme : true});
+}
+
+function handleChange() {
+	setIcon();
+	updatePanelData();
+}
+
+function copyToClipboard(string){
+	let copy = function(string){
+		let copy_form;
+		if(document.querySelector("#copy_form") === null){
+			copy_form = document.createElement("textarea");
+			copy_form.id = "copy_form";
+			copy_form.textContent = string;
+			document.querySelector("body").appendChild(copy_form);
+		} else {
+			copy_form = document.querySelector("#copy_form");
+		}
+		
+		copy_form.focus();
+		document.execCommand('SelectAll');
+		let clipboard_success = document.execCommand('Copy');
+		if(clipboard_success){
+			doNotif("Live notifier", _("Livestreamer_command_copied_into_the_clipboard"));
+			console.info(`Copied: ${string}`)
+		} else {
+			doNotif("Live notifier", _("clipboad_failed"));
+		}
+		
+		copy_form.parentNode.removeChild(copy_form);
+	}
+	
+	if(typeof chrome.permissions != "undefined"){
+		chrome.permissions.contains({
+			permissions: ['clipboardWrite'],
+		}, function(result) {
+			if(result){
+				copy(string);
+			} else {
+				console.log("Clipboard writing permission not granted");
+				chrome.permissions.request({
+					permissions: ['clipboardWrite'],
+				}, function(result) {
+					if(result){
+						copy(string);
+					} else {
+						console.error("The extension doesn't have the permissions.");
+					}
+				});
+			}
+		});
+	} else {
+		copy(string);
+	}
+}
+function copyLivestreamerCmd(data){
+	let cmd = `livestreamer ${getStreamURL(data.website, data.id, data.contentId, false)} ${getPreference("livestreamer_cmd_quality")}`;
+	copyToClipboard(cmd);
+}
+function openOnlineLive(data){
+	openTabIfNotExist(data.streamUrl);
+	if(getPreference("livestreamer_cmd_to_clipboard")){
+		copyLivestreamerCmd(data);
+	}
+}
+
+function openTabIfNotExist(url){
+	console.log(url);
+	chrome.tabs.query({}, function(tabs) {
+		let custom_url = url.toLowerCase().replace(/http(?:s)?\:\/\/(?:www\.)?/i,"");
+		for(let tab of tabs){
+			if(tab.url.toLowerCase().indexOf(custom_url) != -1){ // Mean the url was already opened in a tab
+				chrome.tabs.highlight({tabs: tab.index}); // Show the already opened tab
+				return true; // Return true to stop the function as the tab is already opened
+			}
+		}
+		// If the function is still running, it mean that the url isn't detected to be opened, so, we can open it
+		let action_url = url;
+		chrome.tabs.create({ url: action_url });
+		return false; // Return false because the url wasn't already in a tab
+	});
+}
+
+function doNotif(title, message, imgurl) {
+	doActionNotif(title, message, {}, imgurl);
+}
+
+function doNotifUrl(title,message,url,imgurl){
+	doActionNotif(title, message, new notifAction("openUrl", url), imgurl);
+}
+
+class notifAction{
+	constructor(type, data){
+		this.type = type;
+		this.data = data;
+	}
+}
+let chromeAPI_button_availability = true;
+function doActionNotif(title, message, action, imgurl){
+	let options = {
+		type: "basic",
+		title: title,
+		message: message,
+		contextMessage: chrome.runtime.getManifest().name, //"Live Notifier",
+		iconUrl: ((typeof imgurl == "string" && imgurl != "")? imgurl : myIconURL),
+		isClickable: true
+	}
+	
+	let openUrl = {title: _("Open_in_browser"), iconUrl: "/data/images/ic_open_in_browser_black_24px.svg"},
+		close = {title: _("Close"), iconUrl: "/data/images/ic_close_black_24px.svg"},
+		addItem = {title: _("Add"), iconUrl: "/data/images/ic_add_circle_black_24px.svg"},
+		deleteItem = {title: _("Delete"), iconUrl: "/data/images/ic_delete_black_24px.svg"},
+		cancel = {title: _("Cancel"), iconUrl: "/data/images/ic_cancel_black_24px.svg"};
+	
+	if(chromeAPI_button_availability == true){
+		// 2 buttons max per notification
+		// 2nd button is a cancel (no action) button
+		switch(action.type){
+			case "openUrl":
+				// Notification with openUrl action
+				options.buttons = [openUrl, close]
+				break;
+			case "addStream":
+				options.buttons = [addItem, cancel]
+				break;
+			case "deleteStream":
+				options.buttons = [deleteItem, cancel]
+				break;
+			default:
+				options.buttons = [close];
+		}
+	} else if(action.type == "addStream" || action.type == "deleteStream"){
+		options.title = `${options.title} (${_("click_to_confirm")})`;
+	}
+	
+	let notification_id = "";
+	switch(action.type){
+		case "openUrl":
+			// Notification with openUrl action
+			console.info(`Notification (openUrl): "${message}" (${action.data})`);
+			notification_id = JSON.stringify(action);
+			break;
+		case "addStream":
+			console.info(`Notification (addStream): "${message}" (${action.data})`);
+			notification_id = JSON.stringify(action);
+			break;
+		case "deleteStream":
+			console.info(`Notification (deleteStream): "${message}" (${action.data})`);
+			notification_id = JSON.stringify(action);
+			break;
+		default:
+			notification_id = JSON.stringify(new notifAction("none", {timestamp: Date.now()}));
+	}
+	new Promise((resolve, reject) => {
+		chrome.notifications.create(notification_id, options, function(notificationId){
+			if(typeof chrome.runtime.lastError == "object" && chrome.runtime.lastError != null && typeof chrome.runtime.lastError.message == "string" && chrome.runtime.lastError.message.length > 0){
+				reject(chrome.runtime.lastError);
+			}
+		});
+	}).catch((error)=> {
+		if(typeof error == "object" && typeof error.message == "string" && error.message.length > 0){
+			console.dir(error);
+			console.warn(error.message);
+			
+			if(error.message == "Adding buttons to notifications is not supported." || error.message.indexOf("(Property \"buttons\" is unsupported by Firefox)") != -1){
+				chromeAPI_button_availability = false;
+				console.log("Buttons not supported, retrying notification without them.")
+				doActionNotif(title, message, action, imgurl);
+			}
+		}
+	})
+}
+chrome.notifications.onClicked.addListener(function(notificationId){
+	console.info(`${notificationId} (onClicked)`);
+	chrome.notifications.clear(notificationId);
+	doNotificationAction_Event(notificationId);
+});
+chrome.notifications.onButtonClicked.addListener(function(notificationId, buttonIndex){
+	console.info(`${notificationId} (onButtonClicked) - Button index: ${buttonIndex}`);
+	chrome.notifications.clear(notificationId);
+	
+	// 0 is the first button, used as button of action
+	if(buttonIndex == 0){
+		doNotificationAction_Event(notificationId);
+	}
+});
+function doNotificationAction_Event(notificationId){
+	if(typeof notificationId == "string" && notificationId != ""){
+		
+		let action = JSON.parse(notificationId);
+		
+		if(typeof action.type == "string"){
+			if(action.type == "openUrl"){
+				// Notification with openUrl action
+				openTabIfNotExist(action.data);
+			} else if(action.type == "addStream" || action.type == "deleteStream"){
+				let website = action.data.website;
+				let streamListSetting = new streamListFromSetting(website);
+				let id = action.data.id;
+				
+				if(action.type == "addStream"){
+					let url = action.data.url;
+					
+					streamListSetting.addStream(website, id, url);
+					streamListSetting.update();
+					// Update the panel for the new stream added
+					setTimeout(function(){
+						refreshPanel(false);
+					}, 5000);
+				} else if(action.type == "deleteStream"){
+					streamListSetting.deleteStream(website, id);
+					streamListSetting.update();
+					// Update the panel for the deleted stream
+					refreshPanel(false);
+				}
+			} else {
+				// Nothing - Unknown action
+			}
+		}
+	}
+}
+
+function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamOnline){
+	let streamData = liveStatus.get(website).get(id).get(contentId);
+	
+	if(streamData.streamStatus != ""){
+		let lowerCase_status = (streamData.streamStatus).toLowerCase();
+		if(isStreamOnline){
+			let whitelisted = false;
+			
+			if(streamSetting.statusWhitelist){
+				let statusWhitelist = streamSetting.statusWhitelist;
+				for(let i in statusWhitelist){
+					if(lowerCase_status.indexOf(statusWhitelist[i].toLowerCase()) != -1){
+						whitelisted = true;
+						break;
+					}
+				}
+			}
+			if(getPreference("statusWhitelist") != ""){
+				let statusWhitelist_List = getFilterListFromPreference(getPreference("statusWhitelist"));
+				for(let i in statusWhitelist_List){
+					if(lowerCase_status.indexOf(statusWhitelist_List[i].toLowerCase()) != -1){
+						whitelisted = true;
+						break;
+					}
+				}
+			}
+			if((streamSetting.statusWhitelist || getPreference("statusWhitelist") != "") && whitelisted == false){
+				isStreamOnline = false;
+				console.info(`${id} current status does not contain whitelist element(s)`);
+			}
+			
+			let blacklisted = false;
+			
+			if(streamSetting.statusBlacklist){
+				let statusBlacklist = streamSetting.statusBlacklist;
+				for(let i in statusBlacklist){
+					if(lowerCase_status.indexOf(statusBlacklist[i].toLowerCase()) != -1){
+						blacklisted = true;
+					}
+				}
+			}
+			if(getPreference("statusBlacklist") != ""){
+				let statusBlacklist_List = getFilterListFromPreference(getPreference("statusBlacklist"));
+				for(let i in statusBlacklist_List){
+					if(lowerCase_status.indexOf(statusBlacklist_List[i].toLowerCase()) != -1){
+						blacklisted = true;
+						break;
+					}
+				}
+			}
+			if((streamSetting.statusBlacklist || getPreference("statusBlacklist") != "") && blacklisted == true){
+				isStreamOnline = false;
+				console.info(`${id} current status contain blacklist element(s)`);
+			}
+		}
+	}
+	if(typeof streamData.streamGame == "string" && streamData.streamGame != ""){
+		let lowerCase_streamGame = (streamData.streamGame).toLowerCase();
+		if(isStreamOnline){
+			let whitelisted = false;
+			if(streamSetting.gameWhitelist){
+				let gameWhitelist = streamSetting.gameWhitelist;
+				for(let i in gameWhitelist){
+					if(lowerCase_streamGame.indexOf(gameWhitelist[i].toLowerCase()) != -1){
+						whitelisted = true;
+						break;
+					}
+				}
+			}
+			if(getPreference("gameWhitelist") != ""){
+				let gameWhitelist_List = getFilterListFromPreference(getPreference("gameWhitelist"));
+				for(let i in gameWhitelist_List){
+					if(lowerCase_streamGame.indexOf(gameWhitelist_List[i].toLowerCase()) != -1){
+						whitelisted = true;
+						break;
+					}
+				}
+			}
+			if((streamSetting.gameWhitelist || getPreference("gameWhitelist") != "") && whitelisted == false){
+				isStreamOnline = false;
+				console.info(`${id} current game does not contain whitelist element(s)`);
+			}
+			
+			let blacklisted = false;
+			if(streamSetting.gameBlacklist){
+				let gameBlacklist = streamSetting.gameBlacklist;
+				for(let i in gameBlacklist){
+					if(lowerCase_streamGame.indexOf(gameBlacklist[i].toLowerCase()) != -1){
+						blacklisted = true;
+					}
+				}
+			}
+			if(getPreference("gameBlacklist") != ""){
+				let gameBlacklist_List = getFilterListFromPreference(getPreference("gameBlacklist"));
+				for(let i in gameBlacklist_List){
+					if(lowerCase_streamGame.indexOf(gameBlacklist_List[i].toLowerCase()) != -1){
+						blacklisted = true;
+						break;
+					}
+				}
+			}
+			if((streamSetting.gameBlacklist || getPreference("gameBlacklist") != "") && blacklisted == true){
+				isStreamOnline = false;
+				console.info(`${id} current game contain blacklist element(s)`);
+			}
+		}
+		
+	}
+	streamData.liveStatus.filteredStatus = isStreamOnline;
+	return isStreamOnline;
+}
+appGlobal["getCleanedStreamStatus"] = getCleanedStreamStatus;
+
+function doStreamNotif(website, id, contentId, streamSetting){
+	let streamList = (new streamListFromSetting(website)).mapData;
+	let streamData = liveStatus.get(website).get(id).get(contentId);
+	
+	let online = streamData.liveStatus.API_Status;
+	
+	let streamName = streamData.streamName;
+	let streamOwnerLogo = streamData.streamOwnerLogo;
+	let streamCategoryLogo = streamData.streamCategoryLogo;
+	let streamLogo = "";
+	
+	if(typeof streamOwnerLogo == "string" && streamOwnerLogo != ""){
+		streamLogo  = streamOwnerLogo;
+	}
+	
+	let isStreamOnline_filtered = getCleanedStreamStatus(website, id, contentId, streamSetting, online);
+	
+	if(isStreamOnline_filtered){
+		if(((typeof streamList.get(id).notifyOnline == "boolean")? streamList.get(id).notifyOnline : getPreference("notify_online")) == true && streamData.liveStatus.notifiedStatus == false){
+			let streamStatus = ((streamData.streamStatus != "")? ": " + streamData.streamStatus : "") + ((streamData.streamGame != "")? (" (" + streamData.streamGame + ")") : "");
+				if(streamLogo != ""){
+					doNotifUrl(_("Stream_online"), `${streamName}${streamStatus}`, getStreamURL(website, id, contentId, true), streamLogo);
+				} else {
+					doNotifUrl(_("Stream_online"), `${streamName}${streamStatus}`, getStreamURL(website, id, contentId, true));
+				}
+		}
+	} else {
+		if(((typeof streamList.get(id).notifyOffline == "boolean")? streamList.get(id).notifyOffline : getPreference("notify_offline")) == true && streamData.liveStatus.notifiedStatus == true){
+			if(streamLogo != ""){
+				doNotif(_("Stream_offline"),streamName, streamLogo);
+			} else {
+				doNotif(_("Stream_offline"),streamName);
+			}
+		}
+	}
+	streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
+}
+appGlobal["doStreamNotif"] = doStreamNotif;
+
+function getOfflineCount(){
+	var offlineCount = 0;
+	
+	let streamListSetting = (new streamListFromSetting()).mapDataAll;
+	websites.forEach((websiteAPI, website, array) => {
+		streamListSetting.get(website).forEach((streamList, id, array) => {
+			if(typeof streamList.ignore == "boolean" && streamList.ignore == true){
+				// Ignoring stream with ignore set to true from online count
+				//console.log(`[Live notifier - getOfflineCount] ${id} of ${website} is ignored`);
+				return;
+			}
+			
+			if(liveStatus.get(website).has(id)){
+				if(liveStatus.get(website).get(id).size == 0){
+					offlineCount++;
+				} else {
+					liveStatus.get(website).get(id).forEach((streamData, contentId, array) => {
+						if(!streamData.liveStatus.filteredStatus){
+							offlineCount++;
+						}
+					})
+				}
+			}
+		})
+	})
+	return offlineCount;
+}
+appGlobal["getOfflineCount"] = getOfflineCount;
+
+//Changement de l'icone
+function setIcon() {
+	appGlobal["onlineCount"] = 0;
+	let badgeOnlineCount = 0;
+	
+	liveStatus.forEach((website_liveStatus, website, array) => {
+		let streamList = (new streamListFromSetting(website)).mapData;
+		website_liveStatus.forEach((id_liveStatus, id, array) => {
+			if(streamList.has(id) && (typeof streamList.get(id).ignore == "boolean" && streamList.get(id).ignore == true)){
+				// Ignoring stream with ignore set to true from online count
+				//console.log(`[Live notifier - setIcon] ${id} of ${website} is ignored`);
+				return;
+			} else {
+				id_liveStatus.forEach((streamData, contentId, array) => {
+					if(streamData.liveStatus.filteredStatus && streamList.has(id)){
+						appGlobal["onlineCount"] = appGlobal["onlineCount"] + 1;
+						if(streamList.has(id) && !(typeof streamList.get(id).iconIgnore == "boolean" && streamList.get(id).iconIgnore == true)){
+							badgeOnlineCount++;
+						}
+					}
+				})
+			}
+		})
+	})
+	
+	if (badgeOnlineCount > 0){
+		chrome.browserAction.setTitle({title: _("count_stream_online", badgeOnlineCount.toString())});
+	} else {
+		chrome.browserAction.setTitle({title: _("No_stream_online")});
+	}
+	
+	let badgeImage = (badgeOnlineCount > 0)? online_badgeData : offline_badgeData;
+	if(badgeImage != null){
+		chrome.browserAction.setIcon({
+			imageData: badgeImage
+		});
+	} else {
+		console.warn("Icon(s) is/are not loaded");
+	}
+	
+	chrome.browserAction.setBadgeText({text: badgeOnlineCount.toString()});
+	chrome.browserAction.setBadgeBackgroundColor({color: (badgeOnlineCount > 0)? "#FF0000" : "#424242"});
+};
+appGlobal["setIcon"] = setIcon;
+
+let website_channel_id = /channel\:\:(.*)/;
+let facebookID_from_url = /(?:http|https):\/\/(?:www\.)?facebook.com\/([^\/]+)(?:\/.*)?/;
+let twitterID_from_url = /(?:http|https):\/\/(?:www\.)?twitter.com\/([^\/]+)(?:\/.*)?/;
+
+function checkResponseValidity(website, response){
+	let data = response.json;
+	
+	if(data == null || typeof data != "object" || JSON.stringify(data) == "{}"){ // Empty or invalid JSON
+		if(typeof response == "object" && response.hasOwnProperty("status") && typeof response.status == "number" && (/^4\d*$/.test(response.status) == true || /^5\d*$/.test(response.status) == true)){
+			// Request Error
+			console.warn("Unable to get stream state (request error).");
+			return "request_error";
+		} else {
+			if(typeof response == "object" && response.hasOwnProperty("status") && typeof response.status == "number" && response.status == 0){
+				console.warn("Unable to get stream state (timeout).");
+				return "timout";
+			} else {
+				// Parse Error
+				console.warn("Unable to get stream state (response is empty or not valid JSON).");
+				return "parse_error";
+			}
+		}
+	}
+	let state = websites.get(website).checkResponseValidity(data);
+	switch(state){
+		case "error":
+			console.warn(`[${website}] Unable to get stream state (error detected).`);
+			return "error";
+			break;
+		case "vod":
+			console.warn(`[${website}] Unable to get stream state (vod detected).`);
+			return "vod";
+			break;
+		case "notstream":
+			console.warn(`[${website}] Unable to get stream state (not a stream).`);
+			return "notstream";
+			break;
+		case "":
+		case "success":
+			return "success";
+		default:
+			console.warn(`[${website}] Unable to get stream state (${state}).`);
+			return state;
+			break;
+	}
+	
+	return "success";
+}
+function getAPIPrefsObject(prefList){
+	let obj = {}
+	
+	for(let prefID of prefList){
+		obj[prefID] = getPreference(prefID);
+	}
+	
+	return obj;
+}
+
+function isMap(myMap){
+	return (myMap instanceof Map || myMap.constructor.name == "Map");
+}
+function PromiseWaitAll(promises){
+	if(Array.isArray(promises) || isMap(promises)){
+		let count = (isMap(promises))? promises.size : promises.length;
+		let results = {};
+		return new Promise(function(resolve, reject){
+			promises.forEach((promise, index, array) => {
+				let handler = data => {
+					results[index] = data;
+					if(--count == 0){
+						resolve(results);
+					}
+				}
+				
+				if(promise instanceof Promise){
+					promise.then(handler);
+					promise.catch(handler);
+				} else {
+					handler(promise);
+				}
+			})
+			if(count == 0){
+				resolve(results);
+			}
+		});
+	} else {
+		throw "promises should be an Array or Map of Promise"
+	}
+}
+function convertMS(ms) { // From https://gist.github.com/remino/1563878 with the ms rest added
+	let d, h, m, s, new_ms;
+	s = Math.floor(ms / 1000);
+	new_ms = Math.floor((ms % 1000) * 1000) / 1000;
+	m = Math.floor(s / 60);
+	s = s % 60;
+	h = Math.floor(m / 60);
+	m = m % 60;
+	d = Math.floor(h / 24);
+	h = h % 24;
+	return { d: d, h: h, m: m, s: s, ms: new_ms };
+}
+let timingMarks = new Map();
+function timing(id){
+	timingMarks.set(id, performance.now());
+};
+function timingEnd(id){
+	let result = {};
+	
+	if(timingMarks.has(id)){
+		let duration = performance.now() - timingMarks.get(id);
+		timingMarks.delete(id);
+		let extracted = convertMS(duration);
+		return {
+			"raw": duration,
+			"timing": `${(extracted.d != 0)? `${extracted.d}d` : ""}${(extracted.h != 0)? `${extracted.h}h` : ""}${(extracted.m != 0)? `${extracted.m}m` : ""}${(extracted.s != 0)? `${extracted.s}s` : ""}${extracted.ms}ms`
+		}
+	} else {
+		throw `${id} not started`
+	}
+}
+function getBase64Picture(pictureNode){
+	// Return base64 picture node loaded, and return a promise if not
+	let loadImageData = function(){
+		var canvas = document.createElement("canvas");
+		canvas.width = pictureNode.naturalWidth;
+		canvas.height = pictureNode.naturalHeight;
+		
+		var ctx = canvas.getContext("2d");
+		ctx.drawImage(pictureNode, 0, 0);
+		
+		return canvas.toDataURL();
+	}
+	if(pictureNode.complete == true){
+		return loadImageData();
+	} else {
+		return new Promise(function(resolve, reject){
+			pictureNode.onload = function(){
+				resolve(loadImageData());
+			}
+		})
+	}
+}
+
+let DATAs, streamsTimings, needCheckMissing = false;
+appGlobal["checkingLivesFinished"] = true;
+function checkLives(idArray){
+	return new Promise(function(resolve, reject){
+		let promises = new Map();
+		
+		DATAs = new Map();
+		streamsTimings = new Map();
+		appGlobal["checkingLivesFinished"] = false;
+		timing("checkLives");
+		
+		let streamListSetting = new streamListFromSetting();
+		
+		let listToCheck;
+		if(typeof idArray != "undefined" && idArray instanceof Map){
+			listToCheck = idArray;
+		} else {
+			listToCheck = streamListSetting.mapDataAll;
+			console.group();
+			console.info("[Live Notifier] Checking lives...");
+			console.dir(mapToObj(streamListSetting.mapDataAll));
+			console.groupEnd();
+		}
+		
+		websites.forEach((websiteAPI, website, array) => {
+			if(listToCheck.has(website)){
+				listToCheck.get(website).forEach((streamList, id, array) => {
+					if(typeof streamList.ignore == "boolean" && streamList.ignore == true){
+						//console.info(`Ignoring ${id}`);
+						return;
+					}
+					let onStreamCheckEnd = function(promiseResult){
+						streamsTimings.set(`${website}::${id}`, timingEnd(`${website}::${id}`).timing);
+						if((typeof promiseResult == "string" && promiseResult.indexOf("StreamChecked") != -1) || (typeof promiseResult == "object" && JSON.stringify(promiseResult).indexOf("StreamChecked") != -1)){
+							liveStatus.get(website).get(id).forEach((value, contentId, array) => {
+								if((typeof promiseResult == "string" && promiseResult.indexOf("StreamChecked") != -1) || (typeof promiseResult == "object" && typeof promiseResult[contentId] == "string" && promiseResult[contentId].indexOf("StreamChecked") != -1)){
+									doStreamNotif(website, id, contentId, streamList);
+								}
+							})
+						}
+						setIcon();
+					}
+					timing(`${website}::${id}`);
+					promises.set(`${website}/${id}`, getPrimary(id, "", website, streamList));
+					promises.get(`${website}/${id}`)
+						.then(onStreamCheckEnd)
+						.catch(onStreamCheckEnd)
+				})
+			}
+		})
+		
+		let onPromiseEnd = function(result){
+			console.group();
+			console.info(`[Live notifier] Live check end`);
+			
+			console.group();
+			console.info(`Promises result:`);
+			console.dir(result);
+			console.groupEnd();
+			
+			console.group();
+			console.info(`Timings:`);
+			if(typeof performance.clearResourceTimings == "function"){
+				performance.clearResourceTimings();
+			}
+			console.info("checkLives: " + timingEnd("checkLives").timing);
+			console.dir(streamsTimings);
+			console.groupEnd();
+			
+			console.group();
+			console.info(`DATAs:`);
+			console.dir(mapToObj(DATAs));
+			console.groupEnd();
+			
+			console.groupEnd();
+			appGlobal["checkingLivesFinished"] = true;
+			resolve(result);
+			
+			if(!(typeof idArray != "undefined" && idArray instanceof Map)){ // Only reset interval if it's a "full" check
+				clearInterval(interval);
+				interval = setInterval(checkLives, getPreference('check_delay') * 60000);
+			}
+			
+			if(needCheckMissing){
+				checkMissing();
+			}
+		}
+		if(promises.size == 0){
+			setIcon();
+		}
+		PromiseWaitAll(promises)
+			.then(onPromiseEnd)
+			.catch(onPromiseEnd)
+		
+		
+		if(!(typeof idArray != "undefined" && idArray instanceof Map)){ // Only reset interval if it's a "full" check
+			clearInterval(interval);
+			interval = setInterval(checkLives, getPreference('check_delay') * 60000);
+		}
+	})
+}
+function checkMissing(){
+	if(appGlobal["checkingLivesFinished"]){
+		let listToCheck = new Map();
+		let streamListSetting = new streamListFromSetting().mapDataAll;
+		websites.forEach((websiteAPI, website, array) => {
+			streamListSetting.get(website).forEach((streamList, id, array) => {
+				if(typeof streamList.ignore == "boolean" && streamList.ignore == true){
+					return;
+				}
+				if(!(liveStatus.get(website).has(id))){
+					console.info(`${id} from ${website} is not checked yet`);
+					
+					if(!listToCheck.has(website)){
+						listToCheck.set(website, new Map())
+					}
+					listToCheck.get(website).set(id, streamList);
+				}
+			})
+		})
+		
+		if(listToCheck.size > 0){
+			let refresh = function(result){
+				if(typeof refreshPanel == "function"){
+					refreshPanel();
+				} else {
+					sendDataToMain("refreshPanel", "");
+				}
+			}
+			checkLives(listToCheck)
+				.then(refresh)
+				.catch(refresh)
+		}
+	} else {
+		needCheckMissing = true;
+	}
+}
+appGlobal["checkMissing"] = checkMissing;
+
+function getPrimary(id, contentId, website, streamSetting, url, pageNumber){
+	let promise = new Promise(function(resolve, reject){
+		let current_API = websites.get(website).API((typeof contentId == "string" && contentId != "")? contentId :  id, (websites.get(website).hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites.get(website).APIs_RequiredPrefs) : {});
+		if(typeof url == "string"){
+			current_API.url = url;
+		}
+		
+		let getPrimary_RequestOptions = {
+			url: current_API.url,
+			overrideMimeType: current_API.overrideMimeType,
+			onComplete: function (response) {
+				let data = response.json;
+				
+				if(!DATAs.has(`${website}/${id}`)){
+					DATAs.set(`${website}/${id}`, new Map());
+				}
+				if(typeof contentId == "string" && contentId != ""){
+					if(!DATAs.get(`${website}/${id}`).has(contentId)){
+						DATAs.get(`${website}/${id}`).set(contentId, new Map());
+					}
+					DATAs.get(`${website}/${id}`).get(contentId).set("getPrimary", {"url": response.url, "data": data});
+				} else {
+					DATAs.get(`${website}/${id}`).set("getPrimary", {"url": response.url, "data": data});
+				}
+				
+				if(!liveStatus.get(website).has(id)){
+					liveStatus.get(website).set(id, new Map());
+				}
+				
+				if(!(typeof contentId == "string" && contentId != "") && website_channel_id.test(id) == true){
+					if(typeof pageNumber == "number"){
+						processChannelList(id, website, streamSetting, response, pageNumber)
+							.then(resolve)
+							.catch(reject)
+					} else {
+						getChannelInfo(website, id)
+							.then(function(){
+								processChannelList(id, website, streamSetting, response)
+									.then(resolve)
+									.catch(reject)
+							})
+							.catch(reject)
+					}
+				} else {
+					if(!(typeof contentId == "string" && contentId != "")){
+						contentId = id;
+					}
+					
+					processPrimary(id, contentId, website, streamSetting, response)
+						.then(resolve)
+						.catch(reject)
+				}
+			}
+		}
+		
+		if(current_API.hasOwnProperty("headers") == true){
+			getPrimary_RequestOptions.headers = current_API.headers;
+		}
+		
+		Request(getPrimary_RequestOptions).get();
+	});
+	return promise;
+}
+appGlobal["getPrimary"] = getPrimary;
+
+function processChannelList(id, website, streamSetting, response, pageNumber){
+	let promise = new Promise(function(resolve, reject){
+		let promises = new Map();
+		
+		let data = response.json;
+		
+		if(!channelInfos.get(website).has(id)){
+			let defaultChannelInfos = channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notificationStatus": false, "lastCheckStatus": "", "liveList": {}}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+		}
+		
+		let responseValidity = checkResponseValidity(website, response);
+		if(responseValidity == "success"){
+			let streamListData;
+			if(typeof pageNumber == "number"){
+				streamListData = websites.get(website).channelList(id, website, data, pageNumber);
+			} else {
+				streamListData = websites.get(website).channelList(id, website, data);
+			}
+			
+			if(typeof pageNumber != "number"){
+				// First loop
+				channelInfos.get(website).get(id).liveStatus.liveList = {};
+			}
+			
+			if(!isMap(streamListData.streamList) || streamListData.streamList.size == 0){
+				//getChannelInfo(website, id);
+				channelListEnd(website, id, streamSetting);
+				
+				resolve((isMap(streamListData.streamList))? "EmptyList" : "InvalidList");
+			} else {
+				streamListData.streamList.forEach((value, contentId, array) => {
+					channelInfos.get(website).get(id).liveStatus.liveList[contentId] = "";
+					
+					if(value == null){
+						promises.set(contentId, getPrimary(id, contentId, website, streamSetting));
+					} else {
+						promises.set(contentId, processPrimary(id, contentId, website, streamSetting, {"json": value}));
+					}
+				})
+				
+				if(streamListData.hasOwnProperty("next") == true){
+					if(streamListData.next == null){
+						channelListEnd(website, id, streamSetting);
+					} else {
+						promises.set("next", getPrimary(id, "", website, streamSetting, streamListData.url, streamListData.next_page_number));
+					}
+				}
+				
+				PromiseWaitAll(promises)
+					.then(resolve)
+					.catch(reject)
+			}
+		} else {
+			//getChannelInfo(website, id);
+			channelListEnd(website, id, streamSetting);
+			
+			resolve(responseValidity);
+		}
+	});
+	return promise;
+}
+function channelListEnd(website, id, streamSetting){
+	for(let contentId in liveStatus.get(website).get(id)){
+		if(channelInfos.get(website).get(id).liveStatus.liveList.hasOwnProperty(contentId) == false){
+			liveStatus.get(website).get(id).get(contentId).liveStatus.API_Status = false;
+			doStreamNotif(website, id, contentId, streamSetting);
+			liveStatus.get(website).get(id).delete(contentId);
+		}
+	}
+}
+
+function processPrimary(id, contentId, website, streamSetting, response){
+	let promise = new Promise(function(resolve, reject){
+		let data = response.json;
+		if(!liveStatus.get(website).get(id).has(contentId)){
+			let defaultStatus = liveStatus.get(website).get(id).set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+		}
+		let responseValidity = liveStatus.get(website).get(id).get(contentId).liveStatus.lastCheckStatus = checkResponseValidity(website, response);
+		if(responseValidity == "success"){
+			let liveState = websites.get(website).checkLiveStatus(id, contentId, data, liveStatus.get(website).get(id).get(contentId), (channelInfos.has(website) && channelInfos.get(website).has(id))? channelInfos.get(website).get(id) : null);
+			if(liveState != null){
+				liveStatus.get(website).get(id).set(contentId, liveState);
+				
+				if(websites.get(website).hasOwnProperty("API_second") == true){
+					let second_API = websites.get(website).API_second(contentId, (websites.get(website).hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites.get(website).APIs_RequiredPrefs) : {});
+					
+					let second_API_RequestOptions = {
+						url: second_API.url,
+						overrideMimeType: second_API.overrideMimeType,
+						onComplete: function (response) {
+							let data_second = response.json;
+							
+							if(!DATAs.get(`${website}/${id}`).has(contentId)){
+								DATAs.get(`${website}/${id}`).set(contentId, new Map())
+							}
+							DATAs.get(`${website}/${id}`).get(contentId).set("getSecond", {"url": response.url, "data": data_second});
+							
+							let responseValidity = checkResponseValidity(website, response);
+							if(responseValidity == "success"){
+								let newLiveStatus = websites.get(website).seconderyInfo(id, contentId, data_second, liveStatus.get(website).get(id).get(contentId));
+								if(typeof newLiveStatus == "object" && newLiveStatus != null){
+									liveStatus.get(website).get(id).set(contentId, newLiveStatus);
+									resolve("StreamChecked_With2ndAPI");
+								} else {
+									resolve("StreamChecked");
+								}
+							} else {
+								resolve(responseValidity);
+							}
+							//doStreamNotif(website, id, contentId, streamSetting);
+							//setIcon();
+						}
+					}
+					
+					if(second_API.hasOwnProperty("headers") == true){
+						second_API_RequestOptions.headers = second_API.headers;
+					}
+					
+					Request(second_API_RequestOptions).get();
+				} else {
+					resolve("StreamChecked");
+					//doStreamNotif(website, id, contentId, streamSetting);
+				}
+			} else {
+				console.warn("Unable to get stream state.");
+				resolve("liveState is null");
+			}
+		} else {
+			resolve(responseValidity);
+		}
+	});
+	return promise;
+}
+function getChannelInfo(website, id){
+	let promise = new Promise(function(resolve, reject){
+		let channelInfos_API = websites.get(website).API_channelInfos(id, (websites.get(website).hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites.get(website).APIs_RequiredPrefs) : {});
+		
+		if(!channelInfos.get(website).has(id)){
+			let defaultChannelInfos = channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+		}
+		if(websites.get(website).hasOwnProperty("API_channelInfos") == true){
+			let getChannelInfo_RequestOptions = {
+				url: channelInfos_API.url,
+				overrideMimeType: channelInfos_API.overrideMimeType,
+				onComplete: function (response) {
+					let data_channelInfos = response.json;
+					
+					if(!DATAs.has(`${website}/${id}`)){
+						DATAs.set(`${website}/${id}`, new Map());
+					}
+					DATAs.get(`${website}/${id}`).set("getChannelInfo", {"url": response.url, "data": data_channelInfos});
+					
+					let responseValidity = channelInfos.get(website).get(id).liveStatus.lastCheckStatus = checkResponseValidity(website, response);
+					if(responseValidity == "success"){
+						let newChannelInfos = websites.get(website).channelInfosProcess(id, data_channelInfos, channelInfos.get(website).get(id));
+						if(typeof newChannelInfos == "object" && newChannelInfos != null){
+							channelInfos.get(website).set(id, newChannelInfos);
+						}
+					}
+					resolve(responseValidity);
+				}
+			}
+			
+			if(channelInfos_API.hasOwnProperty("headers") == true){
+				getChannelInfo_RequestOptions.headers = channelInfos_API.headers;
+			}
+			
+			Request(getChannelInfo_RequestOptions).get();
+		}
+	});
+	return promise;
+}
+
+function importButton(website){
+	let importationPromiseEnd = (reason) => {
+		console.group();
+		console.info(`Importation for ${website} finished`);
+		console.dir(reason);
+		console.groupEnd();
+		refreshPanel(false);
+	}
+	if(typeof websites.get(website).importAPIGetUserId == "function" && typeof websites.get(website).importGetUserId == "function"){
+		let importAPIGetUserId = websites.get(website).API(`${getPreference(`${website}_user_id`)}`);
+		Request({
+			url: importAPIGetUserId.url,
+			overrideMimeType: importAPIGetUserId.overrideMimeType,
+			onComplete: function (response) {
+				let data = response.json;
+				
+				if(checkResponseValidity(website, response) != "success"){
+					console.warn(`Sometimes bad things just happen - ${website} - ${response.url}`);
+					doNotif("Live notifier", _("An_error_occurred_when_importing_check_your_id_or_the_website_availability"));
+				} else {
+					console.group();
+					console.info(`${website} - ${response.url}`);
+					console.dir(data);
+					console.groupEnd();
+					
+					let real_id = websites.get(website).importGetUserId(data);
+					
+					importStreams(website, real_id)
+						.then(importationPromiseEnd)
+						.catch(importationPromiseEnd)
+				}
+			}
+		}).get();
+	} else {
+		importStreams(website, getPreference(`${website}_user_id`))
+			.then(importationPromiseEnd)
+			.catch(importationPromiseEnd)
+	}
+}
+function importStreams(website, id, url, pageNumber){
+	return new Promise(function(resolve, reject){
+		let current_API = websites.get(website).importAPI(id, (websites.get(website).hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites.get(website).APIs_RequiredPrefs) : {});
+		if(typeof url == "string" && url != ""){
+			current_API.url = url;
+		} else {
+			console.time(`${website}::${id}`);
+		}
+		let importStreams_RequestOptions = {
+			url: current_API.url,
+			overrideMimeType: current_API.overrideMimeType,
+			onComplete: function (response) {
+				let data = response.json;
+				
+				console.group();
+				console.info(`${website} - ${id} (${response.url})`);
+				console.dir(data);
+				console.groupEnd();
+				
+				let streamListSetting = new streamListFromSetting(website);
+				
+				let importStreamList_Data;
+				if(typeof pageNumber == "number"){
+					importStreamList_Data = websites.get(website).importStreamWebsites(id, data, streamListSetting, pageNumber);
+				} else {
+					importStreamList_Data = websites.get(website).importStreamWebsites(id, data, streamListSetting);
+				}
+				
+				
+				for(let id of importStreamList_Data.list){
+					streamListSetting.addStream(website, id, "");
+				}
+				streamListSetting.update();
+				
+				if(importStreamList_Data.hasOwnProperty("next") == true && importStreamList_Data.next != null){
+					if(importStreamList_Data.next.hasOwnProperty("pageNumber") == true){
+						importStreams(website, id, importStreamList_Data.next.url, importStreamList_Data.next.pageNumber)
+							.then(resolve)
+							.catch(resolve)
+					} else {
+						importStreams(website, id, importStreamList_Data.next.url)
+							.then(resolve)
+							.catch(resolve)
+					}
+				} else {
+					importStreamsEnd(website, id);
+					resolve("ImportEnd");
+				}
+				
+			}
+		}
+		
+		if(current_API.hasOwnProperty("headers") == true){
+			importStreams_RequestOptions.headers = current_API.headers;
+		}
+		
+		Request(importStreams_RequestOptions).get();
+	})
+}
+function importStreamsEnd(website, id){
+	setIcon();
+	console.timeEnd(`${website}::${id}`);
+}
+
+//				------ Load / Unload Event(s) ------				//
+
+// Load online/offline badges
+let online_badgeData = null;
+let offline_badgeData = null;
+
+function loadSVGAsCanvas(id, src, width, height){
+	return new Promise((resolve, reject) => {
+		let old_node = document.querySelector(`canvas#id`);
+		if(old_node != null){
+			old_node.parentNode.removeChild(old_node);
+		}
+		
+		let canvasNode = document.createElement('canvas');
+		canvasNode.id = id;
+		canvasNode.width = width;
+		canvasNode.height = height;
+		document.querySelector("body").appendChild(canvasNode);
+		  
+		// Get drawing context for the Canvas
+		let canvasContext = canvasNode.getContext('2d');
+		  
+		// Load up our image.
+		let mySVG = new Image();
+		mySVG.src = src;
+		mySVG.width = width;
+		mySVG.height = height;
+		// Render our SVG image to the canvas once it loads.
+		mySVG.onload = function(){
+			canvasContext.drawImage(mySVG, 0, 0, width, height);
+			resolve(canvasContext.getImageData(0, 0, width, height));
+		}
+	})
+}
+function loadBadges(){
+	return new Promise((resolve, reject) => {
+		let canvasPromises = new Map();
+		
+		canvasPromises.set("live_online", loadSVGAsCanvas("live_online", "/data/live_online.svg", 19, 19));
+		canvasPromises.get("live_online").then((data) => {
+			if(data instanceof ImageData){
+				online_badgeData = data;
+			}
+		})
+		canvasPromises.set("live_offline", loadSVGAsCanvas("live_offline", "/data/live_offline.svg", 19, 19))
+		canvasPromises.get("live_offline").then((data) => {
+			if(data instanceof ImageData){
+				offline_badgeData = data;
+			}
+		})
+		
+		PromiseWaitAll(canvasPromises)
+			.then(resolve)
+			.catch(reject)
+	})
+}
+loadBadges();
+
+function getRedirectedURL(URL, maxRedirect){
+	return new Promise((resolve, reject) => {
+		Request({
+			url: URL,
+			contentType: "document",
+			onComplete: function (data) {
+				if(data.response == null){
+					resolve(URL);
+				} else {
+					let redirectMetaNode = data.response.querySelector("meta[http-equiv=refresh]");
+					let getURL = /0;URL\=(.*)/i;
+					
+					if(typeof maxRedirect == "number" && redirectMetaNode != null && getURL.test(redirectMetaNode.content)){
+						let newURL = getURL.exec(redirectMetaNode.content)[1];
+						getRedirectedURL(newURL, maxRedirect - 1)
+							.then((result) => {
+								resolve(result);
+							})
+							.catch((result) => {
+								reject(result);
+							})
+					} else if(typeof data.url == "string" && data.url != ""){
+						resolve(data.url);
+					} else {
+						resolve(URL);
+					}
+				}
+			}
+		}).get();
+	})
+}
+
+// Begin to check lives
+var interval
+function initAddon(){
+		chrome.contextMenus.removeAll();
+		chrome.contextMenus.create({
+			"title": _("Add_this"),
+			"contexts": ["link"],
+			"targetUrlPatterns": ["http://*/*", "https://*/*"],
+			"onclick": function(info, tab){
+				activeTab = tab;
+				let url = info.linkUrl;
+				console.info(`[ContextMenu] URL: ${url}`);
+				
+				getRedirectedURL(url, 5)
+					.then((result) => {
+						if((result.indexOf("http://") == 0 || result.indexOf("https://") == 0) && url != result){
+							console.info(`Redirected URL: ${result}`)
+							addStreamFromPanel({"ContextMenu_URL": result});
+						} else {
+							addStreamFromPanel({"ContextMenu_URL": url});
+						}
+					})
+					.catch((error) => {
+						if(typeof error == "object"){
+							console.dir(error);
+						} else {
+							console.warn(error);
+						}
+						addStreamFromPanel({"ContextMenu_URL": url});
+					})
+			}
+		});
+		
+		/*		----- Move localStorage (HTML5) to chrome local storage area -----		*/
+		for(let prefId in localStorage){
+			if(localStorage.getItem(prefId) != null){
+				savePreference(prefId, localStorage.getItem(prefId));
+			}
+		}
+		localStorage.clear();
+		
+		let localToRemove = [];
+		/* 		----- Importation/Removal of old preferences -----		*/
+		if(getPreference("stream_keys_list") == ""){
+			let importSreamsFromOldVersion = function(){
+				let somethingElseThanSpaces = /[^\s]+/;
+				let newPrefTable = [];
+				websites.forEach((websiteAPI, website, array) => {
+					let pref = getPreference(`${website}_keys_list`);
+					if(typeof pref != "undefined" && pref != "" && somethingElseThanSpaces.test(pref)){
+						let myTable = pref.split(",");
+						for(let i in myTable){
+							newPrefTable.push(`${website}::${myTable[i]}`);
+						}
+					}
+				})
+				savePreference("stream_keys_list", newPrefTable.join(", "));
+				websites.forEach((websiteAPI, website, array) => {
+					localToRemove.push(`${website}_keys_list`);
+					if(appGlobal.currentPreferences.hasOwnProperty("notification_type")){
+						delete appGlobal.currentPreferences[`${website}_keys_list`];
+					}
+				})
+			}
+			importSreamsFromOldVersion();
+		}
+		
+		if(typeof chrome.runtime.onInstalled != "undefined" && typeof getPreference("livenotifier_version") == "string"){
+			localToRemove.push("livenotifier_version");
+			if(appGlobal.currentPreferences.hasOwnProperty("livenotifier_version")){
+				delete appGlobal.currentPreferences.livenotifier_version;
+			}
+		}
+		if(typeof getPreference("notification_type") == "string"){
+			localToRemove.push("notification_type");
+			if(appGlobal.currentPreferences.hasOwnProperty("notification_type")){
+				delete appGlobal.currentPreferences.notification_type;
+			}
+		}
+		if(localToRemove.length > 0){
+			chrome.storage.local.remove(localToRemove, function(){
+				if(typeof chrome.runtime.lastError == "object" && chrome.runtime.lastError != null){
+					console.warn(`Error removing preference(s) from chrome local storage: ${chrome.runtime.lastError}`);
+				}
+			});
+		}
+		
+		let toRemove = ["livenotifier_version","notification_type"];
+		websites.forEach((websiteAPI, website, array) => {
+			toRemove.push(`${website}_keys_list`);
+		})
+
+		if(typeof chrome.storage.sync == "object"){
+			chrome.storage.sync.remove(toRemove, function(){
+				if(typeof chrome.runtime.lastError != "undefined" && chrome.runtime.lastError != null){
+					console.warn(`Error removing preference(s) from chrome sync storage: ${chrome.runtime.lastError}`);
+				}
+			});
+		}
+		
+		/* 		----- Fin Importation/Removal des vieux paramères -----		*/
+		
+		websites.forEach((websiteAPI, website, array) => {
+			liveStatus.set(website, new Map());
+			channelInfos.set(website, new Map());
+		})
+		
+		checkLives();
+}
+
+// Checking if updated
+let previousVersion = "";
+let current_version = appGlobal["version"] = chrome.runtime.getManifest().version;
+function checkIfUpdated(details){
+	let getVersionNumbers =  /^(\d*)\.(\d*)\.(\d*)$/;
+	
+	let installReason = details.reason;
+	console.info(`Runtime onInstalled reason: ${installReason}`);
+	
+	// Checking if updated
+	if(installReason == "update" || installReason == "unknown"){
+		previousVersion = details.previousVersion;
+		let previousVersion_numbers = getVersionNumbers.exec(previousVersion);
+		let current_version_numbers = getVersionNumbers.exec(current_version);
+		
+		if(previousVersion != current_version){
+			if(current_version_numbers.length == 4 && previousVersion_numbers.length == 4){
+				if(current_version_numbers[1] > previousVersion_numbers[1]){
+					doNotif("Live notifier", _("Addon_have_been_updated", current_version));
+				} else if((current_version_numbers[1] == previousVersion_numbers[1]) && (current_version_numbers[2] > previousVersion_numbers[2])){
+					doNotif("Live notifier", _("Addon_have_been_updated", current_version));
+				} else if((current_version_numbers[1] == previousVersion_numbers[1]) && (current_version_numbers[2] == previousVersion_numbers[2]) && (current_version_numbers[3] > previousVersion_numbers[3])){
+					doNotif("Live notifier", _("Addon_have_been_updated", current_version));
+				}
+			}
+		}
+	}
+	if(typeof chrome.runtime.onInstalled == "object" && typeof chrome.runtime.onInstalled.removeListener == "function"){
+		chrome.runtime.onInstalled.removeListener(checkIfUpdated);
+	} else {
+		savePreference("livenotifier_version", current_version);
+	}
+}
+
+chrome.storage.local.get(optionsData.options_default,function(currentLocalStorage) {
+	let currentPreferences = {};
+	for(let prefId in currentLocalStorage){
+		currentPreferences[prefId] = currentLocalStorage[prefId];
+	}
+	console.group()
+	console.info("Current preferences in the local storage:")
+	console.dir(currentPreferences);
+	console.groupEnd();
+	appGlobal.currentPreferences = currentPreferences;
+	
+	if(typeof chrome.runtime.onInstalled == "object" && typeof chrome.runtime.onInstalled.removeListener == "function"){
+		chrome.runtime.onInstalled.addListener(checkIfUpdated);
+	} else {
+		console.warn("chrome.runtime.onInstalled is not available");
+		let details;
+		if(typeof getPreference("livenotifier_version") == "string"){
+			details = {
+				"reason": "unknown",
+				"previousVersion": localStorage.getItem("livenotifier_version")
+			}
+		} else {
+			details = {
+				"reason": "install",
+				"previousVersion": "0.0.0"
+			}
+		}
+		
+		checkIfUpdated(details);
+	}
+	
+	loadJS(document, "/data/js/", ["backgroundTheme.js"]);
+	loadJS(document, "/data/js/platforms/", ["beam.js", "dailymotion.js", "hitbox.js", "twitch.js", "youtube.js"])
+		.then(initAddon)
+		.catch(initAddon)
+})

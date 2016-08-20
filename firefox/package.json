@@ -1,7 +1,7 @@
 {
 	"name": "livenotifier",
 	"description": "Be notified of streams from Beam, Dailymotion, Hitbox, Twitch and Youtube",
-	"version": "8.0.0-pre10",
+	"version": "7.2.6",
 	"author": "Zatsune No Mokou",
 	"engines": {
 		"firefox": ">=45.0a1"

@@ -1,0 +1,368 @@
+{
+	"extName": {
+		"message": "Live notifier",
+		"description": ""
+	},
+	"extShortDesc": {
+		"message": "Soyez notifiés des streams de Beam, Dailymotion, Hitbox, Twitch et Youtube.",
+		"description": "this will be used as short description in web stores: MUST BE 132 characters OR LESS"
+	},
+	"Open_in_browser": {
+		"message": "Ouvrir dans le navigateur"
+	},
+	"Close": {
+		"message": "Fermer"
+	},
+	"Add": {
+		"message": "Ajouter"
+	},
+	"Delete": {
+		"message": "Supprimer"
+	},
+	"Cancel": {
+		"message": "Annuler"
+	},
+	"Ok": {
+		"message": "Ok"
+	},
+	"Stream_online": {
+		"message": "Stream en ligne"
+	},
+	"Stream_offline": {
+		"message": "Stream hors ligne"
+	},
+	"No_stream_online": {
+		"message": "Aucun stream en ligne"
+	},
+	"No_stream_offline": {
+		"message": "Aucun stream hors ligne"
+	},
+	"count_stream_online": {
+		"message": "$count$ stream(s) en ligne",
+		"placeholders": {
+			"count": {
+				"content": "$1"
+			}
+		}
+	},
+	"count_stream_offline": {
+		"message": "$count$ stream(s) hors ligne",
+		"placeholders": {
+			"count": {
+				"content": "$1"
+			}
+		}
+	},
+	"Add_this": {
+		"message": "Ajouter cela"
+	},
+	"is_already_configured": {
+		"message": "est déjà configuré."
+	},
+	"wasnt_configured_but_error_retrieving_data": {
+		"message": "n'était pas configuré, mais une erreur s'est produite lors de la récupération des données."
+	},
+	"wasnt_configured_and_have_been_added": {
+		"message": "n'était pas configuré, et a été ajouté."
+	},
+	"wasnt_configured_and_can_be_added": {
+		"message": "n'était pas configuré, et peut être ajouté."
+	},
+	"The_channel": {
+		"message": "La chaine $channel$",
+		"placeholders": {
+			"channel": {
+				"content": "$1"
+			}
+		}
+	},
+	"The_stream": {
+		"message": "Le stream $channel$",
+		"placeholders": {
+			"channel": {
+				"content": "$1"
+			}
+		}
+	},
+	"click_to_confirm": {
+		"message": "cliquer pour confirmer"
+	},
+	"have_been_added": {
+		"message": "a été ajouté."
+	},
+	"No_supported_stream_detected_in_the_current_tab_so_nothing_to_add": {
+		"message": "Aucun stream supporté détecté dans l'onglet actuel, donc, rien à ajouter."
+	},
+	"delete_tooltip": {
+		"message": "Pour supprimer un stream des paramètres, le déplacer dans la poubelle."
+	},
+	"I_am_watching_the_stream_of": {
+		"message": "Je regarde le stream de"
+	},
+	"will_be_deleted_are_you_sure": {
+		"message": "va être supprimé, êtes-vous certain(e)?"
+	},
+	"has_been_deleted": {
+		"message": "a été supprimé."
+	},
+	"Livestreamer_command_copied_into_the_clipboard": {
+		"message": "Commande Livestreamer copiée dans le presse papier"
+	},
+	"clipboad_failed": {
+		"message": "Echec de la copie dans le presse-papier. Ceci n'est pas supporté, ou la permission est manquante"
+	},
+	"Addon_have_been_updated": {
+		"message": "Extension mise à jour (version $version$)",
+		"placeholders": {
+			"version": {
+				"content": "$1"
+			}
+		}
+	},
+	"customURl_title": {
+		"message": "URL personalisée"
+	},
+	"blacklist_title": {
+		"message": "Liste noire"
+	},
+	"whitelist_title": {
+		"message": "Liste blanche"
+	},
+	"Status_title": {
+		"message": "Status"
+	},
+	"Game_title": {
+		"message": "Jeu"
+	},
+	"twitter_title":{
+		"message": "Twitter"
+	},
+	"hideStream_title": {
+		"message": "Cacher le stream"
+	},
+	"ignoreStream_title": {
+		"message": "Ignorer le stream"
+	},
+	"iconIgnore_title": {
+		"message": "Ignorer pour l'icone"
+	},
+	"notifyOnline_title": {
+		"message": "Notification lorsque le stream commence"
+	},
+	"notifyOffline_title": {
+		"message": "Notification lorsque le stream fini"
+	},
+	"stream_keys_list_title": {
+		"message": "Clés de streams à notifier"
+	},
+	"stream_keys_list_description": {
+		"message": "Liste des streams dans une liste séparée par des virgules"
+	},
+	"dailymotion_user_id_description": {
+		"message": "Entrez votre id Dailymotion pour pouvoir importer les streameurs que vous suivez"
+	},
+	"dailymotion_user_id_title": {
+		"message": "Votre id Dailymotion"
+	},
+	"dailymotion_user_id_description": {
+		"message": "Entrez votre id Dailymotion pour pouvoir importer les streameurs que vous suivez"
+	},
+	"dailymotion_import_title":{
+		"message": "Importez les streameurs Dailymotion que vous suivez"
+	},
+	"dailymotion_import":{
+		"message": "Importer"
+	},
+	"hitbox_user_id_title": {
+		"message": "Votre id Hitbox"
+	},
+	"hitbox_user_id_description": {
+		"message": "Entrez votre id Hitbox pour pouvoir importer les streameurs que vous suivez"
+	},
+	"hitbox_import_title":{
+		"message": "Importez les streameurs Hitbox que vous suivez"
+	},
+	"hitbox_import": {
+		"message": "Importer"
+	},
+	"twitch_user_id_title": {
+		"message": "Votre id Twitch"
+	},
+	"twitch_user_id_description": {
+		"message": "Entrez votre id Twitch pour pouvoir importer les streameurs que vous suivez"
+	},
+	"twitch_import_title":{
+		"message": "Importez les streameurs Twitch que vous suivez"
+	},
+	"twitch_import": {
+		"message": "Importer"
+	},
+	"beam_user_id_title": {
+		"message": "Votre id Beam"
+	},
+	"beam_user_id_description": {
+		"message": "Entrez votre id Beam pour pouvoir importer les streameurs que vous suivez"
+	},
+	"beam_import_title":{
+		"message": "Importez les streameurs Beam que vous suivez"
+	},
+	"beam_import": {
+		"message": "Importer"
+	},
+	"An_error_occurred_when_importing_check_your_id_or_the_website_availability": {
+		"message": "Une erreur s'est produite lors de l'importation, vérifier votre id ou la disponibilité du site"
+	},
+	"check_delay_title": {
+		"message": "Délais de vérification de streams"
+	},
+	"check_delay_description": {
+		"message": "Délai entre chaque vérification, en minute"
+	},
+	"notification_type_title": {
+		"message": "Type de notification"
+	},
+	"notification_type_web": {
+		"message": "Web"
+	},
+	"notification_type_chrome_api": {
+		"message": "API Chrome"
+	},
+	"notify_online_title": {
+		"message": "Affiche une notification lorsqu'un stream commence"
+	},
+	"notify_online_description": {
+		"message": "Notification quand cochée"
+	},
+	"notify_offline_title": {
+		"message": "Affiche une notification lorsqu'un stream se finit"
+	},
+	"notify_offline_description": {
+		"message": "Notification quand cochée"
+	},
+	"statusBlacklist_title":{
+		"message": "Liste noire de status"
+	},
+	"statusBlacklist_description":{
+		"message": "Liste séparée de virgules"
+	},
+	"statusWhitelist_title":{
+		"message": "Liste blanche de status"
+	},
+	"statusWhitelist_description":{
+		"message": "Liste séparée de virgules"
+	},
+	"gameBlacklist_title":{
+		"message": "Liste noire de jeu(x)"
+	},
+	"gameBlacklist_description":{
+		"message": "Liste séparée de virgules"
+	},
+	"gameWhitelist_title":{
+		"message": "Liste blanche de jeu(x)"
+	},
+	"gameWhitelist_description":{
+		"message": "Liste séparée de virgules"
+	},
+	"group_streams_by_websites_title": {
+		"message": "Grouper les streams par site"
+	},
+	"group_streams_by_websites_description": {
+		"message": "Grouper quand coché"
+	},
+	"show_offline_in_panel_title": {
+		"message": "Afficher les stream hors ligne dans le panel"
+	},
+	"show_offline_in_panel_description": {
+		"message": "Affiché quand coché"
+	},
+	"confirm_addStreamFromPanel_title": {
+		"message": "Confirmation pour ajouter des streams"
+	},
+	"confirm_addStreamFromPanel_description": {
+		"message": "Affiche une notification pour confirmer lors d'un ajout de stream de configuration (depuis le panel)"
+	},
+	"confirm_deleteStreamFromPanel_title": {
+		"message": "Confirmation pour supprimer des streams"
+	},
+	"confirm_deleteStreamFromPanel_description": {
+		"message": "Affiche une notification pour confirmer lors d'un ajout de stream de configuration (depuis le panel)"
+	},
+	"panel_theme_title": {
+		"message": "Thème du panel"
+	},
+	"panel_theme_description": {
+		"message": "Choix du thème pour le panel"
+	},
+	"panel_theme_dark": {
+		"message": "Sombre"
+	},
+	"panel_theme_light": {
+		"message": "Clair"
+	},
+	"background_color_title": {
+		"message": "Couleur du panel"
+	},
+	"background_color_description": {
+		"message": "Choix de la couleur de base du panel"
+	},
+	"livestreamer_cmd_to_clipboard_title": {
+		"message": "Copier la commande Livestreamer"
+	},
+	"livestreamer_cmd_to_clipboard_description": {
+		"message": "Cocher pour activer la copie dans le presse-papier la commande Livestreamer lors d'un clic sur un stream en ligne"
+	},
+	"livestreamer_cmd_quality_title": {
+		"message": "Qualité Livestreamer"
+	},
+	"livestreamer_cmd_quality_description": {
+		"message": "Plus d'information sur la page de Livestreamer."
+	},
+	"export_preferences_title": {
+		"message": "Exporter les préférences dans un fichier"
+	},
+	"export_preferences": {
+		"message": "Exporter"
+	},
+	"import_preferences_title": {
+		"message": "Importer les préférences depuis un fichier"
+	},
+	"import_preferences": {
+		"message": "Importer"
+	},
+	"options_saved": {
+		"message": "Options enregistrées."
+	},
+	"options_saved_sync": {
+		"message": "Options enregistrées dans la synchronisation."
+	},
+	"save": {
+		"message": "Enregistrer"
+	},
+	"sync_title": {
+		"message": "Enregistrer / Restaurer les préférences depuis/vers la synchronisation"
+	},
+	"restaure_sync": {
+		"message": "Restaurer"
+	},
+	"save_sync": {
+		"message": "Enregistrer"
+	},
+	"debugInfo": {
+		"message": "Les erreurs sont en Anglais (principalement parce que les APIs sont en Anglais). "
+	},
+	"debugDataLabel": {
+		"message": "Erreur(s):"
+	},
+	"noErrorToShow": {
+		"message": "Aucune erreur à afficher."
+	},
+	"debug_checkingLivesState": {
+		"message": "Etat de vérification des streams"
+	},
+	"footer_title": {
+		"message": "Addon sous licence GPL v3."
+	},
+	"footer_by": {
+		"message": "par"
+	}
+}

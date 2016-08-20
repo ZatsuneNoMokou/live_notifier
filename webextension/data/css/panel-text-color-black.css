@@ -1,0 +1,29 @@
+/*			---- Primary text / Icons ----			*/
+body, header button, button, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteStreamTooltip, #searchInputContainer, #searchInput{
+	color: #FFFFFF;
+	color: rgba(0, 0, 0, 0.8);
+}
+/*		--- Secondary text / Base Color ----		*/
+.item-stream, .item-stream .streamTitle, .item-stream .streamStatus, .item-stream .streamCurrentViewers, #current_version{
+	color: #FFFFFF;
+	color: rgba(0, 0, 0, 0.5);
+}
+#deleteStream.active{
+	text-shadow: 0 0 20px rrgba(0, 0, 0, 0.5);
+}
+/*			---- Disabled / Hint text ----			*/
+footer{
+	color: #FFFFFF;
+	color: rgba(0, 0, 0, 0.4);
+}
+/*			---- Stream Title / Links ----			*/
+a{
+	color: #0062BD;
+	color: rgba(50, 159, 255, 0.8);
+}
+
+input:invalid {
+	background-color: lightpink;
+	color: red;
+	font-weight: 700;
+}

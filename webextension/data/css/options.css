@@ -1,0 +1,89 @@
+html, body{
+	height: 100%;
+	overflow: hidden;
+	margin-right: 0px;
+	min-width: 777px;
+	min-height: 500px;
+}
+#contentContainer{
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+	
+	padding: 0px 8px;
+}
+
+*{
+	font-size: 14px;
+}
+textarea[data-string-textarea]{
+	min-height: 64px;
+}
+input[type=text], input[type=url]{
+	height: 25px;
+	border: 1px solid #444;
+	border-radius: 3px;
+	padding-left: 2px;
+}
+button{
+	padding: 0px 8px;
+	border: 0px none;
+	border-radius: 1px;
+	margin: 2px 5px 2px 0px;
+	font-weight: 700;
+	height: 25px;
+}
+.ps-theme-slimScrollbar .ps-scrollbar-x-rail, .ps-theme-slimScrollbar .ps-scrollbar-y-rail{
+	background-color: transparent !important;
+}
+.ps-theme-slimScrollbar .ps-scrollbar-x-rail, .ps-theme-slimScrollbar .ps-scrollbar-x{
+	border-radius: 6px !important;
+	height: 6px !important;
+}
+.ps-theme-slimScrollbar .ps-scrollbar-y-rail, .ps-theme-slimScrollbar .ps-scrollbar-y{
+	border-radius: 6px !important;
+	width: 6px !important;
+}
+
+.pref_group, .website_pref{
+	display: block;
+	margin-top: 14px;
+	margin-bottom: 14px;
+}
+.preferenceContainer.flex_input_text{
+	display: flex;
+	width: 100%;
+	margin-top: 3px;
+	margin-bottom: 3px;
+}
+.preferenceContainer.flex_input_text .preferenceInput{
+	display: flex;
+	flex-grow: 5;
+	max-width: 90%;
+}
+.preference{
+	display: inline;
+	margin-top: 3px;
+	margin-bottom: 3px;
+}
+.preference > span:after{
+	content: ": ";
+}
+label:not(.flex_input_text){
+	display: inline;
+	padding-right: 3px;
+	flex: 2;
+}
+label.flex_input_text{
+	display: inline-flex;
+	padding-right: 3px;
+}
+.import_container .label{
+	display: block;
+}
+.import_container .label{
+	display: block;
+}
+.pref_container{
+	padding-left: 10px;
+}
