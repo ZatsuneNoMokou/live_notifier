@@ -1,4 +1,10 @@
 live_notifier@zatsunenomokou.eu-*.xpi
 live_notifier@zatsunenomokou.eu-*.rdf
 dailymotionsstream@zatsunenomokou.eu*.xpi
+live_notifier_dev_*.zip
+.goutputstream*
+*.nex
+*.pem
+*.crx
 tmp/
+TODO.md

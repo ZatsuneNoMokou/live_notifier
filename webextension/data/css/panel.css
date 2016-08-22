@@ -360,8 +360,13 @@ footer, footer *{
 #saveEditedStream{
 	height: 30px;
 }
-#streamEditor > div, #streamEditor > div{
+#streamEditor > div:not(.streamEditor_group){
 	margin: 3px 0px;
+}
+.streamEditor_group{
+	display: block;
+	margin-top: 14px;
+	margin-bottom: 14px;
 }
 #streamEditor div.flex_input_text, #streamEditor div.flex_textarea{
 	display: flex;
@@ -372,6 +377,10 @@ footer, footer *{
 #streamEditor div.flex_input_text > input[type=text], #streamEditor div.flex_textarea > textarea{
 	display: flex;
 	flex-grow: 5;
+}
+
+#settings_container #preferences{
+	margin-top: 1em;
 }
 .pref_group, .website_pref{
 	display: block;
@@ -431,6 +440,19 @@ label.flex_input_text{
 }*/
 .pref_container{
 	padding-left: 10px;
+}
+#settings_topContainer button{
+	height: 25px;
+}
+#settings_topContainer button#open_optionpage:before{
+	content: "open_in_new";
+	font-family: "Material Icons";
+	font-size: 17px;
+	padding-right: 3px;
+	vertical-align: middle;
+}
+#settings_topContainer button#open_optionpage{
+	margin-top: 4px;
 }
 .preferenceContainer button{
 	max-height: 25px;
@@ -514,7 +536,30 @@ input[type=number]{
 #current_version{
 	display: block;
 }
+footer{
+	display: flex;
+	flex-direction: row;
+	min-height: 32px;
+}
 footer, footer *{
 	white-space: pre-line;
 	text-align: center;
+}
+footer > div{
+	display: flex;
+	flex: 6;
+	border: none;
+	padding: 0px;
+	flex-direction: column;
+}
+footer > div > *{
+	flex: 2;
+}
+footer > #patreonlogo{
+	flex: 1;
+	display: inline-block;
+	height: 28px;
+	width: 28px;
+	background-size: contain;
+	background-repeat: no-repeat;
 }

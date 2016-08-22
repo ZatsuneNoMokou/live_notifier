@@ -87,6 +87,15 @@ optionsData.options = {
 		"value": 5,
 		"minValue": 1
 	},
+	"timeout_delay": {
+		"title": "Streams timeout delay",
+		"description": "Timeout delay of requests, in sec (between 10 and 30)",
+		"type": "integer",
+		"value": 30,
+		"hidden": true,
+		"minValue": 10,
+		"maxValue": 30
+	},
 	/*			Notifications			*/
 	"notify_online": {
 		"title": "Show a notification when a stream start",
@@ -95,8 +104,22 @@ optionsData.options = {
 		"value": true,
 		"group": "notifications"
 	},
+	"notify_vocal_online": {
+		"title": "Read a vocal notification when a stream start",
+		"description": "Notification when checked",
+		"type": "bool",
+		"value": false,
+		"group": "notifications"
+	},
 	"notify_offline": {
 		"title": "Show a notification when a stream finish",
+		"description": "Notification when checked",
+		"type": "bool",
+		"value": false,
+		"group": "notifications"
+	},
+	"notify_vocal_offline": {
+		"title": "Read a vocal notification when a stream finish",
 		"description": "Notification when checked",
 		"type": "bool",
 		"value": false,

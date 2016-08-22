@@ -1,9 +1,11 @@
 # Firefox Web Extension Support
-* /!\ Missing on Firefox:
-  * Clipboard
-  * Permission API
-  * Button on notifications (Using notification without them alike Opera)
-  * onInstalled Event / Addon update notification (Currently using a workaround)
+* /!\ Missing/Not working well on Firefox:
+  * Clipboard ( [Bug 1197451](https://bugzilla.mozilla.org/show_bug.cgi?id=1197451) )
+  * Permission API ( [Bug 1197420](https://bugzilla.mozilla.org/show_bug.cgi?id=1197420) )
+  * Button on notifications (Using notification without them alike Opera) ( [Bug 1190681](https://bugzilla.mozilla.org/show_bug.cgi?id=1190681) )
+  * onInstalled Event / Addon update notification (Currently using a workaround) ( [Bug 1252871](https://bugzilla.mozilla.org/show_bug.cgi?id=1252871) )
+  * Importing from file using the panel with Firefox Web Extensions ( [Bug 1292701](https://bugzilla.mozilla.org/show_bug.cgi?id=1292701) )
+  * ContextMenu in Firefox 48, with addon reload
 
 # 8.0.0
 * i: perfect-scrollbar update (0.6.12) and in option page in the Webextension
@@ -13,7 +15,7 @@
 * i: Changed websites, streamListFromSetting, and live data (live status and channel info) from object to Map
 * i: Replaced some for in loops with array.forEach like ones
 * i: Moved all console.* from stream Requests to one result
-* i: Starting to test Webextension in Firefox, with needed changes (Webextension/Firefox)
+* i: *Starting to test Webextension in Firefox*, with needed changes (Webextension/Firefox)
 * i: Moved the loadPreferences function for option and panel to option-api (Webextension only)
 * i: SVG pictures are now rendered into canvas using Image and not canvg (Webextension only)
 * i: Preferences now using chrome local storage area, with a copy of the preferences in a variable to avoid async (Webextension only)
@@ -31,6 +33,8 @@
 * +: Streams configured with unsupported / not load website are now shown in the panel
 * +: Add a custom timeout in Request (30s)
 * +: Pressing shift when clicking on the button to import from file or sync will merge instead of replacing (Webextension only)
+* +: Hidden request timeout preference
+* +: Voice notification not enabled by default
 * -: Deleted Request_Get function, no longer needed to avoid copy/paste problem (Firefox only)
 * -: Dropped Web notifications support (Webextension only)
 * Fix: Unsuccessful channel list requests

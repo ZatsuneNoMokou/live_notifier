@@ -7,6 +7,9 @@
 		"message": "Soyez notifiés des streams de Beam, Dailymotion, Hitbox, Twitch et Youtube.",
 		"description": "this will be used as short description in web stores: MUST BE 132 characters OR LESS"
 	},
+	"language": {
+		"message": "fr"
+	},
 	"Open_in_browser": {
 		"message": "Ouvrir dans le navigateur"
 	},
@@ -30,6 +33,12 @@
 	},
 	"Stream_offline": {
 		"message": "Stream hors ligne"
+	},
+	"is_online": {
+		"message": "viens de commencer un stream"
+	},
+	"is_offline": {
+		"message": "viens de se finir un stream"
 	},
 	"No_stream_online": {
 		"message": "Aucun stream en ligne"
@@ -146,11 +155,23 @@
 	"iconIgnore_title": {
 		"message": "Ignorer pour l'icone"
 	},
+	"vocalStreamName_title": {
+		"message": "Nom de stream pronouncé pour les notifications vocales"
+	},
 	"notifyOnline_title": {
 		"message": "Notification lorsque le stream commence"
 	},
+	"notifyVocalOnline_title": {
+		"message": "Notification vocale lorsque le stream commence"
+	},
 	"notifyOffline_title": {
 		"message": "Notification lorsque le stream fini"
+	},
+	"notifyVocalOffline_title": {
+		"message": "Notification vocale lorsque le stream fini"
+	},
+	"open_optionpage": {
+		"message": "Ouvrir la page d'option"
 	},
 	"stream_keys_list_title": {
 		"message": "Clés de streams à notifier"
@@ -218,14 +239,11 @@
 	"check_delay_description": {
 		"message": "Délai entre chaque vérification, en minute"
 	},
-	"notification_type_title": {
-		"message": "Type de notification"
+	"timeout_delay_title": {
+		"message": "Délai de timeout des requêtes"
 	},
-	"notification_type_web": {
-		"message": "Web"
-	},
-	"notification_type_chrome_api": {
-		"message": "API Chrome"
+	"timeout_delay_description": {
+		"message": "Délai de timeout des requests, in secondes (entre 10 et 30)"
 	},
 	"notify_online_title": {
 		"message": "Affiche une notification lorsqu'un stream commence"
@@ -233,10 +251,22 @@
 	"notify_online_description": {
 		"message": "Notification quand cochée"
 	},
+	"notify_vocal_online_title": {
+		"message": "Lit une notification vocale lorsqu'un stream commence"
+	},
+	"notify_vocal_online_description": {
+		"message": "Notification quand cochée"
+	},
 	"notify_offline_title": {
 		"message": "Affiche une notification lorsqu'un stream se finit"
 	},
 	"notify_offline_description": {
+		"message": "Notification quand cochée"
+	},
+	"notify_vocal_offline_title": {
+		"message": "Lit une notification vocale lorsqu'un stream se finit"
+	},
+	"notify_vocal_offline_description": {
 		"message": "Notification quand cochée"
 	},
 	"statusBlacklist_title":{

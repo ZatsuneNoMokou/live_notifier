@@ -209,6 +209,9 @@ function setting_Toggle(sectionNodeId){
 }
 settings_button.addEventListener("click", setting_Toggle, false);
 
+let open_optionpage_node = document.querySelector("#open_optionpage");
+open_optionpage_node.addEventListener("click", (event) => { chrome.runtime.openOptionsPage(); }, false);
+
 if(typeof chrome.storage.sync == "object"){
 	document.querySelector("#syncContainer").classList.remove("hide");
 	
@@ -264,6 +267,8 @@ function saveEditedStreamButton_onClick(event){
 				delete obj[i];
 			}
 		}
+		console.warn(JSON.stringify(obj))
+		console.dir(obj)
 		return obj;
 	}
 	
@@ -277,8 +282,11 @@ function saveEditedStreamButton_onClick(event){
 		hide: document.querySelector("#streamEditor #hideStream").checked,
 		ignore: document.querySelector("#streamEditor #ignoreStream").checked,
 		iconIgnore: document.querySelector("#streamEditor #iconIgnore").checked,
+		vocalStreamName: document.querySelector("#streamEditor #vocalStreamName").value,
 		notifyOnline: document.querySelector("#streamEditor #notifyOnline").checked,
-		notifyOffline: document.querySelector("#streamEditor #notifyOffline").checked
+		notifyVocalOnline: document.querySelector("#streamEditor #notifyVocalOnline").checked,
+		notifyOffline: document.querySelector("#streamEditor #notifyOffline").checked,
+		notifyVocalOffline: document.querySelector("#streamEditor #notifyVocalOffline").checked
 	}
 	
 	sendDataToMain("streamSetting_Update", {
@@ -496,8 +504,11 @@ function newEditStreamButton_onClick(event){
 	document.querySelector("#streamEditor #hideStream").checked = (typeof streamSettings.hide == "boolean")? streamSettings.hide : false;
 	document.querySelector("#streamEditor #ignoreStream").checked = (typeof streamSettings.ignore == "boolean")? streamSettings.ignore : false;
 	document.querySelector("#streamEditor #iconIgnore").checked = (typeof streamSettings.iconIgnore == "boolean")? streamSettings.iconIgnore : false;
+	document.querySelector("#streamEditor #vocalStreamName").value = (typeof streamSettings.vocalStreamName == "string")? streamSettings.vocalStreamName : "";
 	document.querySelector("#streamEditor #notifyOnline").checked = (typeof streamSettings.notifyOnline == "boolean")? streamSettings.notifyOnline : true;
+	document.querySelector("#streamEditor #notifyVocalOnline").checked = (typeof streamSettings.notifyVocalOnline == "boolean")? streamSettings.notifyVocalOnline : true;
 	document.querySelector("#streamEditor #notifyOffline").checked = (typeof streamSettings.notifyOffline == "boolean")? streamSettings.notifyOffline : false;
+	document.querySelector("#streamEditor #notifyVocalOffline").checked = (typeof streamSettings.notifyVocalOnline == "boolean")? streamSettings.notifyVocalOnline : false;
 	
 	unhideClassNode(streamEditor);
 	scrollbar_update("streamEditor");

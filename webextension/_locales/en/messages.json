@@ -7,6 +7,9 @@
 		"message": "Be notified of streams from Bream, Dailymotion, Hitbox, Twitch and Youtube.",
 		"description": "this will be used as short description in web stores: MUST BE 132 characters OR LESS"
 	},
+	"language": {
+		"message": "en"
+	},
 	"Open_in_browser": {
 		"message": "Open in browser"
 	},
@@ -30,6 +33,12 @@
 	},
 	"Stream_offline": {
 		"message": "Stream offline"
+	},
+	"is_online": {
+		"message": "just started a stream"
+	},
+	"is_offline": {
+		"message": "just finished a stream"
 	},
 	"No_stream_online": {
 		"message": "No stream online"
@@ -146,11 +155,23 @@
 	"iconIgnore_title": {
 		"message": "Ignore for the icon"
 	},
+	"vocalStreamName_title": {
+		"message": "Custom stream name pronounced on vocal notifications"
+	},
 	"notifyOnline_title": {
 		"message": "Notification when the stream begin"
 	},
+	"notifyVocalOnline_title": {
+		"message": "Vocal notification when the stream begin"
+	},
 	"notifyOffline_title": {
 		"message": "Notification when the stream end"
+	},
+	"notifyVocalOffline_title": {
+		"message": "Vocal notification when the stream end"
+	},
+	"open_optionpage": {
+		"message": "Open option page"
 	},
 	"stream_keys_list_title": {
 		"message": "Stream keys to notify"
@@ -215,14 +236,11 @@
 	"check_delay_description": {
 		"message": "Delay between verifications, in minute"
 	},
-	"notification_type_title": {
-		"message": "Notification type"
+	"timeout_delay_title": {
+		"message": "Timeout delay of requests"
 	},
-	"notification_type_web": {
-		"message": "Web"
-	},
-	"notification_type_chrome_api": {
-		"message": "Chrome API"
+	"timeout_delay_description": {
+		"message": "Timeout delay of requests, in sec (between 10 and 30)"
 	},
 	"notify_online_title": {
 		"message": "Show a notification when a stream start"
@@ -230,10 +248,22 @@
 	"notify_online_description": {
 		"message": "Notification when checked"
 	},
+	"notify_vocal_online_title": {
+		"message": "Play a vocal notification when a stream start"
+	},
+	"notify_vocal_online_description": {
+		"message": "Notification when checked"
+	},
 	"notify_offline_title": {
 		"message": "Show a notification when a stream finish"
 	},
 	"notify_offline_description": {
+		"message": "Notification when checked"
+	},
+	"notify_vocal_offline_title": {
+		"message": "Play a vocal notification when a stream finish"
+	},
+	"notify_vocal_offline_description": {
 		"message": "Notification when checked"
 	},
 	"statusBlacklist_title":{

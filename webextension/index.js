@@ -41,7 +41,7 @@ function Request(options){
 				xhr.overrideMimeType(options.overrideMimeType);
 			}
 			
-			xhr.timeout = 30000;
+			xhr.timeout = getPreference("timeout_delay") * 1000;
 			
 			if(options.hasOwnProperty("headers") == true && typeof options.headers == "object"){
 				for(let header in options.headers){
@@ -163,7 +163,7 @@ class streamListFromSetting{
 					}
 					
 					if(mapDataAll.get(website).has(id) == false){
-						mapDataAll.get(website).set(id, {hide: false, ignore: false, iconIgnore: false, notifyOnline: getPreference("notify_online"), notifyOffline: getPreference("notify_offline"), streamURL: ""});
+						mapDataAll.get(website).set(id, {hide: false, ignore: false, iconIgnore: false, notifyOnline: getPreference("notify_online"), notifyVocalOnline: getPreference("notify_vocal_online"), notifyOffline: getPreference("notify_offline"), notifyVocalOffline: getPreference("notify_vocal_offline"), streamURL: ""});
 					}
 					
 					if(typeof data != "undefined"){
@@ -202,7 +202,7 @@ class streamListFromSetting{
 									mapDataAll.get(website).get(id)[current_filter_id] = [];
 								}
 								
-								if(current_filter_id == "hide" || current_filter_id == "ignore" || current_filter_id == "iconIgnore" || current_filter_id == "notifyOnline" || current_filter_id == "notifyOffline"){
+								if(current_filter_id == "hide" || current_filter_id == "ignore" || current_filter_id == "iconIgnore" || current_filter_id == "notifyOnline" || current_filter_id == "notifyVocalOnline" || current_filter_id == "notifyOffline" || current_filter_id == "notifyVocalOffline"){
 									let boolean = getBooleanFromVar(current_data);
 									if(typeof boolean == "boolean"){
 										current_data = boolean;
@@ -210,7 +210,7 @@ class streamListFromSetting{
 										console.warn(`${current_filter_id} of ${id} should be a boolean`);
 									}
 									mapDataAll.get(website).get(id)[current_filter_id] = current_data;
-								} else if(current_filter_id == "facebook" || current_filter_id == "twitter"){
+								} else if(current_filter_id == "facebook" || current_filter_id == "twitter" || current_filter_id == "vocalStreamName"){
 									mapDataAll.get(website).get(id)[current_filter_id] = decodeString(current_data);
 								} else {
 									if(checkDuplicates){
@@ -296,16 +296,25 @@ class streamListFromSetting{
 						if((j == "hide" || j == "ignore" || j == "iconIgnore") && streamSettings[j] == false){
 							continue;
 						}
+						if(j == "vocalStreamName" && streamSettings[j] == ""){
+							continue;
+						}
 						if(j == "notifyOnline" && streamSettings[j] == getPreference("notify_online")){
+							continue;
+						}
+						if(j == "notifyVocalOnline" && streamSettings[j] == getPreference("notify_vocal_online")){
 							continue;
 						}
 						if(j == "notifyOffline" && streamSettings[j] == getPreference("notify_offline")){
 							continue;
 						}
+						if(j == "notifyVocalOffline" && streamSettings[j] == getPreference("notify_vocal_offline")){
+							continue;
+						}
 						if(typeof streamSettings[j] == "boolean"){
 							filters = filters + " " + j + "::" + streamSettings[j];
 						}
-						if(j == "facebook" || j == "twitter"){
+						if(j == "facebook" || j == "twitter" || j == "vocalStreamName"){
 							filters = filters + " " + j + "::" + encodeString(streamSettings[j]);
 						} else {
 							for(let k in streamSettings[j]){
@@ -323,12 +332,6 @@ class streamListFromSetting{
 		
 		let newSettings = newStreamPrefArray.join(", ");
 		savePreference("stream_keys_list", newSettings);
-		
-		// Update cache
-		streamListFromSetting_cache = {
-			"stringData": newSettings,
-			"mapDataAll": this.mapDataAll
-		}
 		
 		setIcon();
 		console.log(`Stream key list update: ${getPreference(`stream_keys_list`)}`);
@@ -848,7 +851,7 @@ function doActionNotif(title, message, action, imgurl){
 			console.dir(error);
 			console.warn(error.message);
 			
-			if(error.message == "Adding buttons to notifications is not supported." || error.message.indexOf("(Property \"buttons\" is unsupported by Firefox)") != -1){
+			if(error.message == "Adding buttons to notifications is not supported." || error.message.indexOf("\"buttons\"") != -1){
 				chromeAPI_button_availability = false;
 				console.log("Buttons not supported, retrying notification without them.")
 				doActionNotif(title, message, action, imgurl);
@@ -907,17 +910,24 @@ function doNotificationAction_Event(notificationId){
 }
 
 function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamOnline){
+	let getStringsCountInArray = function(someArray){
+		let count = 0;
+		for(let i in someArray){
+			if(typeof someArray[i] == "string"){
+				count++;
+			}
+		}
+	}
 	let streamData = liveStatus.get(website).get(id).get(contentId);
-	
 	if(streamData.streamStatus != ""){
 		let lowerCase_status = (streamData.streamStatus).toLowerCase();
 		if(isStreamOnline){
 			let whitelisted = false;
 			
-			if(streamSetting.statusWhitelist){
+			if(getStringsCountInArray(streamSetting.statusWhitelist) > 0){
 				let statusWhitelist = streamSetting.statusWhitelist;
 				for(let i in statusWhitelist){
-					if(lowerCase_status.indexOf(statusWhitelist[i].toLowerCase()) != -1){
+					if(statusWhitelist[i] != null && lowerCase_status.indexOf(statusWhitelist[i].toLowerCase()) != -1){
 						whitelisted = true;
 						break;
 					}
@@ -926,23 +936,23 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 			if(getPreference("statusWhitelist") != ""){
 				let statusWhitelist_List = getFilterListFromPreference(getPreference("statusWhitelist"));
 				for(let i in statusWhitelist_List){
-					if(lowerCase_status.indexOf(statusWhitelist_List[i].toLowerCase()) != -1){
+					if(statusWhitelist_List[i] != null && lowerCase_status.indexOf(statusWhitelist_List[i].toLowerCase()) != -1){
 						whitelisted = true;
 						break;
 					}
 				}
 			}
-			if((streamSetting.statusWhitelist || getPreference("statusWhitelist") != "") && whitelisted == false){
+			if((getStringsCountInArray(streamSetting.statusWhitelist) > 0 || getPreference("statusWhitelist") != "") && whitelisted == false){
 				isStreamOnline = false;
 				console.info(`${id} current status does not contain whitelist element(s)`);
 			}
 			
 			let blacklisted = false;
 			
-			if(streamSetting.statusBlacklist){
+			if(getStringsCountInArray(streamSetting.statusBlacklist) > 0){
 				let statusBlacklist = streamSetting.statusBlacklist;
 				for(let i in statusBlacklist){
-					if(lowerCase_status.indexOf(statusBlacklist[i].toLowerCase()) != -1){
+					if(statusBlacklist[i] != null && lowerCase_status.indexOf(statusBlacklist[i].toLowerCase()) != -1){
 						blacklisted = true;
 					}
 				}
@@ -950,13 +960,13 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 			if(getPreference("statusBlacklist") != ""){
 				let statusBlacklist_List = getFilterListFromPreference(getPreference("statusBlacklist"));
 				for(let i in statusBlacklist_List){
-					if(lowerCase_status.indexOf(statusBlacklist_List[i].toLowerCase()) != -1){
+					if(statusBlacklist_List[i] != null && lowerCase_status.indexOf(statusBlacklist_List[i].toLowerCase()) != -1){
 						blacklisted = true;
 						break;
 					}
 				}
 			}
-			if((streamSetting.statusBlacklist || getPreference("statusBlacklist") != "") && blacklisted == true){
+			if((getStringsCountInArray(streamSetting.statusBlacklist) > 0 || getPreference("statusBlacklist") != "") && blacklisted == true){
 				isStreamOnline = false;
 				console.info(`${id} current status contain blacklist element(s)`);
 			}
@@ -966,10 +976,10 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 		let lowerCase_streamGame = (streamData.streamGame).toLowerCase();
 		if(isStreamOnline){
 			let whitelisted = false;
-			if(streamSetting.gameWhitelist){
+			if(getStringsCountInArray(streamSetting.gameWhitelist) > 0){
 				let gameWhitelist = streamSetting.gameWhitelist;
 				for(let i in gameWhitelist){
-					if(lowerCase_streamGame.indexOf(gameWhitelist[i].toLowerCase()) != -1){
+					if(gameWhitelist[i] != null && lowerCase_streamGame.indexOf(gameWhitelist[i].toLowerCase()) != -1){
 						whitelisted = true;
 						break;
 					}
@@ -978,22 +988,22 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 			if(getPreference("gameWhitelist") != ""){
 				let gameWhitelist_List = getFilterListFromPreference(getPreference("gameWhitelist"));
 				for(let i in gameWhitelist_List){
-					if(lowerCase_streamGame.indexOf(gameWhitelist_List[i].toLowerCase()) != -1){
+					if(gameWhitelist_List[i] != null && lowerCase_streamGame.indexOf(gameWhitelist_List[i].toLowerCase()) != -1){
 						whitelisted = true;
 						break;
 					}
 				}
 			}
-			if((streamSetting.gameWhitelist || getPreference("gameWhitelist") != "") && whitelisted == false){
+			if((getStringsCountInArray(streamSetting.gameWhitelist) > 0 || getPreference("gameWhitelist") != "") && whitelisted == false){
 				isStreamOnline = false;
 				console.info(`${id} current game does not contain whitelist element(s)`);
 			}
 			
 			let blacklisted = false;
-			if(streamSetting.gameBlacklist){
+			if(getStringsCountInArray(streamSetting.gameBlacklist) > 0){
 				let gameBlacklist = streamSetting.gameBlacklist;
 				for(let i in gameBlacklist){
-					if(lowerCase_streamGame.indexOf(gameBlacklist[i].toLowerCase()) != -1){
+					if(gameBlacklist[i] != null && lowerCase_streamGame.indexOf(gameBlacklist[i].toLowerCase()) != -1){
 						blacklisted = true;
 					}
 				}
@@ -1001,13 +1011,13 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 			if(getPreference("gameBlacklist") != ""){
 				let gameBlacklist_List = getFilterListFromPreference(getPreference("gameBlacklist"));
 				for(let i in gameBlacklist_List){
-					if(lowerCase_streamGame.indexOf(gameBlacklist_List[i].toLowerCase()) != -1){
+					if(gameBlacklist_List[i] != null && lowerCase_streamGame.indexOf(gameBlacklist_List[i].toLowerCase()) != -1){
 						blacklisted = true;
 						break;
 					}
 				}
 			}
-			if((streamSetting.gameBlacklist || getPreference("gameBlacklist") != "") && blacklisted == true){
+			if((getStringsCountInArray(streamSetting.gameBlacklist) > 0 || getPreference("gameBlacklist") != "") && blacklisted == true){
 				isStreamOnline = false;
 				console.info(`${id} current game contain blacklist element(s)`);
 			}
@@ -1037,20 +1047,31 @@ function doStreamNotif(website, id, contentId, streamSetting){
 	let isStreamOnline_filtered = getCleanedStreamStatus(website, id, contentId, streamSetting, online);
 	
 	if(isStreamOnline_filtered){
-		if(((typeof streamList.get(id).notifyOnline == "boolean")? streamList.get(id).notifyOnline : getPreference("notify_online")) == true && streamData.liveStatus.notifiedStatus == false){
-			let streamStatus = ((streamData.streamStatus != "")? ": " + streamData.streamStatus : "") + ((streamData.streamGame != "")? (" (" + streamData.streamGame + ")") : "");
+		if(streamData.liveStatus.notifiedStatus == false){
+			if((typeof streamList.get(id).notifyOnline == "boolean")? streamList.get(id).notifyOnline : getPreference("notify_online") == true){
+				let streamStatus = ((streamData.streamStatus != "")? ": " + streamData.streamStatus : "") + ((streamData.streamGame != "")? (" (" + streamData.streamGame + ")") : "");
 				if(streamLogo != ""){
 					doNotifUrl(_("Stream_online"), `${streamName}${streamStatus}`, getStreamURL(website, id, contentId, true), streamLogo);
 				} else {
 					doNotifUrl(_("Stream_online"), `${streamName}${streamStatus}`, getStreamURL(website, id, contentId, true));
 				}
+			}
+			
+			if(typeof speechSynthesis == "object" && ((typeof streamList.get(id).notifyVocalOnline == "boolean")? streamList.get(id).notifyVocalOnline : getPreference("notify_vocal_online")) == true){
+				voiceReadMessage(_("language"), `${(typeof streamList.get(id).vocalStreamName == "string")? streamList.get(id).vocalStreamName : streamName} ${_("is_online")}`);
+			}
 		}
 	} else {
-		if(((typeof streamList.get(id).notifyOffline == "boolean")? streamList.get(id).notifyOffline : getPreference("notify_offline")) == true && streamData.liveStatus.notifiedStatus == true){
-			if(streamLogo != ""){
-				doNotif(_("Stream_offline"),streamName, streamLogo);
-			} else {
-				doNotif(_("Stream_offline"),streamName);
+		if(streamData.liveStatus.notifiedStatus == true){
+			if((typeof streamList.get(id).notifyOffline == "boolean")? streamList.get(id).notifyOffline : getPreference("notify_offline") == true){
+				if(streamLogo != ""){
+					doNotif(_("Stream_offline"),streamName, streamLogo);
+				} else {
+					doNotif(_("Stream_offline"),streamName);
+				}
+			}
+			if(typeof speechSynthesis == "object" && ((typeof streamList.get(id).notifyVocalOffline == "boolean")? streamList.get(id).notifyVocalOffline : getPreference("notify_vocal_offline")) == true){
+				voiceReadMessage(_("language"), `${(typeof streamList.get(id).vocalStreamName == "string")? streamList.get(id).vocalStreamName : streamName} ${_("is_offline")}`);
 			}
 		}
 	}
@@ -1850,6 +1871,8 @@ var interval
 function initAddon(){
 		chrome.contextMenus.removeAll();
 		chrome.contextMenus.create({
+			"type": "normal",
+			"id": "livenotifier_contextMenu",
 			"title": _("Add_this"),
 			"contexts": ["link"],
 			"targetUrlPatterns": ["http://*/*", "https://*/*"],
@@ -1989,10 +2012,23 @@ function checkIfUpdated(details){
 	}
 }
 
-chrome.storage.local.get(optionsData.options_default,function(currentLocalStorage) {
+//chrome.storage.local.get(optionsData.options_default,function(currentLocalStorage) {
+chrome.storage.local.get(null,function(currentLocalStorage) {
 	let currentPreferences = {};
 	for(let prefId in currentLocalStorage){
-		currentPreferences[prefId] = currentLocalStorage[prefId];
+		if(optionsData.options_default.hasOwnProperty(prefId)){
+			currentPreferences[prefId] = currentLocalStorage[prefId];
+		} else {
+			currentPreferences[prefId] = currentLocalStorage[prefId];
+			console.warn(`${prefId} has no default value (value: currentLocalStorage[prefId])`);
+		}
+	}
+	
+	// Load default settings for the missing settings without saving them in the storage
+	for(let prefId in optionsData.options_default){
+		if(!currentPreferences.hasOwnProperty(prefId)){
+			currentPreferences[prefId] = optionsData.options_default[prefId];
+		}
 	}
 	console.group()
 	console.info("Current preferences in the local storage:")
@@ -2005,10 +2041,10 @@ chrome.storage.local.get(optionsData.options_default,function(currentLocalStorag
 	} else {
 		console.warn("chrome.runtime.onInstalled is not available");
 		let details;
-		if(typeof getPreference("livenotifier_version") == "string"){
+		if(typeof getPreference("livenotifier_version") == "string" && getPreference("livenotifier_version") != ""){
 			details = {
 				"reason": "unknown",
-				"previousVersion": localStorage.getItem("livenotifier_version")
+				"previousVersion": getPreference("livenotifier_version")
 			}
 		} else {
 			details = {

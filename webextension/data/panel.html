@@ -23,7 +23,7 @@
 		<div id="searchInputContainer" class="hide"><label for="searchInput"><i class="material-icons">search</i></label><input id="searchInput" type="text"></div>
 		<div id="deleteStreamTooltip" class="hide"><i class="material-icons">info</i> <span data-translate-id="delete_tooltip">To delete a stream from the settings, move it in the trash can.</span></div>
 		<div id="streamListOnline">
-			<div id="streamOnlineCountLabel">No online stream currently</div>
+			<div id="streamOnlineCountLabel"></div>
 			<div class="beam group"></div>
 			<div class="dailymotion group"></div>
 			<div class="hitbox group"></div>
@@ -32,7 +32,7 @@
 			<div class="unsupported group"></div>
 		</div>
 		<div id="streamListOffline">
-			<div id="streamOfflineCountLabel">No offline stream currently</div>
+			<div id="streamOfflineCountLabel"></div>
 			<div class="beam group"></div>
 			<div class="dailymotion group"></div>
 			<div class="hitbox group"></div>
@@ -44,20 +44,32 @@
 	<section id="streamEditor" class="hide">
 		<div id="streamEditor-firstLine"><span id="editedStreamTitle"></span><span class="vide"></span><button id="closeEditor">X</button></div>
 		<div class="flex_input_text"><label for="customURL"><span data-translate-id="customURL_title">Custom url</span></label><input id="customURL" pattern="(?:http|https):\/\/.+" type="url"></div>
-		<div class="flex_textarea"><label for="status_blacklist"><span data-translate-id="blacklist_title">Blacklist</span> (<span data-translate-id="Status_title">Status</span>)</label><textarea id="status_blacklist"></textarea></div>
-		<div class="flex_textarea"><label for="status_whitelist"><span data-translate-id="whitelist_title">Whitelist</span> (<span data-translate-id="Status_title">Status</span>)</label><textarea id="status_whitelist"></textarea></div>
-		<div class="flex_textarea"><label for="game_blacklist"><span data-translate-id="blacklist_title">Blacklist</span> (<span data-translate-id="Game_title">Game</span>)</label><textarea id="game_blacklist"></textarea></div>
-		<div class="flex_textarea"><label for="game_whitelist"><span data-translate-id="whitelist_title">Whitelist</span> (<span data-translate-id="Game_title">Game</span>)</label><textarea id="game_whitelist"></textarea></div>
 		<div class="flex_input_text"><label for="twitter" data-translate-id="twitter_title">Twitter</label><input id="twitter" type="text"></div>
-		<div><label for="hideStream" data-translate-id="hideStream_title">Hide stream</label><input id="hideStream" type="checkbox"></div>
-		<div><label for="ignoreStream" data-translate-id="ignoreStream_title">Ignore stream</label><input id="ignoreStream" type="checkbox"></div>
-		<div><label for="iconIgnore" data-translate-id="iconIgnore_title">Ignored by the icon</label><input id="iconIgnore" type="checkbox"></div>
-		<div><label for="notifyOnline" data-translate-id="notifyOnline_title">Online notification</label><input id="notifyOnline" type="checkbox"></div>
-		<div><label for="notifyOffline" data-translate-id="notifyOffline_title">Offline notification</label><input id="notifyOffline" type="checkbox"></div>
+		<div class="streamEditor_group">
+			<div><label for="hideStream" data-translate-id="hideStream_title">Hide stream</label><input id="hideStream" type="checkbox"></div>
+			<div><label for="ignoreStream" data-translate-id="ignoreStream_title">Ignore stream</label><input id="ignoreStream" type="checkbox"></div>
+			<div><label for="iconIgnore" data-translate-id="iconIgnore_title">Ignored by the icon</label><input id="iconIgnore" type="checkbox"></div>
+		</div>
+		<div class="streamEditor_group">
+			<div><label for="vocalStreamName" data-translate-id="vocalStreamName_title">Vocal stream name</label><input id="vocalStreamName" type="text"></div>
+			<div><label for="notifyOnline" data-translate-id="notifyOnline_title">Online notification</label><input id="notifyOnline" type="checkbox"></div>
+			<div><label for="notifyVocalOnline" data-translate-id="notifyVocalOnline_title">Online vocal notification</label><input id="notifyVocalOnline" type="checkbox"></div>
+			<div><label for="notifyOffline" data-translate-id="notifyOffline_title">Offline notification</label><input id="notifyOffline" type="checkbox"></div>
+			<div><label for="notifyVocalOffline" data-translate-id="notifyVocalOffline_title">Offline vocal notification</label><input id="notifyVocalOffline" type="checkbox"></div>
+		</div>
+		<div class="streamEditor_group">
+			<div class="flex_textarea"><label for="status_blacklist"><span data-translate-id="blacklist_title">Blacklist</span> (<span data-translate-id="Status_title">Status</span>)</label><textarea id="status_blacklist"></textarea></div>
+			<div class="flex_textarea"><label for="status_whitelist"><span data-translate-id="whitelist_title">Whitelist</span> (<span data-translate-id="Status_title">Status</span>)</label><textarea id="status_whitelist"></textarea></div>
+			<div class="flex_textarea"><label for="game_blacklist"><span data-translate-id="blacklist_title">Blacklist</span> (<span data-translate-id="Game_title">Game</span>)</label><textarea id="game_blacklist"></textarea></div>
+			<div class="flex_textarea"><label for="game_whitelist"><span data-translate-id="whitelist_title">Whitelist</span> (<span data-translate-id="Game_title">Game</span>)</label><textarea id="game_whitelist"></textarea></div>
+		</div>
 		<div><button id="saveEditedStream" data-translate-id="save">Save</button></div>
 	</section>
 	<section id="settings_container" class="hide">
-		<p id="preferences"></p>
+		<div id="settings_topContainer">
+			<button id="open_optionpage" data-translate-id="open_optionpage">Open option page</button>
+		</div>
+		<div id="preferences"></div>
 		<div id="syncContainer" class="pref_sync pref_group hide">
 			<span id="sync_title" data-translate-id="sync_title">Save / Restaure preferences from/to synchronization</span>
 			<div id="sync_control_container">
@@ -75,8 +87,12 @@
 		<div id="noErrorToShow" data-translate-id="noErrorToShow">No error to show.</div>
 		<div id="debugData"></div>
 	</section>
-	<footer><span data-translate-id="footer_title">Addon under GPL v3 licence</span>
-		<span data-translate-id="footer_by">By</span> <a href="https://github.com/ZatsuneNoMokou/" target="_blank">ZatsuneNoMokou</a>
+	<footer>
+		<div>
+			<span data-translate-id="footer_title">Addon under GPL v3 licence</span>
+			<div><span data-translate-id="footer_by">By</span> <a href="https://github.com/ZatsuneNoMokou/" target="_blank">ZatsuneNoMokou</a></div>
+		</div>
+		<a id="patreonlogo" href="https://www.patreon.com/ZatsuneNoMokou" target="_blank"></a>
 	</footer>
 	<script id="panelInit" src="js/panel/panel-init.js"></script>
 </body>

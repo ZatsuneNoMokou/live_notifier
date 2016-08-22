@@ -83,10 +83,12 @@ function getFilterListFromPreference(string){
 	return list;
 }
 function getPreference(prefId){
-	let optionsData = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData : optionsData;
-	let defaultSettings = optionsData.options_default;
+	let options = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options : optionsData.options;
+	let defaultSettings = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options_default : optionsData.options_default;
 	
 	let currentPreferences = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().appGlobal.currentPreferences : appGlobal.currentPreferences;
+/*	console.dir(currentPreferences)
+	console.warn(prefId + " - " + currentPreferences.hasOwnProperty(prefId))*/
 	if(currentPreferences.hasOwnProperty(prefId)){
 		let current_pref = currentPreferences[prefId];
 		switch(typeof defaultSettings[prefId]){
@@ -94,13 +96,13 @@ function getPreference(prefId){
 				return current_pref;
 				break;
 			case "number":
-				if(isNaN(parseInt(current_pref)){
-					return defaultSettings[prefId];
+				if(isNaN(parseInt(current_pref))){
 					console.warn(`${prefId} is not a number (${current_pref})`);
-				} else if(typeof optionsData.options[prefId].minValue == "number" && parseInt(current_pref) < optionsData.options[prefId].minValue){
-					return optionsData.options[prefId].minValue;
-				} else if(typeof optionsData.options[prefId].maxValue == "number" && parseInt(current_pref) > optionsData.options[prefId].maxValue){
-					return optionsData.options[prefId].maxValue;
+					return defaultSettings[prefId];
+				} else if(typeof options[prefId].minValue == "number" && parseInt(current_pref) < options[prefId].minValue){
+					return options[prefId].minValue;
+				} else if(typeof options[prefId].maxValue == "number" && parseInt(current_pref) > options[prefId].maxValue){
+					return options[prefId].maxValue;
 				} else {
 					return parseInt(current_pref);
 				}
@@ -109,7 +111,7 @@ function getPreference(prefId){
 				return getBooleanFromVar(current_pref);
 				break;
 			case "undefined":
-				console.warn(`The setting ${prefId} has no default value: ${typeof defaultSettings[prefId]}`);
+				console.warn(`The setting "${prefId}" has no default value`);
 				return current_pref;
 				break;
 			default:
@@ -120,6 +122,8 @@ function getPreference(prefId){
 		console.warn(`Preference ${prefId} not found, using default`);
 		savePreference(prefId, defaultSettings[prefId]);
 		return defaultSettings[prefId];
+	} else {
+		//console.warn(`Preference ${prefId} not found, no default`);
 	}
 }
 function getSyncPreferences(){
@@ -137,14 +141,14 @@ function getSyncPreferences(){
 	return obj;
 }
 function savePreference(prefId, value){
-	let optionsData = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData : optionsData;
-	let defaultSettings = optionsData.options_default;
+	let options = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options : optionsData.options;
+	let defaultSettings = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options_default : optionsData.options_default;
 	let currentPreferences = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().appGlobal.currentPreferences : appGlobal.currentPreferences;
-	if(optionsData.options[prefId].type == "integer"){
-		if(typeof optionsData.options[prefId].minValue == "number" && parseInt(value) < optionsData.options[prefId].minValue){
-			value = optionsData.options[prefId].minValue;
-		} else if(typeof optionsData.options[prefId].maxValue == "number" && parseInt(value) > optionsData.options[prefId].maxValue){
-			value = optionsData.options[prefId].maxValue;
+	if(options.hasOwnProperty(prefId) && options[prefId].type == "integer"){
+		if(typeof options[prefId].minValue == "number" && parseInt(value) < options[prefId].minValue){
+			value = options[prefId].minValue;
+		} else if(typeof options[prefId].maxValue == "number" && parseInt(value) > options[prefId].maxValue){
+			value = options[prefId].maxValue;
 		}
 	}
 	if(typeof defaultSettings[prefId] == "boolean" || typeof defaultSettings[prefId] == "number"){
@@ -193,6 +197,8 @@ function settingNode_onChange(event){
 	}
 }
 function refreshSettings(event){
+	let options = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options : optionsData.options;
+	
 	let prefId = "";
 	let prefValue = "";
 	if(typeof event.key == "string"){
@@ -206,7 +212,7 @@ function refreshSettings(event){
 	
 	let isPanelPage = location.pathname.indexOf("panel.html") != -1;
 	
-	if(event.type != "input" && !(isPanelPage && typeof options[prefId].showPrefInPanel == "boolean" && options[prefId].showPrefInPanel == false) && typeof options[prefId].type == "string"){
+	if(event.type != "input" && !(isPanelPage && typeof options[prefId].showPrefInPanel == "boolean" && options[prefId].showPrefInPanel == false) && typeof options[prefId].type == "string" && !(typeof options[prefId].hidden == "boolean" && options[prefId].hidden)){
 		if(prefNode == null){
 			console.warn(`${prefId} node is null`);
 		} else {
@@ -338,7 +344,7 @@ function loadPreferences(selector){
 	chrome.storage.onChanged.addListener((changes, area) => {
 		if(area == "local"){
 			for(let prefId in changes){
-				refreshSettings({"key": prefId, newValue: changes[prefId].newValue});
+				refreshSettings({"key": prefId, oldValue: changes[prefId].oldValue, newValue: changes[prefId].newValue});
 			}
 		}
 	})
@@ -346,7 +352,7 @@ function loadPreferences(selector){
 function getPreferenceGroupNode(parent, groupId){
 	let groupNode = document.querySelector(`#${groupId}.pref_group`);
 	if(groupNode == null){
-		groupNode = document.createElement("p");
+		groupNode = document.createElement("div");
 		groupNode.id = groupId;
 		groupNode.classList.add("pref_group");
 		if(groupId == "dailymotion" || groupId == "hitbox" || groupId == "twitch" || groupId == "beam"){
@@ -362,6 +368,8 @@ function import_onClick(){
 	sendDataToMain("importStreams", website);
 }
 function newPreferenceNode(parent, id, prefObj){
+	let backgroundPage = chrome.extension.getBackgroundPage();
+	
 	let node = document.createElement("div");
 	node.classList.add("preferenceContainer");
 	
@@ -474,7 +482,7 @@ function newPreferenceNode(parent, id, prefObj){
 			if(id == "export_preferences"){
 				prefNode.addEventListener("click", exportPrefsToFile);
 			} else if(id == "import_preferences"){
-				prefNode.addEventListener("click", importPrefsFromFile);
+				prefNode.addEventListener("click", importPrefsFromFile); //(backgroundPage != null)? backgroundPage.importPrefsFromFile : importPrefsFromFile);
 			} else if(id.indexOf("_import") != -1){
 				prefNode.addEventListener("click", import_onClick);
 			}
@@ -509,12 +517,16 @@ function exportPrefsToFile(event){
 	simulateClick(link);
 }
 function importPrefsFromFile(event){
-	let mergePreferences = event.shiftKey;
+	let mergePreferences = (typeof event == "object" && typeof event.shiftKey == "boolean")? event.shiftKey : false;
+	let backgroundPage = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage() : window;
 	let appGlobal = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().appGlobal : appGlobal;
+	let options = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options : optionsData.options;
 	console.warn("Merge: " + mergePreferences);
 	let node = document.createElement("input");
 	node.type = "file";
+	node.className = "hide";
 	node.addEventListener("change", function(){
+		node.parentNode.removeChild(node);
 		let fileLoader=new FileReader();
 		if(node.files.length == 0 || node.files.length > 1){
 			console.warn(`[Input error] ${node.files.length} file(s) selected `);
@@ -574,11 +586,16 @@ function importPrefsFromFile(event){
 								console.warn(`Error trying to import ${prefId}`);
 							}
 						}
-						sendDataToMain("refreshStreams","");
+						if(typeof refreshStreamsFromPanel == "funtion"){
+							refreshStreamsFromPanel();
+						} else {
+							sendDataToMain("refreshStreams","");
+						}
 					}
 				}
 			}
 		}
 	});
+	document.querySelector("head").appendChild(node);
 	simulateClick(node);
 }
