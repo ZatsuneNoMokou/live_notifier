@@ -1,17 +1,17 @@
 let youtube = {
 	"addStream_URLpatterns": new Map([
 		["channel::youtube", [
-			/(?:http|https):\/\/(?:www\.)?youtube\.com\/channel\/([^\/\?\&\#]+)*.*/
+			/(?:http|https):\/\/(?:www\.|gaming\.)?youtube\.com\/channel\/([^\/\?\&\#]+)*.*/
 		]],
 		["user::youtube", [
-			/(?:http|https):\/\/(?:www\.)?youtube\.com\/user\/([^\/\?\&\#]+)*.*/
+			/(?:http|https):\/\/(?:www\.|gaming\.)?youtube\.com\/user\/([^\/\?\&\#]+)*.*/
 		]],
 		["video::youtube", [
-			/(?:http|https):\/\/(?:www\.)?youtube\.com\/watch\?v\=([^\/\?\&\#]+)*.*/,
-			/(?:http|https):\/\/(?:www\.)?youtu\.be\/([^\/\?\&\#]+)*.*/
+			/(?:http|https):\/\/(?:www\.|gaming\.)?youtube\.com\/watch\?v\=([^\/\?\&\#]+)*.*/,
+			/(?:http|https):\/\/(?:www\.|gaming\.)?youtu\.be\/([^\/\?\&\#]+)*.*/
 		]],
 		["c::youtube", [
-			/(?:http|https):\/\/(?:www\.)?youtube\.com\/c\/([^\/\?\&\#]+)*.*/
+			/(?:http|https):\/\/(?:www\.|gaming\.)?youtube\.com\/c\/([^\/\?\&\#]+)*.*/
 		]]
 	]),
 	"APIs_RequiredPrefs": [
@@ -98,7 +98,7 @@ let youtube = {
 						"referrer": referrer
 					}
 				}
-				obj.url = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${website_channel_id.exec(id)[1]}&fields=items(snippet)&key=${apiKey}`;
+				obj.url = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${website_channel_id.exec(id)[1]}&fields=items(id,snippet)&key=${apiKey}`;
 				obj.overrideMimeType = "text/plain; charset=utf-8";
 			} else {
 				obj.url = `https://livenotifier.zatsunenomokou.eu/youtube_getChannel.php?id=${website_channel_id.exec(id)[1]}`;

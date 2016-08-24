@@ -650,12 +650,6 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse){
 				case "deleteStream":
 					deleteStreamFromPanel(data);
 					break;
-				case "copyLivestreamerCmd":
-					copyLivestreamerCmd(data);
-					break;
-				case "openOnlineLive":
-					openOnlineLive(data);
-					break;
 				case "openTab":
 					openTabIfNotExist(data);
 					break;
@@ -710,10 +704,10 @@ function copyToClipboard(string){
 		document.execCommand('SelectAll');
 		let clipboard_success = document.execCommand('Copy');
 		if(clipboard_success){
-			doNotif("Live notifier", _("Livestreamer_command_copied_into_the_clipboard"));
+			doNotif("Live notifier", _("clipboard_success"));
 			console.info(`Copied: ${string}`)
 		} else {
-			doNotif("Live notifier", _("clipboad_failed"));
+			doNotif("Live notifier", _("clipboard_failed"));
 		}
 		
 		copy_form.parentNode.removeChild(copy_form);
@@ -742,16 +736,7 @@ function copyToClipboard(string){
 		copy(string);
 	}
 }
-function copyLivestreamerCmd(data){
-	let cmd = `livestreamer ${getStreamURL(data.website, data.id, data.contentId, false)} ${getPreference("livestreamer_cmd_quality")}`;
-	copyToClipboard(cmd);
-}
-function openOnlineLive(data){
-	openTabIfNotExist(data.streamUrl);
-	if(getPreference("livestreamer_cmd_to_clipboard")){
-		copyLivestreamerCmd(data);
-	}
-}
+appGlobal["copyToClipboard"] = copyToClipboard;
 
 function openTabIfNotExist(url){
 	console.log(url);
@@ -862,7 +847,9 @@ function doActionNotif(title, message, action, imgurl){
 chrome.notifications.onClicked.addListener(function(notificationId){
 	console.info(`${notificationId} (onClicked)`);
 	chrome.notifications.clear(notificationId);
-	doNotificationAction_Event(notificationId);
+	if(!chromeAPI_button_availability){
+		doNotificationAction_Event(notificationId);
+	}
 });
 chrome.notifications.onButtonClicked.addListener(function(notificationId, buttonIndex){
 	console.info(`${notificationId} (onButtonClicked) - Button index: ${buttonIndex}`);
@@ -1154,6 +1141,7 @@ function setIcon() {
 appGlobal["setIcon"] = setIcon;
 
 let website_channel_id = /channel\:\:(.*)/;
+appGlobal["website_channel_id"] = website_channel_id;
 let facebookID_from_url = /(?:http|https):\/\/(?:www\.)?facebook.com\/([^\/]+)(?:\/.*)?/;
 let twitterID_from_url = /(?:http|https):\/\/(?:www\.)?twitter.com\/([^\/]+)(?:\/.*)?/;
 
@@ -1336,6 +1324,9 @@ function checkLives(idArray){
 								}
 							})
 						}
+						if(channelInfos.has(website) && channelInfos.get(website).has(id)){
+							channelListEnd(website, id, streamListSetting.mapDataAll.get(website).get(id));
+						}
 						setIcon();
 					}
 					timing(`${website}::${id}`);
@@ -1507,7 +1498,7 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 		let data = response.json;
 		
 		if(!channelInfos.get(website).has(id)){
-			let defaultChannelInfos = channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notificationStatus": false, "lastCheckStatus": "", "liveList": {}}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+			let defaultChannelInfos = channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notificationStatus": false, "lastCheckStatus": "", "liveList": new Map()}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
 		}
 		
 		let responseValidity = checkResponseValidity(website, response);
@@ -1521,17 +1512,17 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 			
 			if(typeof pageNumber != "number"){
 				// First loop
-				channelInfos.get(website).get(id).liveStatus.liveList = {};
+				channelInfos.get(website).get(id).liveStatus.liveList = new Map();
 			}
 			
 			if(!isMap(streamListData.streamList) || streamListData.streamList.size == 0){
 				//getChannelInfo(website, id);
-				channelListEnd(website, id, streamSetting);
+				//channelListEnd(website, id, streamSetting);
 				
 				resolve((isMap(streamListData.streamList))? "EmptyList" : "InvalidList");
 			} else {
 				streamListData.streamList.forEach((value, contentId, array) => {
-					channelInfos.get(website).get(id).liveStatus.liveList[contentId] = "";
+					channelInfos.get(website).get(id).liveStatus.liveList.set(contentId, "");
 					
 					if(value == null){
 						promises.set(contentId, getPrimary(id, contentId, website, streamSetting));
@@ -1540,12 +1531,10 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 					}
 				})
 				
-				if(streamListData.hasOwnProperty("next") == true){
-					if(streamListData.next == null){
-						channelListEnd(website, id, streamSetting);
-					} else {
-						promises.set("next", getPrimary(id, "", website, streamSetting, streamListData.url, streamListData.next_page_number));
-					}
+				if(streamListData.hasOwnProperty("next") == true && streamListData.next != null){
+					promises.set("next", getPrimary(id, "", website, streamSetting, streamListData.url, streamListData.next_page_number));
+				} else {
+					//channelListEnd(website, id, streamSetting);
 				}
 				
 				PromiseWaitAll(promises)
@@ -1554,7 +1543,7 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 			}
 		} else {
 			//getChannelInfo(website, id);
-			channelListEnd(website, id, streamSetting);
+			//channelListEnd(website, id, streamSetting);
 			
 			resolve(responseValidity);
 		}
@@ -1562,13 +1551,13 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 	return promise;
 }
 function channelListEnd(website, id, streamSetting){
-	for(let contentId in liveStatus.get(website).get(id)){
-		if(channelInfos.get(website).get(id).liveStatus.liveList.hasOwnProperty(contentId) == false){
+	liveStatus.get(website).get(id).forEach((value, contentId, array) => {
+		if(channelInfos.get(website).get(id).liveStatus.liveList.has(contentId) == false){
 			liveStatus.get(website).get(id).get(contentId).liveStatus.API_Status = false;
 			doStreamNotif(website, id, contentId, streamSetting);
 			liveStatus.get(website).get(id).delete(contentId);
 		}
-	}
+	})
 }
 
 function processPrimary(id, contentId, website, streamSetting, response){
@@ -1909,7 +1898,7 @@ function initAddon(){
 		}
 		localStorage.clear();
 		
-		let localToRemove = [];
+		let localToRemove = ["livestreamer_cmd_to_clipboard","livestreamer_cmd_quality"];
 		/* 		----- Importation/Removal of old preferences -----		*/
 		if(getPreference("stream_keys_list") == ""){
 			let importSreamsFromOldVersion = function(){
@@ -1955,7 +1944,7 @@ function initAddon(){
 			});
 		}
 		
-		let toRemove = ["livenotifier_version","notification_type"];
+		let toRemove = ["livenotifier_version","notification_type","livestreamer_cmd_to_clipboard","livestreamer_cmd_quality"];
 		websites.forEach((websiteAPI, website, array) => {
 			toRemove.push(`${website}_keys_list`);
 		})

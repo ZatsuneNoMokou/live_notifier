@@ -303,7 +303,7 @@ footer, footer *{
 	font-family: "Material Icons";
 	font-size: 17px;
 }
-.copyLivestreamerCmdButton:before{
+.copyStreamURL:before{
 	content: "content_copy";
 	font-family: "Material Icons";
 	font-size: 17px;
@@ -368,6 +368,10 @@ footer, footer *{
 	margin-top: 14px;
 	margin-bottom: 14px;
 }
+body:not(.showAdvanced) .streamEditor_group.whiteandblacklist{
+	display: none !important;
+	visibility: hidden !important;
+}
 #streamEditor div.flex_input_text, #streamEditor div.flex_textarea{
 	display: flex;
 	width: 100%;
@@ -397,9 +401,20 @@ footer, footer *{
 	display: flex;
 	flex-grow: 5;
 }
-
 .preferenceContainer{
 	display: flex;
+}
+body:not(.showAdvanced) .preferenceContainer.experimented, body:not(.showAdvanced) .preferenceContainer.advanced{
+	display: none;
+	visibility: hidden;
+}
+body:not(.showAdvanced) #syncContainer{
+	display: none !important;
+	visibility: hidden  !important;
+}
+body .preferenceContainer.experimented{
+	display: none;
+	visibility: hidden;
 }
 .preferenceContainer:not(.stringList) label{
 	flex: 4;
@@ -441,8 +456,12 @@ label.flex_input_text{
 .pref_container{
 	padding-left: 10px;
 }
+#settings_topContainer{
+	display: flex;
+}
 #settings_topContainer button{
-	height: 25px;
+	min-height: 25px;
+	margin: 3px;
 }
 #settings_topContainer button#open_optionpage:before{
 	content: "open_in_new";

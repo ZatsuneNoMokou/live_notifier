@@ -8,7 +8,8 @@ optionsData.options = {
 		"type": "string",
 		"stringTextArea": true,
 		"value": "",
-		"showPrefInPanel": false
+		"showPrefInPanel": false,
+		"prefLevel": "experimented"
 	},
 	/*			Dailymotion			*/
 	"dailymotion_user_id": {
@@ -16,13 +17,15 @@ optionsData.options = {
 		"description": "Enter your Dailymotion id to be able to import the stream(s) you follow.",
 		"type": "string",
 		"value": "",
-		"group": "dailymotion"
+		"group": "dailymotion",
+		"prefLevel": "advanced"
 	},
 	"dailymotion_import": {
 		"title": "Import the Dailymotion stream(s) you follow",
 		"label": "Import",
 		"type": "control",
-		"group": "dailymotion"
+		"group": "dailymotion",
+		"prefLevel": "advanced"
 	},
 	/*			Hitbox			*/
 	"hitbox_user_id": {
@@ -30,13 +33,15 @@ optionsData.options = {
 		"description": "Enter your Hitbox id to be able to import the stream(s) you follow.",
 		"type": "string",
 		"value": "",
-		"group": "hitbox"
+		"group": "hitbox",
+		"prefLevel": "advanced"
 	},
 	"hitbox_import": {
 		"title": "Import the Hitbox stream(s) you follow",
 		"label": "Import",
 		"type": "control",
-		"group": "hitbox"
+		"group": "hitbox",
+		"prefLevel": "advanced"
 	},
 	/*			Twitch			*/
 	"twitch_user_id": {
@@ -44,13 +49,15 @@ optionsData.options = {
 		"description": "Enter your Twitch id to be able to import the stream(s) you follow.",
 		"type": "string",
 		"value": "",
-		"group": "twitch"
+		"group": "twitch",
+		"prefLevel": "advanced"
 	},
 	"twitch_import": {
 		"title": "Import the Twitch stream(s) you follow.",
 		"label": "Import",
 		"type": "control",
-		"group": "twitch"
+		"group": "twitch",
+		"prefLevel": "advanced"
 	},
 	/*			Beam			*/
 	"beam_user_id": {
@@ -58,26 +65,28 @@ optionsData.options = {
 		"description": "Enter your Beam id to be able to import the stream(s) you follow.",
 		"type": "string",
 		"value": "",
-		"group": "beam"
+		"group": "beam",
+		"prefLevel": "advanced"
 	},
 	"beam_import": {
 		"title": "Import the Beam stream(s) you follow.",
 		"label": "Import",
 		"type": "control",
-		"group": "beam"
+		"group": "beam",
+		"prefLevel": "advanced"
 	},
 	/*			Youtube			*/
 	"youtube_api_key": {
 		"type": "string",
 		"value": "",
-		"hidden": true,
-		"group": "youtube"
+		"group": "youtube",
+		"prefLevel": "experimented"
 	},
 	"youtube_api_referrer":  {
 		"type": "string",
 		"value": "",
-		"hidden": true,
-		"group": "youtube"
+		"group": "youtube",
+		"prefLevel": "experimented"
 	},
 	/*			Check delay			*/
 	"check_delay": {
@@ -85,16 +94,17 @@ optionsData.options = {
 		"description": "Delay between checks, in minute",
 		"type": "integer",
 		"value": 5,
-		"minValue": 1
+		"minValue": 1,
+		"prefLevel": "advanced"
 	},
 	"timeout_delay": {
 		"title": "Streams timeout delay",
 		"description": "Timeout delay of requests, in sec (between 10 and 30)",
 		"type": "integer",
 		"value": 30,
-		"hidden": true,
 		"minValue": 10,
-		"maxValue": 30
+		"maxValue": 30,
+		"prefLevel": "experimented"
 	},
 	/*			Notifications			*/
 	"notify_online": {
@@ -102,28 +112,32 @@ optionsData.options = {
 		"description": "Notification when checked",
 		"type": "bool",
 		"value": true,
-		"group": "notifications"
+		"group": "notifications",
+		"prefLevel": "basic"
 	},
 	"notify_vocal_online": {
 		"title": "Read a vocal notification when a stream start",
 		"description": "Notification when checked",
 		"type": "bool",
 		"value": false,
-		"group": "notifications"
+		"group": "notifications",
+		"prefLevel": "basic"
 	},
 	"notify_offline": {
 		"title": "Show a notification when a stream finish",
 		"description": "Notification when checked",
 		"type": "bool",
 		"value": false,
-		"group": "notifications"
+		"group": "notifications",
+		"prefLevel": "basic"
 	},
 	"notify_vocal_offline": {
 		"title": "Read a vocal notification when a stream finish",
 		"description": "Notification when checked",
 		"type": "bool",
 		"value": false,
-		"group": "notifications"
+		"group": "notifications",
+		"prefLevel": "basic"
 	},
 	/*				Filters				*/
 	"statusBlacklist":{
@@ -131,28 +145,32 @@ optionsData.options = {
 		"type": "string",
 		"stringList": true,
 		"value": "",
-		"group": "filters"
+		"group": "filters",
+		"prefLevel": "advanced"
 	},
 	"statusWhitelist":{
 		"title": "Status whitelist",
 		"type": "string",
 		"stringList": true,
 		"value": "",
-		"group": "filters"
+		"group": "filters",
+		"prefLevel": "advanced"
 	},
 	"gameBlacklist":{
 		"title": "Game blacklist",
 		"type": "string",
 		"stringList": true,
 		"value": "",
-		"group": "filters"
+		"group": "filters",
+		"prefLevel": "advanced"
 	},
 	"gameWhitelist":{
 		"title": "Game whitelist",
 		"type": "string",
 		"stringList": true,
 		"value": "",
-		"group": "filters"
+		"group": "filters",
+		"prefLevel": "advanced"
 	},
 	/*			Show in panel			*/
 	"group_streams_by_websites": {
@@ -160,14 +178,16 @@ optionsData.options = {
 		"description": "Grouped when checked",
 		"type": "bool",
 		"value": true,
-		"group": "showInPanel"
+		"group": "showInPanel",
+		"prefLevel": "basic"
 	},
 	"show_offline_in_panel": {
 		"title": "Show offline streams in the panel",
 		"description": "Shown when checked",
 		"type": "bool",
 		"value": true,
-		"group": "showInPanel"
+		"group": "showInPanel",
+		"prefLevel": "basic"
 	},
 	/*			Confirm add / delete			*/
 	"confirm_addStreamFromPanel": {
@@ -175,14 +195,16 @@ optionsData.options = {
 		"description": "Show a notification to confirm when adding a stream of config (from panel)",
 		"type": "bool",
 		"value": false,
-		"group": "confirmAddDelete"
+		"group": "confirmAddDelete",
+		"prefLevel": "basic"
 	},
 	"confirm_deleteStreamFromPanel": {
 		"title": "Confirmation to delete streams",
 		"description": "Show a notification to confirm when deleting a stream of config (from panel)",
 		"type": "bool",
 		"value": true,
-		"group": "confirmAddDelete"
+		"group": "confirmAddDelete",
+		"prefLevel": "basic"
 	},
 	/*			Theme			*/
 	"panel_theme": {
@@ -200,42 +222,48 @@ optionsData.options = {
 					"label": "Light"
 				}
 			],
-		"group": "theme"
+		"group": "theme",
+		"prefLevel": "basic"
 	},
 	"background_color": {
 		"title": "Panel background color",
 		"description": "Choose background color",
 		"type": "color",
 		"value": "#000000",
-		"group": "theme"
+		"group": "theme",
+		"prefLevel": "basic"
 	},
 	/*			Import/Export Prefs			*/
 	"export_preferences": {
 		"title": "Export preferences from a file",
 		"label": "Export preferences",
 		"type": "control",
-		"group": "importexport_prefs"
+		"group": "importexport_prefs",
+		"prefLevel": "basic"
 	},
 	"import_preferences": {
 		"title": "Import preferences from a file",
 		"label": "Import preferences",
 		"type": "control",
-		"group": "importexport_prefs"
+		"group": "importexport_prefs",
+		"prefLevel": "basic"
 	},
-	/*			Livestreamer			*/
-	"livestreamer_cmd_to_clipboard": {
-		"title": "Copy Livestreamer command on stream click.",
-		"description": "Check to activate",
+	/*			Settings level			*/
+	"showAdvanced": {
+		"title": "Show advanced settings",
+		"description": "Enabled when checked",
 		"type": "bool",
 		"value": false,
-		"group": "livestreamer"
+		"group": "settingsLevel",
+		"prefLevel": "basic"
 	},
-	"livestreamer_cmd_quality": {
-		"title": "Livestreamer quality",
-		"description": "More information on Livestreamer page.",
-		"type": "string",
-		"value": "best",
-		"group": "livestreamer"
+	"showExperimented": {
+		"title": "Show setting for experimented users",
+		"description": "Enabled when checked",
+		"type": "bool",
+		"value": false,
+		"group": "settingsLevel",
+		"prefLevel": "advanced"
 	}
 }
 

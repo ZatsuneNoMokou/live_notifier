@@ -40,8 +40,7 @@ loadPreferences("section#preferences");
 
 let loadJS = chrome.extension.getBackgroundPage().loadJS;
 function init(){
-	translateNodes(document);
-	translateNodes_title(document);
+	backgroundPage.loadTranslations(window);
 }
 document.addEventListener('DOMContentLoaded',		init);
 

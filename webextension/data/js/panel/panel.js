@@ -4,7 +4,6 @@
 let panelinitjs_node = document.querySelector("#panelInit");
 panelinitjs_node.parentNode.removeChild(panelinitjs_node)
 
-
 function sendDataToMain(id, data){
 	function responseCallback(response){
 		if(typeof response != "undefined"){
@@ -25,6 +24,8 @@ let options_default = backgroundPage.optionsData.options_default;
 let options_default_sync = backgroundPage.optionsData.options_default_sync;
 
 let appGlobal = backgroundPage.appGlobal;
+
+let copyToClipboard = appGlobal.copyToClipboard;
 
 let streamListFromSetting = appGlobal.streamListFromSetting;
 let websites = appGlobal.websites;
@@ -166,6 +167,7 @@ function unhideClassNode(node){
 function hideClassNode(node){
 	node.classList.add("hide");
 }
+let optionsLoaded = false;
 function selectSection(sectionNodeId){
 	let streamList = document.querySelector("#streamList");
 	let streamEditor = document.querySelector("#streamEditor");
@@ -188,6 +190,10 @@ function selectSection(sectionNodeId){
 						sendDataToMain("refreshPanel", "");
 						break;
 					case "settings_container":
+						if(!optionsLoaded){
+							optionsLoaded = true;
+							loadPreferences("section#settings_container #preferences");
+						}
 						setting_Enabled = true;
 						break;
 				}
@@ -211,6 +217,9 @@ settings_button.addEventListener("click", setting_Toggle, false);
 
 let open_optionpage_node = document.querySelector("#open_optionpage");
 open_optionpage_node.addEventListener("click", (event) => { chrome.runtime.openOptionsPage(); }, false);
+
+let ignoreHideIgnore_node = document.querySelector("#ignoreHideIgnore");
+ignoreHideIgnore_node.addEventListener("click", (event) => { ignoreHideIgnore = true; }, false);
 
 if(typeof chrome.storage.sync == "object"){
 	document.querySelector("#syncContainer").classList.remove("hide");
@@ -240,7 +249,7 @@ function enableDebugSection(){
 
 /*				---- Setting nodes generator ----				*/
 
-loadPreferences("section#settings_container #preferences");
+//loadPreferences("section#settings_container #preferences");
 
 /*			---- Settings end ----			*/
 
@@ -299,7 +308,7 @@ function saveEditedStreamButton_onClick(event){
 saveEditedStreamButton.addEventListener("click", saveEditedStreamButton_onClick, false);
 
 /*			---- Stream Editor end----			*/
-
+let ignoreHideIgnore = false;
 function updatePanelData(data){
 	console.log("Updating panel data");
 	
@@ -313,13 +322,15 @@ function updatePanelData(data){
 	let streamListSettings = new streamListFromSetting().mapDataAll;
 	streamListSettings.forEach((streamList, website, array) => {
 		streamList.forEach((value, id, array) => {
-			if(typeof streamList.get(id).ignore == "boolean" && streamList.get(id).ignore == true){
-				//console.info(`[Live notifier - Panel] Ignoring ${id}`);
-				return;
-			}
-			if(typeof streamList.get(id).hide == "boolean" && streamList.get(id).hide == true){
-				//console.info(`[Live notifier - Panel] Hiding ${id}`);
-				return;
+			if(!ignoreHideIgnore){
+				if(typeof streamList.get(id).ignore == "boolean" && streamList.get(id).ignore == true){
+					//console.info(`[Live notifier - Panel] Ignoring ${id}`);
+					return;
+				}
+				if(typeof streamList.get(id).hide == "boolean" && streamList.get(id).hide == true){
+					//console.info(`[Live notifier - Panel] Hiding ${id}`);
+					return;
+				}
 			}
 			
 			if(liveStatus.has(website) && liveStatus.get(website).has(id) && liveStatus.get(website).get(id).size > 0){
@@ -342,6 +353,15 @@ function updatePanelData(data){
 					listener(website, id, contentId, "channel", streamList.get(id), channelInfos.get(website).get(id));
 				} else if(websites.has(website)){
 					console.info(`Currrently no data for ${id} (${website})`);
+					if((typeof streamList.get(id).ignore == "boolean" && streamList.get(id).ignore == true) || (typeof streamList.get(id).hide == "boolean" && streamList.get(id).hide == true)){
+						let contentId = id;
+						let streamData = {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
+						let website_channel_id = appGlobal["website_channel_id"]
+						if(website_channel_id.test(streamData.streamName)){
+							streamData.streamName = website_channel_id.exec(streamData.streamName)[1];
+						}
+						listener(website, id, contentId, website, streamList.get(id), streamData);
+					}
 				} else {
 					let contentId = id;
 					let streamData = {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
@@ -443,6 +463,7 @@ function newDeleteStreamButton(id, website){
 	node.classList.add("deleteStreamButton");
 	node.dataset.id = id;
 	node.dataset.website = website;
+	node.dataset.translateTitle = "Delete";
 	
 	return node;
 }
@@ -466,6 +487,7 @@ function newShareStreamButton(id, contentId, website, streamName, streamUrl, str
 	node.dataset.website = website;
 	node.dataset.id = id;
 	node.dataset.contentId = contentId;
+	node.dataset.translateTitle = "shareStream";
 	
 	return node;
 }
@@ -521,10 +543,11 @@ function newEditStreamButton(id, contentId, website, title, streamSettings){
 	node.dataset.website = website;
 	node.dataset.title = title;
 	node.dataset.streamSettings = JSON.stringify(streamSettings);
+	node.dataset.translateTitle = "Settings";
 	
 	return node;
 }
-function newCopyLivestreamerCmdButton_onClick(event){
+function newCopyStreamURLButton_onClick(event){
 	event.stopPropagation();
 	
 	let node = this;
@@ -532,14 +555,15 @@ function newCopyLivestreamerCmdButton_onClick(event){
 	let contentId = node.dataset.contentId;
 	let website = node.dataset.website;
 	
-	sendDataToMain("copyLivestreamerCmd", {id: id, contentId: contentId, website: website});
+	copyToClipboard(getStreamURL(website, id, contentId, false));
 }
-function newCopyLivestreamerCmdButton(id, contentId, website){
+function newCopyStreamURLButton(id, contentId, website){
 	let node = document.createElement("span");
-	node.classList.add("copyLivestreamerCmdButton");
+	node.classList.add("copyStreamURL");
 	node.dataset.id = id;
 	node.dataset.contentId = contentId;
 	node.dataset.website = website;
+	node.dataset.translateTitle = "copyURL";
 	
 	return node;
 }
@@ -734,12 +758,12 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	let deleteButton_node = newDeleteStreamButton(id, website);
 	control_span.appendChild(deleteButton_node);
 	
-	let copyLivestreamerCmd_node = null;
+	let newCopyStreamURLButton_node = null;
 	let editStream_node = null;
 	let shareStream_node = null;
 	if(type == "live"){
-		copyLivestreamerCmd_node = newCopyLivestreamerCmdButton(id, contentId, website);
-		control_span.appendChild(copyLivestreamerCmd_node);
+		newCopyStreamURLButton_node = newCopyStreamURLButton(id, contentId, website);
+		control_span.appendChild(newCopyStreamURLButton_node);
 	}
 	editStream_node = newEditStreamButton(id, contentId, website, streamName, streamSettings);
 	control_span.appendChild(editStream_node);
@@ -752,8 +776,8 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 		newLine.appendChild(control_span);
 	}
 	deleteButton_node.addEventListener("click", newDeleteStreamButton_onClick, false);
-	if(copyLivestreamerCmd_node !== null){
-		copyLivestreamerCmd_node.addEventListener("click", newCopyLivestreamerCmdButton_onClick, false);
+	if(newCopyStreamURLButton_node !== null){
+		newCopyStreamURLButton_node.addEventListener("click", newCopyStreamURLButton_onClick, false);
 	}
 	if(editStream_node !== null){
 		editStream_node.addEventListener("click", newEditStreamButton_onClick, false);
@@ -798,11 +822,7 @@ function streamItemClick(){
 	let streamUrl = node.dataset.streamUrl;
 	
 	if(streamUrl != ""){
-		if(online){
-			sendDataToMain("openOnlineLive", {id: id, website: website, streamUrl: streamUrl});
-		} else {
-			sendDataToMain("openTab", streamUrl);
-		}
+		sendDataToMain("openTab", streamUrl);
 	}
 }
 
@@ -873,10 +893,9 @@ function scrollbar_update(nodeId){
 	}
 }
 
-sendDataToMain("panel_onload","");
+backgroundPage.loadTranslations(window);
 
-translateNodes(document);
-translateNodes_title(document);
+sendDataToMain("panel_onload","");
 
 load_scrollbar("streamList");
 load_scrollbar("streamEditor");

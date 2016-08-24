@@ -13,11 +13,11 @@
 <body>
 	<header>
 		<!--<div id="vide" class="vide"></div>-->
-		<button id="addStream"><i class="material-icons">add</i></button>
-		<button id="deleteStream" class="dragover"><i class="material-icons dragover">delete</i></button>
-		<button id="searchStream"><i class="material-icons">search</i></button>
-		<button id="refreshStreams"><i class="material-icons">refresh</i></button>
-		<button id="settings"><i class="material-icons">settings</i></button>
+		<button id="addStream" data-translate-title="Add"><i class="material-icons">add</i></button>
+		<button id="deleteStream" data-translate-title="Delete" class="dragover"><i class="material-icons dragover">delete</i></button>
+		<button id="searchStream" data-translate-title="Search"><i class="material-icons">search</i></button>
+		<button id="refreshStreams" data-translate-title="Refresh"><i class="material-icons">refresh</i></button>
+		<button id="settings" data-translate-title="Settings"><i class="material-icons">settings</i></button>
 	</header>
 	<section id="streamList">
 		<div id="searchInputContainer" class="hide"><label for="searchInput"><i class="material-icons">search</i></label><input id="searchInput" type="text"></div>
@@ -57,7 +57,7 @@
 			<div><label for="notifyOffline" data-translate-id="notifyOffline_title">Offline notification</label><input id="notifyOffline" type="checkbox"></div>
 			<div><label for="notifyVocalOffline" data-translate-id="notifyVocalOffline_title">Offline vocal notification</label><input id="notifyVocalOffline" type="checkbox"></div>
 		</div>
-		<div class="streamEditor_group">
+		<div class="streamEditor_group whiteandblacklist">
 			<div class="flex_textarea"><label for="status_blacklist"><span data-translate-id="blacklist_title">Blacklist</span> (<span data-translate-id="Status_title">Status</span>)</label><textarea id="status_blacklist"></textarea></div>
 			<div class="flex_textarea"><label for="status_whitelist"><span data-translate-id="whitelist_title">Whitelist</span> (<span data-translate-id="Status_title">Status</span>)</label><textarea id="status_whitelist"></textarea></div>
 			<div class="flex_textarea"><label for="game_blacklist"><span data-translate-id="blacklist_title">Blacklist</span> (<span data-translate-id="Game_title">Game</span>)</label><textarea id="game_blacklist"></textarea></div>
@@ -67,7 +67,8 @@
 	</section>
 	<section id="settings_container" class="hide">
 		<div id="settings_topContainer">
-			<button id="open_optionpage" data-translate-id="open_optionpage">Open option page</button>
+			<button id="open_optionpage" data-translate-title="open_optionpage"></button>
+			<button id="ignoreHideIgnore" data-translate-id="ignoreHideIgnore">Temporarily disable Ignore/Hide</button>
 		</div>
 		<div id="preferences"></div>
 		<div id="syncContainer" class="pref_sync pref_group hide">

@@ -6,6 +6,19 @@
   * onInstalled Event / Addon update notification (Currently using a workaround) ( [Bug 1252871](https://bugzilla.mozilla.org/show_bug.cgi?id=1252871) )
   * Importing from file using the panel with Firefox Web Extensions ( [Bug 1292701](https://bugzilla.mozilla.org/show_bug.cgi?id=1292701) )
   * ContextMenu in Firefox 48, with addon reload
+  * HTML title (tooltips) not showing
+
+# 8.1.0
+* i: Copy button now copy "original" stream URL
+* +: Titles on panel buttons
+* +: Temporarly disable Hide/Ignore in panel
+* +: Setting level (basic, Advanced, Experimented)
+* -: Livestreamer support
+* Fix: Youtube Gaming support
+* Fix: loadJS was not loading if a script was already in the page
+* Fix: Channel list end, not executed at the right moment
+* Fix: Notification with button was doing event and wasn't supposed to (event on the button)
+* Fix: Delete the translation data attribute (data-translate-id / data-translate-title) after translate it, to avoid re-process it again
 
 # 8.0.0
 * i: perfect-scrollbar update (0.6.12) and in option page in the Webextension

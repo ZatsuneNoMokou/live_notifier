@@ -6,7 +6,7 @@ function loadJS(callerDocument, prefix, list){
 				if(typeof currentScripts[i].src == "string" && currentScripts[i].src.indexOf(list[0]) != -1){
 					console.log(`"${list[0]}" is already loaded`);
 					list.shift();
-					loadJS(callerDocument, list)
+					loadJS(callerDocument, prefix, list)
 						.then(resolve)
 						.catch(reject)
 					return false;

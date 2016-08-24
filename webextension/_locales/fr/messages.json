@@ -28,6 +28,21 @@
 	"Ok": {
 		"message": "Ok"
 	},
+	"Search": {
+		"message": "Recherche"
+	},
+	"Refresh": {
+		"message": "Rafraichir"
+	},
+	"Settings": {
+		"message": "Options"
+	},
+	"copyURL": {
+		"message": "Copier l'URL"
+	},
+	"shareStream": {
+		"message": "Partager le stream"
+	},
 	"Stream_online": {
 		"message": "Stream en ligne"
 	},
@@ -35,7 +50,7 @@
 		"message": "Stream hors ligne"
 	},
 	"is_online": {
-		"message": "viens de commencer un stream"
+		"message": "est en stream"
 	},
 	"is_offline": {
 		"message": "viens de se finir un stream"
@@ -114,10 +129,10 @@
 	"has_been_deleted": {
 		"message": "a été supprimé."
 	},
-	"Livestreamer_command_copied_into_the_clipboard": {
-		"message": "Commande Livestreamer copiée dans le presse papier"
+	"clipboard_success": {
+		"message": "Copié dans le presse-papier"
 	},
-	"clipboad_failed": {
+	"clipboard_failed": {
 		"message": "Echec de la copie dans le presse-papier. Ceci n'est pas supporté, ou la permission est manquante"
 	},
 	"Addon_have_been_updated": {
@@ -173,11 +188,26 @@
 	"open_optionpage": {
 		"message": "Ouvrir la page d'option"
 	},
+	"ignoreHideIgnore": {
+		"message": "Désactiver temporairement Ignorer/Cacher"
+	},
 	"stream_keys_list_title": {
 		"message": "Clés de streams à notifier"
 	},
 	"stream_keys_list_description": {
 		"message": "Liste des streams dans une liste séparée par des virgules"
+	},
+	"beam_user_id_title": {
+		"message": "Votre id Beam"
+	},
+	"beam_user_id_description": {
+		"message": "Entrez votre id Beam pour pouvoir importer les streameurs que vous suivez"
+	},
+	"beam_import_title":{
+		"message": "Importez les streameurs Beam que vous suivez"
+	},
+	"beam_import": {
+		"message": "Importer"
 	},
 	"dailymotion_user_id_description": {
 		"message": "Entrez votre id Dailymotion pour pouvoir importer les streameurs que vous suivez"
@@ -218,17 +248,17 @@
 	"twitch_import": {
 		"message": "Importer"
 	},
-	"beam_user_id_title": {
-		"message": "Votre id Beam"
+	"youtube_api_key_title": {
+		"message": "Votre clé d'API Youtube (Optionel)"
 	},
-	"beam_user_id_description": {
-		"message": "Entrez votre id Beam pour pouvoir importer les streameurs que vous suivez"
+	"youtube_api_key_description": {
+		"message": "Utiliser vote propre quota, et aucune limitation de cache"
 	},
-	"beam_import_title":{
-		"message": "Importez les streameurs Beam que vous suivez"
+	"youtube_api_referrer_title": {
+		"message": "Votre réferrant d'API Youtube (Optionel)"
 	},
-	"beam_import": {
-		"message": "Importer"
+	"youtube_api_referrer_description": {
+		"message": ""
 	},
 	"An_error_occurred_when_importing_check_your_id_or_the_website_availability": {
 		"message": "Une erreur s'est produite lors de l'importation, vérifier votre id ou la disponibilité du site"
@@ -335,18 +365,6 @@
 	"background_color_description": {
 		"message": "Choix de la couleur de base du panel"
 	},
-	"livestreamer_cmd_to_clipboard_title": {
-		"message": "Copier la commande Livestreamer"
-	},
-	"livestreamer_cmd_to_clipboard_description": {
-		"message": "Cocher pour activer la copie dans le presse-papier la commande Livestreamer lors d'un clic sur un stream en ligne"
-	},
-	"livestreamer_cmd_quality_title": {
-		"message": "Qualité Livestreamer"
-	},
-	"livestreamer_cmd_quality_description": {
-		"message": "Plus d'information sur la page de Livestreamer."
-	},
 	"export_preferences_title": {
 		"message": "Exporter les préférences dans un fichier"
 	},
@@ -355,6 +373,18 @@
 	},
 	"import_preferences_title": {
 		"message": "Importer les préférences depuis un fichier"
+	},
+	"showAdvanced_title": {
+		"message": "Afficher les options avancées"
+	},
+	"showAdvanced_description": {
+		"message": "Activé si coché"
+	},
+	"showExperimented_title": {
+		"message": "Afficher les options pour utilisateur experimenté"
+	},
+	"showExperimented_description": {
+		"message": "Activé si coché"
 	},
 	"import_preferences": {
 		"message": "Importer"

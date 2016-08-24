@@ -50,6 +50,18 @@ button{
 	margin-top: 14px;
 	margin-bottom: 14px;
 }
+body:not(.showAdvanced) .preferenceContainer.experimented, body:not(.showAdvanced) .preferenceContainer.advanced{
+	display: none;
+	visibility: hidden;
+}
+body:not(.showAdvanced) #sync_control_container{
+	display: none;
+	visibility: hidden;
+}
+body:not(.showExperimented) .preferenceContainer.experimented{
+	display: none;
+	visibility: hidden;
+}
 .preferenceContainer.flex_input_text{
 	display: flex;
 	width: 100%;

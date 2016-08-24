@@ -9,6 +9,7 @@ function translateNodes(locale_document){
 		let node = translate_nodes[i];
 		if(typeof node.tagName == "string"){
 			node.textContent = _(node.dataset.translateId);
+			delete node.dataset.translateId;
 		}
 	}
 }
@@ -20,8 +21,39 @@ function translateNodes_title(locale_document){
 		let node = translate_nodes[i];
 		if(typeof node.tagName == "string"){
 			node.title = _(node.dataset.translateTitle);
+			delete node.dataset.translateTitle;
 		}
 	}
+}
+
+function loadTranslations(locale_window){
+	let document = locale_window.document;
+	let body = document.querySelector('body');
+	
+	let observer = new MutationObserver(function(mutations) {
+		mutations.forEach(function(mutation) {
+			if(mutation.type == "childList"){
+				translateNodes(document);
+				translateNodes_title(document);
+			}
+		});
+	});
+	
+	// configuration of the observer:
+	var config = {
+		attributes: false,
+		childList: true,
+		subtree: true
+	};
+	
+	translateNodes(document);
+	translateNodes_title(document);
+	
+	// pass in the target node, as well as the observer options
+	observer.observe(body, config);
+	
+	// later, you can stop observing
+	//observer.disconnect();
 }
 
 /*		---- get/save preference ----		*/
@@ -87,8 +119,6 @@ function getPreference(prefId){
 	let defaultSettings = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options_default : optionsData.options_default;
 	
 	let currentPreferences = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().appGlobal.currentPreferences : appGlobal.currentPreferences;
-/*	console.dir(currentPreferences)
-	console.warn(prefId + " - " + currentPreferences.hasOwnProperty(prefId))*/
 	if(currentPreferences.hasOwnProperty(prefId)){
 		let current_pref = currentPreferences[prefId];
 		switch(typeof defaultSettings[prefId]){
@@ -238,6 +268,21 @@ function refreshSettings(event){
 					// Nothing to update, no value
 					break;
 			}
+			let body = document.querySelector("body");
+			if(prefId == "showAdvanced"){
+				if(getPreference("showAdvanced")){
+					body.classList.add("showAdvanced");
+				} else {
+					body.classList.remove("showAdvanced");
+				}
+			}
+			if(prefId == "showExperimented"){
+				if(getPreference("showExperimented")){
+					body.classList.add("showExperimented");
+				} else {
+					body.classList.remove("showExperimented");
+				}
+			}
 			if(prefId == "panel_theme" || prefId == "background_color" && typeof theme_update == "function"){
 				theme_update();
 			}
@@ -315,12 +360,12 @@ function restaureOptionsFromSync(event){
 }
 
 /*		---- Node generation of settings ----		*/
-
 function loadPreferences(selector){
 	let container = document.querySelector(selector);
 	let isPanelPage = location.pathname.indexOf("panel.html") != -1;
 	
 	let options = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options : optionsData.options;
+	let body = document.querySelector("body");
 	
 	for(let id in options){
 		let option = options[id];
@@ -330,7 +375,22 @@ function loadPreferences(selector){
 		if(option.hasOwnProperty("hidden") == true && typeof option.hidden == "boolean" && option.hidden == true){
 			continue;
 		}
-		if(isPanelPage && option.hasOwnProperty("showPrefInPanel") == true && typeof option.showPrefInPanel == "boolean" && option.showPrefInPanel == false){
+		if(id == "showAdvanced"){
+			if(getPreference("showAdvanced")){
+				body.classList.add("showAdvanced");
+			} else {
+				body.classList.remove("showAdvanced");
+			}
+		}
+		if(id == "showExperimented"){
+			if(getPreference("showExperimented")){
+				body.classList.add("showExperimented");
+			} else {
+				body.classList.remove("showExperimented");
+			}
+		}
+		
+		if(isPanelPage && ((typeof option.prefLevel == "string" && option.prefLevel == "experimented") || (option.hasOwnProperty("showPrefInPanel") == true && typeof option.showPrefInPanel == "boolean" && option.showPrefInPanel == false))){
 			continue;
 		}
 		
@@ -372,6 +432,9 @@ function newPreferenceNode(parent, id, prefObj){
 	
 	let node = document.createElement("div");
 	node.classList.add("preferenceContainer");
+	if(typeof prefObj.prefLevel == "string"){
+		node.classList.add(prefObj.prefLevel);
+	}
 	
 	let labelNode = document.createElement("label");
 	labelNode.classList.add("preference");

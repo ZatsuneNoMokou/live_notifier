@@ -28,6 +28,18 @@
 	"Ok": {
 		"message": "Ok"
 	},
+	"Refresh": {
+		"message": "Refresh"
+	},
+	"Settings": {
+		"message": "Settings"
+	},
+	"copyURL": {
+		"message": "Copy stream"
+	},
+	"shareStream": {
+		"message": "Share stream"
+	},
 	"Stream_online": {
 		"message": "Stream online"
 	},
@@ -35,7 +47,7 @@
 		"message": "Stream offline"
 	},
 	"is_online": {
-		"message": "just started a stream"
+		"message": "is streaming"
 	},
 	"is_offline": {
 		"message": "just finished a stream"
@@ -117,7 +129,10 @@
 	"Livestreamer_command_copied_into_the_clipboard": {
 		"message": "Livestreamer command copied into the clipboard"
 	},
-	"clipboad_failed": {
+	"clipboard_success": {
+		"message": "Copied into the clipboad."
+	},
+	"clipboard_failed": {
 		"message": "Failed to copy to clipboad.\nIt is not supported or the permission is missing"
 	},
 	"Addon_have_been_updated": {
@@ -173,11 +188,26 @@
 	"open_optionpage": {
 		"message": "Open option page"
 	},
+	"ignoreHideIgnore": {
+		"message": "Temporarily disable Ignore/Hide"
+	},
 	"stream_keys_list_title": {
 		"message": "Stream keys to notify"
 	},
 	"stream_keys_list_description": {
 		"message": "Stream list in a comma separated list"
+	},
+	"beam_user_id_title": {
+		"message": "Your Beam id"
+	},
+	"beam_user_id_description": {
+		"message": "Enter your Beam id to be able to import the stream(s) you follow"
+	},
+	"beam_import_title":{
+		"message": "Import the Beam stream(s) you follow"
+	},
+	"beam_import": {
+		"message": "Import"
 	},
 	"dailymotion_user_id_title": {
 		"message": "Your Dailymotion id"
@@ -215,17 +245,17 @@
 	"twitch_import": {
 		"message": "Import"
 	},
-	"beam_user_id_title": {
-		"message": "Your Beam id"
+	"youtube_api_key_title": {
+		"message": "Your Youtube API Key (Optional)"
 	},
-	"beam_user_id_description": {
-		"message": "Enter your Beam id to be able to import the stream(s) you follow"
+	"youtube_api_key_description": {
+		"message": "Use your own quota, and no cache limitation"
 	},
-	"beam_import_title":{
-		"message": "Import the Beam stream(s) you follow"
+	"youtube_api_referrer_title": {
+		"message": "Your Youtube API Referrer (Optional)"
 	},
-	"beam_import": {
-		"message": "Import"
+	"youtube_api_referrer_description": {
+		"message": ""
 	},
 	"An_error_occurred_when_importing_check_your_id_or_the_website_availability": {
 		"message": "An error occurred when importing, check your id or the website availability"
@@ -332,18 +362,6 @@
 	"background_color_description": {
 		"message": "Choose base color of the panel"
 	},
-	"livestreamer_cmd_to_clipboard_title": {
-		"message": "Copy Livestreamer command on stream click"
-	},
-	"livestreamer_cmd_to_clipboard_description": {
-		"message": "Check to activate copying Livestreamer command in clipboard when clicking on an online stream"
-	},
-	"livestreamer_cmd_quality_title": {
-		"message": "Livestreamer quality"
-	},
-	"livestreamer_cmd_quality_description": {
-		"message": "More information on Livestreamer page."
-	},
 	"export_preferences_title": {
 		"message": "Export preferences in a file"
 	},
@@ -355,6 +373,18 @@
 	},
 	"import_preferences": {
 		"message": "Import"
+	},
+	"showAdvanced_title": {
+		"message": "Show advanced settings"
+	},
+	"showAdvanced_description": {
+		"message": "Enabled when checked"
+	},
+	"showExperimented_title": {
+		"message": "Show setting for experimented users"
+	},
+	"showExperimented_description": {
+		"message": "Enabled when checked"
 	},
 	"options_saved": {
 		"message": "Options saved."
