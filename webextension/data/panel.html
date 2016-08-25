@@ -8,7 +8,8 @@
 	<!-- 		Google Material Design - Icon font 		-->
 	<link rel="stylesheet" type="text/css" media="all" href="css/fonts.css" />
 	
-	<link rel="stylesheet" href="css/perfect-scrollbar.min.css" />
+	<link rel="stylesheet" href="css/perfect-scrollbar.min.css" type="text/css" />
+	<link rel="stylesheet" href="css/bootstrap_tooltip.min.css" type="text/css" />
 </head>
 <body>
 	<header>
@@ -67,7 +68,7 @@
 	</section>
 	<section id="settings_container" class="hide">
 		<div id="settings_topContainer">
-			<button id="open_optionpage" data-translate-title="open_optionpage"></button>
+			<button id="open_optionpage" data-translate-title="open_optionpage" data-placement="bottom"></button>
 			<button id="ignoreHideIgnore" data-translate-id="ignoreHideIgnore">Temporarily disable Ignore/Hide</button>
 		</div>
 		<div id="preferences"></div>
@@ -78,7 +79,6 @@
 				<button id="save_sync" data-translate-id="save_sync" class="sync">Save</button>
 			</div>
 		</div>
-		<span id="current_version"></span>
 	</section>
 	<section id="debugSection" class="hide">
 		<span><button id="close_debugSection">X</button></span>
@@ -91,9 +91,13 @@
 	<footer>
 		<div>
 			<span data-translate-id="footer_title">Addon under GPL v3 licence</span>
-			<div><span data-translate-id="footer_by">By</span> <a href="https://github.com/ZatsuneNoMokou/" target="_blank">ZatsuneNoMokou</a></div>
+			<div>
+				<span data-translate-id="footer_by">By</span><!--
+				--> <a href="https://github.com/ZatsuneNoMokou/" target="_blank">ZatsuneNoMokou</a><!--
+				--> <span id="current_version"></span>
+			</div>
 		</div>
-		<a id="patreonlogo" href="https://www.patreon.com/ZatsuneNoMokou" target="_blank"></a>
+		<a id="patreonlogo" data-translate-title="supportWithPatreon" href="https://www.patreon.com/ZatsuneNoMokou" target="_blank"></a>
 	</footer>
 	<script id="panelInit" src="js/panel/panel-init.js"></script>
 </body>

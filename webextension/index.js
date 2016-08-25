@@ -375,7 +375,8 @@ function getStreamURL(website, id, contentId, usePrefUrl){
 					if(website_channel_id.test(contentId) == true){
 						return `https://youtube.com/channel/${website_channel_id.exec(id)[1]}`;
 					} else {
-						return `https://youtu.be/${contentId}`;
+						return `https://www.youtube.com/watch?v=${contentId}`;
+						//return `https://youtu.be/${contentId}`;
 					}
 					break;
 				default:

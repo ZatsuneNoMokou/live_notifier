@@ -41,7 +41,7 @@
 		"message": "Copier l'URL"
 	},
 	"shareStream": {
-		"message": "Partager le stream"
+		"message": "Partager le stream"
 	},
 	"Stream_online": {
 		"message": "Stream en ligne"
@@ -201,7 +201,7 @@
 		"message": "Votre id Beam"
 	},
 	"beam_user_id_description": {
-		"message": "Entrez votre id Beam pour pouvoir importer les streameurs que vous suivez"
+		"message": "Saisir pour pouvoir importer les streameurs que vous suivez"
 	},
 	"beam_import_title":{
 		"message": "Importez les streameurs Beam que vous suivez"
@@ -209,14 +209,11 @@
 	"beam_import": {
 		"message": "Importer"
 	},
-	"dailymotion_user_id_description": {
-		"message": "Entrez votre id Dailymotion pour pouvoir importer les streameurs que vous suivez"
-	},
 	"dailymotion_user_id_title": {
 		"message": "Votre id Dailymotion"
 	},
 	"dailymotion_user_id_description": {
-		"message": "Entrez votre id Dailymotion pour pouvoir importer les streameurs que vous suivez"
+		"message": "Saisir pour pouvoir importer les streameurs que vous suivez"
 	},
 	"dailymotion_import_title":{
 		"message": "Importez les streameurs Dailymotion que vous suivez"
@@ -228,7 +225,7 @@
 		"message": "Votre id Hitbox"
 	},
 	"hitbox_user_id_description": {
-		"message": "Entrez votre id Hitbox pour pouvoir importer les streameurs que vous suivez"
+		"message": "Saisir pour pouvoir importer les streameurs que vous suivez"
 	},
 	"hitbox_import_title":{
 		"message": "Importez les streameurs Hitbox que vous suivez"
@@ -240,7 +237,7 @@
 		"message": "Votre id Twitch"
 	},
 	"twitch_user_id_description": {
-		"message": "Entrez votre id Twitch pour pouvoir importer les streameurs que vous suivez"
+		"message": "Saisir pour pouvoir importer les streameurs que vous suivez"
 	},
 	"twitch_import_title":{
 		"message": "Importez les streameurs Twitch que vous suivez"
@@ -424,5 +421,8 @@
 	},
 	"footer_by": {
 		"message": "par"
+	},
+	"supportWithPatreon": {
+		"message": "Supportez l'addon et le support Youtube"
 	}
 }

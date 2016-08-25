@@ -4,7 +4,7 @@ body, header button, button, #streamOnlineCountLabel, #streamOfflineCountLabel, 
 	color: rgba(0, 0, 0, 0.8);
 }
 /*		--- Secondary text / Base Color ----		*/
-.item-stream, .item-stream .streamTitle, .item-stream .streamStatus, .item-stream .streamCurrentViewers, #current_version{
+.item-stream, .item-stream .streamTitle, .item-stream .streamStatus, .item-stream .streamCurrentViewers/*, #current_version*/{
 	color: #FFFFFF;
 	color: rgba(0, 0, 0, 0.5);
 }

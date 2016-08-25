@@ -1,9 +1,8 @@
 'use strict';
 
 /*		---- Nodes translation ----		*/
-function translateNodes(locale_document){
+function translateNodes(){
 	let _ = chrome.i18n.getMessage;
-	let document = locale_document;
 	let translate_nodes = document.querySelectorAll("[data-translate-id]");
 	for(let i in translate_nodes){
 		let node = translate_nodes[i];
@@ -13,21 +12,24 @@ function translateNodes(locale_document){
 		}
 	}
 }
-function translateNodes_title(locale_document){
+function translateNodes_title(){
 	let _ = chrome.i18n.getMessage;
-	let document = locale_document;
 	let translate_nodes = document.querySelectorAll("[data-translate-title]");
 	for(let i in translate_nodes){
 		let node = translate_nodes[i];
 		if(typeof node.tagName == "string"){
+			node.dataset.toggle = "tooltip";
+			if(typeof node.dataset.placement != "string"){
+				node.dataset.placement = "auto";
+			}
 			node.title = _(node.dataset.translateTitle);
+			$(node).tooltip();
 			delete node.dataset.translateTitle;
 		}
 	}
 }
 
-function loadTranslations(locale_window){
-	let document = locale_window.document;
+function loadTranslations(){
 	let body = document.querySelector('body');
 	
 	let observer = new MutationObserver(function(mutations) {
@@ -46,8 +48,8 @@ function loadTranslations(locale_window){
 		subtree: true
 	};
 	
-	translateNodes(document);
-	translateNodes_title(document);
+	translateNodes();
+	translateNodes_title();
 	
 	// pass in the target node, as well as the observer options
 	observer.observe(body, config);

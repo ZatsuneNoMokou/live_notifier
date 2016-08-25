@@ -201,7 +201,7 @@
 		"message": "Your Beam id"
 	},
 	"beam_user_id_description": {
-		"message": "Enter your Beam id to be able to import the stream(s) you follow"
+		"message": "Enter to be able to import the stream(s) you follow"
 	},
 	"beam_import_title":{
 		"message": "Import the Beam stream(s) you follow"
@@ -213,7 +213,7 @@
 		"message": "Your Dailymotion id"
 	},
 	"dailymotion_user_id_description": {
-		"message": "Enter your Dailymotion id to be able to import the stream(s) you follow"
+		"message": "Enter to be able to import the stream(s) you follow"
 	},
 	"dailymotion_import_title":{
 		"message": "Import the Dailymotion stream(s) you follow"
@@ -225,7 +225,7 @@
 		"message": "Your Hitbox id"
 	},
 	"hitbox_user_id_description": {
-		"message": "Enter your Hitbox id to be able to import the stream(s) you follow"
+		"message": "Enter to be able to import the stream(s) you follow"
 	},
 	"hitbox_import_title":{
 		"message": "Import the Hitbox stream(s) you follow"
@@ -237,7 +237,7 @@
 		"message": "Your Twitch id"
 	},
 	"twitch_user_id_description": {
-		"message": "Enter your Twitch id to be able to import the stream(s) you follow"
+		"message": "Enter to be able to import the stream(s) you follow"
 	},
 	"twitch_import_title":{
 		"message": "Import the Twitch stream(s) you follow"
@@ -421,5 +421,8 @@
 	},
 	"footer_by": {
 		"message": "by"
+	},
+	"supportWithPatreon": {
+		"message": "Support this addon and the Youtube support"
 	}
 }

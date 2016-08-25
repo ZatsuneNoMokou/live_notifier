@@ -6,7 +6,16 @@
   * onInstalled Event / Addon update notification (Currently using a workaround) ( [Bug 1252871](https://bugzilla.mozilla.org/show_bug.cgi?id=1252871) )
   * Importing from file using the panel with Firefox Web Extensions ( [Bug 1292701](https://bugzilla.mozilla.org/show_bug.cgi?id=1292701) )
   * ContextMenu in Firefox 48, with addon reload
-  * HTML title (tooltips) not showing
+  * HTML title (tooltips) not showing (Currently using a workaround)
+
+# 8.2.0
+* i: perfect-scrollbar now use jQuery, as it's now loaded anyway
+* i: Panel debug section is now for experimented users
+* i: Moved the addon version to footer, in panel
+* +: jQuery for the tooltips (title)
+* +: Tooltip (title) on the Patreon link, in panel
+* Fix: Use Bootstrap to show tooltips (title) on Firefox
+* Fix: Youtube stream now open in the full version links
 
 # 8.1.0
 * i: Copy button now copy "original" stream URL

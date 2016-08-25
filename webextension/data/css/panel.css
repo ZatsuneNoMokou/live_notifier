@@ -550,10 +550,7 @@ input[type=number]{
 }
 
 #current_version::before{
-	content: "v";
-}
-#current_version{
-	display: block;
+	content: " (v" attr(data-current-version) ")";
 }
 footer{
 	display: flex;
@@ -561,7 +558,7 @@ footer{
 	min-height: 32px;
 }
 footer, footer *{
-	white-space: pre-line;
+	/*white-space: pre-line;*/
 	text-align: center;
 }
 footer > div{

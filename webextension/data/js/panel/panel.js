@@ -242,7 +242,9 @@ let versionNode = document.querySelector("#current_version");
 versionNode.addEventListener("dblclick", enableDebugSection);
 
 function enableDebugSection(){
-	selectSection("debugSection");
+	if(getPreference("showAdvanced") && getPreference("showExperimented")){
+		selectSection("debugSection");
+	}
 }
 
 /*				---- End Debug section ----				*/
@@ -761,7 +763,9 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	let newCopyStreamURLButton_node = null;
 	let editStream_node = null;
 	let shareStream_node = null;
-	if(type == "live"){
+	
+	let websiteStreamURL = getStreamURL(website, id, contentId, false);
+	if(websiteStreamURL != "" && websiteStreamURL != null){
 		newCopyStreamURLButton_node = newCopyStreamURLButton(id, contentId, website);
 		control_span.appendChild(newCopyStreamURLButton_node);
 	}
@@ -828,7 +832,8 @@ function streamItemClick(){
 
 function current_version(version){
 	let current_version_node = document.querySelector("#current_version");
-	current_version_node.textContent = version;
+	//current_version_node.textContent = version;
+	current_version_node.dataset.currentVersion = version;
 }
 
 function theme_update(){
@@ -878,22 +883,28 @@ function load_scrollbar(id){
 		return null;
 	}
 	
-	Ps.initialize(scroll_node, {
+	$(scroll_node).perfectScrollbar({
 		theme: "slimScrollbar",
 		suppressScrollX: true
 	});
+	/*
+	Ps.initialize(scroll_node, {
+		theme: "slimScrollbar",
+		suppressScrollX: true
+	});*/
 }
 
 function scrollbar_update(nodeId){
 	if(typeof nodeId == "string" && nodeId != ""){
 		let scrollbar_node = document.querySelector(`#${nodeId}`);
 		if(scrollbar_node != null){
-			Ps.update(scrollbar_node);
+			$(scrollbar_node).perfectScrollbar('update');
+			//Ps.update(scrollbar_node);
 		}
 	}
 }
 
-backgroundPage.loadTranslations(window);
+loadTranslations();
 
 sendDataToMain("panel_onload","");
 

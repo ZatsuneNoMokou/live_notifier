@@ -40,7 +40,7 @@ loadPreferences("section#preferences");
 
 let loadJS = chrome.extension.getBackgroundPage().loadJS;
 function init(){
-	backgroundPage.loadTranslations(window);
+	loadTranslations();
 }
 document.addEventListener('DOMContentLoaded',		init);
 
@@ -56,11 +56,17 @@ if(typeof chrome.storage.sync == "object"){
 
 
 let contentContainer = document.querySelector("#contentContainer");
-Ps.initialize(contentContainer, {
+$(contentContainer).perfectScrollbar({
 	theme: "slimScrollbar",
 	includePadding: true,
 	suppressScrollX: true
 });
+/*Ps.initialize(contentContainer, {
+	theme: "slimScrollbar",
+	includePadding: true,
+	suppressScrollX: true
+});*/
 window.onresize = function(){
-	Ps.update(contentContainer);
+	$(contentContainer).perfectScrollbar('update');
+	/*Ps.update(contentContainer);*/
 }

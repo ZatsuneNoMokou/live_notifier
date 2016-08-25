@@ -18,5 +18,5 @@ if(typeof optionColorStylesheet == "object" && optionColorStylesheet !== null){
 let loadJS = chrome.extension.getBackgroundPage().loadJS;
 window.onload = function () {
 	window.onload = null;
-	loadJS(document, "/data/js/", ["perfect-scrollbar.min.js", "options-api.js", "panel/panel.js"]);
+	loadJS(document, "/data/js/", ["lib/jquery-3.1.0.min.js", "lib/perfect-scrollbar.jquery.min.js", "lib/bootstrap.min.js", "options-api.js", "panel/panel.js"]);
 }
