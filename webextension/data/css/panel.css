@@ -1,581 +1,568 @@
 html{
-	margin: 0px;
-	padding: 0px;
-	/*height: 100%;
-	width: 100%;*/
-	overflow: hidden;
-	font-weight: 300;
+	margin:0px;
+	padding:0px;
+	/*height:100%;
+	width:100%;*/
+	overflow:hidden;
+	font-weight:300;
 }
 body{
-	margin: 0px;
-	height: 350px;
-	width: 285px;
-	display: flex;
-	flex-direction: column;
+	margin:0px;
+	height:350px;
+	width:285px;
+	display:flex;
+	flex-direction:column;
 	/*
-	resize: both;
-	overflow: auto;
-	max-height: 600px;
-	max-width: 600px;*/
+	resize:both;
+	overflow:auto;
+	max-height:600px;
+	max-width:600px;*/
 }
 
 input[type=text], input[type=url]{
-	border: 1px solid #444;
-	border-radius: 3px;
-	padding-left: 2px;
+	border:1px solid #444;
+	border-radius:3px;
+	padding-left:2px;
 }
 button{
-	padding: 0px 8px;
-	border: 0px none;
-	border-radius: 1px;
-	margin-left: 5px;
-	font-weight: 700;
+	padding:0px 8px;
+	border:0px none;
+	border-radius:1px;
+	margin-left:5px;
+	font-weight:700;
 }
 .ps-theme-slimScrollbar .ps-scrollbar-x-rail, .ps-theme-slimScrollbar .ps-scrollbar-y-rail{
-	background-color: transparent !important;
+	background-color:transparent !important;
 }
 .ps-theme-slimScrollbar .ps-scrollbar-x-rail, .ps-theme-slimScrollbar .ps-scrollbar-x{
-	border-radius: 6px !important;
-	height: 6px !important;
+	border-radius:6px !important;
+	height:6px !important;
 }
 .ps-theme-slimScrollbar .ps-scrollbar-y-rail, .ps-theme-slimScrollbar .ps-scrollbar-y{
-	border-radius: 6px !important;
-	width: 6px !important;
+	border-radius:6px !important;
+	width:6px !important;
 }
 
 
 header{
-	display: flex;
-	flex-direction: row;
-	padding: 5px 2px;
-	min-height: 36px;
+	display:flex;
+	flex-direction:row;
+	padding:5px 2px;
+	min-height:36px;
 }
 header button{
-	flex: 1;
-	height: 36px;
-	/*min-width: 64px;*/
-	min-width: 42px;
-	max-width: 64px;
-	padding: 0px 8px;
-	border: 0px none;
-	border-radius: 1px;
-	margin-left: 5px;
-	font-weight: 700;
+	flex:1;
+	height:36px;
+	/*min-width:64px;*/
+	min-width:42px;
+	max-width:64px;
+	padding:0px 8px;
+	border:0px none;
+	border-radius:1px;
+	margin-left:5px;
+	font-weight:700;
 }
 #vide, .vide{
-	flex: 1;
+	flex:1;
 }
 .hide{
-	display: none !important;
-	visibility: hidden !important;
+	display:none !important;
+	visibility:hidden !important;
 }
 #deleteStream.active{
-	color: red;
+	color:red;
 }
 #deleteStreamTooltip{
-	position: fixed;
-	vertical-align: middle;
-	font-weight: bold;
-	margin-top: 7px;
-	margin-bottom: 7px;
-	border-radius: 2px;
-	z-index: 9999999999999;
+	position:fixed;
+	vertical-align:middle;
+	font-weight:bold;
+	margin-top:7px;
+	margin-bottom:7px;
+	border-radius:2px;
+	z-index:9999999999999;
 }
 .cursor{
-	cursor: pointer;
+	cursor:pointer;
 }
 #streamList, #settings_container, #streamEditor, #debugSection{
-	overflow: hidden;
-	position: relative;
-	/*flex: 1;*/
-	flex-direction: column;
-	align-items: stretch;
-	justify-content: space-between;
-	padding: 5px;
-	padding-right: 9px;
-	
-	height: 100%;
-}
-#searchInputContainer{
-	width: 100%;
-	padding-bottom: 3px;
+	overflow:hidden;
+	position:relative;
+	height:100%;
+	padding:0px 10px 3px 4px;
 }
 #searchInputContainer #searchInput{
-	width: 100%;
-	min-height: 21px;
-	background-color: transparent;
-	border: 1px solid rgba(200,200,200,0.5);
-	padding-left: 26px;
+	width:100%;
+	min-height:21px;
+	background-color:transparent;
+	border:1px solid rgba(200,200,200,0.5);
+	padding-left:26px;
 }
 #searchInputContainer label{
-	position: absolute;
+	position:absolute;
 }
 #streamOnlineCountLabel, #streamOfflineCountLabel{
-	margin: 0px;
-	padding: 0px;
+	margin:0px;
+	padding:0px;
 }
 
 item-stream .streamTitle{
-	font-size: 15px;
+	font-size:15px;
 }
 *,
 .item-stream .streamCurrentViewers .material-icons,
 .item-stream h1{
-	font-size: 13px;
+	font-size:13px;
 }
 #streamList,
 .item-stream .streamCurrentViewers,
 footer, footer *{
-	font-size: 12px;
+	font-size:12px;
 }
 .item-stream {
-	margin: 7px 0px;
-	padding: 7px 14px;
-	background-repeat: no-repeat;
-	background-position: 3px center;
-	justify-content: space-between;
-	flex-direction: column;
+	margin:7px 0px;
+	padding:7px 14px;
+	background-repeat:no-repeat;
+	background-position:3px center;
+	justify-content:space-between;
+	flex-direction:column;
 }
 .item-stream.offlineItem{
-	padding: 7px;
+	padding:7px;
 }
 .item-stream .streamTitle{
-	font-weight: 600;
-	vertical-align: middle;
+	font-weight:600;
+	vertical-align:middle;
 }
 .item-stream:not(.streamLogo){
-	padding-left: 45px;
-	background-size: auto 30px;
+	padding-left:45px;
+	background-size:auto 30px;
 }
 .item-stream.onlineItem.streamLogo{
-	padding-left: 58px;
-	background-size: 50px auto;
-	min-height: 37px;
+	padding-left:58px;
+	background-size:50px auto;
+	min-height:37px;
 }
 .item-stream.offlineItem.streamLogo{
-	padding-left: 58px;
-	background-size: auto 28px;
+	padding-left:58px;
+	background-size:auto 28px;
 }
 .item-stream .streamTitle::before{
-	display: inline-block;
+	display:inline-block;
 	content:"";
-	height: 15px;
-	width: 15px;
-	background-repeat: no-repeat;
-	background-position: center;
-	padding-left: 3px;
-	padding-top: 3px;
-	vertical-align: middle;
+	height:15px;
+	width:15px;
+	background-repeat:no-repeat;
+	background-position:center;
+	padding-left:3px;
+	padding-top:3px;
+	vertical-align:middle;
 }
 .item-stream[data-stream-website=dailymotion] .streamTitle::before, .debugItem[data-stream-website=dailymotion] .debugTitle::before{
-	background-image: url("/data/images/dailymotion-icon.png");
-	background-size: 15px 15px;
+	background-image:url("/data/images/dailymotion-icon.png");
+	background-size:15px 15px;
 }
 .item-stream[data-stream-website=hitbox] .streamTitle::before, .debugItem[data-stream-website=hitbox] .debugTitle::before{
-	background-image: url("/data/images/hitbox-icon.svg");
-	background-size: 15px 15px;
+	background-image:url("/data/images/hitbox-icon.svg");
+	background-size:15px 15px;
 }
 .item-stream[data-stream-website=twitch] .streamTitle::before, .debugItem[data-stream-website=twitch] .debugTitle::before{
-	background-image: url("/data/images/GlitchIcon_WhiteonPurple.png");
-	background-size: 15px 15px;
+	background-image:url("/data/images/GlitchIcon_WhiteonPurple.png");
+	background-size:15px 15px;
 }
 .item-stream[data-stream-website=beam] .streamTitle::before, .debugItem[data-stream-website=beam] .debugTitle::before{
-	background-image: url("/data/images/beam_ball_color.svg");
-	background-size: 15px 15px;
+	background-image:url("/data/images/beam_ball_color.svg");
+	background-size:15px 15px;
 }
 .item-stream[data-stream-website=youtube] .streamTitle::before, .debugItem[data-stream-website=youtube] .debugTitle::before{
-	background-image: url("/data/images/YouTube-icon-full_color.png");
-	background-size: 15px auto;
+	background-image:url("/data/images/YouTube-icon-full_color.png");
+	background-size:15px auto;
 }
 .item-stream[data-stream-type=unsupported] .streamTitle::before, .debugItem[data-stream-type=unsupported] .debugTitle::before{
-	background-image: url("/data/images/warning-34621.svg");
-	background-size: 15px auto;
+	background-image:url("/data/images/warning-34621.svg");
+	background-size:15px auto;
 }
 .item-stream.onlineItem .streamTitle{
-	width: 160px;
+	width:160px;
 }
 .item-stream.offlineItem .streamTitle{
-	/*max-height: 19px;*/
-	left: -15px;
-	overflow: hidden;
+	/*max-height:19px;*/
+	left:-15px;
+	overflow:hidden;
 }
 .item-stream.streamLogo .streamTitle{
-	position: relative;
-	margin-top: -5px;
+	position:relative;
+	margin-top:-5px;
 }
 /*.item-stream.offlineItem.streamLogo .streamTitle{
-	width: 190px;
+	width:190px;
 }*/
 .streamCurrentViewers{
-	display: block;
+	display:block;
 }
 .streamCurrentViewers:before{
-	content: attr(data-stream-current-viewers);
-	width: 12px;
-	height: 12px;
+	content:attr(data-stream-current-viewers);
+	width:12px;
+	height:12px;
 }
 .streamCurrentViewers:after {
-	content: "visibility";
-	font-family: 'Material Icons';
+	content:"visibility";
+	font-family:'Material Icons';
 }
 .item-stream.streamLogo .streamCurrentViewers{
-	top: -10px;
+	top:-10px;
 }
 .item-stream:not(.streamLogo) .streamCurrentViewers{
-	top: -14px;
-	right: 5px !important;
+	top:-14px;
+	right:5px !important;
 }
 .item-stream .streamCurrentViewers .material-icons{
-	padding-left: 3px;
-	font-weight: normal;
+	padding-left:3px;
+	font-weight:normal;
 }
 .item-stream.streamLogo .streamStatus{
-	margin-top: 6px;
+	margin-top:6px;
 }
 .item-stream.onlineItem .streamTitle img.streamStatusLogo{
-	height: 21px;
-	position: relative;
+	height:21px;
+	position:relative;
 }
 .item-stream.offlineItem .streamTitle img.streamStatusLogo{
-	display: none;
-	height: 17px;
-	position: relative;
+	display:none;
+	height:17px;
+	position:relative;
 }
 .item-stream.onlineItem:not(.streamLogo){
-	background-image: url("../online-stream.svg");
+	background-image:url("../online-stream.svg");
 }
 .item-stream.offlineItem:not(.streamLogo){
-	background-image: url("../offline-stream.svg");
+	background-image:url("../offline-stream.svg");
 }
 .item-stream > span{
-	display: block;
+	display:block;
 }
 .item-stream > span.streamStatus{
-	max-height: 55px;
-	overflow: hidden;
-	text-overflow: ellipsis;
+	max-height:55px;
+	overflow:hidden;
+	text-overflow:ellipsis;
 }
 #streamListOnline, #streamListOffline{
-	margin-top: 2px;
-	margin-bottom: 2px;
-	min-height: 21px;
+	margin-top:2px;
+	margin-bottom:2px;
+	min-height:21px;
 }
 #streamListOnline > div.group, #streamListOffline > div.group{
-	padding-top: 2px !important;
-	/*padding-bottom: 2px !important;*/
+	padding-top:2px !important;
+	/*padding-bottom:2px !important;*/
 }
 .item-stream h1{
-	margin: 0px;
-	padding: 0px;
+	margin:0px;
+	padding:0px;
 }
 .item-stream p{
-	margin: 0px;
-	padding: 0px;
-	max-height: 38px;
-	overflow: hidden;
-	text-overflow: ellipsis;
+	margin:0px;
+	padding:0px;
+	max-height:38px;
+	overflow:hidden;
+	text-overflow:ellipsis;
 }
 #stream_right_container{
-	position: relative;
-	float: right;
-	right: -10px;
-	top: -5px;
-	width: 45px;
-	text-align: right;
+	position:relative;
+	float:right;
+	right:-10px;
+	width:45px;
+	text-align:right;
 }
 .stream_control{
-	display: none;
-	visibility: hidden;
-	font-weight: normal;
+	display:none;
+	visibility:hidden;
+	font-weight:normal;
 }
 .deleteStreamButton:before{
-	content: "delete";
-	font-family: "Material Icons";
-	font-size: 17px;
+	content:"delete";
+	font-family:"Material Icons";
+	font-size:17px;
 }
 .shareStreamButton:before{
-	content: "share";
-	font-family: "Material Icons";
-	font-size: 17px;
+	content:"share";
+	font-family:"Material Icons";
+	font-size:17px;
 }
 .editStreamButton:before{
-	content: "settings";
-	font-family: "Material Icons";
-	font-size: 17px;
+	content:"settings";
+	font-family:"Material Icons";
+	font-size:17px;
 }
 .copyStreamURL:before{
-	content: "content_copy";
-	font-family: "Material Icons";
-	font-size: 17px;
+	content:"content_copy";
+	font-family:"Material Icons";
+	font-size:17px;
 }
 #streamList:not(.deleteButtonMode) .item-stream .stream_control .deleteStreamButton{
-	display: none;
-	visibility: hidden;
+	display:none;
+	visibility:hidden;
 }
 #streamList.deleteButtonMode .item-stream .stream_control span:not(.deleteStreamButton){
-	display: none;
-	visibility: hidden;
+	display:none;
+	visibility:hidden;
 }
 .item-stream.offlineItem .stream_control{
-	position: relative;
-	float: right;
-	top: -13px;
-	margin-right: -7px;
+	position:relative;
+	float:right;
+	top:-13px;
 }
 .item-stream.offlineItem .stream_control span{
-	margin-left: 5px;
+	margin-left:5px;
 }
 .item-stream.onlineItem:hover{
-	min-height: 60px;
+	min-height:60px;
 }
 .item-stream.onlineItem:hover > #stream_right_container > .stream_control{
-	position: relative;
-	float: right;
+	position:relative;
 }
 #streamList:not(.deleteButtonMode) .item-stream.onlineItem:hover > #stream_right_container > .stream_control > span:not(.deleteStreamButton){
-	display: block;
-	visibility: unset;
+	display:block;
+	visibility:unset;
 }
 #streamList.deleteButtonMode .stream_control,
 .item-stream:hover > #stream_right_container > .stream_control, .item-stream:hover .stream_control{
-	display: inline;
-	visibility: unset;
+	display:inline;
+	visibility:unset;
 }
 
 #streamEditor label:after{
-	content: ": ";
+	content:": ";
 }
 #streamEditor-firstLine{
-	display: flex;
+	display:flex;
 }
 #editedStreamTitle{
-	font-weight: bolder;
-	font-size: 15px;
-	margin-left: 5px;
+	font-weight:bolder;
+	font-size:15px;
+	margin-left:5px;
 }
 #closeEditor{
-	height: 30px;
-	width: 30px;
+	height:30px;
+	width:30px;
 }
 #saveEditedStream{
-	height: 30px;
+	height:30px;
 }
 #streamEditor > div:not(.streamEditor_group){
-	margin: 3px 0px;
+	margin:3px 0px;
 }
 .streamEditor_group{
-	display: block;
-	margin-top: 14px;
-	margin-bottom: 14px;
+	display:block;
+	margin-top:14px;
+	margin-bottom:14px;
 }
 body:not(.showAdvanced) .streamEditor_group.whiteandblacklist{
-	display: none !important;
-	visibility: hidden !important;
+	display:none !important;
+	visibility:hidden !important;
 }
 #streamEditor div.flex_input_text, #streamEditor div.flex_textarea{
-	display: flex;
-	width: 100%;
-	margin-top: 3px;
-	margin-bottom: 3px;
+	display:flex;
+	width:100%;
+	margin-top:3px;
+	margin-bottom:3px;
 }
 #streamEditor div.flex_input_text > input[type=text], #streamEditor div.flex_textarea > textarea{
-	display: flex;
-	flex-grow: 5;
+	display:flex;
+	flex-grow:5;
 }
 
 #settings_container #preferences{
-	margin-top: 1em;
+	margin-top:1em;
 }
 .pref_group, .website_pref{
-	display: block;
-	margin-top: 14px;
-	margin-bottom: 14px;
+	display:block;
+	margin-top:14px;
+	margin-bottom:14px;
 }
 .preferenceContainer.flex_input_text{
-	display: flex;
-	width: 100%;
-	margin-top: 3px;
-	margin-bottom: 3px;
+	display:flex;
+	width:100%;
+	margin-top:3px;
+	margin-bottom:3px;
 }
 .preferenceContainer.flex_input_text .preferenceInput{
-	display: flex;
-	flex-grow: 5;
+	display:flex;
+	flex-grow:5;
 }
 .preferenceContainer{
-	display: flex;
+	display:flex;
 }
 body:not(.showAdvanced) .preferenceContainer.experimented, body:not(.showAdvanced) .preferenceContainer.advanced{
-	display: none;
-	visibility: hidden;
+	display:none;
+	visibility:hidden;
 }
 body:not(.showAdvanced) #syncContainer{
-	display: none !important;
-	visibility: hidden  !important;
+	display:none !important;
+	visibility:hidden  !important;
 }
 body .preferenceContainer.experimented{
-	display: none;
-	visibility: hidden;
+	display:none;
+	visibility:hidden;
 }
 .preferenceContainer:not(.stringList) label{
-	flex: 4;
+	flex:4;
 }
 .preferenceContainer.stringList label{
-	flex: 1;
+	flex:1;
 }
 .preferenceContainer .preferenceInput{
-	align-items: flex-end;
+	align-items:flex-end;
 }
 .preferenceContainer:not(.stringList) .preferenceInput:not(select){
-	flex: 1;
+	flex:1;
 }
 .preferenceContainer.stringList .preferenceInput:not(select){
-	flex: 2;
+	flex:2;
 }
 .preference{
-	display: inline;
-	margin-top: 3px;
-	margin-bottom: 3px;
+	display:inline;
+	margin-top:3px;
+	margin-bottom:3px;
 }
 .preference > span:after{
-	content: ": ";
+	content:": ";
 }
 label:not(.flex_input_text){
-	display: inline;
-	padding-right: 3px;
+	display:inline;
+	padding-right:3px;
 }
 label.flex_input_text{
-	display: inline-flex;
-	padding-right: 3px;
+	display:inline-flex;
+	padding-right:3px;
 }
 /*.import_container .label{
-	display: block;
+	display:block;
 }
 .import_container .label{
-	display: block;
+	display:block;
 }*/
 .pref_container{
-	padding-left: 10px;
+	padding-left:10px;
 }
 #settings_topContainer{
-	display: flex;
+	display:flex;
 }
 #settings_topContainer button{
-	min-height: 25px;
-	margin: 3px;
+	min-height:25px;
+	margin:3px;
 }
 #settings_topContainer button#open_optionpage:before{
-	content: "open_in_new";
-	font-family: "Material Icons";
-	font-size: 17px;
-	padding-right: 3px;
-	vertical-align: middle;
+	content:"open_in_new";
+	font-family:"Material Icons";
+	font-size:17px;
+	padding-right:3px;
+	vertical-align:middle;
 }
 #settings_topContainer button#open_optionpage{
-	margin-top: 4px;
+	margin-top:4px;
 }
 .preferenceContainer button{
-	max-height: 25px;
+	max-height:25px;
 }
 .preferenceContainer input[type=text]{
-	max-height: 25px;
+	max-height:25px;
 }
 input[type=checkbox]{
-	width: 28px;
+	width:28px;
 }
 input[type=number]{
-	max-width: 42px;
+	max-width:42px;
 }
 #settings_container .pref_sync.pref_group{
-	display: flex;
+	display:flex;
 }
 #settings_container .pref_sync.pref_group #sync_title{
-	flex: 4;
-	min-height: 54px;
+	flex:4;
+	min-height:54px;
 }
 #settings_container .pref_sync.pref_group #sync_control_container{
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
+	flex:1;
+	display:flex;
+	flex-direction:column;
+	justify-content:space-between;
 }
 #settings_container .pref_sync.pref_group #sync_control_container button{
-	flex: 2;
-	margin: 2px 0px;
+	flex:2;
+	margin:2px 0px;
 }
 
 #debugInfo{
-	display: block;
-	font-weight: 700;
-	margin-right: 30px;
+	display:block;
+	font-weight:700;
+	margin-right:30px;
 }
 #close_debugSection{
-	position: absolute;
-	right: 0px;
-	height: 30px;
-	width: 30px;
+	position:absolute;
+	right:0px;
+	height:30px;
+	width:30px;
 }
 #debugDataLabel, .debugItem{
-	margin-top: 6px;
+	margin-top:6px;
 }
 .debugItem[data-stream-website] .debugTitle::before{
-	display: inline-block;
+	display:inline-block;
 	content:"";
-	height: 15px;
-	width: 15px;
-	background-repeat: no-repeat;
-	background-position: center;
-	padding-left: 3px;
-	padding-top: 3px;
-	vertical-align: middle;
+	height:15px;
+	width:15px;
+	background-repeat:no-repeat;
+	background-position:center;
+	padding-left:3px;
+	padding-top:3px;
+	vertical-align:middle;
 }
 #debugDataLabel, .debugItem[data-stream-website] .debugTitle{
-	font-weight: 600;
+	font-weight:600;
 }
 .debugItem[data-stream-website] .debugTitle::after{
-	content: ": ";
+	content:": ";
 }
 #debug_checkingLivesState{
-	margin-top: 9px;
+	margin-top:9px;
 }
 #debug_checkingLivesState.true::after{
-	content: ": done";
-	font-family: "Material Icons";
+	content:": done";
+	font-family:"Material Icons";
 }
 #debug_checkingLivesState.false::after{
-	content: ": warning";
-	font-family: "Material Icons";
+	content:": warning";
+	font-family:"Material Icons";
 }
 #debug_checkingLivesState:not(.true):not(.false)::after{
-	content: ": ?";
+	content:": ?";
 }
 
 #current_version::before{
-	content: " (v" attr(data-current-version) ")";
+	content:" (v" attr(data-current-version) ")";
 }
 footer{
-	display: flex;
-	flex-direction: row;
-	min-height: 32px;
+	display:flex;
+	flex-direction:row;
+	min-height:32px;
 }
 footer, footer *{
-	/*white-space: pre-line;*/
-	text-align: center;
+	/*white-space:pre-line;*/
+	text-align:center;
 }
 footer > div{
-	display: flex;
-	flex: 6;
-	border: none;
-	padding: 0px;
-	flex-direction: column;
+	display:flex;
+	flex:6;
+	border:none;
+	padding:0px;
+	flex-direction:column;
 }
 footer > div > *{
-	flex: 2;
+	flex:2;
 }
 footer > #patreonlogo{
-	flex: 1;
-	display: inline-block;
-	height: 28px;
-	width: 28px;
-	background-size: contain;
-	background-repeat: no-repeat;
+	flex:1;
+	display:inline-block;
+	height:28px;
+	width:28px;
+	background-size:contain;
+	background-repeat:no-repeat;
 }

@@ -263,6 +263,7 @@ optionsData.options = {
 		"type": "bool",
 		"value": false,
 		"group": "settingsLevel",
+		"showPrefInPanel": false,
 		"prefLevel": "advanced"
 	}
 }

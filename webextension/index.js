@@ -64,8 +64,25 @@ function Request(options){
 				if(typeof xhr.response != "undefined"){
 					response.response = xhr.response;
 				}
-				try{response.json = JSON.parse(xhr.responseText);}
-				catch(error){response.json = null;}
+				
+				if(typeof options.urlencodedToJSON == "boolean" && options.urlencodedToJSON == true){
+						let jsonDATA = {};
+						let splitedData = xhr.responseText.split("&");
+						
+						function splitEqual(str){
+							return str.split("=");
+						}
+						splitedData = splitedData.map(splitEqual);
+						for(let item of splitedData){
+							jsonDATA[item[0]] = decodeURIComponent(item[1]);
+						}
+						response.json = jsonDATA;
+				} else if(xhr.responseType == "document" && typeof options.Request_documentParseToJSON == "function"){
+					response.json = options.Request_documentParseToJSON(xhr);
+				} else {
+					try{response.json = JSON.parse(xhr.responseText);}
+					catch(error){response.json = null;}
+				}
 				options.onComplete(response);
 			});
 			
@@ -462,7 +479,7 @@ function addStreamFromPanel(data){
 						} else {
 							let current_API = websiteAPI.API_addStream(source_website, id, (websiteAPI.hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websiteAPI.APIs_RequiredPrefs) : {});
 							
-							Request({
+							let addStream_RequestOptions = {
 								url: current_API.url,
 								overrideMimeType: current_API.overrideMimeType,
 								onComplete: function (response) {
@@ -508,7 +525,20 @@ function addStreamFromPanel(data){
 										}
 									}
 								}
-							}).get();
+							}
+							if(current_API.hasOwnProperty("headers") == true){
+								addStream_RequestOptions.headers = current_API.headers;
+							}
+							if(current_API.hasOwnProperty("contentType") == true){
+								addStream_RequestOptions.contentType = current_API.contentType;
+							}
+							if(websites.get(website).hasOwnProperty("Request_documentParseToJSON") == true){
+								addStream_RequestOptions.Request_documentParseToJSON = websites.get(website).Request_documentParseToJSON;
+							}
+							if(current_API.hasOwnProperty("urlencodedToJSON") == true){
+								addStream_RequestOptions.urlencodedToJSON = true;
+							}
+							Request(addStream_RequestOptions).get();
 							return true;
 						}
 					}
@@ -1121,7 +1151,7 @@ function setIcon() {
 		})
 	})
 	
-	if (badgeOnlineCount > 0){
+	if(badgeOnlineCount > 0){
 		chrome.browserAction.setTitle({title: _("count_stream_online", badgeOnlineCount.toString())});
 	} else {
 		chrome.browserAction.setTitle({title: _("No_stream_online")});
@@ -1485,6 +1515,15 @@ function getPrimary(id, contentId, website, streamSetting, url, pageNumber){
 		if(current_API.hasOwnProperty("headers") == true){
 			getPrimary_RequestOptions.headers = current_API.headers;
 		}
+		if(current_API.hasOwnProperty("contentType") == true){
+			getPrimary_RequestOptions.contentType = current_API.contentType;
+		}
+		if(websites.get(website).hasOwnProperty("Request_documentParseToJSON") == true){
+			getPrimary_RequestOptions.Request_documentParseToJSON = websites.get(website).Request_documentParseToJSON;
+		}
+		if(current_API.hasOwnProperty("urlencodedToJSON") == true){
+			getPrimary_RequestOptions.urlencodedToJSON = true;
+		}
 		
 		Request(getPrimary_RequestOptions).get();
 	});
@@ -1517,9 +1556,6 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 			}
 			
 			if(!isMap(streamListData.streamList) || streamListData.streamList.size == 0){
-				//getChannelInfo(website, id);
-				//channelListEnd(website, id, streamSetting);
-				
 				resolve((isMap(streamListData.streamList))? "EmptyList" : "InvalidList");
 			} else {
 				streamListData.streamList.forEach((value, contentId, array) => {
@@ -1534,8 +1570,6 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 				
 				if(streamListData.hasOwnProperty("next") == true && streamListData.next != null){
 					promises.set("next", getPrimary(id, "", website, streamSetting, streamListData.url, streamListData.next_page_number));
-				} else {
-					//channelListEnd(website, id, streamSetting);
 				}
 				
 				PromiseWaitAll(promises)
@@ -1543,9 +1577,6 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 					.catch(reject)
 			}
 		} else {
-			//getChannelInfo(website, id);
-			//channelListEnd(website, id, streamSetting);
-			
 			resolve(responseValidity);
 		}
 	});
@@ -1607,6 +1638,15 @@ function processPrimary(id, contentId, website, streamSetting, response){
 					if(second_API.hasOwnProperty("headers") == true){
 						second_API_RequestOptions.headers = second_API.headers;
 					}
+					if(second_API.hasOwnProperty("contentType") == true){
+						second_API_RequestOptions.contentType = second_API.contentType;
+					}
+					if(websites.get(website).hasOwnProperty("Request_documentParseToJSON") == true){
+						second_API_RequestOptions.Request_documentParseToJSON = websites.get(website).Request_documentParseToJSON;
+					}
+					if(second_API.hasOwnProperty("urlencodedToJSON") == true){
+						second_API_RequestOptions.urlencodedToJSON = true;
+					}
 					
 					Request(second_API_RequestOptions).get();
 				} else {
@@ -1655,6 +1695,15 @@ function getChannelInfo(website, id){
 			
 			if(channelInfos_API.hasOwnProperty("headers") == true){
 				getChannelInfo_RequestOptions.headers = channelInfos_API.headers;
+			}
+			if(channelInfos_API.hasOwnProperty("contentType") == true){
+				getChannelInfo_RequestOptions.contentType = channelInfos_API.contentType;
+			}
+			if(websites.get(website).hasOwnProperty("Request_documentParseToJSON") == true){
+				getChannelInfo_RequestOptions.Request_documentParseToJSON = websites.get(website).Request_documentParseToJSON;
+			}
+			if(channelInfos_API.hasOwnProperty("urlencodedToJSON") == true){
+				getChannelInfo_RequestOptions.urlencodedToJSON = true;
 			}
 			
 			Request(getChannelInfo_RequestOptions).get();
