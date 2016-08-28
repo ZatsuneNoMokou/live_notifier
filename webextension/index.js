@@ -20,9 +20,42 @@ appGlobal["liveStatus"] = liveStatus;
 let channelInfos = new Map();
 appGlobal["channelInfos"] = channelInfos;
 
+function consoleMsg(level,str){
+	let msg = (typeof str.toString == "function")? str.toString() : str;
+	if(getPreference("showAdvanced") && getPreference("showExperimented")){
+		if(typeof console[level] == "function"){
+			console[level](str)
+		} else {
+			consoleMsg("log", str);
+		}
+	}
+}
+function consoleDir(obj,str){
+	if(getPreference("showAdvanced") && getPreference("showExperimented")){
+		if(typeof str == "string" || typeof str.toString == "function"){
+			console.group();
+			console.info((typeof str == "string")? str : str.toString());
+			console.dir(obj);
+			console.groupEnd();
+		} else {
+			console.dir(obj);
+		}
+	}
+}
+
+class Params extends Map {
+	encode() {
+		const array = [];
+		this.forEach((value, key) => {
+			array.push((value || typeof value == 'boolean')? `${encodeURI(key)}=${encodeURI(value)}` : `${encodeURI(key)}`);
+		});
+		
+		return array.join('&');
+	}
+}
 function Request(options){
 	if(typeof options.url != "string" && typeof options.onComplete != "function"){
-		console.warn("Error in options");
+		consoleMsg("warn", "Error in options");
 	} else {
 		let core = function(method){
 			let xhr;
@@ -32,7 +65,10 @@ function Request(options){
 				xhr = new XMLHttpRequest();
 			}
 			
-			xhr.open(method, options.url, true);
+			const content = (Array.isArray(options.content) || options.content instanceof Map)? options.content : [];
+			const params = new Params(content);
+			
+			xhr.open(method, ((method == 'GET')? `${options.url}${(params.size > 0)? `?${params.encode()}` : ""}` : options.url), true);
 			
 			if(typeof options.contentType == "string"){
 				xhr.responseType = options.contentType;
@@ -74,7 +110,7 @@ function Request(options){
 						}
 						splitedData = splitedData.map(splitEqual);
 						for(let item of splitedData){
-							jsonDATA[item[0]] = decodeURIComponent(item[1]);
+							jsonDATA[decodeURIComponent(item[0])] = decodeURIComponent(item[1]);
 						}
 						response.json = jsonDATA;
 				} else if(xhr.responseType == "document" && typeof options.Request_documentParseToJSON == "function"){
@@ -86,12 +122,21 @@ function Request(options){
 				options.onComplete(response);
 			});
 			
-			xhr.send();
+			if(method == 'GET'){
+				xhr.send();
+			} else if(method == 'POST'){
+				xhr.send(params.encode());
+			} else {
+				throw `Unknown method "${method}"`
+			}
 		}
 		
 		let methods = {
 			'get' : function() {
 				return core('GET');
+			},
+			'post' : function() {
+				return core('POST');
 			}
 		};
 		return methods;
@@ -121,7 +166,7 @@ class streamListFromSetting{
 		let pref = new String(this.stringData);
 		
 		if(streamListFromSetting_cache != null && streamListFromSetting_cache.hasOwnProperty("stringData") && streamListFromSetting_cache.stringData == pref){
-			//console.log("[Live notifier] streamListFromSetting: Using cache")
+			//consoleMsg("log", "[Live notifier] streamListFromSetting: Using cache")
 			this.mapDataAll = streamListFromSetting_cache.mapDataAll;
 			//this.objDataAll = mapToObj(this.mapDataAll);
 			if(typeof requested_website == "string" && requested_website != ""){
@@ -139,17 +184,18 @@ class streamListFromSetting{
 		})
 		
 		if(pref != "" && somethingElseThanSpaces.test(pref)){
-			let myTable = pref.split(",");
+			let myTable = pref.split(/\s*,\s*/);
 			let reg= /\s*([^\s\:]+)\:\:([^\s]+)\s*(.*)?/;
 			if(myTable.length > 0){
-				for(let i in myTable){
+				for(let item of myTable){
 					let url = /((?:http|https):\/\/.*)\s*$/;
 					let filters = /\s*(?:(\w+)\:\:(.+)\s*)/;
 					let cleanEndingSpace = /(.*)\s+$/;
 					
-					let result=reg.exec(myTable[i]);
+					
+					let result=reg.exec(item);
 					if(result == null){
-						console.warn(`Error with ${myTable[i]}`);
+						consoleMsg("warn", `Error with ${item}`);
 						continue;
 					}
 					let website = result[1];
@@ -161,7 +207,7 @@ class streamListFromSetting{
 						continue;
 					}
 					
-					if(websites.has(website) == false){
+					if(mapDataAll.has(website) == false){
 						// Basic information for websites not supported, or not yet
 						mapDataAll.set(website, new Map());
 					}
@@ -174,7 +220,7 @@ class streamListFromSetting{
 							}
 						})
 						if(checkDuplicates_result != ""){
-							console.warn(`Found duplicate (${checkDuplicates_result} and ${id})`);
+							consoleMsg("warn", `Found duplicate (${checkDuplicates_result} and ${id})`);
 							id = checkDuplicates_result;
 						}
 					}
@@ -224,7 +270,7 @@ class streamListFromSetting{
 									if(typeof boolean == "boolean"){
 										current_data = boolean;
 									} else {
-										console.warn(`${current_filter_id} of ${id} should be a boolean`);
+										consoleMsg("warn", `${current_filter_id} of ${id} should be a boolean`);
 									}
 									mapDataAll.get(website).get(id)[current_filter_id] = current_data;
 								} else if(current_filter_id == "facebook" || current_filter_id == "twitter" || current_filter_id == "vocalStreamName"){
@@ -235,7 +281,7 @@ class streamListFromSetting{
 										if(mapDataAll.get(website).get(id)[current_filter_id].map(toLowerCase).indexOf(decodeString(current_data).toLowerCase()) == -1){
 											mapDataAll.get(website).get(id)[current_filter_id].push(decodeString(current_data));
 										} else {
-											console.warn(`Found duplicate for the setting "${current_filter_id}" from "${id}" (${website}): ${decodeString(current_data)}`);
+											consoleMsg("warn", `Found duplicate for the setting "${current_filter_id}" from "${id}" (${website}): ${decodeString(current_data)}`);
 										}
 									} else {
 										mapDataAll.get(website).get(id)[current_filter_id].push(decodeString(current_data));
@@ -284,7 +330,7 @@ class streamListFromSetting{
 		if(this.streamExist(website, id) == false){
 			this.mapDataAll.get(website).set(id, {streamURL: url});
 			this.mapData = this.mapDataAll.get(website);
-			console.log(`${id} has been added`);
+			consoleMsg("log", `${id} has been added`);
 		}
 	}
 	deleteStream(website, id){
@@ -294,7 +340,7 @@ class streamListFromSetting{
 			if(liveStatus.has(website) && liveStatus.get(website).has(id)){
 				liveStatus.get(website).delete(id);
 			}
-			console.log(`${id} has been deleted`);
+			consoleMsg("log", `${id} has been deleted`);
 		}
 	}
 	update(){
@@ -351,7 +397,7 @@ class streamListFromSetting{
 		savePreference("stream_keys_list", newSettings);
 		
 		setIcon();
-		console.log(`Stream key list update: ${getPreference(`stream_keys_list`)}`);
+		consoleMsg("log", `Stream key list update: ${getPreference(`stream_keys_list`)}`);
 		checkMissing();
 	}
 }
@@ -364,7 +410,7 @@ function getStreamURL(website, id, contentId, usePrefUrl){
 		if(streamList.get(id).streamURL != "" && usePrefUrl == true){
 			return streamList.get(id).streamURL;
 		} else {
-			if(liveStatus.get(website).get(id).has(contentId)){
+			if(liveStatus.get(website).has(id) && liveStatus.get(website).get(id).has(contentId)){
 				let streamData = liveStatus.get(website).get(id).get(contentId);
 				if(typeof streamData.streamURL == "string" && streamData.streamURL != ""){
 					return streamData.streamURL;
@@ -439,7 +485,7 @@ function addStreamFromPanel(data){
 	
 	let http_url = /^(?:http|https):\/\//;
 	if(!http_url.test(active_tab_url)){
-		console.info("Current tab isn't a http/https url");
+		consoleMsg("info", "Current tab isn't a http/https url");
 		return false;
 	}
 	let active_tab_title = current_tab.title;
@@ -447,7 +493,7 @@ function addStreamFromPanel(data){
 	let url_list;
 
 	if(typeof data == "object"){
-		console.dir(data);
+		consoleDir(data);
 		if(data.hasOwnProperty("ContextMenu_URL")){
 			url_list = [data.ContextMenu_URL];
 			type = "ContextMenu";
@@ -455,12 +501,12 @@ function addStreamFromPanel(data){
 			url_list = [data.url];
 			type = "url";
 		} else if(data.hasOwnProperty("embed_list")){
-			console.log("[Live notifier] AddStream - Embed list");
+			consoleMsg("log", "[Live notifier] AddStream - Embed list");
 			url_list = data.embed_list;
 			type = "embed";
 		}
 	} else {
-		console.info("Current active tab: " + active_tab_url);
+		consoleMsg("info", "Current active tab: " + active_tab_url);
 		url_list = [active_tab_url];
 	}
 	let pattern_found = false;
@@ -477,7 +523,7 @@ function addStreamFromPanel(data){
 							doNotif("Live notifier",`${display_id(id)} ${_("is_already_configured")}`);
 							return true;
 						} else {
-							let current_API = websiteAPI.API_addStream(source_website, id, (websiteAPI.hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websiteAPI.APIs_RequiredPrefs) : {});
+							let current_API = websiteAPI.API_addStream(source_website, id);
 							
 							let addStream_RequestOptions = {
 								url: current_API.url,
@@ -485,10 +531,7 @@ function addStreamFromPanel(data){
 								onComplete: function (response) {
 									let data = response.json;
 									
-									console.group()
-									console.info(`${website} - ${response.url}`);
-									console.dir(data);
-									console.groupEnd();
+									consoleDir(data, `${website} - ${response.url}`);
 									
 									let responseValidity = checkResponseValidity(website, response);
 									
@@ -528,6 +571,9 @@ function addStreamFromPanel(data){
 							}
 							if(current_API.hasOwnProperty("headers") == true){
 								addStream_RequestOptions.headers = current_API.headers;
+							}
+							if(current_API.hasOwnProperty("content") == true){
+								addStream_RequestOptions.content = current_API.content;
 							}
 							if(current_API.hasOwnProperty("contentType") == true){
 								addStream_RequestOptions.contentType = current_API.contentType;
@@ -584,7 +630,7 @@ function settingUpdate(data){
 		updatePanel = data.updatePanel;
 	}
 	
-	console.log(`${settingName} - ${settingValue}`);
+	consoleMsg("log", `${settingName} - ${settingValue}`);
 	savePreference(settingName, settingValue);
 }
 
@@ -611,7 +657,7 @@ function shareStream(data){
 	let reg_testTwitterId= /\s*@(.+)/;
 	if(twitterID != null && twitterID != ""){
 		streamerAlias = ((reg_testTwitterId.test(twitterID))? "" : "@") + twitterID;
-		console.info(`${id}/${contentId} (${website}) twitter ID: ${twitterID}`);
+		consoleMsg("info", `${id}/${contentId} (${website}) twitter ID: ${twitterID}`);
 	}
 	
 	let shareMessage = `${_("I_am_watching_the_stream_of")} ${streamerAlias}, "${streamStatus}"`;
@@ -640,20 +686,14 @@ function streamSetting_Update(data){
 function sendDataToPanel(id, data){
 	function responseCallback(response){
 		if(typeof response != "undefined"){
-			console.group();
-			console.info(`Port response of ${id}: `);
-			console.dir(response);
-			console.groupEnd();
+			consoleDir(response, `Port response of ${id}: `);
 		}
 	}
 	chrome.runtime.sendMessage({"sender": "Live_Notifier_Main","receiver": "Live_Notifier_Panel", "id": id, "data": data}, responseCallback);
 }
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse){
 	if(message.receiver == "Live_Notifier_Main"){
-		console.group()
-		console.info("Message:");
-		console.dir(message);
-		console.groupEnd();
+		consoleDir(message, "Message:");
 		
 		let id = message.id;
 		let data = message.data;
@@ -665,7 +705,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse){
 					break;
 				case "importStreams":
 					let website = message.data;
-					console.info(`Importing ${website}...`);
+					consoleMsg("info", `Importing ${website}...`);
 					importButton(website);
 					break;
 				case "refreshStreams":
@@ -694,7 +734,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse){
 					streamSetting_Update(data);
 					break;
 				default:
-					console.warn(`Unkown message id (${id})`);
+					consoleMsg("warn", `Unkown message id (${id})`);
 			}
 		} else if(message.sender == "Live_Streamer_Embed"){
 			switch(message.id){
@@ -703,7 +743,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse){
 					break;
 			}
 		} else {
-			console.warn("Unknown sender");
+			consoleMsg("warn", "Unknown sender");
 		}
 	}
 });
@@ -736,7 +776,7 @@ function copyToClipboard(string){
 		let clipboard_success = document.execCommand('Copy');
 		if(clipboard_success){
 			doNotif("Live notifier", _("clipboard_success"));
-			console.info(`Copied: ${string}`)
+			consoleMsg("info", `Copied: ${string}`)
 		} else {
 			doNotif("Live notifier", _("clipboard_failed"));
 		}
@@ -751,7 +791,7 @@ function copyToClipboard(string){
 			if(result){
 				copy(string);
 			} else {
-				console.log("Clipboard writing permission not granted");
+				consoleMsg("log", "Clipboard writing permission not granted");
 				chrome.permissions.request({
 					permissions: ['clipboardWrite'],
 				}, function(result) {
@@ -770,7 +810,7 @@ function copyToClipboard(string){
 appGlobal["copyToClipboard"] = copyToClipboard;
 
 function openTabIfNotExist(url){
-	console.log(url);
+	consoleMsg("log", url);
 	chrome.tabs.query({}, function(tabs) {
 		let custom_url = url.toLowerCase().replace(/http(?:s)?\:\/\/(?:www\.)?/i,"");
 		for(let tab of tabs){
@@ -842,15 +882,15 @@ function doActionNotif(title, message, action, imgurl){
 	switch(action.type){
 		case "openUrl":
 			// Notification with openUrl action
-			console.info(`Notification (openUrl): "${message}" (${action.data})`);
+			consoleMsg("info", `Notification (openUrl): "${message}" (${action.data})`);
 			notification_id = JSON.stringify(action);
 			break;
 		case "addStream":
-			console.info(`Notification (addStream): "${message}" (${action.data})`);
+			consoleMsg("info", `Notification (addStream): "${message}" (${action.data})`);
 			notification_id = JSON.stringify(action);
 			break;
 		case "deleteStream":
-			console.info(`Notification (deleteStream): "${message}" (${action.data})`);
+			consoleMsg("info", `Notification (deleteStream): "${message}" (${action.data})`);
 			notification_id = JSON.stringify(action);
 			break;
 		default:
@@ -864,26 +904,26 @@ function doActionNotif(title, message, action, imgurl){
 		});
 	}).catch((error)=> {
 		if(typeof error == "object" && typeof error.message == "string" && error.message.length > 0){
-			console.dir(error);
-			console.warn(error.message);
+			consoleMsg("warn", error.message);
+			consoleDir(error);
 			
 			if(error.message == "Adding buttons to notifications is not supported." || error.message.indexOf("\"buttons\"") != -1){
 				chromeAPI_button_availability = false;
-				console.log("Buttons not supported, retrying notification without them.")
+				consoleMsg("log", "Buttons not supported, retrying notification without them.")
 				doActionNotif(title, message, action, imgurl);
 			}
 		}
 	})
 }
 chrome.notifications.onClicked.addListener(function(notificationId){
-	console.info(`${notificationId} (onClicked)`);
+	consoleMsg("info", `${notificationId} (onClicked)`);
 	chrome.notifications.clear(notificationId);
 	if(!chromeAPI_button_availability){
 		doNotificationAction_Event(notificationId);
 	}
 });
 chrome.notifications.onButtonClicked.addListener(function(notificationId, buttonIndex){
-	console.info(`${notificationId} (onButtonClicked) - Button index: ${buttonIndex}`);
+	consoleMsg("info", `${notificationId} (onButtonClicked) - Button index: ${buttonIndex}`);
 	chrome.notifications.clear(notificationId);
 	
 	// 0 is the first button, used as button of action
@@ -962,7 +1002,7 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 			}
 			if((getStringsCountInArray(streamSetting.statusWhitelist) > 0 || getPreference("statusWhitelist") != "") && whitelisted == false){
 				isStreamOnline = false;
-				console.info(`${id} current status does not contain whitelist element(s)`);
+				consoleMsg("info", `${id} current status does not contain whitelist element(s)`);
 			}
 			
 			let blacklisted = false;
@@ -986,7 +1026,7 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 			}
 			if((getStringsCountInArray(streamSetting.statusBlacklist) > 0 || getPreference("statusBlacklist") != "") && blacklisted == true){
 				isStreamOnline = false;
-				console.info(`${id} current status contain blacklist element(s)`);
+				consoleMsg("info", `${id} current status contain blacklist element(s)`);
 			}
 		}
 	}
@@ -1014,7 +1054,7 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 			}
 			if((getStringsCountInArray(streamSetting.gameWhitelist) > 0 || getPreference("gameWhitelist") != "") && whitelisted == false){
 				isStreamOnline = false;
-				console.info(`${id} current game does not contain whitelist element(s)`);
+				consoleMsg("info", `${id} current game does not contain whitelist element(s)`);
 			}
 			
 			let blacklisted = false;
@@ -1037,7 +1077,7 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 			}
 			if((getStringsCountInArray(streamSetting.gameBlacklist) > 0 || getPreference("gameBlacklist") != "") && blacklisted == true){
 				isStreamOnline = false;
-				console.info(`${id} current game contain blacklist element(s)`);
+				consoleMsg("info", `${id} current game contain blacklist element(s)`);
 			}
 		}
 		
@@ -1105,7 +1145,7 @@ function getOfflineCount(){
 		streamListSetting.get(website).forEach((streamList, id, array) => {
 			if(typeof streamList.ignore == "boolean" && streamList.ignore == true){
 				// Ignoring stream with ignore set to true from online count
-				//console.log(`[Live notifier - getOfflineCount] ${id} of ${website} is ignored`);
+				//consoleMsg("log", `[Live notifier - getOfflineCount] ${id} of ${website} is ignored`);
 				return;
 			}
 			
@@ -1136,7 +1176,7 @@ function setIcon() {
 		website_liveStatus.forEach((id_liveStatus, id, array) => {
 			if(streamList.has(id) && (typeof streamList.get(id).ignore == "boolean" && streamList.get(id).ignore == true)){
 				// Ignoring stream with ignore set to true from online count
-				//console.log(`[Live notifier - setIcon] ${id} of ${website} is ignored`);
+				//consoleMsg("log", `[Live notifier - setIcon] ${id} of ${website} is ignored`);
 				return;
 			} else {
 				id_liveStatus.forEach((streamData, contentId, array) => {
@@ -1163,7 +1203,7 @@ function setIcon() {
 			imageData: badgeImage
 		});
 	} else {
-		console.warn("Icon(s) is/are not loaded");
+		consoleMsg("warn", "Icon(s) is/are not loaded");
 	}
 	
 	chrome.browserAction.setBadgeText({text: badgeOnlineCount.toString()});
@@ -1182,15 +1222,15 @@ function checkResponseValidity(website, response){
 	if(data == null || typeof data != "object" || JSON.stringify(data) == "{}"){ // Empty or invalid JSON
 		if(typeof response == "object" && response.hasOwnProperty("status") && typeof response.status == "number" && (/^4\d*$/.test(response.status) == true || /^5\d*$/.test(response.status) == true)){
 			// Request Error
-			console.warn("Unable to get stream state (request error).");
+			consoleMsg("warn", "Unable to get stream state (request error).");
 			return "request_error";
 		} else {
 			if(typeof response == "object" && response.hasOwnProperty("status") && typeof response.status == "number" && response.status == 0){
-				console.warn("Unable to get stream state (timeout).");
+				consoleMsg("warn", "Unable to get stream state (timeout).");
 				return "timout";
 			} else {
 				// Parse Error
-				console.warn("Unable to get stream state (response is empty or not valid JSON).");
+				consoleMsg("warn", "Unable to get stream state (response is empty or not valid JSON).");
 				return "parse_error";
 			}
 		}
@@ -1198,36 +1238,27 @@ function checkResponseValidity(website, response){
 	let state = websites.get(website).checkResponseValidity(data);
 	switch(state){
 		case "error":
-			console.warn(`[${website}] Unable to get stream state (error detected).`);
+			consoleMsg("warn", `[${website}] Unable to get stream state (error detected).`);
 			return "error";
 			break;
 		case "vod":
-			console.warn(`[${website}] Unable to get stream state (vod detected).`);
+			consoleMsg("warn", `[${website}] Unable to get stream state (vod detected).`);
 			return "vod";
 			break;
 		case "notstream":
-			console.warn(`[${website}] Unable to get stream state (not a stream).`);
+			consoleMsg("warn", `[${website}] Unable to get stream state (not a stream).`);
 			return "notstream";
 			break;
 		case "":
 		case "success":
 			return "success";
 		default:
-			console.warn(`[${website}] Unable to get stream state (${state}).`);
+			consoleMsg("warn", `[${website}] Unable to get stream state (${state}).`);
 			return state;
 			break;
 	}
 	
 	return "success";
-}
-function getAPIPrefsObject(prefList){
-	let obj = {}
-	
-	for(let prefID of prefList){
-		obj[prefID] = getPreference(prefID);
-	}
-	
-	return obj;
 }
 
 function isMap(myMap){
@@ -1333,17 +1364,14 @@ function checkLives(idArray){
 			listToCheck = idArray;
 		} else {
 			listToCheck = streamListSetting.mapDataAll;
-			console.group();
-			console.info("[Live Notifier] Checking lives...");
-			console.dir(mapToObj(streamListSetting.mapDataAll));
-			console.groupEnd();
+			consoleDir(mapToObj(streamListSetting.mapDataAll), "[Live Notifier] Checking lives...");
 		}
 		
 		websites.forEach((websiteAPI, website, array) => {
 			if(listToCheck.has(website)){
 				listToCheck.get(website).forEach((streamList, id, array) => {
 					if(typeof streamList.ignore == "boolean" && streamList.ignore == true){
-						//console.info(`Ignoring ${id}`);
+						//consoleMsg("info", `Ignoring ${id}`);
 						return;
 					}
 					let onStreamCheckEnd = function(promiseResult){
@@ -1370,29 +1398,23 @@ function checkLives(idArray){
 		})
 		
 		let onPromiseEnd = function(result){
-			console.group();
-			console.info(`[Live notifier] Live check end`);
-			
-			console.group();
-			console.info(`Promises result:`);
-			console.dir(result);
-			console.groupEnd();
-			
-			console.group();
-			console.info(`Timings:`);
-			if(typeof performance.clearResourceTimings == "function"){
-				performance.clearResourceTimings();
+			if(getPreference("showAdvanced") && getPreference("showExperimented")){
+				console.group();
+				consoleMsg("info", `[Live notifier] Live check end`);
+				
+				consoleDir(result, `Promises result:`);
+				
+				if(typeof performance.clearResourceTimings == "function"){
+					performance.clearResourceTimings();
+				}
+				consoleMsg("info", "checkLives: " + timingEnd("checkLives").timing);
+				consoleDir(streamsTimings, `Timings:`);
+				
+				consoleDir(mapToObj(DATAs), `DATAs:`);
+				
+				console.groupEnd();
 			}
-			console.info("checkLives: " + timingEnd("checkLives").timing);
-			console.dir(streamsTimings);
-			console.groupEnd();
 			
-			console.group();
-			console.info(`DATAs:`);
-			console.dir(mapToObj(DATAs));
-			console.groupEnd();
-			
-			console.groupEnd();
 			appGlobal["checkingLivesFinished"] = true;
 			resolve(result);
 			
@@ -1429,7 +1451,7 @@ function checkMissing(){
 					return;
 				}
 				if(!(liveStatus.get(website).has(id))){
-					console.info(`${id} from ${website} is not checked yet`);
+					consoleMsg("info", `${id} from ${website} is not checked yet`);
 					
 					if(!listToCheck.has(website)){
 						listToCheck.set(website, new Map())
@@ -1457,13 +1479,10 @@ function checkMissing(){
 }
 appGlobal["checkMissing"] = checkMissing;
 
-function getPrimary(id, contentId, website, streamSetting, url, pageNumber){
+function getPrimary(id, contentId, website, streamSetting, nextPageToken){
 	let promise = new Promise(function(resolve, reject){
-		let current_API = websites.get(website).API((typeof contentId == "string" && contentId != "")? contentId :  id, (websites.get(website).hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites.get(website).APIs_RequiredPrefs) : {});
-		if(typeof url == "string"){
-			current_API.url = url;
-		}
-		if(website=="youtube")console.dir(current_API)
+		let current_API = websites.get(website).API((typeof contentId == "string" && contentId != "")? contentId :  id, (typeof nextPageToken == "undefined" || nextPageToken == null)? null : nextPageToken);
+		
 		let getPrimary_RequestOptions = {
 			url: current_API.url,
 			overrideMimeType: current_API.overrideMimeType,
@@ -1487,8 +1506,8 @@ function getPrimary(id, contentId, website, streamSetting, url, pageNumber){
 				}
 				
 				if(!(typeof contentId == "string" && contentId != "") && website_channel_id.test(id) == true){
-					if(typeof pageNumber == "number"){
-						processChannelList(id, website, streamSetting, response, pageNumber)
+					if(typeof nextPageToken != "undefined" && nextPageToken != null){
+						processChannelList(id, website, streamSetting, response, nextPageToken)
 							.then(resolve)
 							.catch(reject)
 					} else {
@@ -1515,6 +1534,9 @@ function getPrimary(id, contentId, website, streamSetting, url, pageNumber){
 		if(current_API.hasOwnProperty("headers") == true){
 			getPrimary_RequestOptions.headers = current_API.headers;
 		}
+		if(current_API.hasOwnProperty("content") == true){
+			getPrimary_RequestOptions.content = current_API.content;
+		}
 		if(current_API.hasOwnProperty("contentType") == true){
 			getPrimary_RequestOptions.contentType = current_API.contentType;
 		}
@@ -1531,7 +1553,7 @@ function getPrimary(id, contentId, website, streamSetting, url, pageNumber){
 }
 appGlobal["getPrimary"] = getPrimary;
 
-function processChannelList(id, website, streamSetting, response, pageNumber){
+function processChannelList(id, website, streamSetting, response, nextPageToken){
 	let promise = new Promise(function(resolve, reject){
 		let promises = new Map();
 		
@@ -1544,15 +1566,13 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 		let responseValidity = checkResponseValidity(website, response);
 		if(responseValidity == "success"){
 			let streamListData;
-			if(typeof pageNumber == "number"){
-				streamListData = websites.get(website).channelList(id, website, data, pageNumber);
-			} else {
-				streamListData = websites.get(website).channelList(id, website, data);
-			}
-			
-			if(typeof pageNumber != "number"){
+			if(typeof nextPageToken == "undefined" || nextPageToken == null){
 				// First loop
 				channelInfos.get(website).get(id).liveStatus.liveList = new Map();
+				
+				streamListData = websites.get(website).channelList(id, website, data);
+			} else {
+				streamListData = websites.get(website).channelList(id, website, data, nextPageToken);
 			}
 			
 			if(!isMap(streamListData.streamList) || streamListData.streamList.size == 0){
@@ -1560,7 +1580,6 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 			} else {
 				streamListData.streamList.forEach((value, contentId, array) => {
 					channelInfos.get(website).get(id).liveStatus.liveList.set(contentId, "");
-					
 					if(value == null){
 						promises.set(contentId, getPrimary(id, contentId, website, streamSetting));
 					} else {
@@ -1568,8 +1587,8 @@ function processChannelList(id, website, streamSetting, response, pageNumber){
 					}
 				})
 				
-				if(streamListData.hasOwnProperty("next") == true && streamListData.next != null){
-					promises.set("next", getPrimary(id, "", website, streamSetting, streamListData.url, streamListData.next_page_number));
+				if(streamListData.hasOwnProperty("nextPageToken")){
+					promises.set("next", getPrimary(id, "", website, streamSetting, streamListData.nextPageToken));
 				}
 				
 				PromiseWaitAll(promises)
@@ -1605,7 +1624,7 @@ function processPrimary(id, contentId, website, streamSetting, response){
 				liveStatus.get(website).get(id).set(contentId, liveState);
 				
 				if(websites.get(website).hasOwnProperty("API_second") == true){
-					let second_API = websites.get(website).API_second(contentId, (websites.get(website).hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites.get(website).APIs_RequiredPrefs) : {});
+					let second_API = websites.get(website).API_second(contentId);
 					
 					let second_API_RequestOptions = {
 						url: second_API.url,
@@ -1638,6 +1657,9 @@ function processPrimary(id, contentId, website, streamSetting, response){
 					if(second_API.hasOwnProperty("headers") == true){
 						second_API_RequestOptions.headers = second_API.headers;
 					}
+					if(second_API.hasOwnProperty("content") == true){
+						second_API_RequestOptions.content = second_API.content;
+					}
 					if(second_API.hasOwnProperty("contentType") == true){
 						second_API_RequestOptions.contentType = second_API.contentType;
 					}
@@ -1654,7 +1676,7 @@ function processPrimary(id, contentId, website, streamSetting, response){
 					//doStreamNotif(website, id, contentId, streamSetting);
 				}
 			} else {
-				console.warn("Unable to get stream state.");
+				consoleMsg("warn", "Unable to get stream state.");
 				resolve("liveState is null");
 			}
 		} else {
@@ -1665,7 +1687,7 @@ function processPrimary(id, contentId, website, streamSetting, response){
 }
 function getChannelInfo(website, id){
 	let promise = new Promise(function(resolve, reject){
-		let channelInfos_API = websites.get(website).API_channelInfos(id, (websites.get(website).hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites.get(website).APIs_RequiredPrefs) : {});
+		let channelInfos_API = websites.get(website).API_channelInfos(id);
 		
 		if(!channelInfos.get(website).has(id)){
 			let defaultChannelInfos = channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
@@ -1696,6 +1718,9 @@ function getChannelInfo(website, id){
 			if(channelInfos_API.hasOwnProperty("headers") == true){
 				getChannelInfo_RequestOptions.headers = channelInfos_API.headers;
 			}
+			if(channelInfos_API.hasOwnProperty("content") == true){
+				getChannelInfo_RequestOptions.content = channelInfos_API.content;
+			}
 			if(channelInfos_API.hasOwnProperty("contentType") == true){
 				getChannelInfo_RequestOptions.contentType = channelInfos_API.contentType;
 			}
@@ -1714,10 +1739,7 @@ function getChannelInfo(website, id){
 
 function importButton(website){
 	let importationPromiseEnd = (reason) => {
-		console.group();
-		console.info(`Importation for ${website} finished`);
-		console.dir(reason);
-		console.groupEnd();
+		consoleDir(reason, `Importation for ${website} finished`);
 		refreshPanel(false);
 	}
 	if(typeof websites.get(website).importAPIGetUserId == "function" && typeof websites.get(website).importGetUserId == "function"){
@@ -1729,13 +1751,10 @@ function importButton(website){
 				let data = response.json;
 				
 				if(checkResponseValidity(website, response) != "success"){
-					console.warn(`Sometimes bad things just happen - ${website} - ${response.url}`);
+					consoleMsg("warn", `Sometimes bad things just happen - ${website} - ${response.url}`);
 					doNotif("Live notifier", _("An_error_occurred_when_importing_check_your_id_or_the_website_availability"));
 				} else {
-					console.group();
-					console.info(`${website} - ${response.url}`);
-					console.dir(data);
-					console.groupEnd();
+					consoleDir(data, `${website} - ${response.url}`);
 					
 					let real_id = websites.get(website).importGetUserId(data);
 					
@@ -1753,7 +1772,8 @@ function importButton(website){
 }
 function importStreams(website, id, url, pageNumber){
 	return new Promise(function(resolve, reject){
-		let current_API = websites.get(website).importAPI(id, (websites.get(website).hasOwnProperty("APIs_RequiredPrefs") == true)? getAPIPrefsObject(websites.get(website).APIs_RequiredPrefs) : {});
+		let current_API = websites.get(website).importAPI(id);
+		
 		if(typeof url == "string" && url != ""){
 			current_API.url = url;
 		} else {
@@ -1765,10 +1785,7 @@ function importStreams(website, id, url, pageNumber){
 			onComplete: function (response) {
 				let data = response.json;
 				
-				console.group();
-				console.info(`${website} - ${id} (${response.url})`);
-				console.dir(data);
-				console.groupEnd();
+				consoleDir(data, `${website} - ${id} (${response.url})`);
 				
 				let streamListSetting = new streamListFromSetting(website);
 				
@@ -1918,12 +1935,12 @@ function initAddon(){
 			"onclick": function(info, tab){
 				activeTab = tab;
 				let url = info.linkUrl;
-				console.info(`[ContextMenu] URL: ${url}`);
+				consoleMsg("info", `[ContextMenu] URL: ${url}`);
 				
 				getRedirectedURL(url, 5)
 					.then((result) => {
 						if((result.indexOf("http://") == 0 || result.indexOf("https://") == 0) && url != result){
-							console.info(`Redirected URL: ${result}`)
+							consoleMsg("info", `Redirected URL: ${result}`)
 							addStreamFromPanel({"ContextMenu_URL": result});
 						} else {
 							addStreamFromPanel({"ContextMenu_URL": url});
@@ -1931,9 +1948,9 @@ function initAddon(){
 					})
 					.catch((error) => {
 						if(typeof error == "object"){
-							console.dir(error);
+							consoleDir(error);
 						} else {
-							console.warn(error);
+							consoleMsg("warn", error);
 						}
 						addStreamFromPanel({"ContextMenu_URL": url});
 					})
@@ -1989,7 +2006,7 @@ function initAddon(){
 		if(localToRemove.length > 0){
 			chrome.storage.local.remove(localToRemove, function(){
 				if(typeof chrome.runtime.lastError == "object" && chrome.runtime.lastError != null){
-					console.warn(`Error removing preference(s) from chrome local storage: ${chrome.runtime.lastError}`);
+					consoleMsg("warn", `Error removing preference(s) from chrome local storage: ${chrome.runtime.lastError}`);
 				}
 			});
 		}
@@ -2002,7 +2019,7 @@ function initAddon(){
 		if(typeof chrome.storage.sync == "object"){
 			chrome.storage.sync.remove(toRemove, function(){
 				if(typeof chrome.runtime.lastError != "undefined" && chrome.runtime.lastError != null){
-					console.warn(`Error removing preference(s) from chrome sync storage: ${chrome.runtime.lastError}`);
+					consoleMsg("warn", `Error removing preference(s) from chrome sync storage: ${chrome.runtime.lastError}`);
 				}
 			});
 		}
@@ -2024,7 +2041,7 @@ function checkIfUpdated(details){
 	let getVersionNumbers =  /^(\d*)\.(\d*)\.(\d*)$/;
 	
 	let installReason = details.reason;
-	console.info(`Runtime onInstalled reason: ${installReason}`);
+	consoleMsg("info", `Runtime onInstalled reason: ${installReason}`);
 	
 	// Checking if updated
 	if(installReason == "update" || installReason == "unknown"){
@@ -2059,7 +2076,7 @@ chrome.storage.local.get(null,function(currentLocalStorage) {
 			currentPreferences[prefId] = currentLocalStorage[prefId];
 		} else {
 			currentPreferences[prefId] = currentLocalStorage[prefId];
-			console.warn(`${prefId} has no default value (value: currentLocalStorage[prefId])`);
+			consoleMsg("warn", `${prefId} has no default value (value: currentLocalStorage[prefId])`);
 		}
 	}
 	
@@ -2069,16 +2086,14 @@ chrome.storage.local.get(null,function(currentLocalStorage) {
 			currentPreferences[prefId] = optionsData.options_default[prefId];
 		}
 	}
-	console.group()
-	console.info("Current preferences in the local storage:")
-	console.dir(currentPreferences);
-	console.groupEnd();
+	
 	appGlobal.currentPreferences = currentPreferences;
+	consoleDir(currentPreferences,"Current preferences in the local storage:");
 	
 	if(typeof chrome.runtime.onInstalled == "object" && typeof chrome.runtime.onInstalled.removeListener == "function"){
 		chrome.runtime.onInstalled.addListener(checkIfUpdated);
 	} else {
-		console.warn("chrome.runtime.onInstalled is not available");
+		consoleMsg("warn", "chrome.runtime.onInstalled is not available");
 		let details;
 		if(typeof getPreference("livenotifier_version") == "string" && getPreference("livenotifier_version") != ""){
 			details = {

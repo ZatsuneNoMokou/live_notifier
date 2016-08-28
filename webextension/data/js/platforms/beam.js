@@ -5,11 +5,11 @@ let beam = {
 		]]
 	]),
 	"API_addStream":
-		function(source_website, id, prefs){
-			return beam.API(id, prefs);
+		function(source_website, id){
+			return beam.API(id);
 		},
 	"API":
-		function(id, prefs){
+		function(id){
 			let obj = {
 				url: `https://beam.pro/api/v1/channels/${id}`,
 				overrideMimeType: "text/plain; charset=utf-8"
@@ -17,7 +17,7 @@ let beam = {
 			return obj;
 		},
 	"importAPIGetUserId":
-		function(id, prefs){
+		function(id){
 			let obj = {
 				url: `https://beam.pro/api/v1/channels/${id}`,
 				overrideMimeType: "text/plain; charset=utf-8"
@@ -25,7 +25,7 @@ let beam = {
 			return obj;
 		},
 	"importAPI":
-		function(id, prefs){
+		function(id){
 			let obj = {
 				url: `https://beam.pro/api/v1/users/${id}/follows?fields=id,token`,
 				overrideMimeType: "text/plain; charset=utf-8"

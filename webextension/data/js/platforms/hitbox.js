@@ -5,11 +5,11 @@ let hitbox = {
 		]]
 	]),
 	"API_addStream":
-		function(source_website, id, prefs){
-			return hitbox.API(id, prefs);
+		function(source_website, id){
+			return hitbox.API(id);
 		},
 	"API":
-		function(id, prefs){
+		function(id){
 			let obj = {
 				url: `https://api.hitbox.tv/media/live/${id}`,
 				overrideMimeType: "text/plain; charset=utf-8"
@@ -17,7 +17,7 @@ let hitbox = {
 			return obj;
 		},
 	"importAPI":
-		function(id, prefs){
+		function(id){
 			let obj = {
 				url: `https://api.hitbox.tv/following/user?user_name=${id}`,
 				overrideMimeType: "text/plain; charset=utf-8"

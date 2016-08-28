@@ -5,11 +5,11 @@ let twitch = {
 		]]
 	]),
 	"API_addStream":
-		function(source_website, id, prefs){
-			return twitch.API(id, prefs);
+		function(source_website, id){
+			return twitch.API(id);
 		},
 	"API":
-		function(id, prefs){
+		function(id){
 			let obj = {
 				url: `https://api.twitch.tv/kraken/streams/${id}`,
 				overrideMimeType: "application/vnd.twitchtv.v3+json; charset=utf-8" //"text/plain; charset=utf-8"
@@ -17,7 +17,7 @@ let twitch = {
 			return obj;
 		},
 	"API_second":
-		function(id, prefs){
+		function(id){
 			let obj = {
 				url: `https://api.twitch.tv/kraken/users/${id}`,
 				overrideMimeType: "application/vnd.twitchtv.v3+json; charset=utf-8" //"text/plain; charset=utf-8"
@@ -25,7 +25,7 @@ let twitch = {
 			return obj;
 		},
 	"importAPI":
-		function(id, prefs){
+		function(id){
 			let obj = {
 				url: `https://api.twitch.tv/kraken/users/${id}/follows/channels`,
 				overrideMimeType: "application/vnd.twitchtv.v3+json; charset=utf-8"

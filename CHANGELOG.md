@@ -8,6 +8,14 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.4.0
+* i: Simplified request "paging" to get stream data
+* i: console.* for index.js is now shown in console for experimented user only
+* +: Request now support post and use content, but use `Array[key,value]` / Map not alike Firefox SDK API
+* -: APIs_RequiredPrefs, because platforms script are able to access to preferences directly
+* Fix: Youtube stream list wasn't retrieving the pageToken to get the next pages
+* Fix: Spaces in Patreon password
+
 # 8.3.1
 * +: Add real preference for my Patreons only server, for Youtube API
 

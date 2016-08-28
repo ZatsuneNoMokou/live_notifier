@@ -764,10 +764,13 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	let editStream_node = null;
 	let shareStream_node = null;
 	
-	let websiteStreamURL = getStreamURL(website, id, contentId, false);
-	if(websiteStreamURL != "" && websiteStreamURL != null){
-		newCopyStreamURLButton_node = newCopyStreamURLButton(id, contentId, website);
-		control_span.appendChild(newCopyStreamURLButton_node);
+	let websiteStreamURL
+	if(type != "unsupported"){
+		websiteStreamURL = getStreamURL(website, id, contentId, false);
+		if(websiteStreamURL != "" && websiteStreamURL != null){
+			newCopyStreamURLButton_node = newCopyStreamURLButton(id, contentId, website);
+			control_span.appendChild(newCopyStreamURLButton_node);
+		}
 	}
 	editStream_node = newEditStreamButton(id, contentId, website, streamName, streamSettings);
 	control_span.appendChild(editStream_node);

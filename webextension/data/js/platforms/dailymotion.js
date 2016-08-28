@@ -12,42 +12,67 @@ let dailymotion = {
 		]]
 	]),
 	"API_addStream":
-		function(source_website, id, prefs){
-			if(website_channel_id.test(source_website) == true){
-				return dailymotion.API_channelInfos(`channel::${id}`, prefs);
+		function(source_website, id){
+			if(source_website == "channel::dailymotion"){
+				return dailymotion.API_channelInfos(`channel::${id}`);
 			} else {
-				return dailymotion.API(id, prefs);
+				return dailymotion.API(id);
 			}
 		},
 	"API":
-		function(id, prefs){
+		function(id, nextPageToken){
 			let obj = {
-				url: `https://api.dailymotion.com/video/${id}?fields=id,title,owner,user.username,audience,url,game.title,mode,onair?_=${new Date().getTime()}`,
 				overrideMimeType: "text/plain; charset=latin1"
 			}
 			if(website_channel_id.test(id)){
-				obj.url = `https://api.dailymotion.com/videos?live_onair&owners=${website_channel_id.exec(id)[1]}&fields=id,title,owner,audience,url,mode,onair?_= ${new Date().getTime()}`;
+				//obj.url = `https://api.dailymotion.com/videos?live_onair&owners=${website_channel_id.exec(id)[1]}&fields=id,title,owner,audience,url,mode,onair?_= ${new Date().getTime()}`;
+				obj.url = "https://api.dailymotion.com/videos";
+				obj.content = [
+					["live_onair",""],
+					["owner",website_channel_id.exec(id)[1]],
+					["fields","id,title,owner,audience,url,mode,onair"],
+					["_", new Date().getTime()]
+				]
+				if(typeof nextPageToken == "number"){obj.content.push(["page", nextPageToken]);}
+			} else {
+				//obj.url = `https://api.dailymotion.com/video/${id}?fields=id,title,owner,user.username,audience,url,game.title,mode,onair?_=${new Date().getTime()}`;
+				obj.url = `https://api.dailymotion.com/video/${id}`;
+				obj.content = [
+					["fields","id,title,owner,user.username,audience,url,game.title,mode,onair"],
+					["_", new Date().getTime()]
+				]
 			}
 			return obj;
 		},
 	"API_channelInfos":
-		function(id, prefs){
+		function(id){
 			id = (website_channel_id.test(id))? website_channel_id.exec(id)[1] : id;
 			let obj = {
-				url: `https://api.dailymotion.com/user/${id}?fields=id,username,screenname,url,avatar_720_url,facebook_url,twitter_url`,
-				overrideMimeType: "text/plain; charset=latin1"
+				//url: `https://api.dailymotion.com/user/${id}?fields=id,username,screenname,url,avatar_720_url,facebook_url,twitter_url`,
+				url: `https://api.dailymotion.com/user/${id}`,
+				overrideMimeType: "text/plain; charset=latin1",
+				content: [
+					["fields","id,username,screenname,url,avatar_720_url,facebook_url,twitter_url"],
+					["_", new Date().getTime()]
+				]
 			}
 			return obj;
 		},
 	"API_second":
-		function(id, prefs){
+		function(id){
 			let obj = {
-				url: `https://api.dailymotion.com/video/${id}?fields=id,user.screenname,user.avatar_720_url,user.facebook_url,user.twitter_url`,
-				overrideMimeType: "text/plain; charset=latin1"
+				//url: `https://api.dailymotion.com/video/${id}?fields=id,user.screenname,user.avatar_720_url,user.facebook_url,user.twitter_url`,
+				url: `https://api.dailymotion.com/video/${id}`,
+				overrideMimeType: "text/plain; charset=latin1",
+				content: [
+					["fields","id,user.screenname,user.avatar_720_url,user.facebook_url,user.twitter_url"],
+					["_", new Date().getTime()]
+				]
 			}
+			
 			return obj;
 		},
-	"importAPI": function(id, prefs){
+	"importAPI": function(id){
 		let obj = {
 			url: `https://api.dailymotion.com/user/${id}/following?fields=id,username,facebook_url,twitter_url?_=${new Date().getTime()}`,
 			overrideMimeType: "text/plain; charset=latin1"
@@ -94,7 +119,7 @@ let dailymotion = {
 		function(id, contentId, data, currentLiveStatus, currentChannelInfo){
 			let streamData = currentLiveStatus;
 			streamData.streamName = data.title;
-			streamData.streamCurrentViewers = JSON.parse(data.audience);
+			streamData.streamCurrentViewers = parseInt(data.audience);
 			streamData.streamURL = data.url;
 			streamData.streamGame = (data.hasOwnProperty("game.title") && data["game.title"] != null && typeof data["game.title"] == "string")? data["game.title"] : "";
 			
@@ -140,11 +165,8 @@ let dailymotion = {
 				}
 				
 				if(data.has_more){
-					let next_url = dailymotion.API(website_channel_id.exec(id)[1]).url;
 					let next_page_number = ((typeof pageNumber == "number")? pageNumber : 1) + 1;
-					obj.next = {"url": next_url + "&page=" + next_page_number, "pageNumber": next_page_number};
-				} else {
-					obj.next = null;
+					obj.nextPageToken = next_page_number;
 				}
 				return obj;
 			}
