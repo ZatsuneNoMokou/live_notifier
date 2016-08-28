@@ -246,16 +246,22 @@
 		"message": "Importer"
 	},
 	"youtube_api_key_title": {
-		"message": "Votre clé d'API Youtube (Optionel)"
+		"message": "Votre clé d'API Youtube (Optionnel)"
 	},
 	"youtube_api_key_description": {
-		"message": "Utiliser vote propre quota, et aucune limitation de cache"
+		"message": "Utiliser votre propre quota, et aucune limitation de cache"
 	},
 	"youtube_api_referrer_title": {
-		"message": "Votre réferrant d'API Youtube (Optionel)"
+		"message": "Votre réferrant d'API Youtube (Optionnel)"
 	},
 	"youtube_api_referrer_description": {
 		"message": ""
+	},
+	"youtube_patreon_password_title": {
+		"message": "Mot de passe Patreon (Optionnel, réservé à mes Patreon)"
+	},
+	"youtube_patreon_password_description": {
+		"message": "Utiliser complètement l'API Youtube, sur mon serveur"
 	},
 	"An_error_occurred_when_importing_check_your_id_or_the_website_availability": {
 		"message": "Une erreur s'est produite lors de l'importation, vérifier votre id ou la disponibilité du site"

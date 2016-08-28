@@ -257,6 +257,12 @@
 	"youtube_api_referrer_description": {
 		"message": ""
 	},
+	"youtube_patreon_password_title": {
+		"message": "Patreon password (Optional, for my Patreon only)"
+	},
+	"youtube_patreon_password_description": {
+		"message": "Fully use Youtube API, on my server"
+	},
 	"An_error_occurred_when_importing_check_your_id_or_the_website_availability": {
 		"message": "An error occurred when importing, check your id or the website availability"
 	},

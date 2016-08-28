@@ -1,4 +1,3 @@
-let passworkAPIKey_reg = /password\:\:(.*)/i;
 let youtube = {
 	"addStream_URLpatterns": new Map([
 		["channel::youtube", [
@@ -73,45 +72,46 @@ let youtube = {
 		},
 	"APIs_RequiredPrefs": [
 		"youtube_api_key",
-		"youtube_api_referrer"
+		"youtube_api_referrer",
+		"youtube_patreon_password"
 	],
 	"API_addStream":
 		function(source_website, id, prefs){
-			let apiKey = prefs.youtube_api_key;
-			let referrer = prefs.youtube_api_referrer;
+			let apiKey = prefs.youtube_api_key,
+				referrer = prefs.youtube_api_referrer,
+				youtube_patreon_password = prefs.youtube_patreon_password;
 			
 			let obj = {};
 			if(source_website == "c::youtube"){
 					obj.url = `https://www.youtube.com/c/${id}`;
 					obj.overrideMimeType = "text/html; charset=utf-8";
 					obj.contentType = "document";
-			/*} else if(typeof apiKey == "string" && apiKey != ""){
-				if(passworkAPIKey_reg.test(apiKey)){
-					if(source_website == "user::youtube"){
-						obj.url = `https://livenotifier.zatsunenomokou.eu/youtube_getIdFromUser.php?user=${id}&password=${passworkAPIKey_reg.exec(apiKey)[1]}`;
-						obj.overrideMimeType = "text/plain; charset=utf-8";
-					} else if(source_website == "video::youtube"){
-						obj.url = `https://livenotifier.zatsunenomokou.eu/youtube_getIdFromVid.php?vid=${id}&password=${passworkAPIKey_reg.exec(apiKey)[1]}`;
-						obj.overrideMimeType = "text/plain; charset=utf-8";
-					} else if(website_channel_id.test(source_website) == true){
-						return youtube.API_channelInfos(`channel::${id}`, prefs);
+			/*} else if(youtube_patreon_password != ""){
+				if(source_website == "user::youtube"){
+					obj.url = `https://livenotifier.zatsunenomokou.eu/youtube_getIdFromUser.php?user=${id}&password=${youtube_patreon_password}`;
+					obj.overrideMimeType = "text/plain; charset=utf-8";
+				} else if(source_website == "video::youtube"){
+					obj.url = `https://livenotifier.zatsunenomokou.eu/youtube_getIdFromVid.php?vid=${id}&password=${youtube_patreon_password}`;
+					obj.overrideMimeType = "text/plain; charset=utf-8";
+				} else if(website_channel_id.test(source_website) == true){
+					return youtube.API_channelInfos(`channel::${id}`, prefs);
+				}
+			} else if(typeof apiKey == "string" && apiKey != ""){
+				if(typeof referrer == "string" && referrer != ""){
+					obj.headers = {
+						"referrer": referrer
 					}
-				} else {
-					if(typeof referrer == "string" && referrer != ""){
-						obj.headers = {
-							"referrer": referrer
-						}
-					}
-					if(source_website == "user::youtube"){
-						obj.url = `https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=${id}&fields=items(id)&key=${apiKey}`;
-						obj.overrideMimeType = "text/plain; charset=utf-8";
-					} else if(source_website == "video::youtube"){
-						obj.url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${id}&fields=items(snippet(channelId))&key=${apiKey}`;
-						obj.overrideMimeType = "text/plain; charset=utf-8";
-					} else if(website_channel_id.test(source_website) == true){
-						return youtube.API_channelInfos(`channel::${id}`, prefs);
-					}
-				}*/
+				}
+				if(source_website == "user::youtube"){
+					obj.url = `https://www.googleapis.com/youtube/v3/channels?part=snippet&forUsername=${id}&fields=items(id)&key=${apiKey}`;
+					obj.overrideMimeType = "text/plain; charset=utf-8";
+				} else if(source_website == "video::youtube"){
+					obj.url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${id}&fields=items(snippet(channelId))&key=${apiKey}`;
+					obj.overrideMimeType = "text/plain; charset=utf-8";
+				} else if(website_channel_id.test(source_website) == true){
+					return youtube.API_channelInfos(`channel::${id}`, prefs);
+				}
+			}*/
 			} else if(source_website == "user::youtube"){
 				obj.url = `https://www.youtube.com/user/${id}`;
 				obj.overrideMimeType = "text/html; charset=utf-8";
@@ -127,32 +127,32 @@ let youtube = {
 		},
 	"API":
 		function(id, prefs){
-			let apiKey = prefs.youtube_api_key;
-			let referrer = prefs.youtube_api_referrer;
+			let apiKey = prefs.youtube_api_key,
+				referrer = prefs.youtube_api_referrer,
+				youtube_patreon_password = prefs.youtube_patreon_password;
 			
 			let obj = {};
-			if(typeof apiKey == "string" && apiKey != ""){
-				if(passworkAPIKey_reg.test(apiKey)){
-					if(website_channel_id.test(id)){
-						obj.url = `https://livenotifier.zatsunenomokou.eu/youtube_getLives.php?id=${website_channel_id.exec(id)[1]}`;
-						obj.overrideMimeType = "text/plain; charset=utf-8";
-					} else {
-						obj.url = `https://livenotifier.zatsunenomokou.eu/youtube_getLiveInfo.php?id=${id}&password=${passworkAPIKey_reg.exec(apiKey)[1]}`;
-						obj.overrideMimeType = "text/plain; charset=utf-8";
-					}
+			
+			if(youtube_patreon_password != ""){
+				if(website_channel_id.test(id)){
+					obj.url = `https://livenotifier.zatsunenomokou.eu/youtube_getLives.php?id=${website_channel_id.exec(id)[1]}`;
+					obj.overrideMimeType = "text/plain; charset=utf-8";
 				} else {
-					if(typeof referrer == "string" && referrer != ""){
-						obj.headers = {
-							"referrer": referrer
-						}
+					obj.url = `https://livenotifier.zatsunenomokou.eu/youtube_getLiveInfo.php?id=${id}&password=${youtube_patreon_password}`;
+					obj.overrideMimeType = "text/plain; charset=utf-8";
+				}
+			} else if(typeof apiKey == "string" && apiKey != ""){
+				if(typeof referrer == "string" && referrer != ""){
+					obj.headers = {
+						"referrer": referrer
 					}
-					if(website_channel_id.test(id)){
-						obj.url = `https://www.googleapis.com/youtube/v3/search?eventType=live&part=id&channelId=${website_channel_id.exec(id)[1]}&type=video&fields=items(id)&key=${apiKey}`;
-						obj.overrideMimeType = "text/plain; charset=utf-8";
-					} else {
-						obj.url = `https://www.googleapis.com/youtube/v3/videos?part=id,liveStreamingDetails,snippet&id=${id}&type=video&fields=items(id,liveStreamingDetails,snippet)&key=${apiKey}`;
-						obj.overrideMimeType = "text/plain; charset=utf-8";
-					}
+				}
+				if(website_channel_id.test(id)){
+					obj.url = `https://www.googleapis.com/youtube/v3/search?eventType=live&part=id&channelId=${website_channel_id.exec(id)[1]}&type=video&fields=items(id)&key=${apiKey}`;
+					obj.overrideMimeType = "text/plain; charset=utf-8";
+				} else {
+					obj.url = `https://www.googleapis.com/youtube/v3/videos?part=id,liveStreamingDetails,snippet&id=${id}&type=video&fields=items(id,liveStreamingDetails,snippet)&key=${apiKey}`;
+					obj.overrideMimeType = "text/plain; charset=utf-8";
 				}
 			} else {
 				if(website_channel_id.test(id)){
@@ -168,23 +168,23 @@ let youtube = {
 		},
 	"API_channelInfos":
 		function(id, prefs){
-			let apiKey = prefs.youtube_api_key;
-			let referrer = prefs.youtube_api_referrer;
+			let apiKey = prefs.youtube_api_key,
+				referrer = prefs.youtube_api_referrer,
+				youtube_patreon_password = prefs.youtube_patreon_password;
 			
 			let obj = {};
-			if(typeof apiKey == "string" && apiKey != ""){
-				if(passworkAPIKey_reg.test(apiKey)){
-					obj.url = `https://livenotifier.zatsunenomokou.eu/youtube_getChannel.php?id=${website_channel_id.exec(id)[1]}&password=${passworkAPIKey_reg.exec(apiKey)[1]}`;
-					obj.overrideMimeType = "text/plain; charset=utf-8";
-				} else {
-					if(typeof referrer == "string" && referrer != ""){
-						obj.headers = {
-							"referrer": referrer
-						}
+			
+			if(youtube_patreon_password != ""){
+				obj.url = `https://livenotifier.zatsunenomokou.eu/youtube_getChannel.php?id=${website_channel_id.exec(id)[1]}&password=${youtube_patreon_password}`;
+				obj.overrideMimeType = "text/plain; charset=utf-8";
+			} else if(typeof apiKey == "string" && apiKey != ""){
+				if(typeof referrer == "string" && referrer != ""){
+					obj.headers = {
+						"referrer": referrer
 					}
-					obj.url = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${website_channel_id.exec(id)[1]}&fields=items(id,snippet)&key=${apiKey}`;
-					obj.overrideMimeType = "text/plain; charset=utf-8";
 				}
+				obj.url = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${website_channel_id.exec(id)[1]}&fields=items(id,snippet)&key=${apiKey}`;
+				obj.overrideMimeType = "text/plain; charset=utf-8";
 			} else {
 				obj.url = `https://www.youtube.com/channel/${website_channel_id.exec(id)[1]}`;
 				obj.overrideMimeType = "text/html; charset=utf-8";

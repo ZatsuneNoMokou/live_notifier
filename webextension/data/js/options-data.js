@@ -88,6 +88,12 @@ optionsData.options = {
 		"group": "youtube",
 		"prefLevel": "experimented"
 	},
+	"youtube_patreon_password": {
+		"type": "string",
+		"value": "",
+		"group": "youtube",
+		"prefLevel": "experimented"
+	},
 	/*			Check delay			*/
 	"check_delay": {
 		"title": "Streams status delay",

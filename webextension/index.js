@@ -1463,7 +1463,7 @@ function getPrimary(id, contentId, website, streamSetting, url, pageNumber){
 		if(typeof url == "string"){
 			current_API.url = url;
 		}
-		
+		if(website=="youtube")console.dir(current_API)
 		let getPrimary_RequestOptions = {
 			url: current_API.url,
 			overrideMimeType: current_API.overrideMimeType,

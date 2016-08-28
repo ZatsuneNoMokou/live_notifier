@@ -8,6 +8,9 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.3.1
+* +: Add real preference for my Patreons only server, for Youtube API
+
 # 8.3.0
 * i: Youtube support changed, to avoid using "quota" API
 
