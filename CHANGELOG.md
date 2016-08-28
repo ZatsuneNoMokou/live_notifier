@@ -8,6 +8,9 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.4.1
+* Fix: Preferences init with console
+
 # 8.4.0
 * i: Simplified request "paging" to get stream data
 * i: console.* for index.js is now shown in console for experimented user only

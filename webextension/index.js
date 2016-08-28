@@ -2076,7 +2076,7 @@ chrome.storage.local.get(null,function(currentLocalStorage) {
 			currentPreferences[prefId] = currentLocalStorage[prefId];
 		} else {
 			currentPreferences[prefId] = currentLocalStorage[prefId];
-			consoleMsg("warn", `${prefId} has no default value (value: currentLocalStorage[prefId])`);
+			console.warn(`${prefId} has no default value (value: currentLocalStorage[prefId])`);
 		}
 	}
 	
