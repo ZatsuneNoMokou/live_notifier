@@ -32,7 +32,7 @@ function consoleMsg(level,str){
 }
 function consoleDir(obj,str){
 	if(getPreference("showAdvanced") && getPreference("showExperimented")){
-		if(typeof str == "string" || typeof str.toString == "function"){
+		if(typeof str == "string" || (typeof str != "undefined" && typeof str.toString == "function")){
 			console.group();
 			console.info((typeof str == "string")? str : str.toString());
 			console.dir(obj);
@@ -772,7 +772,8 @@ function copyToClipboard(string){
 		}
 		
 		copy_form.focus();
-		document.execCommand('SelectAll');
+		copy_form.select();
+		//document.execCommand('SelectAll');
 		let clipboard_success = document.execCommand('Copy');
 		if(clipboard_success){
 			doNotif("Live notifier", _("clipboard_success"));
