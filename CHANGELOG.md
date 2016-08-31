@@ -8,6 +8,9 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.4.3
+* Fix: Minor fixex
+
 # 8.4.2
 * Fix: consoleDir, optionnal string
 

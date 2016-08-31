@@ -53,7 +53,7 @@
 		"message": "est en stream"
 	},
 	"is_offline": {
-		"message": "viens de se finir un stream"
+		"message": "viens de finir un stream"
 	},
 	"No_stream_online": {
 		"message": "Aucun stream en ligne"

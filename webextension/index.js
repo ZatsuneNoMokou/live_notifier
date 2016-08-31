@@ -847,7 +847,7 @@ function doActionNotif(title, message, action, imgurl){
 		type: "basic",
 		title: title,
 		message: message,
-		contextMessage: chrome.runtime.getManifest().name, //"Live Notifier",
+		contextMessage: chrome.runtime.getManifest().name,
 		iconUrl: ((typeof imgurl == "string" && imgurl != "")? imgurl : myIconURL),
 		isClickable: true
 	}
@@ -1114,6 +1114,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 				} else {
 					doNotifUrl(_("Stream_online"), `${streamName}${streamStatus}`, getStreamURL(website, id, contentId, true));
 				}
+				streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
 			}
 			
 			if(typeof speechSynthesis == "object" && ((typeof streamList.get(id).notifyVocalOnline == "boolean")? streamList.get(id).notifyVocalOnline : getPreference("notify_vocal_online")) == true){
@@ -1128,13 +1129,14 @@ function doStreamNotif(website, id, contentId, streamSetting){
 				} else {
 					doNotif(_("Stream_offline"),streamName);
 				}
+				streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
 			}
+			
 			if(typeof speechSynthesis == "object" && ((typeof streamList.get(id).notifyVocalOffline == "boolean")? streamList.get(id).notifyVocalOffline : getPreference("notify_vocal_offline")) == true){
 				voiceReadMessage(_("language"), `${(typeof streamList.get(id).vocalStreamName == "string")? streamList.get(id).vocalStreamName : streamName} ${_("is_offline")}`);
 			}
 		}
 	}
-	streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
 }
 appGlobal["doStreamNotif"] = doStreamNotif;
 
