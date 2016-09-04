@@ -1,14 +1,13 @@
 function getVoiceLanguage(langCode){
 	let findVoice = function(langCode){
-		let found = false,
-			result = null;
+		let result = null;
 		let voices = speechSynthesis.getVoices();
-		voices.forEach((voice, index, array) => {
-			if(voice.lang.indexOf(langCode) != -1){
-				found = true;
+		for(let voice of voices){
+			if(voice.lang.indexOf(langCode) != -1 && !found){
 				result = voice;
+				break;
 			}
-		})
+		}
 		return result;
 	}
 	return new Promise((resolve, reject) => {

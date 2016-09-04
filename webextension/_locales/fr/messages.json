@@ -276,7 +276,7 @@
 		"message": "Délai de timeout des requêtes"
 	},
 	"timeout_delay_description": {
-		"message": "Délai de timeout des requests, in secondes (entre 10 et 30)"
+		"message": "Délai de timeout des requêtes, en secondes (entre 10 et 30)"
 	},
 	"notify_online_title": {
 		"message": "Affiche une notification lorsqu'un stream commence"

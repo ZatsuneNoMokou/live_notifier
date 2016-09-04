@@ -53,6 +53,17 @@ class Params extends Map {
 		return array.join('&');
 	}
 }
+function mapToObj(myMap){
+	if(myMap instanceof Map){
+		let obj = {};
+		myMap.forEach((value, index, array) => {
+			obj[index] = (value instanceof Map)? mapToObj(value) : value;
+		})
+		return obj;
+	} else {
+		throw 'myMap should be an Map';
+	}
+}
 function Request(options){
 	if(typeof options.url != "string" && typeof options.onComplete != "function"){
 		consoleMsg("warn", "Error in options");
@@ -114,7 +125,13 @@ function Request(options){
 						}
 						response.json = jsonDATA;
 				} else if(xhr.responseType == "document" && typeof options.Request_documentParseToJSON == "function"){
-					response.json = options.Request_documentParseToJSON(xhr);
+					let result = options.Request_documentParseToJSON(xhr);
+					if(result instanceof Map){
+						response.map = result;
+						response.json = mapToObj(result);
+					} else {
+						response.json = result;
+					}
 				} else {
 					try{response.json = JSON.parse(xhr.responseText);}
 					catch(error){response.json = null;}
@@ -1114,8 +1131,8 @@ function doStreamNotif(website, id, contentId, streamSetting){
 				} else {
 					doNotifUrl(_("Stream_online"), `${streamName}${streamStatus}`, getStreamURL(website, id, contentId, true));
 				}
-				streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
 			}
+			streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
 			
 			if(typeof speechSynthesis == "object" && ((typeof streamList.get(id).notifyVocalOnline == "boolean")? streamList.get(id).notifyVocalOnline : getPreference("notify_vocal_online")) == true){
 				voiceReadMessage(_("language"), `${(typeof streamList.get(id).vocalStreamName == "string")? streamList.get(id).vocalStreamName : streamName} ${_("is_online")}`);
@@ -1129,14 +1146,15 @@ function doStreamNotif(website, id, contentId, streamSetting){
 				} else {
 					doNotif(_("Stream_offline"),streamName);
 				}
-				streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
 			}
+			streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
 			
 			if(typeof speechSynthesis == "object" && ((typeof streamList.get(id).notifyVocalOffline == "boolean")? streamList.get(id).notifyVocalOffline : getPreference("notify_vocal_offline")) == true){
 				voiceReadMessage(_("language"), `${(typeof streamList.get(id).vocalStreamName == "string")? streamList.get(id).vocalStreamName : streamName} ${_("is_offline")}`);
 			}
 		}
 	}
+	streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
 }
 appGlobal["doStreamNotif"] = doStreamNotif;
 
