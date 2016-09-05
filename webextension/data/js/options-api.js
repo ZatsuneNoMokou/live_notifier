@@ -475,13 +475,20 @@ function newPreferenceNode(parent, id, prefObj){
 			break;
 		case "integer":
 			prefNode = document.createElement("input");
-			prefNode.type = "number";
 			prefNode.required = true;
+			if(typeof prefObj.rangeInput == "boolean" && prefObj.rangeInput == true && typeof prefObj.minValue == "number" && typeof prefObj.maxValue == "number"){
+				prefNode.type = "range";
+				prefNode.step = 1;
+				
+				var output = document.createElement("output");
+			} else {
+				prefNode.type = "number";
+			}
 			if(typeof prefObj.minValue == "number"){
 				prefNode.min = prefObj.minValue;
 			}
 			if(typeof prefObj.maxValue == "number"){
-				prefNode.min = prefObj.maxValue;
+				prefNode.max = prefObj.maxValue;
 			}
 			prefNode.value = parseInt(getPreference(id));
 			break;
@@ -532,6 +539,14 @@ function newPreferenceNode(parent, id, prefObj){
 	node.appendChild(labelNode);
 	node.appendChild(prefNode);
 	parent.appendChild(node);
+	
+	if(typeof prefNode.type == "string" && prefNode.type == "range"){
+		output.textContent = prefNode.value;
+		prefNode.addEventListener("change",function(){
+			output.textContent = prefNode.value;
+		});
+		node.appendChild(output);
+	}
 	
 	switch(prefObj.type){
 		case "string":

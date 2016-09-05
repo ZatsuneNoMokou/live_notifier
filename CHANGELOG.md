@@ -8,6 +8,12 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.5.0
+* +: Range input type support in the option API
+* +: Preference for volume of vocal notifications
+* +: Theme on number input and select preferences
+* Fix: Voice notification 
+
 # 8.4.4
 * Fix: Minor fixes
 

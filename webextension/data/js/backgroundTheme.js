@@ -77,9 +77,16 @@ function theme_cache_update(colorStylesheetNode){
 		backgroundPage_theme_cache.textContent = `
 ${textColor_stylesheet}
 body {background-color: hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[0]});}
-header, footer {background-color: hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[1]});}
-header button, button, .item-stream {background-color: hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[2]});}
-#deleteStreamTooltip {background-color: hsla(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[2]}, 0.95);};
+header, footer{background-color: hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[1]});}
+header button, button, input[type=number], select, .item-stream {background-color: hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[2]});}
+#deleteStreamTooltip {background-color: hsla(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[2]}, 0.95);}
+
+input[type=range]::-webkit-slider-thumb{background-color: hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[2]});}
+input[type=range]::-moz-range-thumb{background-color: hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[2]});}
+
+input[type=range]::-webkit-slider-runnable-track{background-color:hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[1]});}
+input[type=range]::-moz-range-track{background-color:hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[1]});}
+
 header, .item-stream, footer{box-shadow: 0px 0px 5px 0px hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[3]});}
 `
 		backgroundPage_theme_cache.dataset.theme = currentTheme;

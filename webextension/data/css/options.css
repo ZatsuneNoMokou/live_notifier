@@ -20,12 +20,62 @@ html, body{
 textarea[data-string-textarea]{
 	min-height:64px;
 }
-input[type=text], input[type=url]{
+input[type=text], input[type=number], input[type=url]{
 	height:25px;
 	border:1px solid #444;
 	border-radius:3px;
 	padding-left:2px;
 }
+select{
+	border:1px solid #444;
+	border-radius:3px;
+	padding-left:2px;
+	background-image: unset !important;
+	box-shadow:unset !important;
+}
+select option, select:hover option{
+	text-shadow:unset;
+}
+
+input[type=range]{
+	-webkit-appearance:none;
+	width:300px;
+	background-color:transparent;
+}
+input[type=range]::-webkit-slider-runnable-track{
+	width:300px;
+	height:5px;
+	border:none;
+	border-radius:1px;
+}
+input[type=range]::-webkit-slider-thumb{
+	-webkit-appearance: none;
+	border:none;
+	height:21px;
+	width:10px;
+	border-radius:1px;
+	margin-top:-8px;
+}
+input[type=range]::-moz-range-track{
+	width:300px;
+	height:5px;
+	border:none;
+	border-radius:1px;
+}
+input[type=range]::-moz-range-thumb{
+	border:none;
+	height:21px;
+	width:10px;
+	border-radius:1px;
+}
+input[type=range]:focus {
+	outline:none;
+}
+input[type=range]:-moz-focusring{
+	outline:1px solid white;
+	outline-offset:-1px;
+}
+
 button{
 	padding:0px 8px;
 	border:0px none;

@@ -185,6 +185,12 @@
 	"notifyVocalOffline_title": {
 		"message": "Notification vocale lorsque le stream fini"
 	},
+	"vocal_volume_title": {
+		"message": "Volume des notifications vocales"
+	},
+	"vocal_volume_description": {
+		"message": "En pourcent"
+	},
 	"open_optionpage": {
 		"message": "Ouvrir la page d'option"
 	},

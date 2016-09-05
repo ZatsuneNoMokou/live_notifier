@@ -3,7 +3,7 @@
 		"gecko": {
 			"id": "livenotifier_dev@zatsunenomokou.eu",
 			"strict_min_version": "48.0",
-			"update_url": "https://gitlab.com/ZatsuneNoMokou/znotifier/raw/master/dist/znotifier_dev.update.json"
+			"update_url": "https://gitlab.com/ZatsuneNoMokou/live_notifier/raw/master/dist/live_notifier_dev.update.json"
 		}
 	},
 	"manifest_version": 2,
@@ -11,7 +11,7 @@
 	"short_name": "LiveNotifierDev",
 	"description": "__MSG_extShortDesc__",
 	"author": "ZatsuneNoMokou",
-	"version": "8.4.4",
+	"version": "8.5.0",
 	"icons": {
 		"96": "/icon_96.png",
 		"128": "/icon_128.png"

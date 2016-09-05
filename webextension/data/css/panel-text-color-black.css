@@ -1,7 +1,10 @@
 /*			---- Primary text / Icons ----			*/
-body, header button, button, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteStreamTooltip, #searchInputContainer, #searchInput{
+body, header button, button, input[type=number], select, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteStreamTooltip, #searchInputContainer, #searchInput{
 	color: #FFFFFF;
 	color: rgba(0, 0, 0, 0.8);
+}
+select:hover{
+	color:unset !important;
 }
 /*		--- Secondary text / Base Color ----		*/
 .item-stream, .item-stream .streamTitle, .item-stream .streamStatus, .item-stream .streamCurrentViewers/*, #current_version*/{

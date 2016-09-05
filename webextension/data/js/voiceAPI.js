@@ -3,7 +3,7 @@ function getVoiceLanguage(langCode){
 		let result = null;
 		let voices = speechSynthesis.getVoices();
 		for(let voice of voices){
-			if(voice.lang.indexOf(langCode) != -1 && !found){
+			if(voice.lang.indexOf(langCode) != -1){
 				result = voice;
 				break;
 			}
@@ -29,7 +29,7 @@ function voiceReadMessage(langCode, message){
 		if(data.constructor.name == "SpeechSynthesisVoice"){
 			var msg = new SpeechSynthesisUtterance();
 			msg.voice = data; // Note: some voices don't support altering params
-			msg.volume = 0.7; // 0 to 1
+			msg.volume = (typeof getPreference("vocal_volume") == "number")? getPreference("vocal_volume")/100 : 0.7; // 0 to 1
 			msg.rate = 1; // 0.1 to 10
 			msg.pitch = 1; //0 to 2
 			msg.text = message;

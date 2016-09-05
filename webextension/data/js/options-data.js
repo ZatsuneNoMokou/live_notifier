@@ -110,6 +110,7 @@ optionsData.options = {
 		"value": 30,
 		"minValue": 10,
 		"maxValue": 30,
+		"rangeInput": true,
 		"prefLevel": "experimented"
 	},
 	/*			Notifications			*/
@@ -143,6 +144,16 @@ optionsData.options = {
 		"type": "bool",
 		"value": false,
 		"group": "notifications",
+		"prefLevel": "basic"
+	},
+	"vocal_volume": {
+		"title": "Volume of vocal notifiations",
+		"description": "In percent",
+		"type": "integer",
+		"value": 70,
+		"minValue": 0,
+		"maxValue": 100,
+		"rangeInput": true,
 		"prefLevel": "basic"
 	},
 	/*				Filters				*/
