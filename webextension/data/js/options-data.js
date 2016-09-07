@@ -76,6 +76,13 @@ optionsData.options = {
 		"prefLevel": "advanced"
 	},
 	/*			Youtube			*/
+	"youtube_import": {
+		"title": "Import the YouTube channels you follow.",
+		"label": "Import",
+		"type": "control",
+		"group": "youtube",
+		"prefLevel": "advanced"
+	},
 	"youtube_api_key": {
 		"type": "string",
 		"value": "",

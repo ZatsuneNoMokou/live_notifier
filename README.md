@@ -10,3 +10,5 @@ The icon of the addon (version 4 and later) is from https://pixabay.com/photo-97
 The "warning" website icon in the panel (version 8 and later), on the stream with a unsupported (or not loaded) website configured is under [CC0 Public Domain](https://pixabay.com/fr/service/terms/#usage) license, and is from from: https://pixabay.com/photo-34621/
 
 Patreon logo from https://www.patreon.com/toolbox/media
+
+XML2jsobj is from https://www.sitepoint.com/how-to-convert-xml-to-a-javascript-object/

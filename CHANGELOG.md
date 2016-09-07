@@ -8,6 +8,10 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.6.0
+* +: Youtube importation using RSS subscriptions list
+* +: Xml support in Request using xml2jsobj ( https://www.sitepoint.com/how-to-convert-xml-to-a-javascript-object/ )
+
 # 8.5.0
 * +: Range input type support in the option API
 * +: Preference for volume of vocal notifications

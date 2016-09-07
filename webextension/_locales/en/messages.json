@@ -251,6 +251,12 @@
 	"twitch_import": {
 		"message": "Import"
 	},
+	"youtube_import_title": {
+		"message": "Import the YouTube channels you follow (current browser session)"
+	},
+	"youtube_import": {
+		"message": "Import"
+	},
 	"youtube_api_key_title": {
 		"message": "Your Youtube API Key (Optional)"
 	},

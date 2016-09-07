@@ -112,18 +112,52 @@ function Request(options){
 					response.response = xhr.response;
 				}
 				
-				if(typeof options.urlencodedToJSON == "boolean" && options.urlencodedToJSON == true){
-						let jsonDATA = {};
-						let splitedData = xhr.responseText.split("&");
-						
-						function splitEqual(str){
-							return str.split("=");
-						}
-						splitedData = splitedData.map(splitEqual);
-						for(let item of splitedData){
-							jsonDATA[decodeURIComponent(item[0])] = decodeURIComponent(item[1]);
-						}
-						response.json = jsonDATA;
+				if(typeof options.customJSONParse == "string"){
+					switch(options.customJSONParse){
+						case "xmlToJSON":
+							if(typeof xhr.responseXML == "undefined" || xhr.responseXML == null){
+								response.json = null;
+							} else {
+								let xmlToStringParser = new XMLSerializer();
+								let xmlText = xmlToStringParser.serializeToString(xhr.responseXML);
+								
+								try{
+									// Source: https://www.sitepoint.com/how-to-convert-xml-to-a-javascript-object/
+									let rawData = XML2jsobj(xhr.responseXML.documentElement);
+									let data = {};
+									
+									/**		Flatten the object a bit		**/
+									if(rawData.hasOwnProperty("body")){
+										data = rawData.body;
+									}
+									if(rawData.hasOwnProperty("version")){
+										data.version = rawData.version;
+									}
+									/**		End flatten the object a bit		**/
+									
+									response.json = data;
+								}
+								catch(error){
+									response.json = null;
+								}
+							}
+							break;
+						case "urlencodedToJSON":
+							let jsonDATA = {};
+							let splitedData = xhr.responseText.split("&");
+							
+							function splitEqual(str){
+								return str.split("=");
+							}
+							splitedData = splitedData.map(splitEqual);
+							for(let item of splitedData){
+								jsonDATA[decodeURIComponent(item[0])] = decodeURIComponent(item[1]);
+							}
+							response.json = jsonDATA;
+							break;
+						default:
+							consoleMsg("warn", `[Request] Unknown custom JSON parse ${options.customJSONParse}`);
+					}
 				} else if(xhr.responseType == "document" && typeof options.Request_documentParseToJSON == "function"){
 					let result = options.Request_documentParseToJSON(xhr);
 					if(result instanceof Map){
@@ -595,11 +629,11 @@ function addStreamFromPanel(data){
 							if(current_API.hasOwnProperty("contentType") == true){
 								addStream_RequestOptions.contentType = current_API.contentType;
 							}
-							if(websites.get(website).hasOwnProperty("Request_documentParseToJSON") == true){
-								addStream_RequestOptions.Request_documentParseToJSON = websites.get(website).Request_documentParseToJSON;
+							if(current_API.hasOwnProperty("Request_documentParseToJSON") == true){
+								addStream_RequestOptions.Request_documentParseToJSON = current_API.Request_documentParseToJSON;
 							}
-							if(current_API.hasOwnProperty("urlencodedToJSON") == true){
-								addStream_RequestOptions.urlencodedToJSON = true;
+							if(current_API.hasOwnProperty("customJSONParse") == true){
+								addStream_RequestOptions.customJSONParse = current_API.customJSONParse;
 							}
 							Request(addStream_RequestOptions).get();
 							return true;
@@ -1252,6 +1286,7 @@ function checkResponseValidity(website, response){
 			} else {
 				// Parse Error
 				consoleMsg("warn", "Unable to get stream state (response is empty or not valid JSON).");
+			console.dir(response);
 				return "parse_error";
 			}
 		}
@@ -1275,6 +1310,7 @@ function checkResponseValidity(website, response){
 			return "success";
 		default:
 			consoleMsg("warn", `[${website}] Unable to get stream state (${state}).`);
+			console.log(response.url);
 			return state;
 			break;
 	}
@@ -1410,6 +1446,7 @@ function checkLives(idArray){
 						setIcon();
 					}
 					timing(`${website}::${id}`);
+					
 					promises.set(`${website}/${id}`, getPrimary(id, "", website, streamList));
 					promises.get(`${website}/${id}`)
 						.then(onStreamCheckEnd)
@@ -1448,6 +1485,7 @@ function checkLives(idArray){
 				checkMissing();
 			}
 		}
+
 		if(promises.size == 0){
 			setIcon();
 		}
@@ -1460,6 +1498,7 @@ function checkLives(idArray){
 			clearInterval(interval);
 			interval = setInterval(checkLives, getPreference('check_delay') * 60000);
 		}
+
 	})
 }
 function checkMissing(){
@@ -1561,11 +1600,11 @@ function getPrimary(id, contentId, website, streamSetting, nextPageToken){
 		if(current_API.hasOwnProperty("contentType") == true){
 			getPrimary_RequestOptions.contentType = current_API.contentType;
 		}
-		if(websites.get(website).hasOwnProperty("Request_documentParseToJSON") == true){
-			getPrimary_RequestOptions.Request_documentParseToJSON = websites.get(website).Request_documentParseToJSON;
+		if(current_API.hasOwnProperty("Request_documentParseToJSON") == true){
+			getPrimary_RequestOptions.Request_documentParseToJSON = current_API.Request_documentParseToJSON;
 		}
-		if(current_API.hasOwnProperty("urlencodedToJSON") == true){
-			getPrimary_RequestOptions.urlencodedToJSON = true;
+		if(current_API.hasOwnProperty("customJSONParse") == true){
+			getPrimary_RequestOptions.customJSONParse = current_API.customJSONParse;
 		}
 		
 		Request(getPrimary_RequestOptions).get();
@@ -1684,11 +1723,11 @@ function processPrimary(id, contentId, website, streamSetting, response){
 					if(second_API.hasOwnProperty("contentType") == true){
 						second_API_RequestOptions.contentType = second_API.contentType;
 					}
-					if(websites.get(website).hasOwnProperty("Request_documentParseToJSON") == true){
-						second_API_RequestOptions.Request_documentParseToJSON = websites.get(website).Request_documentParseToJSON;
+					if(second_API.hasOwnProperty("Request_documentParseToJSON") == true){
+						second_API_RequestOptions.Request_documentParseToJSON = second_API.Request_documentParseToJSON;
 					}
-					if(second_API.hasOwnProperty("urlencodedToJSON") == true){
-						second_API_RequestOptions.urlencodedToJSON = true;
+					if(second_API.hasOwnProperty("customJSONParse") == true){
+						second_API_RequestOptions.customJSONParse = second_API.customJSONParse;
 					}
 					
 					Request(second_API_RequestOptions).get();
@@ -1745,11 +1784,11 @@ function getChannelInfo(website, id){
 			if(channelInfos_API.hasOwnProperty("contentType") == true){
 				getChannelInfo_RequestOptions.contentType = channelInfos_API.contentType;
 			}
-			if(websites.get(website).hasOwnProperty("Request_documentParseToJSON") == true){
-				getChannelInfo_RequestOptions.Request_documentParseToJSON = websites.get(website).Request_documentParseToJSON;
+			if(channelInfos_API.hasOwnProperty("Request_documentParseToJSON") == true){
+				getChannelInfo_RequestOptions.Request_documentParseToJSON = channelInfos_API.Request_documentParseToJSON;
 			}
-			if(channelInfos_API.hasOwnProperty("urlencodedToJSON") == true){
-				getChannelInfo_RequestOptions.urlencodedToJSON = true;
+			if(channelInfos_API.hasOwnProperty("customJSONParse") == true){
+				getChannelInfo_RequestOptions.customJSONParse = channelInfos_API.customJSONParse;
 			}
 			
 			Request(getChannelInfo_RequestOptions).get();
@@ -1843,6 +1882,15 @@ function importStreams(website, id, url, pageNumber){
 		
 		if(current_API.hasOwnProperty("headers") == true){
 			importStreams_RequestOptions.headers = current_API.headers;
+		}
+		if(current_API.hasOwnProperty("Request_documentParseToJSON") == true){
+			importStreams_RequestOptions.Request_documentParseToJSON = current_API.Request_documentParseToJSON;
+		}
+		if(current_API.hasOwnProperty("xmlToJSON") == true){
+			importStreams_RequestOptions.xmlToJSON = true;
+		}
+		if(current_API.hasOwnProperty("customJSONParse") == true){
+			importStreams_RequestOptions.customJSONParse = current_API.customJSONParse;
 		}
 		
 		Request(importStreams_RequestOptions).get();
