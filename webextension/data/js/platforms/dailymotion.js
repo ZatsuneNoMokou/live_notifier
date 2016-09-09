@@ -1,4 +1,5 @@
 let dailymotion = {
+	"title": "Dailymotion",
 	"addStream_URLpatterns": new Map([
 		["dailymotion", [
 			/^(?:http|https):\/\/games\.dailymotion\.com\/(?:live|video)\/([a-zA-Z0-9]+).*$/,
@@ -196,22 +197,26 @@ let dailymotion = {
 				list: []
 			}
 			
-			if(data.total > 0){
-				for(let item of data.list){
-					if(!streamListSetting.streamExist("dailymotion", `channel::${item.id}`) && !streamListSetting.streamExist("dailymotion", `channel::${item.username}`)){
-						obj.list.push(`channel::${item.id}`);
-					} else {
-						console.log(`${item.username} already exist`);
+			if(data.hasOwnProperty("list") == false){
+				obj.list = null;
+			} else {
+				if(data.total > 0){
+					for(let item of data.list){
+						if(!streamListSetting.streamExist("dailymotion", `channel::${item.id}`) && !streamListSetting.streamExist("dailymotion", `channel::${item.username}`)){
+							obj.list.push(`channel::${item.id}`);
+						} else {
+							console.log(`${item.username} already exist`);
+						}
 					}
 				}
-			}
-			
-			if(data.has_more){
-				let nextPageNumber = ((typeof pageNumber == "number")? pageNumber : 1) + 1;
-				let nextUrl = dailymotion.importAPI(id).url + "&page=" + nextPageNumber;
-				obj.next = {"url": nextUrl, "pageNumber": nextPageNumber}
-			} else {
-				obj.next = null;
+				
+				if(data.has_more){
+					let nextPageNumber = ((typeof pageNumber == "number")? pageNumber : 1) + 1;
+					let nextUrl = dailymotion.importAPI(id).url + "&page=" + nextPageNumber;
+					obj.next = {"url": nextUrl, "pageNumber": nextPageNumber}
+				} else {
+					obj.next = null;
+				}
 			}
 			
 			return obj;

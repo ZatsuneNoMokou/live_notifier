@@ -1,4 +1,5 @@
 let hitbox = {
+	"title": "Hitbox",
 	"addStream_URLpatterns": new Map([
 		["hitbox", [
 			/^(?:http|https):\/\/www\.hitbox\.tv\/(?:embedchat\/)?([^\/\?\&]+).*$/

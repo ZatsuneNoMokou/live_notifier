@@ -34,6 +34,12 @@
 	"Settings": {
 		"message": "Settings"
 	},
+	"delete_all_selected": {
+		"message": "Delete all selected streams"
+	},
+	"cancelDelete": {
+		"message": "Cancel delete"
+	},
 	"copyURL": {
 		"message": "Copy stream"
 	},
@@ -111,11 +117,33 @@
 	"have_been_added": {
 		"message": "have been added."
 	},
+	"importation_finished":{
+		"message": "Importation finished for $website$",
+		"placeholders": {
+			"website": {
+				"content": "$1"
+			}
+		}
+	},
+	"importation_finished_DataNull":{
+		"message": "Importation finished with error for $website$ ($reason$)",
+		"placeholders": {
+			"website": {
+				"content": "$1"
+			},
+			"reason": {
+				"content": "$2"
+			}
+		}
+	},
+	"importError_checkId":{
+		"message": "check your id"
+	},
+	"importError_checkYouTubeConnexion":{
+		"message": "check the connexion to your YouTube account on your browser"
+	},
 	"No_supported_stream_detected_in_the_current_tab_so_nothing_to_add": {
 		"message": "No supported stream detected in the current tab, so, nothing to add."
-	},
-	"delete_tooltip": {
-		"message": "To delete a stream from the settings, move it in the trash can."
 	},
 	"I_am_watching_the_stream_of": {
 		"message": "I am watching the stream of"
@@ -125,9 +153,6 @@
 	},
 	"has_been_deleted": {
 		"message": "has been deleted."
-	},
-	"Livestreamer_command_copied_into_the_clipboard": {
-		"message": "Livestreamer command copied into the clipboard"
 	},
 	"clipboard_success": {
 		"message": "Copied into the clipboad."

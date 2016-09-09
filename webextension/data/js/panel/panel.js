@@ -97,22 +97,57 @@ dropDiv.addEventListener("dragover", allowDrop);
 document.addEventListener("dragenter", dragenter); // Event dragging something and entering a valid node
 document.addEventListener("dragleave", dragleave); // Event dragging something and leaving a valid node
 document.addEventListener("dragstart", drag); // Get dragged element data
+
 let deleteStreamButton = document.querySelector("#deleteStream");
-let deleteStreamTooltip = document.querySelector("#deleteStreamTooltip");
-let showDeleteTooltip = false;
+let deleteMode = false;
+let deleteStream = backgroundPage.deleteStream;
+
 function deleteStreamButtonClick(){
-	if(!showDeleteTooltip){
-		showDeleteTooltip = true;
-		deleteStreamTooltip.classList.remove("hide");
-		setTimeout(function() {
-			showDeleteTooltip = false;
-			deleteStreamTooltip.classList.add("hide");
-		}, 1250);
+	if(deleteMode){
+		let toDelete = document.querySelectorAll(".item-stream .active");
+		for(let node of toDelete){
+			if(typeof node.tagName == "string"){
+				node.classList.remove("active");
+			}
+		}
 	}
 	
+	deleteMode = !deleteMode;
+	document.querySelector("#deleteModeControles").classList.toggle("hide",!deleteMode);
 	document.querySelector("#streamList").classList.toggle("deleteButtonMode");
 }
 deleteStreamButton.addEventListener("click", deleteStreamButtonClick, false);
+
+let confirmDelete_Node = document.querySelector("#confirmDelete"),
+	cancelDelete_Node = document.querySelector("#cancelDelete");
+function cancelDelete(){
+	let toDelete = document.querySelectorAll(".item-stream .active");
+	for(let node of toDelete){
+		if(typeof node.tagName == "string"){
+			node.classList.remove("active");
+		}
+	}
+	deleteStreamButtonClick();
+}
+cancelDelete_Node.addEventListener("click", cancelDelete, false);
+function confirmDelete(){
+	if(deleteMode){
+		let toDelete = document.querySelectorAll(".item-stream .active");
+		if(toDelete != null){
+			for(let node of toDelete){
+				if(typeof node.tagName == "string"){
+					node.classList.remove("active");
+					let id = node.dataset.id,
+						website = node.dataset.website;
+					deleteStream(website, id);
+				}
+			}
+		}
+	}
+	updatePanelData({"doUpdateTheme": false});
+	deleteStreamButtonClick();
+}
+confirmDelete_Node.addEventListener("click", confirmDelete, false);
 
 /*				---- Search Button ----				*/
 let toggle_search_button = document.querySelector("button#searchStream");
@@ -306,6 +341,8 @@ function saveEditedStreamButton_onClick(event){
 		contentId: contentId,
 		streamSettingsData: streamSettingsData
 	});
+	
+	selectSection("streamList");
 }
 saveEditedStreamButton.addEventListener("click", saveEditedStreamButton_onClick, false);
 
@@ -320,6 +357,8 @@ function updatePanelData(data){
 	
 	//Clear stream list in the panel
 	initList({"group_streams_by_websites": getPreference("group_streams_by_websites"), "show_offline_in_panel": getPreference("show_offline_in_panel")});
+	
+	let show_offline_in_panel = getPreference("show_offline_in_panel");
 	
 	let streamListSettings = new streamListFromSetting().mapDataAll;
 	streamListSettings.forEach((streamList, website, array) => {
@@ -339,7 +378,7 @@ function updatePanelData(data){
 				liveStatus.get(website).get(id).forEach((streamData, contentId, array) => {
 					getCleanedStreamStatus(website, id, contentId, streamList.get(id), streamData.liveStatus.API_Status);
 					
-					if(streamData.liveStatus.filteredStatus || (getPreference("show_offline_in_panel") && !streamData.liveStatus.filteredStatus)){
+					if(streamData.liveStatus.filteredStatus || (show_offline_in_panel && !streamData.liveStatus.filteredStatus)){
 						doStreamNotif(website, id, contentId, streamList.get(id), streamData.liveStatus.API_Status);
 						
 						listener(website, id, contentId, "live", streamList.get(id), streamData);
@@ -350,7 +389,7 @@ function updatePanelData(data){
 					let streamData = channelInfos.get(website).get(id);
 					let contentId = id;
 					
-					console.info(`Using channel infos for ${id} (${website})`);
+					//console.info(`Using channel infos for ${id} (${website})`);
 					
 					listener(website, id, contentId, "channel", streamList.get(id), channelInfos.get(website).get(id));
 				} else if(websites.has(website)){
@@ -372,7 +411,9 @@ function updatePanelData(data){
 				}
 			}
 		})
+		showNonEmptySitesBlocks();
 	})
+	scrollbar_update("streamList");
 	
 	liveStatus.forEach((website_liveStatus, website, array) => {
 		website_liveStatus.forEach((id_liveStatus, id, array) => {
@@ -381,7 +422,7 @@ function updatePanelData(data){
 				console.info(`${id} from ${website} was already deleted but not from liveStatus ${(channelInfos.get(website).has(id))? "and channelInfos" : ""}`);
 				liveStatus.get(website).delete(id);
 				if(channelInfos.get(website).has(id)){
-					channelInfos.get(website).remove(id);
+					channelInfos.get(website).delete(id);
 				}
 			}
 		})
@@ -393,7 +434,7 @@ function updatePanelData(data){
 	let onlineCount = appGlobal["onlineCount"];
 	listenerOnlineCount((onlineCount == 0)? _("No_stream_online") :  _("count_stream_online", onlineCount.toString()));
 	
-	if(getPreference("show_offline_in_panel")){
+	if(show_offline_in_panel){
 		var offlineCount = getOfflineCount();
 		listenerOfflineCount((offlineCount == 0)? _("No_stream_offline") :  _("count_stream_offline", offlineCount.toString()));
 	} else {
@@ -458,7 +499,8 @@ function newDeleteStreamButton_onClick(event){
 	let id = node.dataset.id;
 	let website = node.dataset.website;
 	
-	sendDataToMain("deleteStream", {id: id, website: website});
+	node.classList.toggle("active");
+	//sendDataToMain("deleteStream", {id: id, website: website});
 }
 function newDeleteStreamButton(id, website){
 	let node = document.createElement("span");
@@ -483,7 +525,7 @@ function newShareStreamButton_onClick(event){
 		contentId: node.dataset.contentId,
 	});
 }
-function newShareStreamButton(id, contentId, website, streamName, streamUrl, streamStatus, facebookID, twitterID){
+function newShareStreamButton(id, contentId, website){
 	let node = document.createElement("span");
 	node.classList.add("shareStreamButton");
 	node.dataset.website = website;
@@ -656,15 +698,7 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	}
 	let liveStatus = streamData.liveStatus;
 	
-	let streamName = streamData.streamName;
-	let streamStatus = streamData.streamStatus;
-	let streamGame = streamData.streamGame;
-	let streamOwnerLogo = streamData.streamOwnerLogo;
-	let streamCategoryLogo = streamData.streamCategoryLogo;
-	let streamCurrentViewers = streamData.streamCurrentViewers;
-	let streamUrl = (type == "live" || type == "channel")? getStreamURL(website, id, contentId, true) : "";
-	let facebookID = streamData.facebookID;
-	let twitterID = streamData.twitterID;
+	//let streamUrl = (type == "live" || type == "channel")? getStreamURL(website, id, contentId, true) : "";
 	
 	var newLine = document.createElement("div");
 	newLine.id = `${website}/${id}/${contentId}`;
@@ -675,11 +709,11 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 		stream_right_container_node.id = "stream_right_container";
 		newLine.appendChild(stream_right_container_node);
 		
-		if(online && typeof streamCurrentViewers == "number"){
+		if(online && typeof streamData.streamCurrentViewers == "number"){
 			var viewerCountNode = document.createElement("span");
 			viewerCountNode.classList.add("streamCurrentViewers");
 			
-			let viewer_number = (typeof streamCurrentViewers == "number")? streamCurrentViewers : parseInt(streamCurrentViewers);
+			let viewer_number = (typeof streamData.streamCurrentViewers == "number")? streamData.streamCurrentViewers : parseInt(streamData.streamCurrentViewers);
 			viewerCountNode.dataset.streamCurrentViewers = (viewer_number < 1000)? viewer_number : ((Math.round(viewer_number / 100)/10) + "k");
 			
 			stream_right_container_node.appendChild(viewerCountNode);
@@ -688,10 +722,10 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	
 	let streamLogo = "";
 	
-	if(online && typeof streamCategoryLogo == "string" && streamCategoryLogo != ""){
-		streamLogo  = streamCategoryLogo;
-	} else if(typeof streamOwnerLogo == "string" && streamOwnerLogo != ""){
-		streamLogo  = streamOwnerLogo;
+	if(online && typeof streamData.streamCategoryLogo == "string" && streamData.streamCategoryLogo != ""){
+		streamLogo  = streamData.streamCategoryLogo;
+	} else if(typeof streamData.streamOwnerLogo == "string" && streamData.streamOwnerLogo != ""){
+		streamLogo  = streamData.streamOwnerLogo;
 	}
 	
 	if(typeof streamLogo == "string" && streamLogo != ""){
@@ -707,23 +741,23 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 		imgStreamStatusLogo.src = (online)? "online-stream.svg" : "offline-stream.svg";
 		titleLine.appendChild(imgStreamStatusLogo);
 	}
-	titleLine.textContent = streamName;
+	titleLine.textContent = streamData.streamName;
 	newLine.appendChild(titleLine);
 	
 	if(online){
-		if(streamStatus != ""){
+		if(streamData.streamStatus != ""){
 			var statusLine = document.createElement("span");
 			statusLine.classList.add("streamStatus");
-			statusLine.textContent = streamStatus + ((streamGame.length > 0)? (" (" + streamGame + ")") : "");
+			statusLine.textContent = streamData.streamStatus + ((streamData.streamGame.length > 0)? (" (" + streamData.streamGame + ")") : "");
 			newLine.appendChild(statusLine);
 			
-			newLine.dataset.streamStatus = streamStatus;
-			newLine.dataset.streamStatusLowercase = streamStatus.toLowerCase();
+			newLine.dataset.streamStatus = streamData.streamStatus;
+			newLine.dataset.streamStatusLowercase = streamData.streamStatus.toLowerCase();
 		}
 		
-		if(streamGame.length > 0){
-			newLine.dataset.streamGame = streamGame;
-			newLine.dataset.streamGameLowercase = streamGame.toLowerCase();
+		if(streamData.streamGame.length > 0){
+			newLine.dataset.streamGame = streamData.streamGame;
+			newLine.dataset.streamGameLowercase = streamData.streamGame.toLowerCase();
 		}
 		
 		newLine.classList.add("item-stream", "onlineItem");
@@ -737,20 +771,20 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	newLine.dataset.streamId = id;
 	newLine.dataset.contentId = contentId;
 	newLine.dataset.online = online;
-	newLine.dataset.streamName = streamName;
-	newLine.dataset.streamNameLowercase = streamName.toLowerCase();
+	newLine.dataset.streamName = streamData.streamName;
+	newLine.dataset.streamNameLowercase = streamData.streamName.toLowerCase();
 	newLine.dataset.streamWebsite = website;
 	newLine.dataset.streamWebsiteLowercase = website.toLowerCase();
-	newLine.dataset.streamUrl = streamUrl;
+	//newLine.dataset.streamUrl = streamUrl;
 	newLine.dataset.streamType = type;
 	
 	newLine.dataset.streamSettings = JSON.stringify(streamSettings);
 	
-	if(typeof facebookID == "string" && facebookID != ""){
-		newLine.dataset.facebookId = facebookID;
+	if(typeof streamData.facebookID == "string" && streamData.facebookID != ""){
+		newLine.dataset.facebookId = streamData.facebookID;
 	}
-	if(typeof twitterID == "string" && twitterID != ""){
-		newLine.dataset.twitterId = twitterID;
+	if(typeof streamData.twitterID == "string" && streamData.twitterID != ""){
+		newLine.dataset.twitterId = streamData.twitterID;
 	}
 	newLine.addEventListener("click", streamItemClick);
 	
@@ -772,10 +806,10 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 			control_span.appendChild(newCopyStreamURLButton_node);
 		}
 	}
-	editStream_node = newEditStreamButton(id, contentId, website, streamName, streamSettings);
+	editStream_node = newEditStreamButton(id, contentId, website, streamData.streamName, streamSettings);
 	control_span.appendChild(editStream_node);
 	if(online){
-		shareStream_node = newShareStreamButton(id, contentId, website, streamName, streamUrl, streamStatus, (typeof facebookID == "string")? facebookID: "", (typeof twitterID == "string")? twitterID: "");
+		shareStream_node = newShareStreamButton(id, contentId, website);
 		control_span.appendChild(shareStream_node);
 		
 		stream_right_container_node.appendChild(control_span);
@@ -795,9 +829,6 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	
 	newLine.draggable = true;
 	
-	showNonEmptySitesBlocks();
-	scrollbar_update("streamList");
-	
 	if(typeof liveStatus.lastCheckStatus == "string" && liveStatus.lastCheckStatus != "" && liveStatus.lastCheckStatus != "success"){
 		let debugDataNode = document.querySelector("#debugData");
 		let newDebugItem = document.createElement('div');
@@ -806,7 +837,7 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 		
 		let newDebugItem_title = document.createElement('span');
 		newDebugItem_title.classList.add("debugTitle");
-		newDebugItem_title.textContent = streamName;
+		newDebugItem_title.textContent = streamData.streamName;
 		newDebugItem.appendChild(newDebugItem_title);
 		
 		let newDebugItem_status = document.createElement('span');

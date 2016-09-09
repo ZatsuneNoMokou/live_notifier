@@ -1,4 +1,5 @@
 let youtube = {
+	"title": "YouTube",
 	"addStream_URLpatterns": new Map([
 		["channel::youtube", [
 			/(?:http|https):\/\/(?:www\.|gaming\.)?youtube\.com\/channel\/([^\/\?\&\#]+)*.*/
@@ -430,10 +431,11 @@ let youtube = {
 	"importStreamWebsites":
 		function(id, data, streamListSetting, pageNumber){
 			let obj = {
-				list: []
+				list: null
 			}
 			
 			if(data != null && data.hasOwnProperty("outline") && data.outline.hasOwnProperty("outline") && Array.isArray(data.outline.outline)){
+				obj.list = [];
 				let getId = /https\:\/\/www\.youtube\.com\/feeds\/videos\.xml\?channel_id\=([^&]+)/i;
 				data.outline.outline.forEach((item) => {
 					if(getId.test(item.xmlUrl)){

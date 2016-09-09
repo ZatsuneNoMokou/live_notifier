@@ -1,4 +1,5 @@
 let beam = {
+	"title": "Beam",
 	"addStream_URLpatterns": new Map([
 		["beam", [
 			/^(?:http|https):\/\/beam\.pro\/([^\/\?\&]+)/

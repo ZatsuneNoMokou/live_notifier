@@ -1,4 +1,5 @@
 let twitch = {
+	"title": "Twitch",
 	"addStream_URLpatterns": new Map([
 		["twitch", [
 			/^(?:http|https):\/\/www\.twitch\.tv\/([^\/\?\&]+).*$/,/^(?:http|https):\/\/player\.twitch\.tv\/\?channel\=([\w\-]+).*$/
@@ -100,15 +101,19 @@ let twitch = {
 				list: []
 			}
 			
-			if(typeof data.follows == "object"){
-				for(let item of data.follows){
-					obj.list.push(item["channel"]["display_name"]);
-				}
-				
-				if(data.follows.length > 0 && typeof data._links.next == "string"){
-					obj.next = {"url": data._links.next};
-				} else {
-					obj.next = null;
+			if(data.hasOwnProperty("error")){
+				obj.list = null;
+			} else {
+				if(typeof data.follows == "object"){
+					for(let item of data.follows){
+						obj.list.push(item["channel"]["display_name"]);
+					}
+					
+					if(data.follows.length > 0 && typeof data._links.next == "string"){
+						obj.next = {"url": data._links.next};
+					} else {
+						obj.next = null;
+					}
 				}
 			}
 			

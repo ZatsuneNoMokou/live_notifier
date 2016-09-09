@@ -8,6 +8,14 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.7.0
+* +: New delete mode in the panel
+* +: Notification on the importation end of the stream for a website
+* Fix: Potential error with xmlToJSON custom parse in Request
+* Fix: In panel, avoid updating scrollbar after each stream inserted in the page
+* Fix: Saving in individual stream settings
+* Fix: Minor fix in updatePanelData
+
 # 8.6.0
 * +: Youtube importation using RSS subscriptions list
 * +: Xml support in Request using xml2jsobj ( https://www.sitepoint.com/how-to-convert-xml-to-a-javascript-object/ )

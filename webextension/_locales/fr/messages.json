@@ -37,6 +37,12 @@
 	"Settings": {
 		"message": "Options"
 	},
+	"delete_all_selected": {
+		"message": "Supprimer les streams sélectionnés"
+	},
+	"cancelDelete": {
+		"message": "Annuler la suppression"
+	},
 	"copyURL": {
 		"message": "Copier l'URL"
 	},
@@ -111,14 +117,36 @@
 	"click_to_confirm": {
 		"message": "cliquer pour confirmer"
 	},
+	"importation_finished":{
+		"message": "Importation terminée pour $website$",
+		"placeholders": {
+			"website": {
+				"content": "$1"
+			}
+		}
+	},
+	"importation_finished_DataNull":{
+		"message": "Importation terminée avec erreur pour $website$ ($reason$)",
+		"placeholders": {
+			"website": {
+				"content": "$1"
+			},
+			"reason": {
+				"content": "$2"
+			}
+		}
+	},
+	"importError_checkId":{
+		"message": "vérifiez votre identifiant"
+	},
+	"importError_checkYouTubeConnexion":{
+		"message": "vérifiez la connexion à votre compte YouTube sur votre navigateur"
+	},
 	"have_been_added": {
 		"message": "a été ajouté."
 	},
 	"No_supported_stream_detected_in_the_current_tab_so_nothing_to_add": {
 		"message": "Aucun stream supporté détecté dans l'onglet actuel, donc, rien à ajouter."
-	},
-	"delete_tooltip": {
-		"message": "Pour supprimer un stream des paramètres, le déplacer dans la poubelle."
 	},
 	"I_am_watching_the_stream_of": {
 		"message": "Je regarde le stream de"

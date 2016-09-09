@@ -129,9 +129,11 @@ function Request(options){
 									/**		Flatten the object a bit		**/
 									if(rawData.hasOwnProperty("body")){
 										data = rawData.body;
-									}
-									if(rawData.hasOwnProperty("version")){
-										data.version = rawData.version;
+										if(rawData.hasOwnProperty("version")){
+											data.version = rawData.version;
+										}
+									} else {
+										data = rawData;
 									}
 									/**		End flatten the object a bit		**/
 									
@@ -652,6 +654,14 @@ function addStreamFromPanel(data){
 		}
 	} else {
 		doNotif("Live notifier", _("No_supported_stream_detected_in_the_current_tab_so_nothing_to_add"));
+	}
+}
+function deleteStream(website,id){
+	let streamListSetting = new streamListFromSetting(website);
+	
+	if(streamListSetting.streamExist(website, id)){
+		streamListSetting.deleteStream(website, id);
+		streamListSetting.update();
 	}
 }
 function deleteStreamFromPanel(data){
@@ -1800,6 +1810,14 @@ function getChannelInfo(website, id){
 function importButton(website){
 	let importationPromiseEnd = (reason) => {
 		consoleDir(reason, `Importation for ${website} finished`);
+		if(typeof reason == "string" && reason == "ImportEnd"){
+			doNotif("Live notifier",_("importation_finished", (websites.get(website).hasOwnProperty("title"))? websites.get(website).title : website));
+		} else if(typeof reason == "string" && reason == "ImportEnd_DataNull"){
+			doNotif("Live notifier",_("importation_finished_DataNull",
+				[((websites.get(website).hasOwnProperty("title"))? websites.get(website).title : website),
+				((website != "youtube")? _("importError_checkId") : _("importError_checkYouTubeConnexion"))]
+			));
+		}
 		refreshPanel(false);
 	}
 	if(typeof websites.get(website).importAPIGetUserId == "function" && typeof websites.get(website).importGetUserId == "function"){
@@ -1837,7 +1855,7 @@ function importStreams(website, id, url, pageNumber){
 		if(typeof url == "string" && url != ""){
 			current_API.url = url;
 		} else {
-			console.time(`${website}::${id}`);
+			timing(`import_${website}`);
 		}
 		let importStreams_RequestOptions = {
 			url: current_API.url,
@@ -1856,27 +1874,30 @@ function importStreams(website, id, url, pageNumber){
 					importStreamList_Data = websites.get(website).importStreamWebsites(id, data, streamListSetting);
 				}
 				
-				
-				for(let id of importStreamList_Data.list){
-					streamListSetting.addStream(website, id, "");
-				}
-				streamListSetting.update();
-				
-				if(importStreamList_Data.hasOwnProperty("next") == true && importStreamList_Data.next != null){
-					if(importStreamList_Data.next.hasOwnProperty("pageNumber") == true){
-						importStreams(website, id, importStreamList_Data.next.url, importStreamList_Data.next.pageNumber)
-							.then(resolve)
-							.catch(resolve)
+				if(importStreamList_Data.list != null){
+					for(let id of importStreamList_Data.list){
+						streamListSetting.addStream(website, id, "");
+					}
+					streamListSetting.update();
+					
+					if(importStreamList_Data.hasOwnProperty("next") == true && importStreamList_Data.next != null){
+						if(importStreamList_Data.next.hasOwnProperty("pageNumber") == true){
+							importStreams(website, id, importStreamList_Data.next.url, importStreamList_Data.next.pageNumber)
+								.then(resolve)
+								.catch(resolve)
+						} else {
+							importStreams(website, id, importStreamList_Data.next.url)
+								.then(resolve)
+								.catch(resolve)
+						}
 					} else {
-						importStreams(website, id, importStreamList_Data.next.url)
-							.then(resolve)
-							.catch(resolve)
+						importStreamsEnd(website, id);
+						resolve("ImportEnd");
 					}
 				} else {
 					importStreamsEnd(website, id);
-					resolve("ImportEnd");
+					resolve("ImportEnd_DataNull");
 				}
-				
 			}
 		}
 		
@@ -1898,7 +1919,7 @@ function importStreams(website, id, url, pageNumber){
 }
 function importStreamsEnd(website, id){
 	setIcon();
-	console.timeEnd(`${website}::${id}`);
+	timingEnd(`import_${website}`);
 }
 
 //				------ Load / Unload Event(s) ------				//
