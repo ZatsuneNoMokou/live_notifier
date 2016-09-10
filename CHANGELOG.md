@@ -8,6 +8,11 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.7.1
+* Fix: Clicking on streams (Panel)
+* Fix: streamListFromSetting class, delete stream when no website defined on the contructor
+* Fix: Delete mode in the panel now make a Map of the streams to delete, and the deleteStream function is replaced with a deleteStreams to avoid updating stream list preference after each stream
+
 # 8.7.0
 * +: New delete mode in the panel
 * +: Notification on the importation end of the stream for a website

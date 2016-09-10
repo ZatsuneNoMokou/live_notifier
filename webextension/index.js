@@ -389,7 +389,9 @@ class streamListFromSetting{
 	deleteStream(website, id){
 		if(this.streamExist(website, id)){
 			this.mapDataAll.get(website).delete(id);
-			this.mapData.delete(id);
+			if(typeof this.mapData != "undefined"){
+				this.mapData.delete(id);
+			}
 			if(liveStatus.has(website) && liveStatus.get(website).has(id)){
 				liveStatus.get(website).delete(id);
 			}
@@ -656,13 +658,15 @@ function addStreamFromPanel(data){
 		doNotif("Live notifier", _("No_supported_stream_detected_in_the_current_tab_so_nothing_to_add"));
 	}
 }
-function deleteStream(website,id){
-	let streamListSetting = new streamListFromSetting(website);
+function deleteStreams(deleteMap){
+	let streamListSetting = new streamListFromSetting();
 	
-	if(streamListSetting.streamExist(website, id)){
-		streamListSetting.deleteStream(website, id);
-		streamListSetting.update();
-	}
+	deleteMap.forEach((deleteMap_website, website) => {
+		for(let id of deleteMap_website){
+			streamListSetting.deleteStream(website, id);
+		}
+	})
+	streamListSetting.update();
 }
 function deleteStreamFromPanel(data){
 	let streamListSetting = new streamListFromSetting(data.website);

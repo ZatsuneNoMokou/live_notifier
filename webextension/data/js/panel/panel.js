@@ -100,7 +100,7 @@ document.addEventListener("dragstart", drag); // Get dragged element data
 
 let deleteStreamButton = document.querySelector("#deleteStream");
 let deleteMode = false;
-let deleteStream = backgroundPage.deleteStream;
+let deleteStreams = backgroundPage.deleteStreams;
 
 function deleteStreamButtonClick(){
 	if(deleteMode){
@@ -132,6 +132,7 @@ function cancelDelete(){
 cancelDelete_Node.addEventListener("click", cancelDelete, false);
 function confirmDelete(){
 	if(deleteMode){
+		let toDeleteMap = new Map();
 		let toDelete = document.querySelectorAll(".item-stream .active");
 		if(toDelete != null){
 			for(let node of toDelete){
@@ -139,9 +140,15 @@ function confirmDelete(){
 					node.classList.remove("active");
 					let id = node.dataset.id,
 						website = node.dataset.website;
-					deleteStream(website, id);
+					if(!toDeleteMap.has(website)){
+						toDeleteMap.set(website, []);
+					}
+					if(toDeleteMap.get(website).indexOf(id) == -1){
+						toDeleteMap.get(website).push(id);
+					}
 				}
 			}
+			deleteStreams(toDeleteMap);
 		}
 	}
 	updatePanelData({"doUpdateTheme": false});
@@ -855,11 +862,12 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 function streamItemClick(){
 	let node = this;
 	let id = node.dataset.streamId;
+	let contentId = node.dataset.contentId;
 	let online = node.dataset.online;
 	let website = node.dataset.streamWebsite;
-	let streamUrl = node.dataset.streamUrl;
 	
-	if(streamUrl != ""){
+	let streamUrl = getStreamURL(website, id, contentId, true);
+	if(streamUrl != null && streamUrl != ""){
 		sendDataToMain("openTab", streamUrl);
 	}
 }
