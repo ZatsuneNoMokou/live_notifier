@@ -155,7 +155,8 @@ let dailymotion = {
 			let list = data.list;
 			
 			let obj = {
-				streamList: new Map()
+				streamList: new Map(),
+				primaryRequest: false
 			}
 			if(data.total == 0){
 				return obj;

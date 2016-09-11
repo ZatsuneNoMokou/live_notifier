@@ -99,12 +99,12 @@ document.addEventListener("dragleave", dragleave); // Event dragging something a
 document.addEventListener("dragstart", drag); // Get dragged element data
 
 let deleteStreamButton = document.querySelector("#deleteStream");
-let deleteMode = false;
+let streamChangeMode = false;
 let deleteStreams = backgroundPage.deleteStreams;
 
 function deleteStreamButtonClick(){
-	if(deleteMode){
-		let toDelete = document.querySelectorAll(".item-stream .active");
+	if(streamChangeMode){
+		let toDelete = document.querySelectorAll(".item-stream .deleteStreamButton.active");
 		for(let node of toDelete){
 			if(typeof node.tagName == "string"){
 				node.classList.remove("active");
@@ -112,16 +112,26 @@ function deleteStreamButtonClick(){
 		}
 	}
 	
-	deleteMode = !deleteMode;
-	document.querySelector("#deleteModeControles").classList.toggle("hide",!deleteMode);
+	let ignoreStreamButtons = document.querySelectorAll(".item-stream .ignoreStreamButton");
+	let streamListSettings = new streamListFromSetting();
+	for(let node of ignoreStreamButtons){
+		let website = node.dataset.website;
+		let id = node.dataset.id;
+		if(streamListSettings.mapDataAll.has(website) && streamListSettings.mapDataAll.get(website) && streamListSettings.mapDataAll.get(website).has(id)){
+			node.classList.toggle("active", streamListSettings.mapDataAll.get(website).get(id).ignore);
+		}
+	}
+	
+	streamChangeMode = !streamChangeMode;
+	document.querySelector("#deleteModeControles").classList.toggle("hide",!streamChangeMode);
 	document.querySelector("#streamList").classList.toggle("deleteButtonMode");
 }
 deleteStreamButton.addEventListener("click", deleteStreamButtonClick, false);
 
-let confirmDelete_Node = document.querySelector("#confirmDelete"),
-	cancelDelete_Node = document.querySelector("#cancelDelete");
-function cancelDelete(){
-	let toDelete = document.querySelectorAll(".item-stream .active");
+let confirmChanges_Node = document.querySelector("#confirmChanges"),
+	cancelChanges_Node = document.querySelector("#cancelChanges");
+function cancelChanges(){
+	let toDelete = document.querySelectorAll(".item-stream .deleteStreamButton.active");
 	for(let node of toDelete){
 		if(typeof node.tagName == "string"){
 			node.classList.remove("active");
@@ -129,11 +139,11 @@ function cancelDelete(){
 	}
 	deleteStreamButtonClick();
 }
-cancelDelete_Node.addEventListener("click", cancelDelete, false);
-function confirmDelete(){
-	if(deleteMode){
+cancelChanges_Node.addEventListener("click", cancelChanges, false);
+function confirmChanges(){
+	if(streamChangeMode){
 		let toDeleteMap = new Map();
-		let toDelete = document.querySelectorAll(".item-stream .active");
+		let toDelete = document.querySelectorAll(".item-stream .deleteStreamButton.active");
 		if(toDelete != null){
 			for(let node of toDelete){
 				if(typeof node.tagName == "string"){
@@ -150,11 +160,20 @@ function confirmDelete(){
 			}
 			deleteStreams(toDeleteMap);
 		}
+		let ignoreStreamButtons = document.querySelectorAll(".item-stream .ignoreStreamButton");
+		let streamListSettings = new streamListFromSetting();
+		for(let node of ignoreStreamButtons){
+			let website = node.dataset.website;
+			let id = node.dataset.id;
+			if(streamListSettings.mapDataAll.has(website) && streamListSettings.mapDataAll.get(website) && streamListSettings.mapDataAll.get(website).has(id)){
+				streamListSettings.mapDataAll.get(website).get(id).ignore = node.classList.contains("active");
+			}
+		}
 	}
 	updatePanelData({"doUpdateTheme": false});
 	deleteStreamButtonClick();
 }
-confirmDelete_Node.addEventListener("click", confirmDelete, false);
+confirmChanges_Node.addEventListener("click", confirmChanges, false);
 
 /*				---- Search Button ----				*/
 let toggle_search_button = document.querySelector("button#searchStream");
@@ -515,6 +534,28 @@ function newDeleteStreamButton(id, website){
 	node.dataset.id = id;
 	node.dataset.website = website;
 	node.dataset.translateTitle = "Delete";
+	node.textContent = "delete";
+	
+	return node;
+}
+function newIgnoreStreamButton_onClick(event){
+	event.stopPropagation();
+	
+	let node = this;
+	let id = node.dataset.id;
+	let website = node.dataset.website;
+	
+	node.classList.toggle("active");
+}
+function newIgnoreStreamButton(id, website, streamSettings){
+	let node = document.createElement("span");
+	node.classList.add("ignoreStreamButton");
+	node.dataset.id = id;
+	node.dataset.website = website;
+	node.dataset.translateTitle = "IgnoreStream";
+	node.textContent = "visibility_off";
+	
+	node.classList.toggle("active", streamSettings.ignore);
 	
 	return node;
 }
@@ -798,8 +839,12 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	/*			---- Control span ----			*/
 	let control_span = document.createElement("span");
 	control_span.classList.add("stream_control");
+	
 	let deleteButton_node = newDeleteStreamButton(id, website);
 	control_span.appendChild(deleteButton_node);
+	
+	let ignoreStreamButton_node = newIgnoreStreamButton(id, website, streamSettings);
+	control_span.appendChild(ignoreStreamButton_node);
 	
 	let newCopyStreamURLButton_node = null;
 	let editStream_node = null;
@@ -824,6 +869,7 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 		newLine.appendChild(control_span);
 	}
 	deleteButton_node.addEventListener("click", newDeleteStreamButton_onClick, false);
+	ignoreStreamButton_node.addEventListener("click", newIgnoreStreamButton_onClick, false);
 	if(newCopyStreamURLButton_node !== null){
 		newCopyStreamURLButton_node.addEventListener("click", newCopyStreamURLButton_onClick, false);
 	}

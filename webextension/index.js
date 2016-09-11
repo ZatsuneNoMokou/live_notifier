@@ -1654,10 +1654,19 @@ function processChannelList(id, website, streamSetting, response, nextPageToken)
 			} else {
 				streamListData.streamList.forEach((value, contentId, array) => {
 					channelInfos.get(website).get(id).liveStatus.liveList.set(contentId, "");
-					if(value == null){
-						promises.set(contentId, getPrimary(id, contentId, website, streamSetting));
-					} else {
+					
+					if(streamListData.hasOwnProperty("primaryRequest") && typeof streamListData.primaryRequest == "boolean" && !streamListData.primaryRequest){
 						promises.set(contentId, processPrimary(id, contentId, website, streamSetting, {"json": value}));
+					} else {
+						if(value != null){
+							if(!liveStatus.get(website).get(id).has(contentId)){
+								let defaultStatus = liveStatus.get(website).get(id).set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+							}
+							for(let infoId in value){
+								liveStatus.get(website).get(id).get(contentId)[infoId] = value[infoId];
+							}
+						}
+						promises.set(contentId, getPrimary(id, contentId, website, streamSetting));
 					}
 				})
 				

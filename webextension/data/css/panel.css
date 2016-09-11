@@ -112,6 +112,9 @@ header button{
 	margin-left:5px;
 	font-weight:700;
 }
+#deleteStream i{
+	font-size:16px;
+}
 #vide, .vide{
 	flex:1;
 }
@@ -119,7 +122,7 @@ header button{
 	display:none !important;
 	visibility:hidden !important;
 }
-#deleteStream.active,.item-stream .active{
+#deleteStream.active .deleteLogo,.item-stream .active{
 	color:red;
 }
 #deleteModeControles{
@@ -328,8 +331,16 @@ footer, footer *{
 	visibility:hidden;
 	font-weight:normal;
 }
-.deleteStreamButton:before{
-	content:"delete";
+.item-stream.onlineItem .stream_control .ignoreStreamButton, .item-stream.onlineItem .stream_control .deleteStreamButton{
+	display:block;
+}
+.ignoreStreamButton{
+	/*content:"visibility_off";*/
+	font-family:"Material Icons";
+	font-size:17px;
+}
+.deleteStreamButton{
+	/*content:"delete";*/
 	font-family:"Material Icons";
 	font-size:17px;
 }
@@ -348,11 +359,11 @@ footer, footer *{
 	font-family:"Material Icons";
 	font-size:17px;
 }
-#streamList:not(.deleteButtonMode) .item-stream .stream_control .deleteStreamButton{
+#streamList:not(.deleteButtonMode) .item-stream .stream_control .deleteStreamButton, #streamList:not(.deleteButtonMode) .item-stream .stream_control .ignoreStreamButton{
 	display:none;
 	visibility:hidden;
 }
-#streamList.deleteButtonMode .item-stream .stream_control span:not(.deleteStreamButton){
+#streamList.deleteButtonMode .item-stream .stream_control span:not(.deleteStreamButton):not(.ignoreStreamButton){
 	display:none;
 	visibility:hidden;
 }
@@ -370,7 +381,7 @@ footer, footer *{
 .item-stream.onlineItem:hover > #stream_right_container > .stream_control{
 	position:relative;
 }
-#streamList:not(.deleteButtonMode) .item-stream.onlineItem:hover > #stream_right_container > .stream_control > span:not(.deleteStreamButton){
+#streamList:not(.deleteButtonMode) .item-stream.onlineItem:hover > #stream_right_container > .stream_control > span:not(.deleteStreamButton):not(.ignoreStreamButton){
 	display:block;
 	visibility:unset;
 }

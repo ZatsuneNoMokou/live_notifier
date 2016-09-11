@@ -162,12 +162,52 @@ let youtube = {
 				}
 			} else {
 				if(website_channel_id.test(id)){
-					obj = {
+					/*obj = {
 						"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLives.php",
 						"overrideMimeType": "text/plain; charset=utf-8",
 						"content": [
 							["id", website_channel_id.exec(id)[1]]
 						]
+					}*/
+					obj = {
+						"url": `https:\/\/www.youtube.com/channel/${website_channel_id.exec(id)[1]}/videos`,
+						"overrideMimeType": "text/html; charset=utf-8",
+						"content": [
+							["view", "2"],
+							["live_view", "501"]
+						],
+						"contentType": "document",
+						"Request_documentParseToJSON": function(xhrRequest){
+							let dataDocument = xhrRequest.response;
+							let parser = new DOMParser();
+							
+							let streamList_nodes = dataDocument.querySelectorAll("#channels-browse-content-grid li.channels-content-item");
+							let streamListData_Map = new Map();
+							streamListData_Map.set("list", new Map());
+							
+							for(let node of streamList_nodes){
+								let currentChannelId = dataDocument.querySelector("meta[itemprop=channelId]").getAttribute("content");
+								
+								let subNodeDoc = parser.parseFromString(node.innerHTML, "text/html");
+								if(subNodeDoc.querySelector(".video-time") == null){
+									let streamId_node = subNodeDoc.querySelector("[data-context-item-id]");
+									let ownerId = subNodeDoc.querySelector("[data-ytid]");
+									
+									if(((ownerId != null) && ownerId.dataset.ytid == currentChannelId) && streamId_node != null){
+										let streamId = streamId_node.dataset.contextItemId;
+										
+										//let streamName_node = subNodeDoc.querySelector(".yt-lockup-title");
+										//let streamName = (streamName_node != null)? streamName_node.textContent : "";
+										
+										let streamCurrentViewers_node = subNodeDoc.querySelector(".yt-lockup-meta-info");
+										let streamCurrentViewers = (streamCurrentViewers_node != null)? parseInt(streamCurrentViewers_node.textContent.replace(/\s/,"")) : null;
+										
+										streamListData_Map.get("list").set(streamId, {"streamCurrentViewers": streamCurrentViewers});
+									}
+								}
+							}
+							return streamListData_Map;
+						}
 					}
 					if(typeof nextPageToken == "string"){obj.content.push(["pageToken", nextPageToken]);}
 				} else {
@@ -356,7 +396,16 @@ let youtube = {
 			let obj = {
 				streamList: new Map()
 			}
-			if(data.hasOwnProperty('items') == false){
+			
+			if(data.hasOwnProperty("list") == true){
+				let list = data.list;
+				
+				for(let contentId in list){
+					obj.streamList.set(contentId, list[contentId]);
+				}
+				
+				return obj;
+			} else if(data.hasOwnProperty('items') == false){
 				return obj;
 			} else {
 				let list = data.items;

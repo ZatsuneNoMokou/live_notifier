@@ -22,11 +22,17 @@
 	"Delete": {
 		"message": "Delete"
 	},
+	"DeleteIgnore": {
+		"message": "Delete / Ignore"
+	},
 	"Cancel": {
 		"message": "Cancel"
 	},
 	"Ok": {
 		"message": "Ok"
+	},
+	"Search": {
+		"message": "Search"
 	},
 	"Refresh": {
 		"message": "Refresh"
@@ -34,11 +40,14 @@
 	"Settings": {
 		"message": "Settings"
 	},
-	"delete_all_selected": {
-		"message": "Delete all selected streams"
+	"confirm_all_changes": {
+		"message": "Confirm changes"
 	},
-	"cancelDelete": {
-		"message": "Cancel delete"
+	"cancelChanges": {
+		"message": "Cancel changes"
+	},
+	"IgnoreStream": {
+		"message": "Ignore the stream"
 	},
 	"copyURL": {
 		"message": "Copy stream"

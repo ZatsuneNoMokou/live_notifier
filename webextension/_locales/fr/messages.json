@@ -22,6 +22,9 @@
 	"Delete": {
 		"message": "Supprimer"
 	},
+	"DeleteIgnore": {
+		"message": "Supprimer / Ignorer"
+	},
 	"Cancel": {
 		"message": "Annuler"
 	},
@@ -37,11 +40,14 @@
 	"Settings": {
 		"message": "Options"
 	},
-	"delete_all_selected": {
-		"message": "Supprimer les streams sélectionnés"
+	"confirm_all_changes": {
+		"message": "Confirmer les changements"
 	},
-	"cancelDelete": {
-		"message": "Annuler la suppression"
+	"cancelChanges": {
+		"message": "Annuler les changements"
+	},
+	"IgnoreStream": {
+		"message": "Ignorer stream"
 	},
 	"copyURL": {
 		"message": "Copier l'URL"
