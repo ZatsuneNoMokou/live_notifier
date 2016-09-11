@@ -8,6 +8,10 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.8.0
+* +: Ignore/Un-ignore streams added in the mode that was "delete mode"
+* Fix: Default youtube support does not use YouTube "quota" API anymore and some changes in the "core" to get viewers
+
 # 8.7.1
 * Fix: Clicking on streams (Panel)
 * Fix: streamListFromSetting class, delete stream when no website defined on the contructor
