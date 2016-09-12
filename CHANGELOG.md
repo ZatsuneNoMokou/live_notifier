@@ -8,6 +8,11 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.8.1
+* i: Remade positioning of elements inside streams, in panel
+* Fix: Ignore button in "change" mode wasn't updating the preference on confirmation
+* Fix: Stream buttons tooltip placement (now on the left)
+
 # 8.8.0
 * +: Ignore/Un-ignore streams added in the mode that was "delete mode"
 * Fix: Default youtube support does not use YouTube "quota" API anymore and some changes in the "core" to get viewers

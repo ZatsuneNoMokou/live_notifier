@@ -169,6 +169,7 @@ function confirmChanges(){
 				streamListSettings.mapDataAll.get(website).get(id).ignore = node.classList.contains("active");
 			}
 		}
+		streamListSettings.update();
 	}
 	updatePanelData({"doUpdateTheme": false});
 	deleteStreamButtonClick();
@@ -535,6 +536,7 @@ function newDeleteStreamButton(id, website){
 	node.dataset.website = website;
 	node.dataset.translateTitle = "Delete";
 	node.textContent = "delete";
+	node.dataset.placement = "left";
 	
 	return node;
 }
@@ -554,6 +556,7 @@ function newIgnoreStreamButton(id, website, streamSettings){
 	node.dataset.website = website;
 	node.dataset.translateTitle = "IgnoreStream";
 	node.textContent = "visibility_off";
+	node.dataset.placement = "left";
 	
 	node.classList.toggle("active", streamSettings.ignore);
 	
@@ -580,6 +583,7 @@ function newShareStreamButton(id, contentId, website){
 	node.dataset.id = id;
 	node.dataset.contentId = contentId;
 	node.dataset.translateTitle = "shareStream";
+	node.dataset.placement = "left";
 	
 	return node;
 }
@@ -636,6 +640,7 @@ function newEditStreamButton(id, contentId, website, title, streamSettings){
 	node.dataset.title = title;
 	node.dataset.streamSettings = JSON.stringify(streamSettings);
 	node.dataset.translateTitle = "Settings";
+	node.dataset.placement = "left";
 	
 	return node;
 }
@@ -656,6 +661,7 @@ function newCopyStreamURLButton(id, contentId, website){
 	node.dataset.contentId = contentId;
 	node.dataset.website = website;
 	node.dataset.translateTitle = "copyURL";
+	node.dataset.placement="left";
 	
 	return node;
 }
@@ -751,8 +757,59 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	var newLine = document.createElement("div");
 	newLine.id = `${website}/${id}/${contentId}`;
 	
+	let streamLogo = "";
+	
+	if(online && typeof streamData.streamCategoryLogo == "string" && streamData.streamCategoryLogo != ""){
+		streamLogo  = streamData.streamCategoryLogo;
+	} else if(typeof streamData.streamOwnerLogo == "string" && streamData.streamOwnerLogo != ""){
+		streamLogo  = streamData.streamOwnerLogo;
+	}
+	
+	if(typeof streamLogo == "string" && streamLogo != ""){
+		newLine.style.backgroundImage = "url('" + streamLogo + "')";
+		newLine.classList.add("streamLogo");
+	}
+	
+	let contentContainer = document.createElement("div");
+	
+	var titleLine = document.createElement("span");
+	titleLine.classList.add("streamTitle");
+	if(typeof streamLogo == "string" && streamLogo != ""){
+		var imgStreamStatusLogo = document.createElement("img");
+		imgStreamStatusLogo.classList.add("streamStatusLogo");
+		imgStreamStatusLogo.src = (online)? "online-stream.svg" : "offline-stream.svg";
+		titleLine.appendChild(imgStreamStatusLogo);
+	}
+	titleLine.textContent = streamData.streamName;
+	
+	if(online){
+		newLine.appendChild(contentContainer);
+		contentContainer.appendChild(titleLine);
+	} else {
+		newLine.appendChild(titleLine);
+	}
+	
 	let stream_right_container_node;
 	if(online){
+		if(streamData.streamStatus != ""){
+			var statusLine = document.createElement("span");
+			statusLine.classList.add("streamStatus");
+			statusLine.textContent = streamData.streamStatus + ((streamData.streamGame.length > 0)? (" (" + streamData.streamGame + ")") : "");
+			//newLine.appendChild(statusLine);
+			contentContainer.appendChild(statusLine);
+			
+			newLine.dataset.streamStatus = streamData.streamStatus;
+			newLine.dataset.streamStatusLowercase = streamData.streamStatus.toLowerCase();
+		}
+		
+		if(streamData.streamGame.length > 0){
+			newLine.dataset.streamGame = streamData.streamGame;
+			newLine.dataset.streamGameLowercase = streamData.streamGame.toLowerCase();
+		}
+		
+		newLine.classList.add("item-stream", "onlineItem");
+		insertStreamNode(newLine, website, id, contentId, type, streamData, online);
+		
 		stream_right_container_node = document.createElement("span");
 		stream_right_container_node.id = "stream_right_container";
 		newLine.appendChild(stream_right_container_node);
@@ -766,50 +823,6 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 			
 			stream_right_container_node.appendChild(viewerCountNode);
 		}
-	}
-	
-	let streamLogo = "";
-	
-	if(online && typeof streamData.streamCategoryLogo == "string" && streamData.streamCategoryLogo != ""){
-		streamLogo  = streamData.streamCategoryLogo;
-	} else if(typeof streamData.streamOwnerLogo == "string" && streamData.streamOwnerLogo != ""){
-		streamLogo  = streamData.streamOwnerLogo;
-	}
-	
-	if(typeof streamLogo == "string" && streamLogo != ""){
-		newLine.style.backgroundImage = "url('" + streamLogo + "')";
-		newLine.classList.add("streamLogo");
-	}
-
-	var titleLine = document.createElement("span");
-	titleLine.classList.add("streamTitle");
-	if(typeof streamLogo == "string" && streamLogo != ""){
-		var imgStreamStatusLogo = document.createElement("img");
-		imgStreamStatusLogo.classList.add("streamStatusLogo");
-		imgStreamStatusLogo.src = (online)? "online-stream.svg" : "offline-stream.svg";
-		titleLine.appendChild(imgStreamStatusLogo);
-	}
-	titleLine.textContent = streamData.streamName;
-	newLine.appendChild(titleLine);
-	
-	if(online){
-		if(streamData.streamStatus != ""){
-			var statusLine = document.createElement("span");
-			statusLine.classList.add("streamStatus");
-			statusLine.textContent = streamData.streamStatus + ((streamData.streamGame.length > 0)? (" (" + streamData.streamGame + ")") : "");
-			newLine.appendChild(statusLine);
-			
-			newLine.dataset.streamStatus = streamData.streamStatus;
-			newLine.dataset.streamStatusLowercase = streamData.streamStatus.toLowerCase();
-		}
-		
-		if(streamData.streamGame.length > 0){
-			newLine.dataset.streamGame = streamData.streamGame;
-			newLine.dataset.streamGameLowercase = streamData.streamGame.toLowerCase();
-		}
-		
-		newLine.classList.add("item-stream", "onlineItem");
-		insertStreamNode(newLine, website, id, contentId, type, streamData, online);
 	} else {
 		newLine.classList.add("item-stream", "offlineItem");
 		insertStreamNode(newLine, website, id, contentId, type, streamData, online);

@@ -4,6 +4,7 @@ html, body{
 	margin-right:0px;
 	min-width:777px;
 	min-height:500px;
+	font-family: Ubuntu, Tahoma, sans-serif;
 }
 #contentContainer{
 	height:100%;

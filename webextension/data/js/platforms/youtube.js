@@ -448,7 +448,7 @@ let youtube = {
 						}
 					} else {
 						if(typeof data.author == "string" && data.author.indexOf("youtube.com/") != -1){
-							streamData.streamURL = item;
+							streamData.streamURL = data.author;
 							urlFound = true;
 						}
 					}
