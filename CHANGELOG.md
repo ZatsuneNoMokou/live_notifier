@@ -12,6 +12,7 @@
 * i: Remade positioning of elements inside streams, in panel
 * Fix: Ignore button in "change" mode wasn't updating the preference on confirmation
 * Fix: Stream buttons tooltip placement (now on the left)
+* Fix: Youtube probably copy/paste fail
 
 # 8.8.0
 * +: Ignore/Un-ignore streams added in the mode that was "delete mode"
