@@ -33,7 +33,11 @@ let youtube = {
 							return node.getAttribute("content");
 							break;
 						case "link":
-							return node.getAttribute("href");
+							let link = node.getAttribute("href");
+							if(link.indexOf("//") == 0){
+								link = `https:${link}`;
+							}
+							return link;
 							break;
 						case "span":
 							let content = {};

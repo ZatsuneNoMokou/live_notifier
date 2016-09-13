@@ -8,6 +8,11 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.8.2
+* Fix: Better space usage for online streams (status can use whole width)
+* Fix: Some Youtube links with protocole missing
+* Fix: Stream individual setting of offline vocal notification
+
 # 8.8.1
 * i: Remade positioning of elements inside streams, in panel
 * Fix: Ignore button in "change" mode wasn't updating the preference on confirmation

@@ -198,8 +198,15 @@ footer, footer *{
 .item-stream.onlineItem{
 	position:relative;
 	display: flex;
-	flex-direction: row;
 	padding-right: 5px;
+}
+.item-stream.onlineItem > div{
+	display:flex;
+	justify-content:space-between;
+}
+.item-stream.onlineItem:hover > div > .stream_control{
+	display:flex;
+	flex-direction:column;
 }
 .item-stream.onlineItem.streamLogo{
 	padding-left:58px;

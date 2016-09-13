@@ -626,7 +626,7 @@ function newEditStreamButton_onClick(event){
 	document.querySelector("#streamEditor #notifyOnline").checked = (typeof streamSettings.notifyOnline == "boolean")? streamSettings.notifyOnline : true;
 	document.querySelector("#streamEditor #notifyVocalOnline").checked = (typeof streamSettings.notifyVocalOnline == "boolean")? streamSettings.notifyVocalOnline : true;
 	document.querySelector("#streamEditor #notifyOffline").checked = (typeof streamSettings.notifyOffline == "boolean")? streamSettings.notifyOffline : false;
-	document.querySelector("#streamEditor #notifyVocalOffline").checked = (typeof streamSettings.notifyVocalOnline == "boolean")? streamSettings.notifyVocalOnline : false;
+	document.querySelector("#streamEditor #notifyVocalOffline").checked = (typeof streamSettings.notifyVocalOffline == "boolean")? streamSettings.notifyVocalOffline : false;
 	
 	unhideClassNode(streamEditor);
 	scrollbar_update("streamEditor");
@@ -770,7 +770,9 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 		newLine.classList.add("streamLogo");
 	}
 	
+	let firstLine = document.createElement("div");
 	let contentContainer = document.createElement("div");
+	
 	
 	var titleLine = document.createElement("span");
 	titleLine.classList.add("streamTitle");
@@ -783,13 +785,13 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	titleLine.textContent = streamData.streamName;
 	
 	if(online){
+		newLine.appendChild(firstLine);
 		newLine.appendChild(contentContainer);
-		contentContainer.appendChild(titleLine);
+		firstLine.appendChild(titleLine);
 	} else {
 		newLine.appendChild(titleLine);
 	}
 	
-	let stream_right_container_node;
 	if(online){
 		if(streamData.streamStatus != ""){
 			var statusLine = document.createElement("span");
@@ -810,10 +812,6 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 		newLine.classList.add("item-stream", "onlineItem");
 		insertStreamNode(newLine, website, id, contentId, type, streamData, online);
 		
-		stream_right_container_node = document.createElement("span");
-		stream_right_container_node.id = "stream_right_container";
-		newLine.appendChild(stream_right_container_node);
-		
 		if(online && typeof streamData.streamCurrentViewers == "number"){
 			var viewerCountNode = document.createElement("span");
 			viewerCountNode.classList.add("streamCurrentViewers");
@@ -821,7 +819,7 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 			let viewer_number = (typeof streamData.streamCurrentViewers == "number")? streamData.streamCurrentViewers : parseInt(streamData.streamCurrentViewers);
 			viewerCountNode.dataset.streamCurrentViewers = (viewer_number < 1000)? viewer_number : ((Math.round(viewer_number / 100)/10) + "k");
 			
-			stream_right_container_node.appendChild(viewerCountNode);
+			firstLine.appendChild(viewerCountNode);
 		}
 	} else {
 		newLine.classList.add("item-stream", "offlineItem");
@@ -877,7 +875,7 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 		shareStream_node = newShareStreamButton(id, contentId, website);
 		control_span.appendChild(shareStream_node);
 		
-		stream_right_container_node.appendChild(control_span);
+		contentContainer.appendChild(control_span);
 	} else {
 		newLine.appendChild(control_span);
 	}
