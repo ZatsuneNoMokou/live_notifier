@@ -185,14 +185,14 @@ footer, footer *{
 	display:flex;
 	flex-direction:row;
 	align-items:center;
-	justify-content:pace-between;
+	justify-content:space-between;
 }
 .item-stream .streamTitle{
 	font-weight:600;
 	vertical-align:middle;
 }
 .item-stream:not(.streamLogo){
-	padding-left:45px;
+	padding-left:42px;
 	background-size:auto 30px;
 }
 .item-stream.onlineItem{
@@ -214,7 +214,7 @@ footer, footer *{
 	min-height:37px;
 }
 .item-stream.offlineItem.streamLogo{
-	padding-left:35px;
+	padding-left:42px;
 	background-size:auto 28px;
 }
 .item-stream .streamTitle::before{
@@ -224,8 +224,8 @@ footer, footer *{
 	width:15px;
 	background-repeat:no-repeat;
 	background-position:center;
-	padding-left:3px;
-	padding-top:3px;
+	padding:3px 0 3px 0;
+	margin-right:3px;
 	vertical-align:middle;
 }
 .item-stream[data-stream-website=dailymotion] .streamTitle::before, .debugItem[data-stream-website=dailymotion] .debugTitle::before{

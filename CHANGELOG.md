@@ -8,6 +8,9 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.8.3
+* Fix: Stream alignment fix
+
 # 8.8.2
 * Fix: Better space usage for online streams (status can use whole width)
 * Fix: Some Youtube links with protocole missing
