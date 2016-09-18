@@ -8,6 +8,9 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.8.5
+* Fix: Youtube programmed event shown as online
+
 # 8.8.4
 * Fix: Trying to fix performances issues using jQuery to get sub nodes (with $(node).find() ) instead of using DOMParser
 * Fix: Broken Twitch support: api key added

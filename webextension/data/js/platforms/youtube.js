@@ -206,6 +206,9 @@ let youtube = {
 										//let streamName = (streamName_node.length > 0)? streamName_node[0].textContent : "";
 										
 										let streamCurrentViewers_node = $(node).find(".yt-lockup-meta-info");
+										if($(streamCurrentViewers_node).find(".localized-date").length > 0){/**		Programmed events		**/
+											continue;
+										}
 										let streamCurrentViewers = (streamCurrentViewers_node.length > 0)? parseInt(streamCurrentViewers_node[0].textContent.replace(/\s/,"")) : null;
 										
 										streamListData_Map.get("list").set(streamId, {"streamCurrentViewers": streamCurrentViewers});
