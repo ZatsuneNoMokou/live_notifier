@@ -12,24 +12,33 @@ let twitch = {
 	"API":
 		function(id){
 			let obj = {
-				url: `https://api.twitch.tv/kraken/streams/${id}`,
-				overrideMimeType: "application/vnd.twitchtv.v3+json; charset=utf-8" //"text/plain; charset=utf-8"
+				"url": `https://api.twitch.tv/kraken/streams/${id}`,
+				"overrideMimeType": "application/vnd.twitchtv.v3+json; charset=utf-8", //"text/plain; charset=utf-8"
+				"content": [
+					["client_id","kll57pgmkzth3mcr2p184gstqi77ex2"]
+				]
 			}
 			return obj;
 		},
 	"API_second":
 		function(id){
 			let obj = {
-				url: `https://api.twitch.tv/kraken/users/${id}`,
-				overrideMimeType: "application/vnd.twitchtv.v3+json; charset=utf-8" //"text/plain; charset=utf-8"
+				"url": `https://api.twitch.tv/kraken/users/${id}`,
+				"overrideMimeType": "application/vnd.twitchtv.v3+json; charset=utf-8", //"text/plain; charset=utf-8"
+				"content": [
+					["client_id","kll57pgmkzth3mcr2p184gstqi77ex2"]
+				]
 			}
 			return obj;
 		},
 	"importAPI":
 		function(id){
 			let obj = {
-				url: `https://api.twitch.tv/kraken/users/${id}/follows/channels`,
-				overrideMimeType: "application/vnd.twitchtv.v3+json; charset=utf-8"
+				"url": `https://api.twitch.tv/kraken/users/${id}/follows/channels`,
+				"overrideMimeType": "application/vnd.twitchtv.v3+json; charset=utf-8", //"text/plain; charset=utf-8"
+				"content": [
+					["client_id","kll57pgmkzth3mcr2p184gstqi77ex2"]
+				]
 			}
 			return obj;
 		},

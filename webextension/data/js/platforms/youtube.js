@@ -24,7 +24,7 @@ let youtube = {
 			
 			if(itempropNodes != null){
 				jsonDATA = {};
-				let parser = new DOMParser();
+				// let parser = new DOMParser();
 				
 				let getPropValue = function(node){
 					let id = node.getAttribute("itemprop");
@@ -41,8 +41,10 @@ let youtube = {
 							break;
 						case "span":
 							let content = {};
-							let subNodesDoc = parser.parseFromString(node.innerHTML, "text/html");
-							let subItemProps = subNodesDoc.querySelectorAll("[itemprop]");
+							
+							let subItemProps = $(node).find("[itemprop]");
+							// let subNodesDoc = parser.parseFromString(node.innerHTML, "text/html");
+							// let subItemProps = subNodesDoc.querySelectorAll("[itemprop]");
 							
 							for(let subNode of subItemProps){
 								let subNodeId = subNode.getAttribute("itemprop");
@@ -183,7 +185,7 @@ let youtube = {
 						"contentType": "document",
 						"Request_documentParseToJSON": function(xhrRequest){
 							let dataDocument = xhrRequest.response;
-							let parser = new DOMParser();
+							//let parser = new DOMParser();
 							
 							let streamList_nodes = dataDocument.querySelectorAll("#channels-browse-content-grid li.channels-content-item");
 							let streamListData_Map = new Map();
@@ -192,19 +194,19 @@ let youtube = {
 							for(let node of streamList_nodes){
 								let currentChannelId = dataDocument.querySelector("meta[itemprop=channelId]").getAttribute("content");
 								
-								let subNodeDoc = parser.parseFromString(node.innerHTML, "text/html");
-								if(subNodeDoc.querySelector(".video-time") == null){
-									let streamId_node = subNodeDoc.querySelector("[data-context-item-id]");
-									let ownerId = subNodeDoc.querySelector("[data-ytid]");
+								//let subNodeDoc = parser.parseFromString(node.innerHTML, "text/html");
+								if($(node).find(".video-time").length == 0){
+									let streamId_node = $(node).find("[data-context-item-id]");
+									let ownerId = $(node).find("[data-ytid]");
 									
-									if(((ownerId != null) && ownerId.dataset.ytid == currentChannelId) && streamId_node != null){
-										let streamId = streamId_node.dataset.contextItemId;
+									if((ownerId.length > 0 && ownerId[0].dataset.ytid == currentChannelId) && streamId_node.length > 0){
+										let streamId = streamId_node[0].dataset.contextItemId;
 										
-										//let streamName_node = subNodeDoc.querySelector(".yt-lockup-title");
-										//let streamName = (streamName_node != null)? streamName_node.textContent : "";
+										//let streamName_node = $(node).find(".yt-lockup-title");
+										//let streamName = (streamName_node.length > 0)? streamName_node[0].textContent : "";
 										
-										let streamCurrentViewers_node = subNodeDoc.querySelector(".yt-lockup-meta-info");
-										let streamCurrentViewers = (streamCurrentViewers_node != null)? parseInt(streamCurrentViewers_node.textContent.replace(/\s/,"")) : null;
+										let streamCurrentViewers_node = $(node).find(".yt-lockup-meta-info");
+										let streamCurrentViewers = (streamCurrentViewers_node.length > 0)? parseInt(streamCurrentViewers_node[0].textContent.replace(/\s/,"")) : null;
 										
 										streamListData_Map.get("list").set(streamId, {"streamCurrentViewers": streamCurrentViewers});
 									}

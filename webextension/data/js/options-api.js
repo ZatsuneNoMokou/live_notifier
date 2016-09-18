@@ -23,7 +23,9 @@ function translateNodes_title(){
 				node.dataset.placement = "auto";
 			}
 			node.title = _(node.dataset.translateTitle);
-			$(node).tooltip();
+			$(node).tooltip({
+				"trigger": "hover"
+			});
 			delete node.dataset.translateTitle;
 		}
 	}

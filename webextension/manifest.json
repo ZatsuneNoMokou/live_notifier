@@ -11,13 +11,13 @@
 	"short_name": "LiveNotifierDev",
 	"description": "__MSG_extShortDesc__",
 	"author": "ZatsuneNoMokou",
-	"version": "8.8.3",
+	"version": "8.8.4",
 	"icons": {
 		"96": "/icon_96.png",
 		"128": "/icon_128.png"
 	},
 	"background": {
-		"scripts": [ "/data/js/loadJS.js", "/data/js/options-data.js", "/data/js/options-api.js", "/data/js/voiceAPI.js", "/data/js/lib/xml2jsobj.js", "index.js" ]
+		"scripts": [ "/data/js/loadJS.js", "/data/js/options-data.js", "/data/js/options-api.js", "/data/js/voiceAPI.js", "/data/js/lib/xml2jsobj.js", "/data/js/lib/jquery-3.1.0.min.js", "index.js" ]
 	},
 	"browser_action": {
 		"browser_style": false,
