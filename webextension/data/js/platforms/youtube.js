@@ -42,9 +42,7 @@ let youtube = {
 						case "span":
 							let content = {};
 							
-							let subItemProps = $(node).find("[itemprop]");
-							// let subNodesDoc = parser.parseFromString(node.innerHTML, "text/html");
-							// let subItemProps = subNodesDoc.querySelectorAll("[itemprop]");
+							let subItemProps = node.querySelectorAll("[itemprop]");
 							
 							for(let subNode of subItemProps){
 								let subNodeId = subNode.getAttribute("itemprop");
@@ -185,7 +183,6 @@ let youtube = {
 						"contentType": "document",
 						"Request_documentParseToJSON": function(xhrRequest){
 							let dataDocument = xhrRequest.response;
-							//let parser = new DOMParser();
 							
 							let streamList_nodes = dataDocument.querySelectorAll("#channels-browse-content-grid li.channels-content-item");
 							let streamListData_Map = new Map();
@@ -194,22 +191,21 @@ let youtube = {
 							for(let node of streamList_nodes){
 								let currentChannelId = dataDocument.querySelector("meta[itemprop=channelId]").getAttribute("content");
 								
-								//let subNodeDoc = parser.parseFromString(node.innerHTML, "text/html");
-								if($(node).find(".video-time").length == 0){
-									let streamId_node = $(node).find("[data-context-item-id]");
-									let ownerId = $(node).find("[data-ytid]");
+								if(node.querySelector(".video-time") == null){
+									let streamId_node = node.querySelector("[data-context-item-id]");
+									let ownerId = node.querySelector("[data-ytid]");
 									
-									if((ownerId.length > 0 && ownerId[0].dataset.ytid == currentChannelId) && streamId_node.length > 0){
-										let streamId = streamId_node[0].dataset.contextItemId;
+									if((ownerId != null && ownerId.dataset.ytid == currentChannelId) && streamId_node != null){
+										let streamId = streamId_node.dataset.contextItemId;
 										
-										//let streamName_node = $(node).find(".yt-lockup-title");
-										//let streamName = (streamName_node.length > 0)? streamName_node[0].textContent : "";
+										//let streamName_node = node.querySelector(".yt-lockup-title");
+										//let streamName = (streamName_node != null)? streamName_node.textContent : "";
 										
-										let streamCurrentViewers_node = $(node).find(".yt-lockup-meta-info");
-										if($(streamCurrentViewers_node).find(".localized-date").length > 0){/**		Programmed events		**/
+										let streamCurrentViewers_node = node.querySelector(".yt-lockup-meta-info");
+										if(streamCurrentViewers_node.querySelector(".localized-date") != null){/**		Programmed events		**/
 											continue;
 										}
-										let streamCurrentViewers = (streamCurrentViewers_node.length > 0)? parseInt(streamCurrentViewers_node[0].textContent.replace(/\s/,"")) : null;
+										let streamCurrentViewers = (streamCurrentViewers_node != null)? parseInt(streamCurrentViewers_node.textContent.replace(/\s/,"")) : null;
 										
 										streamListData_Map.get("list").set(streamId, {"streamCurrentViewers": streamCurrentViewers});
 									}
