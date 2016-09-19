@@ -1,6 +1,6 @@
 # Firefox Web Extension Support
 * /!\ Missing/Not working well on Firefox:
-  * Clipboard ( [Bug 1197451](https://bugzilla.mozilla.org/show_bug.cgi?id=1197451) )
+  * Clipboard ( [Bug 1272869](https://bugzilla.mozilla.org/show_bug.cgi?id=1272869) ~~[Bug 1197451 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1197451)~~ )
   * Permission API ( [Bug 1197420](https://bugzilla.mozilla.org/show_bug.cgi?id=1197420) )
   * Button on notifications (Using notification without them alike Opera) ( [Bug 1190681](https://bugzilla.mozilla.org/show_bug.cgi?id=1190681) )
   * onInstalled Event / Addon update notification (Currently using a workaround) ( [Bug 1252871](https://bugzilla.mozilla.org/show_bug.cgi?id=1252871) )
