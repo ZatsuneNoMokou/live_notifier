@@ -793,16 +793,18 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	}
 	
 	if(online){
+		var statusLine = document.createElement("span");
+		statusLine.classList.add("streamStatus");
 		if(streamData.streamStatus != ""){
-			var statusLine = document.createElement("span");
-			statusLine.classList.add("streamStatus");
 			statusLine.textContent = streamData.streamStatus + ((streamData.streamGame.length > 0)? (" (" + streamData.streamGame + ")") : "");
-			//newLine.appendChild(statusLine);
-			contentContainer.appendChild(statusLine);
-			
-			newLine.dataset.streamStatus = streamData.streamStatus;
-			newLine.dataset.streamStatusLowercase = streamData.streamStatus.toLowerCase();
+		} else {
+			statusLine.textContent = "";
 		}
+		//newLine.appendChild(statusLine);
+		contentContainer.appendChild(statusLine);
+		
+		newLine.dataset.streamStatus = streamData.streamStatus;
+		newLine.dataset.streamStatusLowercase = streamData.streamStatus.toLowerCase();
 		
 		if(streamData.streamGame.length > 0){
 			newLine.dataset.streamGame = streamData.streamGame;

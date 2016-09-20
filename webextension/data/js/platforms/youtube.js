@@ -196,10 +196,13 @@ let youtube = {
 									let ownerId = node.querySelector("[data-ytid]");
 									
 									if((ownerId != null && ownerId.dataset.ytid == currentChannelId) && streamId_node != null){
+										let urlReg = /(?:http|https):\/\/.*/i;
+										
 										let streamId = streamId_node.dataset.contextItemId;
 										
-										//let streamName_node = node.querySelector(".yt-lockup-title");
-										//let streamName = (streamName_node != null)? streamName_node.textContent : "";
+										let streamName_node = node.querySelector(".yt-lockup-title a");
+										let streamName = (streamName_node != null)? streamName_node.textContent : "";
+										let streamUrl = (urlReg.test(streamName_node.href))? streamName_node.href : "";
 										
 										let streamCurrentViewers_node = node.querySelector(".yt-lockup-meta-info");
 										if(streamCurrentViewers_node.querySelector(".localized-date") != null){/**		Programmed events		**/
@@ -207,7 +210,15 @@ let youtube = {
 										}
 										let streamCurrentViewers = (streamCurrentViewers_node != null)? parseInt(streamCurrentViewers_node.textContent.replace(/\s/,"")) : null;
 										
-										streamListData_Map.get("list").set(streamId, {"streamCurrentViewers": streamCurrentViewers});
+										let videoThumb_node = node.querySelector(".video-thumb img");
+										let videoThumbUrl = videoThumb_node.src;
+										
+										streamListData_Map.get("list").set(streamId, {
+											"streamName": streamName,
+											"streamUrl": streamUrl,
+											"streamOwnerLogo": videoThumbUrl,
+											"streamCurrentViewers": streamCurrentViewers
+										});
 									}
 								}
 							}
@@ -327,7 +338,7 @@ let youtube = {
 		function(id, contentId, data, currentLiveStatus, currentChannelInfo){
 			let streamData = currentLiveStatus;
 			
-			if(data.hasOwnProperty("channelId")){
+			/*if(data.hasOwnProperty("channelId")){
 				if(typeof data.name == "string" && data.url != ""){
 					streamData.streamName = data.name;
 				}
@@ -353,10 +364,10 @@ let youtube = {
 					streamData.liveStatus.API_Status = false;
 				}
 				return streamData;
-			} else if(data.hasOwnProperty("items") == true && typeof data.items.length == "number" && data.items.length == 1){
+			} else */ if(data.hasOwnProperty("items") == true && typeof data.items.length == "number" && data.items.length == 1){
 				streamData.streamURL = "https://www.youtube.com/watch?v=" + contentId;
 				
-				data = data.items[0]
+				data = data.items[0];
 				snippetData = data.snippet;
 				
 				if(typeof snippetData.title == "string" && snippetData.title != ""){
@@ -392,6 +403,18 @@ let youtube = {
 				
 				streamData.liveStatus.API_Status = true;
 				return streamData;
+			} else if(data.hasOwnProperty("streamOwnerLogo")){
+				if(currentChannelInfo.streamName != ""){
+					streamData.streamName = currentChannelInfo.streamName;
+					streamData.streamStatus = data.streamName;
+				} else {
+					streamData.streamName = data.streamName;
+				}
+				streamData.streamUrl = data.streamUrl;
+				streamData.streamOwnerLogo = data.streamOwnerLogo;
+				streamData.streamCurrentViewers = data.streamCurrentViewers;
+				streamData.liveStatus.API_Status = true;
+				return streamData;
 			} else {
 				return null;
 			}
@@ -408,6 +431,7 @@ let youtube = {
 				for(let contentId in list){
 					obj.streamList.set(contentId, list[contentId]);
 				}
+				obj.primaryRequest = false;
 				
 				return obj;
 			} else if(data.hasOwnProperty('items') == false){

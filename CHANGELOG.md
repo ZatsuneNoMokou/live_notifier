@@ -8,6 +8,10 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.8.7
+* Fix: Online streams if no status
+* Fix: Youtube support retrieve all informations from the same request as the stream list 
+
 # 8.8.6
 * Fix: Better way to get Youtube informations, to avoid jQuery
 
