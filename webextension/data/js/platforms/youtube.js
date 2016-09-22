@@ -202,8 +202,7 @@ let youtube = {
 										
 										let streamName_node = node.querySelector(".yt-lockup-title a");
 										let streamName = (streamName_node != null)? streamName_node.textContent : "";
-										let streamUrl = (urlReg.test(streamName_node.href))? streamName_node.href : "";
-										
+										let streamURL = (urlReg.test(streamName_node.href))? streamName_node.href : "";
 										let streamCurrentViewers_node = node.querySelector(".yt-lockup-meta-info");
 										if(streamCurrentViewers_node.querySelector(".localized-date") != null){/**		Programmed events		**/
 											continue;
@@ -215,7 +214,7 @@ let youtube = {
 										
 										streamListData_Map.get("list").set(streamId, {
 											"streamName": streamName,
-											"streamUrl": streamUrl,
+											"streamURL": streamURL,
 											"streamOwnerLogo": videoThumbUrl,
 											"streamCurrentViewers": streamCurrentViewers
 										});
@@ -410,7 +409,7 @@ let youtube = {
 				} else {
 					streamData.streamName = data.streamName;
 				}
-				streamData.streamUrl = data.streamUrl;
+				streamData.streamURL = (typeof data.streamURL == "string")? data.streamURL : "";
 				streamData.streamOwnerLogo = data.streamOwnerLogo;
 				streamData.streamCurrentViewers = data.streamCurrentViewers;
 				streamData.liveStatus.API_Status = true;

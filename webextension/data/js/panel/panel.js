@@ -194,6 +194,9 @@ function searchContainer_Toggle(){
 	searchInputContainer.classList.toggle("hide");
 	searchInput.value = "";
 	searchInput_onInput();
+	if(!searchInput.classList.contains("hide")){
+		searchInput.focus();
+	}
 	
 	scrollbar_update("streamList");
 }

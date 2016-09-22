@@ -1157,6 +1157,12 @@ function doStreamNotif(website, id, contentId, streamSetting){
 	let streamList = (new streamListFromSetting(website)).mapData;
 	let streamData = liveStatus.get(website).get(id).get(contentId);
 	
+	if(website == "youtube"){
+		console.dir(streamData)
+	}
+	
+	let channelData = (channelInfos.has(website) && channelInfos.get(website).has(id))? channelInfos.get(website).get(id) : null;
+	
 	let online = streamData.liveStatus.API_Status;
 	
 	let streamName = streamData.streamName;
@@ -1182,8 +1188,9 @@ function doStreamNotif(website, id, contentId, streamSetting){
 			}
 			streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
 			
-			if(typeof speechSynthesis == "object" && ((typeof streamList.get(id).notifyVocalOnline == "boolean")? streamList.get(id).notifyVocalOnline : getPreference("notify_vocal_online")) == true){
+			if(typeof speechSynthesis == "object" && (channelData == null || channelData.liveStatus.notifiedStatus_Vocal == false) && ((typeof streamList.get(id).notifyVocalOnline == "boolean")? streamList.get(id).notifyVocalOnline : getPreference("notify_vocal_online")) == true){
 				voiceReadMessage(_("language"), `${(typeof streamList.get(id).vocalStreamName == "string")? streamList.get(id).vocalStreamName : streamName} ${_("is_online")}`);
+				channelData.liveStatus.notifiedStatus_Vocal = isStreamOnline_filtered;
 			}
 		}
 	} else {
@@ -1197,8 +1204,9 @@ function doStreamNotif(website, id, contentId, streamSetting){
 			}
 			streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
 			
-			if(typeof speechSynthesis == "object" && ((typeof streamList.get(id).notifyVocalOffline == "boolean")? streamList.get(id).notifyVocalOffline : getPreference("notify_vocal_offline")) == true){
+			if(typeof speechSynthesis == "object" && (channelData == null || channelData.liveStatus.notifiedStatus_Vocal) && ((typeof streamList.get(id).notifyVocalOffline == "boolean")? streamList.get(id).notifyVocalOffline : getPreference("notify_vocal_offline")) == true){
 				voiceReadMessage(_("language"), `${(typeof streamList.get(id).vocalStreamName == "string")? streamList.get(id).vocalStreamName : streamName} ${_("is_offline")}`);
+				channelData.liveStatus.notifiedStatus_Vocal = isStreamOnline_filtered;
 			}
 		}
 	}
@@ -1634,7 +1642,7 @@ function processChannelList(id, website, streamSetting, response, nextPageToken)
 		let data = response.json;
 		
 		if(!channelInfos.get(website).has(id)){
-			let defaultChannelInfos = channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notificationStatus": false, "lastCheckStatus": "", "liveList": new Map()}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+			let defaultChannelInfos = channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": "", "liveList": new Map()}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
 		}
 		
 		let responseValidity = checkResponseValidity(website, response);
@@ -1773,7 +1781,7 @@ function getChannelInfo(website, id){
 		let channelInfos_API = websites.get(website).API_channelInfos(id);
 		
 		if(!channelInfos.get(website).has(id)){
-			let defaultChannelInfos = channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+			let defaultChannelInfos = channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) == true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
 		}
 		if(websites.get(website).hasOwnProperty("API_channelInfos") == true){
 			let getChannelInfo_RequestOptions = {
