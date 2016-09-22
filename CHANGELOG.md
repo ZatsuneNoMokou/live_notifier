@@ -8,6 +8,11 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.8.8
+* Fix: Gives focus to input when enabling stream search in the panel
+* Fix: Avoid duplicated vocal notifications on channels that have several streams
+* Fix: Youtube stream URL retrieving variable mispelled
+
 # 8.8.7
 * Fix: Online streams if no status
 * Fix: Youtube support retrieve all informations from the same request as the stream list 
