@@ -200,13 +200,17 @@ let youtube = {
 										
 										let streamId = streamId_node.dataset.contextItemId;
 										
+										if(node.querySelector(".yt-badge-live") == null){
+											continue;
+										}
+										
 										let streamName_node = node.querySelector(".yt-lockup-title a");
 										let streamName = (streamName_node != null)? streamName_node.textContent : "";
 										let streamURL = (urlReg.test(streamName_node.href))? streamName_node.href : "";
 										let streamCurrentViewers_node = node.querySelector(".yt-lockup-meta-info");
-										if(streamCurrentViewers_node.querySelector(".localized-date") != null){/**		Programmed events		**/
-											continue;
-										}
+										//if(streamCurrentViewers_node.querySelector(".localized-date") != null){/**		Programmed events		**/
+										//	continue;
+										//}
 										let streamCurrentViewers = (streamCurrentViewers_node != null)? parseInt(streamCurrentViewers_node.textContent.replace(/\s/,"")) : null;
 										
 										let videoThumb_node = node.querySelector(".video-thumb img");

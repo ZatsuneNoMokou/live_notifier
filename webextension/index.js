@@ -1157,10 +1157,6 @@ function doStreamNotif(website, id, contentId, streamSetting){
 	let streamList = (new streamListFromSetting(website)).mapData;
 	let streamData = liveStatus.get(website).get(id).get(contentId);
 	
-	if(website == "youtube"){
-		console.dir(streamData)
-	}
-	
 	let channelData = (channelInfos.has(website) && channelInfos.get(website).has(id))? channelInfos.get(website).get(id) : null;
 	
 	let online = streamData.liveStatus.API_Status;
