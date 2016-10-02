@@ -80,7 +80,7 @@ let youtube = {
 		},
 	"API_addStream":
 		function(source_website, id){
-			let apiKey = getPreference("youtube_api_key"),
+			let apiKey = getPreference("youtube_api_key").replace(/\s/,""),
 				referrer = getPreference("youtube_api_referrer"),
 				youtube_patreon_password = getPreference("youtube_patreon_password").replace(/\s/,"");
 			
@@ -105,7 +105,7 @@ let youtube = {
 		},
 	"API":
 		function(id, nextPageToken){
-			let apiKey = getPreference("youtube_api_key"),
+			let apiKey = getPreference("youtube_api_key").replace(/\s/,""),
 				referrer = getPreference("youtube_api_referrer"),
 				youtube_patreon_password = getPreference("youtube_patreon_password").replace(/\s/,"");
 			
@@ -245,7 +245,7 @@ let youtube = {
 		},
 	"API_channelInfos":
 		function(id){
-			let apiKey = getPreference("youtube_api_key"),
+			let apiKey = getPreference("youtube_api_key").replace(/\s/,""),
 				referrer = getPreference("youtube_api_referrer"),
 				youtube_patreon_password = getPreference("youtube_patreon_password").replace(/\s/,"");
 			

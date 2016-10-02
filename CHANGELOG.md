@@ -8,6 +8,9 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 8.8.10
+* Fix: Ignore spaces from Youtube API Keys
+
 # 8.8.9
 * Fix: Better filter for Youtube programmed events
 * Fix: Forgotten test/debug console.dir()

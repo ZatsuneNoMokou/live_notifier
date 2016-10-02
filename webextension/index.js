@@ -24,7 +24,7 @@ function consoleMsg(level,str){
 	let msg = (typeof str.toString == "function")? str.toString() : str;
 	if(getPreference("showAdvanced") && getPreference("showExperimented")){
 		if(typeof console[level] == "function"){
-			console[level](str)
+			console[level](str);
 		} else {
 			consoleMsg("log", str);
 		}
