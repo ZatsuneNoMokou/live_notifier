@@ -289,8 +289,24 @@ let youtube = {
 	"importAPI": function(id){
 		let obj = {
 			"url": "https://www.youtube.com/subscription_manager?action_takeout=1",
-			"overrideMimeType": "application/xml; charset=utf-8",
-			"customJSONParse": "xmlToJSON"
+			//"overrideMimeType": "application/xml; charset=utf-8",
+			"overrideMimeType": "text/html; charset=utf-8",
+			"contentType": "document",
+			"Request_documentParseToJSON": function(xhrRequest){
+				let userChannelList = {"list": null};
+				let getId = /https\:\/\/www\.youtube\.com\/feeds\/videos\.xml\?channel_id\=([^&]+)/i;
+				let dataDocument = xhrRequest.response;
+				if(dataDocument.querySelector("outline") != null){
+					userChannelList.list = [];
+					let userChannelList_nodes = xhrRequest.response.querySelectorAll("outline[xmlUrl]");
+					for(let node of userChannelList_nodes){
+						if(getId.test(node.getAttribute("xmlurl"))){
+							userChannelList.list.push(`channel::${getId.exec(node.getAttribute("xmlurl"))[1]}`);
+						}
+					}
+				}
+				return userChannelList;
+			}
 		}
 		return obj;
 	},
@@ -514,15 +530,8 @@ let youtube = {
 			let obj = {
 				list: null
 			}
-			
-			if(data != null && data.hasOwnProperty("outline") && data.outline.hasOwnProperty("outline") && Array.isArray(data.outline.outline)){
-				obj.list = [];
-				let getId = /https\:\/\/www\.youtube\.com\/feeds\/videos\.xml\?channel_id\=([^&]+)/i;
-				data.outline.outline.forEach((item) => {
-					if(getId.test(item.xmlUrl)){
-						obj.list.push(`channel::${getId.exec(item.xmlUrl)[1]}`);
-					}
-				});
+			if(data != null && data.list != null && Array.isArray(data.list)){
+				obj.list = data.list;
 			}
 			return obj;
 		}

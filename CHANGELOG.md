@@ -1,12 +1,16 @@
 # Firefox Web Extension Support
 * /!\ Missing/Not working well on Firefox:
-  * Clipboard ( [Bug 1272869](https://bugzilla.mozilla.org/show_bug.cgi?id=1272869) ~~[Bug 1197451 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1197451)~~ )
+  * Clipboard (Currently using a workaround, but [Bug 1272869](https://bugzilla.mozilla.org/show_bug.cgi?id=1272869) ~~[Bug 1197451 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1197451)~~ )
   * Permission API ( [Bug 1197420](https://bugzilla.mozilla.org/show_bug.cgi?id=1197420) )
   * Button on notifications (Using notification without them alike Opera) ( [Bug 1190681](https://bugzilla.mozilla.org/show_bug.cgi?id=1190681) )
   * onInstalled Event / Addon update notification (Currently using a workaround) ( [Bug 1252871](https://bugzilla.mozilla.org/show_bug.cgi?id=1252871) )
   * Importing from file using the panel with Firefox Web Extensions ( [Bug 1292701](https://bugzilla.mozilla.org/show_bug.cgi?id=1292701) )
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
+
+# 8.9.0
+* +: Youtube importation does not use xml to object parse anymore
+* Fix: Clipboard function moved to panel, mainly as workaround for Firefox
 
 # 8.8.10
 * Fix: Ignore spaces from Youtube API Keys

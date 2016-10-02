@@ -30,6 +30,8 @@ function consoleMsg(level,str){
 		}
 	}
 }
+appGlobal["consoleMsg"] = consoleMsg;
+
 function consoleDir(obj,str){
 	if(getPreference("showAdvanced") && getPreference("showExperimented")){
 		if(typeof str == "string" || (typeof str != "undefined" && typeof str.toString == "function")){
@@ -42,6 +44,7 @@ function consoleDir(obj,str){
 		}
 	}
 }
+appGlobal["consoleDir"] = consoleDir;
 
 class Params extends Map {
 	encode() {
@@ -824,57 +827,6 @@ function handleChange() {
 	updatePanelData();
 }
 
-function copyToClipboard(string){
-	let copy = function(string){
-		let copy_form;
-		if(document.querySelector("#copy_form") === null){
-			copy_form = document.createElement("textarea");
-			copy_form.id = "copy_form";
-			copy_form.textContent = string;
-			document.querySelector("body").appendChild(copy_form);
-		} else {
-			copy_form = document.querySelector("#copy_form");
-		}
-		
-		copy_form.focus();
-		copy_form.select();
-		//document.execCommand('SelectAll');
-		let clipboard_success = document.execCommand('Copy');
-		if(clipboard_success){
-			doNotif("Live notifier", _("clipboard_success"));
-			consoleMsg("info", `Copied: ${string}`)
-		} else {
-			doNotif("Live notifier", _("clipboard_failed"));
-		}
-		
-		copy_form.parentNode.removeChild(copy_form);
-	}
-	
-	if(typeof chrome.permissions != "undefined"){
-		chrome.permissions.contains({
-			permissions: ['clipboardWrite'],
-		}, function(result) {
-			if(result){
-				copy(string);
-			} else {
-				consoleMsg("log", "Clipboard writing permission not granted");
-				chrome.permissions.request({
-					permissions: ['clipboardWrite'],
-				}, function(result) {
-					if(result){
-						copy(string);
-					} else {
-						console.error("The extension doesn't have the permissions.");
-					}
-				});
-			}
-		});
-	} else {
-		copy(string);
-	}
-}
-appGlobal["copyToClipboard"] = copyToClipboard;
-
 function openTabIfNotExist(url){
 	consoleMsg("log", url);
 	chrome.tabs.query({}, function(tabs) {
@@ -895,6 +847,7 @@ function openTabIfNotExist(url){
 function doNotif(title, message, imgurl) {
 	doActionNotif(title, message, {}, imgurl);
 }
+appGlobal["doNotif"] = doNotif;
 
 function doNotifUrl(title,message,url,imgurl){
 	doActionNotif(title, message, new notifAction("openUrl", url), imgurl);
@@ -1920,6 +1873,9 @@ function importStreams(website, id, url, pageNumber){
 		
 		if(current_API.hasOwnProperty("headers") == true){
 			importStreams_RequestOptions.headers = current_API.headers;
+		}
+		if(current_API.hasOwnProperty("contentType") == true){
+			importStreams_RequestOptions.contentType = current_API.contentType;
 		}
 		if(current_API.hasOwnProperty("Request_documentParseToJSON") == true){
 			importStreams_RequestOptions.Request_documentParseToJSON = current_API.Request_documentParseToJSON;

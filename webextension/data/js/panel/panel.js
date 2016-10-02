@@ -25,7 +25,55 @@ let options_default_sync = backgroundPage.optionsData.options_default_sync;
 
 let appGlobal = backgroundPage.appGlobal;
 
-let copyToClipboard = appGlobal.copyToClipboard;
+function copyToClipboard(string){
+	let copy = function(string){
+		if(document.querySelector("#copy_form") != null){
+			let node = document.querySelector("#copy_form");
+			node.parentNode.removeChild(node);
+		}
+		let copy_form = document.createElement("textarea");
+		copy_form.id = "copy_form";
+		copy_form.textContent = string;
+		copy_form.class = "hide";
+		document.querySelector("body").appendChild(copy_form);
+		
+		copy_form.focus();
+		copy_form.select();
+		let clipboard_success = document.execCommand('Copy');
+		if(clipboard_success){
+			appGlobal.doNotif("Live notifier", _("clipboard_success"));
+			appGlobal.consoleMsg("info", `Copied: ${string}`);
+		} else {
+			appGlobal.doNotif("Live notifier", _("clipboard_failed"));
+		}
+		
+		copy_form.parentNode.removeChild(copy_form);
+	}
+	
+	if(typeof chrome.permissions != "undefined"){
+		chrome.permissions.contains({
+			permissions: ['clipboardWrite'],
+		}, function(result) {
+			if(result){
+				copy(string);
+			} else {
+				consoleMsg("log", "Clipboard writing permission not granted");
+				chrome.permissions.request({
+					permissions: ['clipboardWrite'],
+				}, function(result) {
+					if(result){
+						copy(string);
+					} else {
+						console.error("The extension doesn't have the permissions.");
+					}
+				});
+			}
+		});
+	} else {
+		copy(string);
+	}
+}
+
 
 let streamListFromSetting = appGlobal.streamListFromSetting;
 let websites = appGlobal.websites;
