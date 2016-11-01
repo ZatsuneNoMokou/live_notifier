@@ -318,6 +318,12 @@
 	"check_delay_description": {
 		"message": "Delay between verifications, in minute"
 	},
+	"check_limit_title": {
+		"message": "Streams checked limit (0: no limit)"
+	},
+	"check_limit_description": {
+		"message": "Number of stream checked simultaneously"
+	},
 	"timeout_delay_title": {
 		"message": "Timeout delay of requests"
 	},

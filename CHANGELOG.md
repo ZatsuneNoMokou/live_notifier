@@ -8,6 +8,9 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 9.0.0
+* +: Streams are now checked with a queue system limiting the number of requests running simultaneously
+
 # 8.9.0
 * +: Youtube importation does not use xml to object parse anymore
 * Fix: Clipboard function moved to panel, mainly as workaround for Firefox

@@ -1348,7 +1348,7 @@ function timingEnd(id){
 			"timing": `${(extracted.d != 0)? `${extracted.d}d` : ""}${(extracted.h != 0)? `${extracted.h}h` : ""}${(extracted.m != 0)? `${extracted.m}m` : ""}${(extracted.s != 0)? `${extracted.s}s` : ""}${extracted.ms}ms`
 		}
 	} else {
-		throw `${id} not started`
+		throw `${id} not started`;
 	}
 }
 function getBase64Picture(pictureNode){
@@ -1395,6 +1395,8 @@ function checkLives(idArray){
 			consoleDir(mapToObj(streamListSetting.mapDataAll), "[Live Notifier] Checking lives...");
 		}
 		
+		let checkQueue = new Queue(getPreference("check_limit"));
+		
 		websites.forEach((websiteAPI, website, array) => {
 			if(listToCheck.has(website)){
 				listToCheck.get(website).forEach((streamList, id, array) => {
@@ -1402,31 +1404,43 @@ function checkLives(idArray){
 						//consoleMsg("info", `Ignoring ${id}`);
 						return;
 					}
-					let onStreamCheckEnd = function(promiseResult){
-						streamsTimings.set(`${website}::${id}`, timingEnd(`${website}::${id}`).timing);
-						if((typeof promiseResult == "string" && promiseResult.indexOf("StreamChecked") != -1) || (typeof promiseResult == "object" && JSON.stringify(promiseResult).indexOf("StreamChecked") != -1)){
-							liveStatus.get(website).get(id).forEach((value, contentId, array) => {
-								if((typeof promiseResult == "string" && promiseResult.indexOf("StreamChecked") != -1) || (typeof promiseResult == "object" && typeof promiseResult[contentId] == "string" && promiseResult[contentId].indexOf("StreamChecked") != -1)){
-									doStreamNotif(website, id, contentId, streamList);
-								}
-							})
-						}
-						if(channelInfos.has(website) && channelInfos.get(website).has(id)){
-							channelListEnd(website, id, streamListSetting.mapDataAll.get(website).get(id));
-						}
-						setIcon();
-					}
-					timing(`${website}::${id}`);
 					
-					promises.set(`${website}/${id}`, getPrimary(id, "", website, streamList));
-					promises.get(`${website}/${id}`)
-						.then(onStreamCheckEnd)
-						.catch(onStreamCheckEnd)
+					checkQueue.enqueue(getPrimary, `${website}::${id}`, id, "", website, streamList);
 				})
 			}
-		})
+		});
 		
-		let onPromiseEnd = function(result){
+		let onStreamCheckBegin = function(queueId, args){
+			let id = args[0],
+				contentId = args[1],
+				website = args[2],
+				streamSetting = args[3];
+			
+			timing(`${website}::${id}`);
+		}
+		let onStreamCheckEnd = function(queueId, promiseResult, args){
+			let id = args[0],
+				contentId = args[1],
+				website = args[2],
+				streamSetting = args[3];
+			
+			let streamList = listToCheck.get(website).get(id);
+			
+			streamsTimings.set(`${website}::${id}`, timingEnd(`${website}::${id}`).timing);
+			if((typeof promiseResult == "string" && promiseResult.indexOf("StreamChecked") != -1) || (typeof promiseResult == "object" && JSON.stringify(promiseResult).indexOf("StreamChecked") != -1)){
+				liveStatus.get(website).get(id).forEach((value, contentId, array) => {
+					if((typeof promiseResult == "string" && promiseResult.indexOf("StreamChecked") != -1) || (typeof promiseResult == "object" && typeof promiseResult[contentId] == "string" && promiseResult[contentId].indexOf("StreamChecked") != -1)){
+						doStreamNotif(website, id, contentId, streamList);
+					}
+				})
+			}
+			if(channelInfos.has(website) && channelInfos.get(website).has(id)){
+				channelListEnd(website, id, streamListSetting.mapDataAll.get(website).get(id));
+			}
+			setIcon();
+		}
+		
+		let onCheckEnd = function(result){
 			if(getPreference("showAdvanced") && getPreference("showExperimented")){
 				console.group();
 				consoleMsg("info", `[Live notifier] Live check end`);
@@ -1456,14 +1470,14 @@ function checkLives(idArray){
 				checkMissing();
 			}
 		}
-
-		if(promises.size == 0){
-			setIcon();
-		}
-		PromiseWaitAll(promises)
-			.then(onPromiseEnd)
-			.catch(onPromiseEnd)
 		
+		if(checkQueue.queue.size == 0){
+			setIcon();
+		} else {
+			checkQueue.run(onStreamCheckBegin, onStreamCheckEnd)
+				.then(onCheckEnd)
+				.catch(onCheckEnd)
+		}
 		
 		if(!(typeof idArray != "undefined" && idArray instanceof Map)){ // Only reset interval if it's a "full" check
 			clearInterval(interval);

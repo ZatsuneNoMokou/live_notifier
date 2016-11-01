@@ -108,7 +108,17 @@ optionsData.options = {
 		"type": "integer",
 		"value": 5,
 		"minValue": 1,
+		"group": "checking",
 		"prefLevel": "advanced"
+	},
+	"check_limit": {
+		"title": "Streams checked limit (0: no limit)",
+		"description": "Number of stream checked simultaneously",
+		"type": "integer",
+		"value": 4,
+		"minValue": 0,
+		"group": "checking",
+		"prefLevel": "experimented"
 	},
 	"timeout_delay": {
 		"title": "Streams timeout delay",
@@ -118,6 +128,7 @@ optionsData.options = {
 		"minValue": 10,
 		"maxValue": 30,
 		"rangeInput": true,
+		"group": "checking",
 		"prefLevel": "experimented"
 	},
 	/*			Notifications			*/

@@ -318,6 +318,12 @@
 	"check_delay_description": {
 		"message": "Délai entre chaque vérification, en minute"
 	},
+	"check_limit_title": {
+		"message": "Limite de vérification de streams  (0: aucune limite)"
+	},
+	"check_limit_description": {
+		"message": "Nombre de stream(s) vérifiés simultanément"
+	},
 	"timeout_delay_title": {
 		"message": "Délai de timeout des requêtes"
 	},

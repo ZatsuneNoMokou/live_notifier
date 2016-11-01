@@ -2,7 +2,7 @@
 	"applications": {
 		"gecko": {
 			"id": "livenotifier_dev@zatsunenomokou.eu",
-			"strict_min_version": "48.0",
+			"strict_min_version": "49.0",
 			"update_url": "https://gitlab.com/ZatsuneNoMokou/live_notifier/raw/master/dist/live_notifier_dev.update.json"
 		}
 	},
@@ -11,13 +11,13 @@
 	"short_name": "LiveNotifierDev",
 	"description": "__MSG_extShortDesc__",
 	"author": "ZatsuneNoMokou",
-	"version": "8.9.0",
+	"version": "9.0.0",
 	"icons": {
 		"96": "/icon_96.png",
 		"128": "/icon_128.png"
 	},
 	"background": {
-		"scripts": [ "/data/js/loadJS.js", "/data/js/options-data.js", "/data/js/options-api.js", "/data/js/voiceAPI.js", "/data/js/lib/xml2jsobj.js", "index.js" ]
+		"scripts": [ "/data/js/loadJS.js", "/data/js/options-data.js", "/data/js/options-api.js", "/data/js/voiceAPI.js", "/data/js/lib/xml2jsobj.js", "/data/js/queue.js", "index.js" ]
 	},
 	"browser_action": {
 		"browser_style": false,
