@@ -61,7 +61,7 @@ echo "Remplacement des éléments de manifest.json..."
 cd tmp
 sed		-e 's/\"id\"\: \"livenotifier_dev\@zatsunenomokou\.eu\"/\"id\"\: \"livenotifier\@zatsunenomokou\.eu\"/g' \
 		-e 's/\"name\"\: \"Live Notifier (Dev)\"/\"name\"\: \"Live Notifier\"/g' \
-		-e 's/\"short_name\"\: \"LiveNotifierDev\"/\"short_name\"\: \"LiveNotifierDev\"/g' \
+		-e 's/\"short_name\"\: \"LiveNotifierDev\"/\"short_name\"\: \"LiveNotifier\"/g' \
 		-e 's/\"update_url\"\: \".*\",//gi' \
 		-e '/^\s*$/d' \
 		manifest.json > manifest_new.json

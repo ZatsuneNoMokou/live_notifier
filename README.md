@@ -1,5 +1,5 @@
 # Live notifier
-Web Extension (and previously Firefox addon) to be notified of streams from Beam, Dailymotion, Hitbox, Twitch, and Youtube  (Webextension pages available when the versions will be released)
+Web Extension to be notified of streams from Beam, Dailymotion, Hitbox, Twitch, and Youtube.
 
 More information on the Mozilla addon page https://addons.mozilla.org/fr/firefox/addon/live-notifier/
 

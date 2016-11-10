@@ -8,6 +8,9 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 9.0.2-9.0.1
+* Fix: Check "end" detection when no stream is checked
+
 # 9.0.0
 * +: Streams are now checked with a queue system limiting the number of requests running simultaneously
 

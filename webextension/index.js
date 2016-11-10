@@ -1473,6 +1473,7 @@ function checkLives(idArray){
 		
 		if(checkQueue.queue.size == 0){
 			setIcon();
+			appGlobal["checkingLivesFinished"] = true;
 		} else {
 			checkQueue.run(onStreamCheckBegin, onStreamCheckEnd)
 				.then(onCheckEnd)
