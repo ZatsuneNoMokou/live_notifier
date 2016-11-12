@@ -8,6 +8,10 @@
   * ContextMenu in Firefox 48, with addon reload
   * HTML title (tooltips) not showing (Currently using a workaround)
 
+# 9.0.3
+* Fix: Option page in some resolutions
+* Fix: Disable click on streams in the panel during "change" mode
+
 # 9.0.2-9.0.1
 * Fix: Check "end" detection when no stream is checked
 

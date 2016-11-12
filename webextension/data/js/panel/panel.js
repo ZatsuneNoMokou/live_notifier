@@ -977,7 +977,7 @@ function streamItemClick(){
 	let website = node.dataset.streamWebsite;
 	
 	let streamUrl = getStreamURL(website, id, contentId, true);
-	if(streamUrl != null && streamUrl != ""){
+	if(streamChangeMode == false && streamUrl != null && streamUrl != ""){
 		sendDataToMain("openTab", streamUrl);
 	}
 }
