@@ -5,7 +5,7 @@
   * Button on notifications (Using notification without them alike Opera) ( [Bug 1190681](https://bugzilla.mozilla.org/show_bug.cgi?id=1190681) )
   * onInstalled Event / Addon update notification (Currently using a workaround) ( [Bug 1252871](https://bugzilla.mozilla.org/show_bug.cgi?id=1252871) )
   * Importing from file using the panel with Firefox Web Extensions ( [Bug 1292701](https://bugzilla.mozilla.org/show_bug.cgi?id=1292701) )
-  * ContextMenu in Firefox 48, with addon reload
+  * ~~ContextMenu in Firefox 48, with addon reload~~ (Fixed in Firefox 50)
   * HTML title (tooltips) not showing (Currently using a workaround)
 
 # 9.0.3
