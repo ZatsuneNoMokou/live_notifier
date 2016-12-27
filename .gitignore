@@ -8,4 +8,5 @@ live_notifier-*.zip
 *.pem
 *.crx
 tmp/
+firefox/
 TODO.md
