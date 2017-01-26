@@ -5,6 +5,7 @@ html, body{
 	font-family: Ubuntu, Tahoma, sans-serif;
 }
 html{
+	min-height: 666px;
 	height: 100vh;
 }
 body{

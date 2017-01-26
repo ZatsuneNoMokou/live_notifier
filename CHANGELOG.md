@@ -9,7 +9,7 @@
   * HTML title (tooltips) not showing (Currently using a workaround)
   * Sync support ([Bug 1220494](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494) and [Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) )
 
-# 9.0.4
+# 9.0.5-9.0.4
 * Fix: Option page not showing on Firefox
 
 # 9.0.3
