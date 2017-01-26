@@ -55,18 +55,12 @@ if(typeof chrome.storage.sync == "object"){
 }
 
 
-let contentContainer = document.querySelector("#contentContainer");
+/*let contentContainer = document.querySelector("#contentContainer");
 $(contentContainer).perfectScrollbar({
 	theme: "slimScrollbar",
 	includePadding: true,
 	suppressScrollX: true
 });
-/*Ps.initialize(contentContainer, {
-	theme: "slimScrollbar",
-	includePadding: true,
-	suppressScrollX: true
-});*/
 window.onresize = function(){
 	$(contentContainer).perfectScrollbar('update');
-	/*Ps.update(contentContainer);*/
-}
+}*/
