@@ -1257,7 +1257,6 @@ function checkResponseValidity(website, response){
 			} else {
 				// Parse Error
 				consoleMsg("warn", "Unable to get stream state (response is empty or not valid JSON).");
-			console.dir(response);
 				return "parse_error";
 			}
 		}

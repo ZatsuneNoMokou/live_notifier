@@ -1,9 +1,14 @@
 html, body{
-	height:100%;
 	overflow:hidden;
 	margin-right:0px;
 	min-width:777px;
 	font-family: Ubuntu, Tahoma, sans-serif;
+}
+html{
+	height: 100vh;
+}
+body{
+	height: 100%;
 }
 #contentContainer{
 	height:100%;
