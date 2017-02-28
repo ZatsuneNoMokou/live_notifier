@@ -7,7 +7,7 @@
   * Importing from file using the panel with Firefox Web Extensions ( [Bug 1292701](https://bugzilla.mozilla.org/show_bug.cgi?id=1292701) )
   * ~~ContextMenu in Firefox 48, with addon reload~~ (Fixed in Firefox 50)
   * HTML title (tooltips) not showing (Currently using a workaround)
-  * Sync support ([Bug 1220494](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494) and [Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) )
+  * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
 
 # 9.0.6
 * Fix: Removed perfect-scrollbar in option page due to bugs (Firefox / Chrome) on the option page height
