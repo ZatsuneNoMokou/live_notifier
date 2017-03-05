@@ -28,6 +28,12 @@
 	"Cancel": {
 		"message": "Cancel"
 	},
+	"Yes": {
+		"message": "Yes"
+	},
+	"No": {
+		"message": "No"
+	},
 	"Ok": {
 		"message": "Ok"
 	},
@@ -94,6 +100,12 @@
 	},
 	"is_already_configured": {
 		"message": "is already configured."
+	},
+	"hidden_ignored_reactivate": {
+		"message": "is currently hidden / ignored, reactivate it?"
+	},
+	"hidden_ignored_reactivated": {
+		"message": "was hidden / ignored and has been reactivated"
 	},
 	"wasnt_configured_but_error_retrieving_data": {
 		"message": "wasn't configured, but an error occurred when retrieving data."

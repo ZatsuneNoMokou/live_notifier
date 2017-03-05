@@ -9,6 +9,10 @@
   * HTML title (tooltips) not showing (Currently using a workaround)
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
 
+# 9.1.0
+* +: Ability to reactivate stream already configured but hidden / ignored.
+* Fix: Potential error reading viewer number with YouTube
+
 # 9.0.6
 * Fix: Removed perfect-scrollbar in option page due to bugs (Firefox / Chrome) on the option page height
 

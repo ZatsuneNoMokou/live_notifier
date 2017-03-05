@@ -211,7 +211,7 @@ let youtube = {
 										//if(streamCurrentViewers_node.querySelector(".localized-date") != null){/**		Programmed events		**/
 										//	continue;
 										//}
-										let streamCurrentViewers = (streamCurrentViewers_node != null)? parseInt(streamCurrentViewers_node.textContent.replace(/\s/,"")) : null;
+										let streamCurrentViewers = (streamCurrentViewers_node != null)? parseInt(streamCurrentViewers_node.textContent.replace(/\s/,"").replace(/,/,"")) : null;
 										
 										let videoThumb_node = node.querySelector(".video-thumb img");
 										let videoThumbUrl = videoThumb_node.src;

@@ -610,7 +610,20 @@ function addStreamFromPanel(data){
 									}
 									
 									if(streamListSetting.streamExist(website, streamId) == true){
-										doNotif("Live notifier",`${display_id(streamId)} ${_("is_already_configured")}`);
+										const streamSettings = streamListSetting.mapDataAll.get(website).get(streamId);
+										if(streamSettings.hide == false && streamSettings.ignore == false){
+											doNotif("Live notifier",`${display_id(streamId)} ${_("is_already_configured")}`);
+										} else {
+											if(getPreference("confirm_addStreamFromPanel")){
+												let reactivateStreamNotifAction = new notifAction("reactivateStream", {id: streamId, website: website, url: ((type == "embed")? active_tab_url : "")});
+												doActionNotif(`Live notifier`, `${display_id(streamId)} ${_("hidden_ignored_reactivate")}`, reactivateStreamNotifAction);
+											} else {
+												streamSettings.hide = false;
+												streamSettings.ignore = false;
+												streamListSetting.update();
+												doNotif("Live notifier",`${display_id(streamId)} ${_("hidden_ignored_reactivated")}`);
+											}
+										}
 									} else {
 										if(getPreference("confirm_addStreamFromPanel")){
 											let addstreamNotifAction = new notifAction("addStream", {id: streamId, website: website, url: ((type == "embed")? active_tab_url : "")});
@@ -874,7 +887,9 @@ function doActionNotif(title, message, action, imgurl){
 		close = {title: _("Close"), iconUrl: "/data/images/ic_close_black_24px.svg"},
 		addItem = {title: _("Add"), iconUrl: "/data/images/ic_add_circle_black_24px.svg"},
 		deleteItem = {title: _("Delete"), iconUrl: "/data/images/ic_delete_black_24px.svg"},
-		cancel = {title: _("Cancel"), iconUrl: "/data/images/ic_cancel_black_24px.svg"};
+		cancel = {title: _("Cancel"), iconUrl: "/data/images/ic_cancel_black_24px.svg"},
+		yes = {title: _("Yes"), iconUrl: "/data/images/ic_add_circle_black_24px.svg"},
+		no = {title: _("No"), iconUrl: "/data/images/ic_cancel_black_24px.svg"};
 	
 	if(chromeAPI_button_availability == true){
 		// 2 buttons max per notification
@@ -890,10 +905,13 @@ function doActionNotif(title, message, action, imgurl){
 			case "deleteStream":
 				options.buttons = [deleteItem, cancel]
 				break;
+			case "reactivateStream":
+				options.buttons = [yes, no]
+				break;
 			default:
 				options.buttons = [close];
 		}
-	} else if(action.type == "addStream" || action.type == "deleteStream"){
+	} else if(action.type == "addStream" || action.type == "deleteStream" || action.type == "reactivateStream"){
 		options.title = `${options.title} (${_("click_to_confirm")})`;
 	}
 	
@@ -910,6 +928,10 @@ function doActionNotif(title, message, action, imgurl){
 			break;
 		case "deleteStream":
 			consoleMsg("info", `Notification (deleteStream): "${message}" (${action.data})`);
+			notification_id = JSON.stringify(action);
+			break;
+		case "reactivateStream":
+			consoleMsg("info", `Notification (reactivateStream): "${message}" (${action.data})`);
 			notification_id = JSON.stringify(action);
 			break;
 		default:
@@ -959,7 +981,7 @@ function doNotificationAction_Event(notificationId){
 			if(action.type == "openUrl"){
 				// Notification with openUrl action
 				openTabIfNotExist(action.data);
-			} else if(action.type == "addStream" || action.type == "deleteStream"){
+			} else if(action.type == "addStream" || action.type == "deleteStream" || action.type == "reactivateStream"){
 				let website = action.data.website;
 				let streamListSetting = new streamListFromSetting(website);
 				let id = action.data.id;
@@ -978,6 +1000,11 @@ function doNotificationAction_Event(notificationId){
 					streamListSetting.update();
 					// Update the panel for the deleted stream
 					refreshPanel(false);
+				} else if(action.type == "reactivateStream"){
+					const streamSettings = streamListSetting.mapData.get(id);
+					streamSettings.hide = false;
+					streamSettings.ignore = false;
+					streamListSetting.update();
 				}
 			} else {
 				// Nothing - Unknown action
