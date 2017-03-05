@@ -403,13 +403,13 @@
 		"message": "Shown when checked"
 	},
 	"confirm_addStreamFromPanel_title": {
-		"message": "Confirmation pour ajouter des streams"
+		"message": "Confirmation to add or reactivate streams"
 	},
 	"confirm_addStreamFromPanel_description": {
-		"message": "Show a notification to confirm when adding a stream of config (from panel)"
+		"message": "Show a notification to confirm when adding or reactivate a stream of config (from panel)"
 	},
 	"confirm_deleteStreamFromPanel_title": {
-		"message": "Confirmation pour supprimer des streams"
+		"message": "Confirmation to delete streams"
 	},
 	"confirm_deleteStreamFromPanel_description": {
 		"message": "Show a notification to confirm when deleting a stream of config (from panel)"

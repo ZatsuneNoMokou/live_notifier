@@ -403,10 +403,10 @@
 		"message": "Affiché quand coché"
 	},
 	"confirm_addStreamFromPanel_title": {
-		"message": "Confirmation pour ajouter des streams"
+		"message": "Confirmation pour ajouter et réactiver des streams"
 	},
 	"confirm_addStreamFromPanel_description": {
-		"message": "Affiche une notification pour confirmer lors d'un ajout de stream de configuration (depuis le panel)"
+		"message": "Affiche une notification pour confirmer lors d'un ajout ou la réactivation de stream de configuration (depuis le panel)"
 	},
 	"confirm_deleteStreamFromPanel_title": {
 		"message": "Confirmation pour supprimer des streams"

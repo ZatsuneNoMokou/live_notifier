@@ -9,6 +9,10 @@
   * HTML title (tooltips) not showing (Currently using a workaround)
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
 
+# 9.1.1
+* Fix: Localization
+* Fix: Changed descition of confirmation adding stream because the setting is used with confirmation too
+
 # 9.1.0
 * +: Ability to reactivate stream already configured but hidden / ignored.
 * Fix: Potential error reading viewer number with YouTube
