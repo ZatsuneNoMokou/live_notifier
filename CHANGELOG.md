@@ -11,7 +11,7 @@
 
 # 9.1.1
 * Fix: Localization
-* Fix: Changed descition of confirmation adding stream because the setting is used with confirmation too
+* Fix: Changed desciption of confirmation adding stream because the setting is used with confirmation too
 
 # 9.1.0
 * +: Ability to reactivate stream already configured but hidden / ignored.
