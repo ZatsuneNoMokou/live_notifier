@@ -2142,6 +2142,22 @@ function initAddon(){
 let previousVersion = "";
 let current_version = appGlobal["version"] = chrome.runtime.getManifest().version;
 
+function checkIfUpdated(details){
+	let getVersionNumbers =  /^(\d*)\.(\d*)\.(\d*)$/;
+	
+	if(typeof details.reason == "string"){
+		let installReason = details.reason;
+		consoleMsg("info", `Runtime onInstalled reason: ${installReason}`);
+		// Checking if updated
+		if(typeof chrome.runtime.onInstalled == "object" && installReason == "update"){
+			doNotif("Live notifier", _("Addon_have_been_updated", current_version));
+		}
+	}
+	if(typeof chrome.runtime.onInstalled.removeListener == "function"){
+		chrome.runtime.onInstalled.removeListener(checkIfUpdated);
+	}
+}
+
 //chrome.storage.local.get(optionsData.options_default,function(currentLocalStorage) {
 chrome.storage.local.get(null,function(currentLocalStorage) {
 	let currentPreferences = {};
@@ -2164,11 +2180,7 @@ chrome.storage.local.get(null,function(currentLocalStorage) {
 	appGlobal.currentPreferences = currentPreferences;
 	consoleDir(currentPreferences,"Current preferences in the local storage:");
 	
-	if(typeof chrome.runtime.onInstalled == "object" && typeof chrome.runtime.onInstalled.removeListener == "function"){
-		chrome.runtime.onInstalled.addListener(checkIfUpdated);
-	} else {
-		consoleMsg("warn", "chrome.runtime.onInstalled is not available, update detection have been dropped");
-	}
+	chrome.runtime.onInstalled.addListener(checkIfUpdated);
 	
 	loadJS(document, "/data/js/", ["backgroundTheme.js"]);
 	loadJS(document, "/data/js/platforms/", ["beam.js", "dailymotion.js", "hitbox.js", "twitch.js", "youtube.js"])
