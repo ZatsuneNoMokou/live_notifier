@@ -3,11 +3,14 @@
   * Clipboard (Currently using a workaround, but [Bug 1272869](https://bugzilla.mozilla.org/show_bug.cgi?id=1272869) ~~[Bug 1197451 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1197451)~~ )
   * Permission API ( [Bug 1197420](https://bugzilla.mozilla.org/show_bug.cgi?id=1197420) )
   * Button on notifications (Using notification without them alike Opera) ( [Bug 1190681](https://bugzilla.mozilla.org/show_bug.cgi?id=1190681) )
-  * ~~onInstalled Event / Addon update notification (Currently using a workaround) ( [Bug 1252871 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1252871) )~~ (Fixed on Firefox 52, cf [WebExtensions in Firefox 52](https://blog.mozilla.org/addons/2016/11/18/webextensions-in-firefox-52/))
   * Importing from file using the panel with Firefox Web Extensions ( [Bug 1292701](https://bugzilla.mozilla.org/show_bug.cgi?id=1292701) )
-  * ~~ContextMenu in Firefox 48, with addon reload~~ (Fixed in Firefox 50)
   * HTML title (tooltips) not showing (Currently using a workaround)
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
+  * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
+
+# 9.2.0
+* i: New Firefox Minimal version 52, following ESR version. The Firefox support of Web Extension is not "finished" / stable, in my point of view, so there might be some new minimal version in the Future, depending of the bug corrected or discovered too in Firefox.
+* -: Dropped update detection without onInstalled event, no longer needed
 
 # 9.1.1
 * Fix: Localization

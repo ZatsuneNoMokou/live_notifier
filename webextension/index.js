@@ -2141,36 +2141,6 @@ function initAddon(){
 // Checking if updated
 let previousVersion = "";
 let current_version = appGlobal["version"] = chrome.runtime.getManifest().version;
-function checkIfUpdated(details){
-	let getVersionNumbers =  /^(\d*)\.(\d*)\.(\d*)$/;
-	
-	let installReason = details.reason;
-	consoleMsg("info", `Runtime onInstalled reason: ${installReason}`);
-	
-	// Checking if updated
-	if(installReason == "update" || installReason == "unknown"){
-		previousVersion = details.previousVersion;
-		let previousVersion_numbers = getVersionNumbers.exec(previousVersion);
-		let current_version_numbers = getVersionNumbers.exec(current_version);
-		
-		if(previousVersion != current_version){
-			if(current_version_numbers.length == 4 && previousVersion_numbers.length == 4){
-				if(current_version_numbers[1] > previousVersion_numbers[1]){
-					doNotif("Live notifier", _("Addon_have_been_updated", current_version));
-				} else if((current_version_numbers[1] == previousVersion_numbers[1]) && (current_version_numbers[2] > previousVersion_numbers[2])){
-					doNotif("Live notifier", _("Addon_have_been_updated", current_version));
-				} else if((current_version_numbers[1] == previousVersion_numbers[1]) && (current_version_numbers[2] == previousVersion_numbers[2]) && (current_version_numbers[3] > previousVersion_numbers[3])){
-					doNotif("Live notifier", _("Addon_have_been_updated", current_version));
-				}
-			}
-		}
-	}
-	if(typeof chrome.runtime.onInstalled == "object" && typeof chrome.runtime.onInstalled.removeListener == "function"){
-		chrome.runtime.onInstalled.removeListener(checkIfUpdated);
-	} else {
-		savePreference("livenotifier_version", current_version);
-	}
-}
 
 //chrome.storage.local.get(optionsData.options_default,function(currentLocalStorage) {
 chrome.storage.local.get(null,function(currentLocalStorage) {
@@ -2197,21 +2167,7 @@ chrome.storage.local.get(null,function(currentLocalStorage) {
 	if(typeof chrome.runtime.onInstalled == "object" && typeof chrome.runtime.onInstalled.removeListener == "function"){
 		chrome.runtime.onInstalled.addListener(checkIfUpdated);
 	} else {
-		consoleMsg("warn", "chrome.runtime.onInstalled is not available");
-		let details;
-		if(typeof getPreference("livenotifier_version") == "string" && getPreference("livenotifier_version") != ""){
-			details = {
-				"reason": "unknown",
-				"previousVersion": getPreference("livenotifier_version")
-			}
-		} else {
-			details = {
-				"reason": "install",
-				"previousVersion": "0.0.0"
-			}
-		}
-		
-		checkIfUpdated(details);
+		consoleMsg("warn", "chrome.runtime.onInstalled is not available, update detection have been dropped");
 	}
 	
 	loadJS(document, "/data/js/", ["backgroundTheme.js"]);
