@@ -2095,12 +2095,12 @@ function initAddon(){
 			importSreamsFromOldVersion();
 		}
 		
-		if(typeof chrome.runtime.onInstalled != "undefined" && typeof getPreference("livenotifier_version") == "string"){
+		/*if(typeof chrome.runtime.onInstalled != "undefined" && typeof getPreference("livenotifier_version") == "string"){
 			localToRemove.push("livenotifier_version");
 			if(appGlobal.currentPreferences.hasOwnProperty("livenotifier_version")){
 				delete appGlobal.currentPreferences.livenotifier_version;
 			}
-		}
+		}*/
 		if(typeof getPreference("notification_type") == "string"){
 			localToRemove.push("notification_type");
 			if(appGlobal.currentPreferences.hasOwnProperty("notification_type")){

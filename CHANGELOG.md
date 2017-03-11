@@ -8,8 +8,8 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
-# 9.2.1-9.2.2-9.2.3
-* Fix: Update detection, onInstalled event does not seems to work correctly
+# 9.2.1-9.2.2-9.2.3-9.2.4
+* Fix: Update detection, onInstalled event does not seems to work correctly on Firefox
 
 # 9.2.0
 * i: New Firefox Minimal version 52, following ESR version. The Firefox support of Web Extension is not "finished" / stable, in my point of view, so there might be some new minimal version in the Future, depending of the bug corrected or discovered too in Firefox.

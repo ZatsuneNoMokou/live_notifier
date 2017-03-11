@@ -300,6 +300,13 @@ optionsData.options = {
 		"group": "settingsLevel",
 		"showPrefInPanel": false,
 		"prefLevel": "advanced"
+	},
+	/*			Internal				*/
+	"livenotifier_version": {
+		"type": "string",
+		"hidden": true,
+		"sync": false,
+		"value": "0.0.0"
 	}
 }
 
