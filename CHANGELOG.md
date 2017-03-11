@@ -8,7 +8,7 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
-# 9.2.1-9.2.2
+# 9.2.1-9.2.2-9.2.3
 * Fix: Update detection, onInstalled event does not seems to work correctly
 
 # 9.2.0
