@@ -2,10 +2,8 @@
 
 /*		---- Nodes translation ----		*/
 function translateNodes(){
-	let _ = chrome.i18n.getMessage;
-	let translate_nodes = document.querySelectorAll("[data-translate-id]");
-	for(let i in translate_nodes){
-		let node = translate_nodes[i];
+	const _ = chrome.i18n.getMessage;
+	for(let node of document.querySelectorAll("[data-translate-id]")){
 		if(typeof node.tagName == "string"){
 			node.textContent = _(node.dataset.translateId);
 			delete node.dataset.translateId;
@@ -13,10 +11,8 @@ function translateNodes(){
 	}
 }
 function translateNodes_title(){
-	let _ = chrome.i18n.getMessage;
-	let translate_nodes = document.querySelectorAll("[data-translate-title]");
-	for(let i in translate_nodes){
-		let node = translate_nodes[i];
+	const _ = chrome.i18n.getMessage;
+	for(let node of document.querySelectorAll("[data-translate-title]")){
 		if(typeof node.tagName == "string"){
 			node.dataset.toggle = "tooltip";
 			if(typeof node.dataset.placement != "string"){
@@ -32,19 +28,18 @@ function translateNodes_title(){
 }
 
 function loadTranslations(){
-	let body = document.querySelector('body');
-	
-	let observer = new MutationObserver(function(mutations) {
-		mutations.forEach(function(mutation) {
-			if(mutation.type == "childList"){
-				translateNodes(document);
-				translateNodes_title(document);
-			}
+	let body = document.querySelector('body'),
+		observer = new MutationObserver(function(mutations) {
+			mutations.forEach(function(mutation) {
+				if(mutation.type == "childList"){
+					translateNodes(document);
+					translateNodes_title(document);
+				}
+			});
 		});
-	});
 	
 	// configuration of the observer:
-	var config = {
+	const config = {
 		attributes: false,
 		childList: true,
 		subtree: true
@@ -107,6 +102,10 @@ function getBooleanFromVar(string){
 	}
 }
 function getFilterListFromPreference(string){
+	if(typeof string != "string"){
+		console.warn("Type error")
+		string = "";
+	}
 	let list = string.split(",");
 	for(let i in list){
 		if(list[i].length == 0){
@@ -119,12 +118,11 @@ function getFilterListFromPreference(string){
 	return list;
 }
 function getPreference(prefId){
-	let options = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options : optionsData.options;
-	let defaultSettings = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options_default : optionsData.options_default;
-	
-	let currentPreferences = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().appGlobal.currentPreferences : appGlobal.currentPreferences;
+	let options = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options : optionsData.options,
+		defaultSettings = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options_default : optionsData.options_default,
+		currentPreferences = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().appGlobal.currentPreferences : appGlobal.currentPreferences;
 	if(currentPreferences.hasOwnProperty(prefId)){
-		let current_pref = currentPreferences[prefId];
+		const current_pref = currentPreferences[prefId];
 		switch(typeof defaultSettings[prefId]){
 			case "string":
 				return current_pref;
@@ -163,7 +161,7 @@ function getPreference(prefId){
 function getSyncPreferences(){
 	let obj = {};
 	for(let prefId in options){
-		let option = options[prefId];
+		const option = options[prefId];
 		if(option.hasOwnProperty("sync") == true && option.sync == false){
 			continue;
 		} else if(option.type == "control" || option.type == "file"){
@@ -175,9 +173,9 @@ function getSyncPreferences(){
 	return obj;
 }
 function savePreference(prefId, value){
-	let options = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options : optionsData.options;
-	let defaultSettings = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options_default : optionsData.options_default;
-	let currentPreferences = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().appGlobal.currentPreferences : appGlobal.currentPreferences;
+	let options = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options : optionsData.options,
+		defaultSettings = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options_default : optionsData.options_default,
+		currentPreferences = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().appGlobal.currentPreferences : appGlobal.currentPreferences;
 	if(options.hasOwnProperty(prefId) && options[prefId].type == "integer"){
 		if(typeof options[prefId].minValue == "number" && parseInt(value) < options[prefId].minValue){
 			value = options[prefId].minValue;
@@ -197,16 +195,13 @@ function savePreference(prefId, value){
 }
 
 function getValueFromNode(node){
-	let tagName = node.tagName.toLowerCase();
+	const tagName = node.tagName.toLowerCase();
 	if(tagName == "textarea"){
 		if(node.dataset.stringTextarea == "true"){
 			return node.value.replace(/\n/g, "");
 		} else if(node.dataset.stringList == "true"){
-			let list = node.value.split("\n");
-			for(let i in list){
-				list[i] = encodeString(list[i]);
-			}
-			return list.join(",");
+			// Split as list, encode item, then make it back a string
+			return node.value.split("\n").map(encodeString).join(",");
 		} else {
 			return node.value;
 		}
@@ -222,10 +217,10 @@ function getValueFromNode(node){
 }
 
 function settingNode_onChange(event){
-	let node = event.target;
-	let settingName = node.id;
+	const node = event.target,
+		settingName = node.id;
 	if(node.validity.valid){
-		let settingValue = getValueFromNode(node);
+		const settingValue = getValueFromNode(node);
 		
 		savePreference(settingName, settingValue);
 	}
@@ -302,7 +297,7 @@ function saveOptionsInSync(event){
 	
 	chrome.storage.sync.set(settingsDataToSync, function() {
 		// Update status to let user know options were saved.
-		var status = document.getElementById('status');
+		let status = document.getElementById('status');
 		if(status != null){
 			status.textContent = _("options_saved_sync");
 		}
@@ -365,14 +360,13 @@ function restaureOptionsFromSync(event){
 
 /*		---- Node generation of settings ----		*/
 function loadPreferences(selector){
-	let container = document.querySelector(selector);
-	let isPanelPage = location.pathname.indexOf("panel.html") != -1;
-	
-	let options = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options : optionsData.options;
-	let body = document.querySelector("body");
+	const container = document.querySelector(selector),
+		isPanelPage = location.pathname.indexOf("panel.html") != -1,
+		options = (chrome.extension.getBackgroundPage() != null)? chrome.extension.getBackgroundPage().optionsData.options : optionsData.options,
+		body = document.querySelector("body");
 	
 	for(let id in options){
-		let option = options[id];
+		const option = options[id];
 		if(typeof option.type == "undefined"){
 			continue;
 		}
@@ -427,8 +421,8 @@ function getPreferenceGroupNode(parent, groupId){
 	return groupNode;
 }
 function import_onClick(){
-	let getWebsite = /^(\w+)_import$/i;
-	let website = getWebsite.exec(this.id)[1];
+	const getWebsite = /^(\w+)_import$/i,
+		website = getWebsite.exec(this.id)[1];
 	sendDataToMain("importStreams", website);
 }
 function newPreferenceNode(parent, id, prefObj){

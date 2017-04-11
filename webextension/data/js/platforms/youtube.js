@@ -1,4 +1,4 @@
-let youtube = {
+const youtube = {
 	"title": "YouTube",
 	"addStream_URLpatterns": new Map([
 		["channel::youtube", [
@@ -17,35 +17,32 @@ let youtube = {
 	]),
 	"Request_documentParseToJSON":
 		function(xhrResponse){
-			let responseDoc = xhrResponse.response;
-			
-			let itempropNodes = responseDoc.querySelectorAll("#watch7-content > [itemprop], body > [itemprop], head > [itemprop]");
+			const responseDoc = xhrResponse.response,
+				itempropNodes = responseDoc.querySelectorAll("#watch7-content > [itemprop], body > [itemprop], head > [itemprop]");
 			let jsonDATA = null;
 			
 			if(itempropNodes != null){
 				jsonDATA = {};
-				// let parser = new DOMParser();
 				
-				let getPropValue = function(node){
+				const getPropValue = function(node){
 					let id = node.getAttribute("itemprop");
 					switch(node.tagName.toLowerCase()){
 						case "meta":
 							return node.getAttribute("content");
 							break;
 						case "link":
-							let link = node.getAttribute("href");
+							const link = node.getAttribute("href");
 							if(link.indexOf("//") == 0){
 								link = `https:${link}`;
 							}
 							return link;
 							break;
 						case "span":
-							let content = {};
-							
-							let subItemProps = node.querySelectorAll("[itemprop]");
+							const content = {},
+								subItemProps = node.querySelectorAll("[itemprop]");
 							
 							for(let subNode of subItemProps){
-								let subNodeId = subNode.getAttribute("itemprop");
+								const subNodeId = subNode.getAttribute("itemprop");
 								content[subNodeId] = getPropValue(subNode);
 							}
 							
@@ -64,7 +61,7 @@ let youtube = {
 				}
 				
 				for(let node of itempropNodes){
-					let id = node.getAttribute("itemprop");
+					const id = node.getAttribute("itemprop");
 					let itemprop_data = getPropValue(node);
 					if(jsonDATA.hasOwnProperty(id)){
 						if(Array.isArray(jsonDATA[id])){
@@ -80,7 +77,7 @@ let youtube = {
 		},
 	"API_addStream":
 		function(source_website, id){
-			let apiKey = getPreference("youtube_api_key").replace(/\s/,""),
+			const apiKey = getPreference("youtube_api_key").replace(/\s/,""),
 				referrer = getPreference("youtube_api_referrer"),
 				youtube_patreon_password = getPreference("youtube_patreon_password").replace(/\s/,"");
 			
@@ -105,7 +102,7 @@ let youtube = {
 		},
 	"API":
 		function(id, nextPageToken){
-			let apiKey = getPreference("youtube_api_key").replace(/\s/,""),
+			const apiKey = getPreference("youtube_api_key").replace(/\s/,""),
 				referrer = getPreference("youtube_api_referrer"),
 				youtube_patreon_password = getPreference("youtube_patreon_password").replace(/\s/,"");
 			
@@ -182,38 +179,38 @@ let youtube = {
 						],
 						"contentType": "document",
 						"Request_documentParseToJSON": function(xhrRequest){
-							let dataDocument = xhrRequest.response;
+							const dataDocument = xhrRequest.response,
+								streamList_nodes = dataDocument.querySelectorAll("#channels-browse-content-grid li.channels-content-item");
 							
-							let streamList_nodes = dataDocument.querySelectorAll("#channels-browse-content-grid li.channels-content-item");
 							let streamListData_Map = new Map();
 							streamListData_Map.set("list", new Map());
 							
 							for(let node of streamList_nodes){
-								let currentChannelId = dataDocument.querySelector("meta[itemprop=channelId]").getAttribute("content");
+								const currentChannelId = dataDocument.querySelector("meta[itemprop=channelId]").getAttribute("content");
 								
 								if(node.querySelector(".video-time") == null){
-									let streamId_node = node.querySelector("[data-context-item-id]");
-									let ownerId = node.querySelector("[data-ytid]");
+									const streamId_node = node.querySelector("[data-context-item-id]"),
+										ownerId = node.querySelector("[data-ytid]");
 									
 									if((ownerId != null && ownerId.dataset.ytid == currentChannelId) && streamId_node != null){
-										let urlReg = /(?:http|https):\/\/.*/i;
-										
-										let streamId = streamId_node.dataset.contextItemId;
+										const urlReg = /(?:http|https):\/\/.*/i,
+											streamId = streamId_node.dataset.contextItemId;
 										
 										if(node.querySelector(".yt-badge-live") == null){
 											continue;
 										}
 										
-										let streamName_node = node.querySelector(".yt-lockup-title a");
+										const streamName_node = node.querySelector(".yt-lockup-title a");
 										let streamName = (streamName_node != null)? streamName_node.textContent : "";
 										let streamURL = (urlReg.test(streamName_node.href))? streamName_node.href : "";
-										let streamCurrentViewers_node = node.querySelector(".yt-lockup-meta-info");
+										
+										const streamCurrentViewers_node = node.querySelector(".yt-lockup-meta-info");
 										//if(streamCurrentViewers_node.querySelector(".localized-date") != null){/**		Programmed events		**/
 										//	continue;
 										//}
 										let streamCurrentViewers = (streamCurrentViewers_node != null)? parseInt(streamCurrentViewers_node.textContent.replace(/\s/,"").replace(/,/,"")) : null;
 										
-										let videoThumb_node = node.querySelector(".video-thumb img");
+										const videoThumb_node = node.querySelector(".video-thumb img");
 										let videoThumbUrl = videoThumb_node.src;
 										
 										streamListData_Map.get("list").set(streamId, {
@@ -245,7 +242,7 @@ let youtube = {
 		},
 	"API_channelInfos":
 		function(id){
-			let apiKey = getPreference("youtube_api_key").replace(/\s/,""),
+			const apiKey = getPreference("youtube_api_key").replace(/\s/,""),
 				referrer = getPreference("youtube_api_referrer"),
 				youtube_patreon_password = getPreference("youtube_patreon_password").replace(/\s/,"");
 			
@@ -287,15 +284,15 @@ let youtube = {
 			return obj;
 		},
 	"importAPI": function(id){
-		let obj = {
+		const obj = {
 			"url": "https://www.youtube.com/subscription_manager?action_takeout=1",
 			//"overrideMimeType": "application/xml; charset=utf-8",
 			"overrideMimeType": "text/html; charset=utf-8",
 			"contentType": "document",
 			"Request_documentParseToJSON": function(xhrRequest){
 				let userChannelList = {"list": null};
-				let getId = /https\:\/\/www\.youtube\.com\/feeds\/videos\.xml\?channel_id\=([^&]+)/i;
-				let dataDocument = xhrRequest.response;
+				const getId = /https\:\/\/www\.youtube\.com\/feeds\/videos\.xml\?channel_id\=([^&]+)/i,
+					dataDocument = xhrRequest.response;
 				if(dataDocument.querySelector("outline") != null){
 					userChannelList.list = [];
 					let userChannelList_nodes = xhrRequest.response.querySelectorAll("outline[xmlUrl]");
@@ -324,20 +321,30 @@ let youtube = {
 		},
 	"addStream_getId":
 		function(source_website, id, xhrResponse, streamListSetting, responseValidity){
-			let data = xhrResponse.json;
+			const data = xhrResponse.json;
 			if(responseValidity == "success"){
 				if(data.hasOwnProperty("items") == true && typeof data.items.length == "number" && data.items.length == 1){
 					if(data.items[0].hasOwnProperty("snippet") == true && data.items[0].snippet.hasOwnProperty("channelId") == true){
-						return `channel::${data.items[0].snippet.channelId}`;
+						return {
+							streamId: `channel::${data.items[0].snippet.channelId}`,
+							streamName: (typeof data.items[0].snippet.title == "string")? data.items[0].snippet.title : data.items[0].snippet.channelId
+						};
 					} else if(data.items[0].hasOwnProperty("id") == true && typeof data.items[0].id == "string"){
-						return `channel::${data.items[0].id}`;
+						return {
+							streamId: `channel::${data.items[0].id}`,
+							streamName: (data.items[0].snippet && typeof data.items[0].snippet.title == "string")? data.items[0].snippet.title : data.items[0].id
+						};
 					}
 				} else if(data.hasOwnProperty("channelId")){
-					let dataDocument = xhrResponse.response;
+					const dataDocument = xhrResponse.response;
 					
-					let channelIdPropItem = dataDocument.querySelector("meta[itemprop=channelId]");
+					const channelIdPropItem = dataDocument.querySelector("meta[itemprop=channelId]");
 					if(channelIdPropItem != null && typeof channelIdPropItem.hasAttribute("content")){
-						return `channel::${channelIdPropItem.getAttribute("content")}`;
+						const channelNamePropItem = dataDocument.querySelector("meta[itemprop=name]");
+						return {
+							streamId: `channel::${channelIdPropItem.getAttribute("content")}`,
+							streamName: (channelNamePropItem != null && typeof channelNamePropItem.hasAttribute("content"))? channelNamePropItem.getAttribute("content") : channelIdPropItem.getAttribute("content")
+						};
 					}// else {
 						//let linkNode = dataDocument.querySelector("#content .qualified-channel-title a");
 						//if(typeof linkNode.tagName == "string"){

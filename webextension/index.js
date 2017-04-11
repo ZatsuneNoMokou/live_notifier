@@ -67,6 +67,8 @@ function mapToObj(myMap){
 		throw 'myMap should be an Map';
 	}
 }
+appGlobal["mapToObj"] = mapToObj;
+
 function Request(options){
 	if(typeof options.url != "string" && typeof options.onComplete != "function"){
 		consoleMsg("warn", "Error in options");
@@ -529,11 +531,11 @@ function refreshStreamsFromPanel(){
 	
 }
 
-function display_id(id){
+function display_id(id, displayName){
 	if(website_channel_id.test(id)){
-		return _("The_channel", website_channel_id.exec(id)[1]);
+		return _("The_channel", (typeof displayName == "string")? displayName : website_channel_id.exec(id)[1]);
 	} else {
-		return _("The_stream", id);
+		return _("The_stream", (typeof displayName == "string")? displayName : id);
 	}
 }
 let activeTab;
@@ -593,7 +595,7 @@ function addStreamFromPanel(data){
 									
 									let responseValidity = checkResponseValidity(website, response);
 									
-									let streamId = websiteAPI.addStream_getId(source_website, id, response, streamListSetting, responseValidity);
+									let {streamId, streamName} = websiteAPI.addStream_getId(source_website, id, response, streamListSetting, responseValidity);
 									
 									if(website == "dailymotion" && responseValidity == "invalid_parameter"){
 										doNotif("Live notifier", _("No_supported_stream_detected_in_the_current_tab_so_nothing_to_add"));
@@ -612,26 +614,26 @@ function addStreamFromPanel(data){
 									if(streamListSetting.streamExist(website, streamId) == true){
 										const streamSettings = streamListSetting.mapDataAll.get(website).get(streamId);
 										if(streamSettings.hide == false && streamSettings.ignore == false){
-											doNotif("Live notifier",`${display_id(streamId)} ${_("is_already_configured")}`);
+											doNotif("Live notifier",`${display_id(streamId, streamName)} ${_("is_already_configured")}`);
 										} else {
 											if(getPreference("confirm_addStreamFromPanel")){
 												let reactivateStreamNotifAction = new notifAction("reactivateStream", {id: streamId, website: website, url: ((type == "embed")? active_tab_url : "")});
-												doActionNotif(`Live notifier`, `${display_id(streamId)} ${_("hidden_ignored_reactivate")}`, reactivateStreamNotifAction);
+												doActionNotif(`Live notifier`, `${display_id(streamId, streamName)} ${_("hidden_ignored_reactivate")}`, reactivateStreamNotifAction);
 											} else {
 												streamSettings.hide = false;
 												streamSettings.ignore = false;
 												streamListSetting.update();
-												doNotif("Live notifier",`${display_id(streamId)} ${_("hidden_ignored_reactivated")}`);
+												doNotif("Live notifier",`${display_id(streamId, streamName)} ${_("hidden_ignored_reactivated")}`);
 											}
 										}
 									} else {
 										if(getPreference("confirm_addStreamFromPanel")){
 											let addstreamNotifAction = new notifAction("addStream", {id: streamId, website: website, url: ((type == "embed")? active_tab_url : "")});
-											doActionNotif(`Live notifier`, `${display_id(streamId)} ${_("wasnt_configured_and_can_be_added")}`, addstreamNotifAction);
+											doActionNotif(`Live notifier`, `${display_id(streamId, streamName)} ${_("wasnt_configured_and_can_be_added")}`, addstreamNotifAction);
 										} else {
 											streamListSetting.addStream(website, streamId, ((type == "embed")? active_tab_url : ""));
 											streamListSetting.update();
-											doNotif("Live notifier", `${display_id(streamId)} ${_("wasnt_configured_and_have_been_added")}`);
+											doNotif("Live notifier", `${display_id(streamId, streamName)} ${_("wasnt_configured_and_have_been_added")}`);
 											// Update the panel for the new stream added
 											setTimeout(function(){
 												refreshPanel(false);
@@ -1133,6 +1135,7 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 }
 appGlobal["getCleanedStreamStatus"] = getCleanedStreamStatus;
 
+appGlobal["notificationGlobalyDisabled"] = false;
 function doStreamNotif(website, id, contentId, streamSetting){
 	let streamList = (new streamListFromSetting(website)).mapData;
 	let streamData = liveStatus.get(website).get(id).get(contentId);
@@ -1152,6 +1155,10 @@ function doStreamNotif(website, id, contentId, streamSetting){
 	
 	let isStreamOnline_filtered = getCleanedStreamStatus(website, id, contentId, streamSetting, online);
 	
+	if(appGlobal["notificationGlobalyDisabled"] == true){
+		return null;
+	}
+
 	if(isStreamOnline_filtered){
 		if(streamData.liveStatus.notifiedStatus == false){
 			if((typeof streamList.get(id).notifyOnline == "boolean")? streamList.get(id).notifyOnline : getPreference("notify_online") == true){
@@ -2215,7 +2222,7 @@ chrome.storage.local.get(null,function(currentLocalStorage) {
 	//}
 	
 	loadJS(document, "/data/js/", ["backgroundTheme.js"]);
-	loadJS(document, "/data/js/platforms/", ["beam.js", "dailymotion.js", "hitbox.js", "twitch.js", "youtube.js"])
+	loadJS(document, "/data/js/platforms/", ["beam.js", "dailymotion.js", "hitbox.js", "picarto_tv.js", "twitch.js", "youtube.js"])
 		.then(initAddon)
 		.catch(initAddon)
 })

@@ -8,6 +8,17 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 10.0.0
+* i: Using more ECMA5/6 (more class and const)
+* i: Updated Material Icons
+* i: Updated perfect-scrollbar (0.6.16)
+* +: Support of Picarto.tv
+* +: Ability to display stream name when adding stream instead of id
+* +: Starting to use Mustache in the panel as template system, making easier the creation and insertion of the stream list elements, and websites for grouped support
+* +: Default picture/logo for streams in panel, if no other is available
+* +: Ability to disable all notifications from the panel
+* Fix: Tooltips ("titles") translation
+
 # 9.2.1-9.2.2-9.2.3-9.2.4
 * Fix: Update detection, onInstalled event does not seems to work correctly on Firefox
 

@@ -17,6 +17,7 @@
 		<button id="addStream" data-translate-title="Add"><i class="material-icons">add</i></button>
 		<button id="deleteStream" data-translate-title="DeleteIgnore" class="dragover"><i class="material-icons dragover deleteLogo">delete</i><i class="material-icons dragover">visibility_off</i></button>
 		<button id="searchStream" data-translate-title="Search"><i class="material-icons">search</i></button>
+		<button id="disableNotifications"></button>
 		<button id="refreshStreams" data-translate-title="Refresh"><i class="material-icons">refresh</i></button>
 		<button id="settings" data-translate-title="Settings"><i class="material-icons">settings</i></button>
 	</header>
@@ -24,26 +25,61 @@
 		<button id="confirmChanges" data-translate-id="confirm_all_changes">Changes changes</button>
 		<button id="cancelChanges" data-translate-id="cancelChanges">Cancel changes</button>
 	</section>
-	<section id="streamList">
-		<div id="searchInputContainer" class="hide"><label for="searchInput"><i class="material-icons">search</i></label><input id="searchInput" type="text"></div>
+	<script id="streamTemplate" type="x-tmpl-mustache">
+		<div id="{{streamWebsite}}/{{streamId}}/{{contentId}}" class="item-stream cursor{{#online}} onlineItem{{/online}}{{^online}} offlineItem{{/online}}{{#streamLogo}} streamLogo{{/streamLogo}}"
+			{{#streamStatus}}
+				data-stream-status='{{streamStatus}}' data-stream-status-lowercase='{{streamStatusLowercase}}'
+			{{/streamStatus}}
+			data-stream-id='{{streamId}}'
+			data-content-id='{{contentId}}'
+			data-online="{{online}}"
+			data-stream-name='{{streamName}}' data-stream-name-lowercase='{{streamNameLowercase}}'
+			data-stream-website='{{streamWebsite}}' data-stream-website-lowercase='{{streamWebsiteLowercase}}'
+			data-stream-type='{{streamType}}'
+			data-stream-settings='{{streamSettings}}'
+			draggable="true"
+			{{#streamLogo}}
+				style="background-image: url(&quot;{{streamLogo}}&quot;);"
+			{{/streamLogo}}>
+			{{#online}}
+			<div>
+				{{/online}}<span class="streamTitle">{{streamName}}</span>{{#online}}
+				{{#streamCurrentViewers}}<span class="streamCurrentViewers" data-stream-current-viewers="{{streamCurrentViewers}}"></span>{{/streamCurrentViewers}}
+			</div>
+			<div>
+				<span class="streamStatus">{{streamStatus}}</span>{{/online}}
+				<span class="stream_control">
+					<span class="deleteStreamButton" data-id='{{streamId}}' data-website='{{streamWebsite}}' data-translate-title="Delete" data-placement="left" onClick="newDeleteStreamButton_onClick()">delete</span>
+					<span class="ignoreStreamButton" data-id='{{streamId}}' data-website='{{streamWebsite}}' data-translate-title="IgnoreStream" data-placement="left" onClick="newIgnoreStreamButton_onClick()">visibility_off</span>
+					{{^unsupportedType}}{{#streamURL}}
+						<span class="copyStreamURL" data-id='{{streamId}}' data-content-id='{{contentId}}' data-website='{{streamWebsite}}' data-translate-title="copyURL" data-placement="left" onClick="newCopyStreamURLButton_onClick()"></span>
+					{{/streamURL}}{{/unsupportedType}}
+					<span class="editStreamButton" data-id='{{streamId}}' data-content-id='{{contentId}}' data-website='{{streamWebsite}}' data-title='{{streamName}}' data-stream-settings='{{streamSettings}}' data-translate-title="Settings" data-placement="left"></span>
+					{{#online}}
+						<span class="shareStreamButton" data-website='{{streamWebsite}}' data-id='{{streamId}}' data-content-id='{{contentId}}' data-translate-title="shareStream" data-placement="left"></span>
+					{{/online}}
+				</span>
+			{{#online}}</div>{{/online}}
+		</div>
+	</script>
+	<script id="streamListTemplate" type="x-tmpl-mustache">
 		<div id="streamListOnline">
 			<div id="streamOnlineCountLabel"></div>
-			<div class="beam group"></div>
-			<div class="dailymotion group"></div>
-			<div class="hitbox group"></div>
-			<div class="twitch group"></div>
-			<div class="youtube group"></div>
+			{{#websites}}
+			<div class="{{.}} group">{{thetitle}}</div>
+			{{/websites}}
 			<div class="unsupported group"></div>
 		</div>
 		<div id="streamListOffline">
 			<div id="streamOfflineCountLabel"></div>
-			<div class="beam group"></div>
-			<div class="dailymotion group"></div>
-			<div class="hitbox group"></div>
-			<div class="twitch group"></div>
-			<div class="youtube group"></div>
+			{{#websites}}
+			<div class="{{.}} group"></div>
+			{{/websites}}
 			<div class="unsupported group"></div>
 		</div>
+	</script>
+	<section id="streamList">
+		<div id="searchInputContainer" class="hide"><label for="searchInput"><i class="material-icons">search</i></label><input id="searchInput" type="text"></div>
 	</section>
 	<section id="streamEditor" class="hide">
 		<div id="streamEditor-firstLine"><span id="editedStreamTitle"></span><span class="vide"></span><button id="closeEditor">X</button></div>

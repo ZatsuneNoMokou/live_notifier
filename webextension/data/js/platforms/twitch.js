@@ -1,4 +1,4 @@
-let twitch = {
+const twitch = {
 	"title": "Twitch",
 	"addStream_URLpatterns": new Map([
 		["twitch", [
@@ -58,9 +58,12 @@ let twitch = {
 		},
 	"addStream_getId":
 		function(source_website, id, response, streamListSetting, responseValidity){
-			let data = response.json;
+			const data = response.json;
 			if(responseValidity == "success"){
-				return id;
+				return {
+					streamId: id,
+					streamName: (data.stream && data.stream.channel && typeof data.stream.channel.display_name == "string")? data.stream.channel.display_name : id
+				};
 			}
 			return null;
 		},

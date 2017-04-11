@@ -103,6 +103,17 @@ function addStreamButtonClick(){
 }
 addStreamButton.addEventListener("click",addStreamButtonClick,false);
 
+var disableNotificationsButton = document.querySelector("#disableNotifications");
+function disableNotifications_onClick(){
+	appGlobal["notificationGlobalyDisabled"] = !appGlobal["notificationGlobalyDisabled"];
+	disableNotificationsButton.classList.toggle("off", backgroundPage.appGlobal["notificationGlobalyDisabled"]);
+	
+	$(disableNotificationsButton).tooltip("hide")
+	disableNotificationsButton.dataset.originalTitle = disableNotificationsButton.title = _((backgroundPage.appGlobal["notificationGlobalyDisabled"])? "GloballyDisabledNotifications" : "GloballyDisableNotifications");
+	$(disableNotificationsButton).tooltip("show");
+}
+disableNotificationsButton.addEventListener("click", disableNotifications_onClick)
+
 function allowDrop(event){
 	event.preventDefault();
 }
@@ -488,8 +499,7 @@ function updatePanelData(data){
 					listener(website, id, contentId, "unsupported", streamList.get(id), streamData);
 				}
 			}
-		})
-		showNonEmptySitesBlocks();
+		});
 	})
 	scrollbar_update("streamList");
 	
@@ -580,17 +590,6 @@ function newDeleteStreamButton_onClick(event){
 	node.classList.toggle("active");
 	//sendDataToMain("deleteStream", {id: id, website: website});
 }
-function newDeleteStreamButton(id, website){
-	let node = document.createElement("span");
-	node.classList.add("deleteStreamButton");
-	node.dataset.id = id;
-	node.dataset.website = website;
-	node.dataset.translateTitle = "Delete";
-	node.textContent = "delete";
-	node.dataset.placement = "left";
-	
-	return node;
-}
 function newIgnoreStreamButton_onClick(event){
 	event.stopPropagation();
 	
@@ -599,19 +598,6 @@ function newIgnoreStreamButton_onClick(event){
 	let website = node.dataset.website;
 	
 	node.classList.toggle("active");
-}
-function newIgnoreStreamButton(id, website, streamSettings){
-	let node = document.createElement("span");
-	node.classList.add("ignoreStreamButton");
-	node.dataset.id = id;
-	node.dataset.website = website;
-	node.dataset.translateTitle = "IgnoreStream";
-	node.textContent = "visibility_off";
-	node.dataset.placement = "left";
-	
-	node.classList.toggle("active", streamSettings.ignore);
-	
-	return node;
 }
 function newShareStreamButton_onClick(event){
 	event.stopPropagation();
@@ -626,17 +612,6 @@ function newShareStreamButton_onClick(event){
 		id: node.dataset.id,
 		contentId: node.dataset.contentId,
 	});
-}
-function newShareStreamButton(id, contentId, website){
-	let node = document.createElement("span");
-	node.classList.add("shareStreamButton");
-	node.dataset.website = website;
-	node.dataset.id = id;
-	node.dataset.contentId = contentId;
-	node.dataset.translateTitle = "shareStream";
-	node.dataset.placement = "left";
-	
-	return node;
 }
 function newEditStreamButton_onClick(event){
 	event.stopPropagation();
@@ -682,19 +657,6 @@ function newEditStreamButton_onClick(event){
 	unhideClassNode(streamEditor);
 	scrollbar_update("streamEditor");
 }
-function newEditStreamButton(id, contentId, website, title, streamSettings){
-	let node = document.createElement("span");
-	node.classList.add("editStreamButton");
-	node.dataset.id = id;
-	node.dataset.contentId = contentId;
-	node.dataset.website = website;
-	node.dataset.title = title;
-	node.dataset.streamSettings = JSON.stringify(streamSettings);
-	node.dataset.translateTitle = "Settings";
-	node.dataset.placement = "left";
-	
-	return node;
-}
 function newCopyStreamURLButton_onClick(event){
 	event.stopPropagation();
 	
@@ -705,90 +667,42 @@ function newCopyStreamURLButton_onClick(event){
 	
 	copyToClipboard(getStreamURL(website, id, contentId, false));
 }
-function newCopyStreamURLButton(id, contentId, website){
-	let node = document.createElement("span");
-	node.classList.add("copyStreamURL");
-	node.dataset.id = id;
-	node.dataset.contentId = contentId;
-	node.dataset.website = website;
-	node.dataset.translateTitle = "copyURL";
-	node.dataset.placement="left";
-	
-	return node;
-}
 
-let streamNodes = {
-	"online": {
-		"beam": document.querySelector("#streamListOnline .beam"),
-		"dailymotion": document.querySelector("#streamListOnline .dailymotion"),
-		"hitbox": document.querySelector("#streamListOnline .hitbox"),
-		"twitch": document.querySelector("#streamListOnline .twitch"),
-		"youtube": document.querySelector("#streamListOnline .youtube")
-	},
-	"offline": {
-		"beam": document.querySelector("#streamListOffline .beam"),
-		"dailymotion": document.querySelector("#streamListOffline .dailymotion"),
-		"hitbox": document.querySelector("#streamListOffline .hitbox"),
-		"twitch": document.querySelector("#streamListOffline .twitch"),
-		"youtube": document.querySelector("#streamListOffline .youtube")
-	}
-}
+const streamTemplate = $('#streamTemplate').html(),
+	streamListTemplate = $('#streamListTemplate').html();
+Mustache.parse(streamTemplate);   // optional, speeds up future uses
+Mustache.parse(streamListTemplate);   // optional, speeds up future uses
 
-function showNonEmptySitesBlocks(){
-	let current_node;
-	for(let onlineStatus in streamNodes){
-		for(let website in streamNodes[onlineStatus]){
-			current_node = streamNodes[onlineStatus][website];
-			current_node.classList.remove("hide");
-			if(!current_node.hasChildNodes()){
-				current_node.classList.add("hide");
-			}
-		}
-	}
-	let unsupportedWebsiteNodes = ["#streamListOnline .unsupported", "#streamListOffline .unsupported"]
-	unsupportedWebsiteNodes.forEach((selector, index, array) => {
-		let node  = document.querySelector(selector)
-		node.classList.remove("hide");
-		if(!node.hasChildNodes()){
-			node.classList.add("hide");
-		}
-	})
-}
+const websitesList = [];
+websites.forEach((value, id)=>{
+	websitesList.push(id);
+});
+$(Mustache.render(streamListTemplate, {
+	"websites": websitesList
+})).appendTo("#streamList");
+
 function insertStreamNode(newLine, website, id, contentId, type, streamData, online){
-	let statusNode;
-	let statusStreamList;
-	
-	if(online){
-		statusNode = document.querySelector("#streamListOnline");
-		statusStreamList = document.querySelectorAll("#streamListOnline .item-stream");
-	} else {
-		statusNode = document.querySelector("#streamListOffline");
-		statusStreamList = document.querySelectorAll("#streamListOffline .item-stream");
-	}
-	
+	let statusNode = document.querySelector(`#streamList${(online)? "Online" : "Offline"}`),
+		statusStreamList = statusNode.querySelectorAll(".item-stream");
+
+	document.querySelector("body").classList.toggle("groupedStreams", group_streams_by_websites);
+
 	if(group_streams_by_websites){
-		if(streamNodes.hasOwnProperty(((online)? "online" : "offline")) && streamNodes[((online)? "online" : "offline")].hasOwnProperty(website)){
-			streamNodes[((online)? "online" : "offline")][website].appendChild(newLine);
-		} else {
-			document.querySelector(`#streamList${((online)? "Online" : "Offline")} .unsupported`).appendChild(newLine);
-		}
-		return true;
+		return $(`#streamList${((online)? "Online" : "Offline")} .${(streamNodes[((online)? "online" : "offline")].hasOwnProperty(website))? website : "unsupported"}`).append(newLine);
 	} else {
 		if(statusStreamList.length > 0){
-			for(let i in statusStreamList){
-				let streamNode = statusStreamList[i];
+			for(let streamNode of statusStreamList){
 				if(typeof streamNode.tagName == "string"){
 					let streamNode_title = streamNode.dataset.streamName;
 					if(streamData.streamName.toLowerCase() < streamNode_title.toLowerCase()){
-						streamNode.parentNode.insertBefore(newLine,streamNode);
-						return true;
+						return $(newLine).insertBefore(streamNode);
 					}
 				}
 			}
 		}
-		statusNode.appendChild(newLine);
-		return true;
+		return $(newLine).appendTo(statusNode);
 	}
+	return null;
 }
 
 function listener(website, id, contentId, type, streamSettings, streamData){
@@ -802,14 +716,48 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 			break;
 	}
 	let liveStatus = streamData.liveStatus;
+
+	let streamRenderData = {
+		"streamId": id,
+		"contentId": contentId,
+		"online": online,
+		"streamName": streamData.streamName,
+		"streamNameLowercase": streamData.streamName.toLowerCase(),
+		"streamWebsite": website,
+		"streamWebsiteLowercase": website.toLowerCase(),
+		//"streamUrl": streamUrl,
+		"streamType": type,
+		"unsupportedType": (type == "unsupported"),
+		"streamSettings": JSON.stringify(streamSettings)
+	}
 	
+	if(online){
+		streamRenderData.streamStatus = streamData.streamStatus;
+		streamRenderData.streamStatusLowercase = streamData.streamStatus.toLowerCase();
+		if(streamData.streamGame.length > 0){
+			streamRenderData.streamGame = streamData.streamGame;
+			streamRenderData.streamGameLowercase = streamData.streamGame.toLowerCase();
+		}
+		if(typeof streamData.streamCurrentViewers == "number"){
+			let viewer_number = (typeof streamData.streamCurrentViewers == "number")? streamData.streamCurrentViewers : parseInt(streamData.streamCurrentViewers);
+			streamRenderData.streamCurrentViewers = (viewer_number < 1000)? viewer_number : ((Math.round(viewer_number / 100)/10) + "k");
+		}
+	}
+
 	//let streamUrl = (type == "live" || type == "channel")? getStreamURL(website, id, contentId, true) : "";
-	
-	var newLine = document.createElement("div");
-	newLine.id = `${website}/${id}/${contentId}`;
-	
+	const websiteStreamURL = getStreamURL(website, id, contentId, false);
+	if(websiteStreamURL != "" && websiteStreamURL != null){
+		streamRenderData.streamURL = websiteStreamURL;
+	}
+
+	if(typeof streamData.facebookID == "string" && streamData.facebookID != ""){
+		streamRenderData.facebookId = streamData.facebookID;
+	}
+	if(typeof streamData.twitterID == "string" && streamData.twitterID != ""){
+		streamRenderData.twitterId = streamData.twitterID;
+	}
+
 	let streamLogo = "";
-	
 	if(online && typeof streamData.streamCategoryLogo == "string" && streamData.streamCategoryLogo != ""){
 		streamLogo  = streamData.streamCategoryLogo;
 	} else if(typeof streamData.streamOwnerLogo == "string" && streamData.streamOwnerLogo != ""){
@@ -817,134 +765,16 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	}
 	
 	if(typeof streamLogo == "string" && streamLogo != ""){
-		newLine.style.backgroundImage = "url('" + streamLogo + "')";
-		newLine.classList.add("streamLogo");
+		streamRenderData.streamLogo = streamLogo;
 	}
-	
-	let firstLine = document.createElement("div");
-	let contentContainer = document.createElement("div");
-	
-	
-	var titleLine = document.createElement("span");
-	titleLine.classList.add("streamTitle");
-	if(typeof streamLogo == "string" && streamLogo != ""){
-		var imgStreamStatusLogo = document.createElement("img");
-		imgStreamStatusLogo.classList.add("streamStatusLogo");
-		imgStreamStatusLogo.src = (online)? "online-stream.svg" : "offline-stream.svg";
-		titleLine.appendChild(imgStreamStatusLogo);
-	}
-	titleLine.textContent = streamData.streamName;
-	
-	if(online){
-		newLine.appendChild(firstLine);
-		newLine.appendChild(contentContainer);
-		firstLine.appendChild(titleLine);
-	} else {
-		newLine.appendChild(titleLine);
-	}
-	
-	if(online){
-		var statusLine = document.createElement("span");
-		statusLine.classList.add("streamStatus");
-		if(streamData.streamStatus != ""){
-			statusLine.textContent = streamData.streamStatus + ((streamData.streamGame.length > 0)? (" (" + streamData.streamGame + ")") : "");
-		} else {
-			statusLine.textContent = "";
-		}
-		//newLine.appendChild(statusLine);
-		contentContainer.appendChild(statusLine);
-		
-		newLine.dataset.streamStatus = streamData.streamStatus;
-		newLine.dataset.streamStatusLowercase = streamData.streamStatus.toLowerCase();
-		
-		if(streamData.streamGame.length > 0){
-			newLine.dataset.streamGame = streamData.streamGame;
-			newLine.dataset.streamGameLowercase = streamData.streamGame.toLowerCase();
-		}
-		
-		newLine.classList.add("item-stream", "onlineItem");
-		insertStreamNode(newLine, website, id, contentId, type, streamData, online);
-		
-		if(online && typeof streamData.streamCurrentViewers == "number"){
-			var viewerCountNode = document.createElement("span");
-			viewerCountNode.classList.add("streamCurrentViewers");
-			
-			let viewer_number = (typeof streamData.streamCurrentViewers == "number")? streamData.streamCurrentViewers : parseInt(streamData.streamCurrentViewers);
-			viewerCountNode.dataset.streamCurrentViewers = (viewer_number < 1000)? viewer_number : ((Math.round(viewer_number / 100)/10) + "k");
-			
-			firstLine.appendChild(viewerCountNode);
-		}
-	} else {
-		newLine.classList.add("item-stream", "offlineItem");
-		insertStreamNode(newLine, website, id, contentId, type, streamData, online);
-	}
-	newLine.classList.add("cursor");
-	
-	newLine.dataset.streamId = id;
-	newLine.dataset.contentId = contentId;
-	newLine.dataset.online = online;
-	newLine.dataset.streamName = streamData.streamName;
-	newLine.dataset.streamNameLowercase = streamData.streamName.toLowerCase();
-	newLine.dataset.streamWebsite = website;
-	newLine.dataset.streamWebsiteLowercase = website.toLowerCase();
-	//newLine.dataset.streamUrl = streamUrl;
-	newLine.dataset.streamType = type;
-	
-	newLine.dataset.streamSettings = JSON.stringify(streamSettings);
-	
-	if(typeof streamData.facebookID == "string" && streamData.facebookID != ""){
-		newLine.dataset.facebookId = streamData.facebookID;
-	}
-	if(typeof streamData.twitterID == "string" && streamData.twitterID != ""){
-		newLine.dataset.twitterId = streamData.twitterID;
-	}
-	newLine.addEventListener("click", streamItemClick);
-	
-	/*			---- Control span ----			*/
-	let control_span = document.createElement("span");
-	control_span.classList.add("stream_control");
-	
-	let deleteButton_node = newDeleteStreamButton(id, website);
-	control_span.appendChild(deleteButton_node);
-	
-	let ignoreStreamButton_node = newIgnoreStreamButton(id, website, streamSettings);
-	control_span.appendChild(ignoreStreamButton_node);
-	
-	let newCopyStreamURLButton_node = null;
-	let editStream_node = null;
-	let shareStream_node = null;
-	
-	let websiteStreamURL
-	if(type != "unsupported"){
-		websiteStreamURL = getStreamURL(website, id, contentId, false);
-		if(websiteStreamURL != "" && websiteStreamURL != null){
-			newCopyStreamURLButton_node = newCopyStreamURLButton(id, contentId, website);
-			control_span.appendChild(newCopyStreamURLButton_node);
-		}
-	}
-	editStream_node = newEditStreamButton(id, contentId, website, streamData.streamName, streamSettings);
-	control_span.appendChild(editStream_node);
-	if(online){
-		shareStream_node = newShareStreamButton(id, contentId, website);
-		control_span.appendChild(shareStream_node);
-		
-		contentContainer.appendChild(control_span);
-	} else {
-		newLine.appendChild(control_span);
-	}
-	deleteButton_node.addEventListener("click", newDeleteStreamButton_onClick, false);
-	ignoreStreamButton_node.addEventListener("click", newIgnoreStreamButton_onClick, false);
-	if(newCopyStreamURLButton_node !== null){
-		newCopyStreamURLButton_node.addEventListener("click", newCopyStreamURLButton_onClick, false);
-	}
-	if(editStream_node !== null){
-		editStream_node.addEventListener("click", newEditStreamButton_onClick, false);
-	}
-	if(shareStream_node !== null){
-		shareStream_node.addEventListener("click", newShareStreamButton_onClick, false);
-	}
-	
-	newLine.draggable = true;
+	const newNode = insertStreamNode(Mustache.render(streamTemplate, streamRenderData), website, id, contentId, type, streamData, online);
+
+	$(newNode).click(streamItemClick);
+	$(newNode).find(".deleteStreamButton").click(newDeleteStreamButton_onClick);
+	$(newNode).find(".ignoreStreamButton").click(newIgnoreStreamButton_onClick);
+	$(newNode).find(".copyStreamURL").click(newCopyStreamURLButton_onClick);
+	$(newNode).find(".editStreamButton").click(newEditStreamButton_onClick);
+	$(newNode).find(".shareStreamButton").click(newShareStreamButton_onClick);
 	
 	if(typeof liveStatus.lastCheckStatus == "string" && liveStatus.lastCheckStatus != "" && liveStatus.lastCheckStatus != "success"){
 		let debugDataNode = document.querySelector("#debugData");
@@ -996,7 +826,9 @@ function theme_update(){
 		
 		let currentThemeNode = document.querySelector("#generated-color-stylesheet");
 		currentThemeNode.parentNode.removeChild(currentThemeNode);
-		
+
+		document.querySelector("body").dataset.theme = panelColorStylesheet.dataset.theme;
+
 		document.querySelector("head").appendChild(panelColorStylesheet);
 	}
 }

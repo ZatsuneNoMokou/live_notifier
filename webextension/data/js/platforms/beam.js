@@ -1,4 +1,4 @@
-let beam = {
+const beam = {
 	"title": "Beam",
 	"addStream_URLpatterns": new Map([
 		["beam", [
@@ -43,9 +43,12 @@ let beam = {
 		},
 	"addStream_getId":
 		function(source_website, id, response, streamListSetting, responseValidity){
-			let data = response.json;
+			const data = response.json;
 			if(responseValidity == "success"){
-				return id;
+				return {
+					streamId: id,
+					streamName: (data.user && typeof data.user.username == "string")? data.user.username : id
+				};
 			}
 			return null;
 		},

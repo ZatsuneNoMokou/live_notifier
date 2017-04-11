@@ -43,6 +43,12 @@
 	"Refresh": {
 		"message": "Rafraichir"
 	},
+	"GloballyDisabledNotifications": {
+		"message": "Toutes les notifications sont désactivées"
+	},
+	"GloballyDisableNotifications": {
+		"message": "Désactiver temporairement les notifications"
+	},
 	"Settings": {
 		"message": "Options"
 	},
