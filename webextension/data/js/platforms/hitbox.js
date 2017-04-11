@@ -1,4 +1,4 @@
-let hitbox = {
+const hitbox = {
 	"title": "Hitbox",
 	"addStream_URLpatterns": new Map([
 		["hitbox", [
@@ -31,7 +31,7 @@ let hitbox = {
 				return "error";
 			}
 			if(data.error == true){
-				let error_msg = (data.hasOwnProperty("error_msg") == true)? data.error_msg : "error";
+				const error_msg = (data.hasOwnProperty("error_msg") == true)? data.error_msg : "error";
 				return error_msg;
 			}
 			if(data.hasOwnProperty("livestream") == false){
@@ -41,9 +41,12 @@ let hitbox = {
 		},
 	"addStream_getId":
 		function(source_website, id, response, streamListSetting, responseValidity){
-			let data = response.json;
+			const data = response.json;
 			if(responseValidity == "success"){
-				return id;
+				return {
+					streamId: id,
+					streamName: (data.hasOwnProperty("media_user_name"))? data["media_user_name"] : id
+				};
 			}
 			return null;
 		},
@@ -104,8 +107,8 @@ let hitbox = {
 				}
 				
 				if(data.following.length > 0){
-					let nextPageNumber = ((typeof pageNumber == "number")? pageNumber : 1) + 1;
-					let nextUrl = hitbox.importAPI(id).url + "&offset=" + nextPageNumber;
+					const nextPageNumber = ((typeof pageNumber == "number")? pageNumber : 1) + 1,
+						nextUrl = hitbox.importAPI(id).url + "&offset=" + nextPageNumber;
 					obj.next = {"url": nextUrl, "pageNumber": nextPageNumber};
 				} else {
 					obj.next = null;

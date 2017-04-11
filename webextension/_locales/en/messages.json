@@ -43,6 +43,12 @@
 	"Refresh": {
 		"message": "Refresh"
 	},
+	"GloballyDisabledNotifications": {
+		"message": "All notifications are disabled"
+	},
+	"GloballyDisableNotifications": {
+		"message": "Temporarly disable notifications"
+	},
 	"Settings": {
 		"message": "Settings"
 	},

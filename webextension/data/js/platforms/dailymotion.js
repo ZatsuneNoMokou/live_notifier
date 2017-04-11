@@ -1,4 +1,4 @@
-let dailymotion = {
+const dailymotion = {
 	"title": "Dailymotion",
 	"addStream_URLpatterns": new Map([
 		["dailymotion", [
@@ -101,7 +101,7 @@ let dailymotion = {
 		},
 	"addStream_getId":
 		function(source_website, id, response, streamListSetting, responseValidity){
-			let data = response.json;
+			const data = response.json;
 			if(responseValidity == "success" || responseValidity == "vod" || responseValidity == "notstream"){
 				let username = (typeof data.mode == "string")? data["user.username"] : data.username;
 				let id_username = `channel::${username}`;
@@ -112,7 +112,10 @@ let dailymotion = {
 				if(streamListSetting.streamExist("dailymotion", id_username) || streamListSetting.streamExist("dailymotion", id_owner)){
 					return true;
 				}
-				return id;
+				return {
+					streamId: id,
+					streamName: (typeof username == "string" && username != "")? username : id
+				};
 			}
 			return null;
 		},
@@ -130,7 +133,7 @@ let dailymotion = {
 	"seconderyInfo":
 		function(id, contentId, data, currentLiveStatus){
 			let streamData = currentLiveStatus;
-			let isStreamOnline = streamData.liveStatus.API_Status;
+			const isStreamOnline = streamData.liveStatus.API_Status;
 			if(data.hasOwnProperty("user.screenname")){
 				if(isStreamOnline){
 					streamData.streamStatus = streamData.streamName;
@@ -152,7 +155,7 @@ let dailymotion = {
 		},
 	"channelList":
 		function(id, website, data, pageNumber){
-			let list = data.list;
+			const list = data.list;
 			
 			let obj = {
 				streamList: new Map(),
@@ -162,12 +165,12 @@ let dailymotion = {
 				return obj;
 			} else {
 				for(let i in list){
-					let contentId = list[i].id;
+					const contentId = list[i].id;
 					obj.streamList.set(contentId, list[i]);
 				}
 				
 				if(data.has_more){
-					let next_page_number = ((typeof pageNumber == "number")? pageNumber : 1) + 1;
+					const next_page_number = ((typeof pageNumber == "number")? pageNumber : 1) + 1;
 					obj.nextPageToken = next_page_number;
 				}
 				return obj;
@@ -212,8 +215,8 @@ let dailymotion = {
 				}
 				
 				if(data.has_more){
-					let nextPageNumber = ((typeof pageNumber == "number")? pageNumber : 1) + 1;
-					let nextUrl = dailymotion.importAPI(id).url + "&page=" + nextPageNumber;
+					const nextPageNumber = ((typeof pageNumber == "number")? pageNumber : 1) + 1,
+						nextUrl = dailymotion.importAPI(id).url + "&page=" + nextPageNumber;
 					obj.next = {"url": nextUrl, "pageNumber": nextPageNumber}
 				} else {
 					obj.next = null;

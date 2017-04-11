@@ -12,11 +12,16 @@ if(typeof optionColorStylesheet == "object" && optionColorStylesheet !== null){
 	let currentThemeNode = document.querySelector("#generated-color-stylesheet");
 	currentThemeNode.parentNode.removeChild(currentThemeNode);
 	
+	document.querySelector("body").dataset.theme = optionColorStylesheet.dataset.theme;
+
 	document.querySelector("head").appendChild(optionColorStylesheet);
 }
+
+document.querySelector("#disableNotifications").classList.toggle("off", backgroundPage.appGlobal["notificationGlobalyDisabled"]);
+document.querySelector("#disableNotifications").dataset.translateTitle = (backgroundPage.appGlobal["notificationGlobalyDisabled"])? "GloballyDisabledNotifications" : "GloballyDisableNotifications";
 
 let loadJS = chrome.extension.getBackgroundPage().loadJS;
 window.onload = function () {
 	window.onload = null;
-	loadJS(document, "/data/js/", ["lib/jquery-3.1.0.min.js", "lib/perfect-scrollbar.jquery.min.js", "lib/bootstrap.min.js", "options-api.js", "panel/panel.js"]);
+	loadJS(document, "/data/js/", ["lib/jquery-3.2.1.min.js", "lib/perfect-scrollbar.jquery.min.js", "lib/bootstrap.min.js", "options-api.js", "lib/mustache.min.js", "panel/panel.js"]);
 }

@@ -3,19 +3,22 @@
 //var backgroundPage = chrome.extension.getBackgroundPage();
 //var getPreference = backgroundPage.getPreference;
 
-function color(hexColorCode) {
-	let getCodes =  /^#([\da-fA-F]{2,2})([\da-fA-F]{2,2})([\da-fA-F]{2,2})$/;
-	if(getCodes.test(hexColorCode)){
-		let result = getCodes.exec(hexColorCode);
-		this.R= parseInt(result[1],16);
-		this.G= parseInt(result[2],16);
-		this.B= parseInt(result[3],16);
+class color{
+	constructor(hexColorCode){
+		const getCodes =  /^#([\da-fA-F]{2,2})([\da-fA-F]{2,2})([\da-fA-F]{2,2})$/;
+		if(getCodes.test(hexColorCode)){
+			const result = getCodes.exec(hexColorCode);
+			this.R= parseInt(result[1],16);
+			this.G= parseInt(result[2],16);
+			this.B= parseInt(result[3],16);
+		}
 	}
-	this.rgbCode = function(){
+
+	rgbCode(){
 		return "rgb(" + this.R + ", " + this.G + ", " + this.B + ")";
 	}
 	/* RGB to HSL function from https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion/9493060#9493060 */
-	this.getHSL = function(){
+	getHSL(){
 		let r = this.R;let g = this.G;let b = this.B;
 		
 		r /= 255, g /= 255, b /= 255;
@@ -40,8 +43,8 @@ function color(hexColorCode) {
 
 let backgroundPage_theme_cache = null;
 function theme_cache_update(colorStylesheetNode){
-	let currentTheme = getPreference("panel_theme");
-	let background_color = getPreference("background_color");
+	const currentTheme = getPreference("panel_theme"),
+		background_color = getPreference("background_color");
 	
 	if(backgroundPage_theme_cache != null && colorStylesheetNode != null && currentTheme == backgroundPage_theme_cache.dataset.theme && background_color == backgroundPage_theme_cache.dataset.background_color){
 		if(colorStylesheetNode != null && currentTheme == colorStylesheetNode.dataset.theme && background_color == colorStylesheetNode.dataset.background_color){
@@ -52,12 +55,12 @@ function theme_cache_update(colorStylesheetNode){
 			return backgroundPage_theme_cache.cloneNode(true);
 		}
 	} else {
-		let baseColor = new color(background_color);
+		const baseColor = new color(background_color);
 		if(typeof baseColor != "object"){return null;}
 		backgroundPage_theme_cache = document.createElement("style");
 		backgroundPage_theme_cache.id = "generated-color-stylesheet";
-		let baseColor_hsl = baseColor.getHSL();
-		let baseColor_L = JSON.parse(baseColor_hsl.L.replace("%",""))/100;
+		const baseColor_hsl = baseColor.getHSL(),
+			baseColor_L = JSON.parse(baseColor_hsl.L.replace("%",""))/100;
 		let values;
 		if(currentTheme == "dark"){
 			var textColor_stylesheet = "@import url(css/panel-text-color-white.css);";

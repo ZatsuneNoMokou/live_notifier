@@ -116,6 +116,18 @@ header button{
 #deleteStream i{
 	font-size:16px;
 }
+#disableNotifications::before{
+	content: "notifications_active";
+	font-family:"Material Icons";
+	font-size:24px;
+	font-weight: normal;
+}
+#disableNotifications.off::before{
+	content: "notifications_off";
+	font-family:"Material Icons";
+	font-size:24px;
+	font-weight: normal;
+}
 #vide, .vide{
 	flex:1;
 }
@@ -231,29 +243,35 @@ footer, footer *{
 	margin-right:3px;
 	vertical-align:middle;
 }
-.item-stream[data-stream-website=dailymotion] .streamTitle::before, .debugItem[data-stream-website=dailymotion] .debugTitle::before{
-	background-image:url("/data/images/dailymotion-icon.png");
-	background-size:15px 15px;
+.item-stream[data-stream-website] .streamTitle::before, .debugItem[data-stream-website] .debugTitle::before{
+	background-image:url("/data/images/help-1724292.svg");
+	background-size:15px auto;
 }
-.item-stream[data-stream-website=hitbox] .streamTitle::before, .debugItem[data-stream-website=hitbox] .debugTitle::before{
+.item-stream[data-stream-website="dailymotion"] .streamTitle::before, .debugItem[data-stream-website="dailymotion"] .debugTitle::before{
+	background-image:url("/data/images/dailymotion-icon.png");
+}
+.item-stream[data-stream-website="hitbox"] .streamTitle::before, .debugItem[data-stream-website="hitbox"] .debugTitle::before{
 	background-image:url("/data/images/hitbox-icon.svg");
 	background-size:15px 15px;
 }
-.item-stream[data-stream-website=twitch] .streamTitle::before, .debugItem[data-stream-website=twitch] .debugTitle::before{
+.item-stream[data-stream-website="twitch"] .streamTitle::before, .debugItem[data-stream-website="twitch"] .debugTitle::before{
 	background-image:url("/data/images/GlitchIcon_WhiteonPurple.png");
-	background-size:15px 15px;
 }
-.item-stream[data-stream-website=beam] .streamTitle::before, .debugItem[data-stream-website=beam] .debugTitle::before{
+.item-stream[data-stream-website="beam"] .streamTitle::before, .debugItem[data-stream-website="beam"] .debugTitle::before{
 	background-image:url("/data/images/beam_ball_color.svg");
 	background-size:15px 15px;
 }
-.item-stream[data-stream-website=youtube] .streamTitle::before, .debugItem[data-stream-website=youtube] .debugTitle::before{
+.item-stream[data-stream-website="youtube"] .streamTitle::before, .debugItem[data-stream-website="youtube"] .debugTitle::before{
 	background-image:url("/data/images/YouTube-icon-full_color.png");
-	background-size:15px auto;
+}
+.item-stream[data-stream-website="picarto_tv"] .streamTitle::before, .debugItem[data-stream-website="picarto_tv"] .debugTitle::before{
+	background-image:url("/data/images/picarto-tv_Logo_black.svg");
+}
+body[data-theme='light'] .item-stream[data-stream-website="picarto_tv"] .streamTitle::before, .debugItem[data-stream-website="picarto_tv"] .debugTitle::before{
+	background-image:url("/data/images/picarto-tv_Logo_white.svg");
 }
 .item-stream[data-stream-type=unsupported] .streamTitle::before, .debugItem[data-stream-type=unsupported] .debugTitle::before{
 	background-image:url("/data/images/warning-34621.svg");
-	background-size:15px auto;
 }
 .item-stream.onlineItem .streamTitle{
 	width:160px;
@@ -317,7 +335,7 @@ footer, footer *{
 	margin-bottom:2px;
 	min-height:21px;
 }
-#streamListOnline > div.group, #streamListOffline > div.group{
+body.groupedStreams #streamListOnline > div.group, body.groupedStreams #streamListOffline > div.group{
 	padding-top:2px !important;
 	/*padding-bottom:2px !important;*/
 }
