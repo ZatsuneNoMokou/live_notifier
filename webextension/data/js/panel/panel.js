@@ -688,7 +688,7 @@ function insertStreamNode(newLine, website, id, contentId, type, streamData, onl
 	document.querySelector("body").classList.toggle("groupedStreams", group_streams_by_websites);
 
 	if(group_streams_by_websites){
-		return $(`#streamList${((online)? "Online" : "Offline")} .${(streamNodes[((online)? "online" : "offline")].hasOwnProperty(website))? website : "unsupported"}`).append(newLine);
+		return $(`#streamList${((online)? "Online" : "Offline")} .${(websites.has(website))? website : "unsupported"}`).append(newLine);
 	} else {
 		if(statusStreamList.length > 0){
 			for(let streamNode of statusStreamList){
