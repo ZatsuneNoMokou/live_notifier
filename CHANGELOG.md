@@ -8,6 +8,10 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 10.0.2
+* Fix: Panel height glich in Opera
+* Fix: Partial fix for the new YouTube design breaking a part of the YouTube support
+
 # 10.0.1
 * Fix: Stream list in panel, grouped by Website
 

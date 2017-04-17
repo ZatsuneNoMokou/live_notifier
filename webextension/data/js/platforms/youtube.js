@@ -78,8 +78,7 @@ const youtube = {
 	"API_addStream":
 		function(source_website, id){
 			const apiKey = getPreference("youtube_api_key").replace(/\s/,""),
-				referrer = getPreference("youtube_api_referrer"),
-				youtube_patreon_password = getPreference("youtube_patreon_password").replace(/\s/,"");
+				referrer = getPreference("youtube_api_referrer");
 			
 			let obj = {
 				"overrideMimeType": "text/html; charset=utf-8",
@@ -91,10 +90,11 @@ const youtube = {
 			} else if(source_website == "user::youtube"){
 				obj.url = `https://www.youtube.com/user/${id}`;
 			} else if(source_website == "video::youtube"){
-				obj.url = "https://www.youtube.com/watch";
+				return youtube.API(id);
+				/*obj.url = "https://www.youtube.com/watch";
 				obj.content = [
 					["v", id]
-				]
+				]*/
 			} else if(website_channel_id.test(source_website) == true){
 				return youtube.API_channelInfos(`channel::${id}`);
 			}
@@ -103,32 +103,11 @@ const youtube = {
 	"API":
 		function(id, nextPageToken){
 			const apiKey = getPreference("youtube_api_key").replace(/\s/,""),
-				referrer = getPreference("youtube_api_referrer"),
-				youtube_patreon_password = getPreference("youtube_patreon_password").replace(/\s/,"");
-			
+				referrer = getPreference("youtube_api_referrer");
+
 			let obj = {};
 			
-			if(youtube_patreon_password != ""){
-				if(website_channel_id.test(id)){
-					obj = {
-						"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLives.php",
-						"overrideMimeType":"text/plain; charset=utf-8",
-						"content": [
-							["id", website_channel_id.exec(id)[1]]
-						]
-					}
-					if(typeof nextPageToken == "string"){obj.content.push(["pageToken", nextPageToken]);}
-				} else {
-					obj = {
-						"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLiveInfo.php",
-						"overrideMimeType": "text/plain; charset=utf-8",
-						"content": [
-							["id", id],
-							["password", youtube_patreon_password]
-						]
-					}
-				}
-			} else if(typeof apiKey == "string" && apiKey != ""){
+			if(typeof apiKey == "string" && apiKey != ""){
 				if(website_channel_id.test(id)){
 					obj = {
 						"url": "https://www.googleapis.com/youtube/v3/search",
@@ -162,79 +141,23 @@ const youtube = {
 					}
 				}
 			} else {
+				//if(youtube_patreon_password != ""){
 				if(website_channel_id.test(id)){
-					/*obj = {
+					obj = {
 						"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLives.php",
-						"overrideMimeType": "text/plain; charset=utf-8",
+						"overrideMimeType":"text/plain; charset=utf-8",
 						"content": [
 							["id", website_channel_id.exec(id)[1]]
 						]
-					}*/
-					obj = {
-						"url": `https:\/\/www.youtube.com/channel/${website_channel_id.exec(id)[1]}/videos`,
-						"overrideMimeType": "text/html; charset=utf-8",
-						"content": [
-							["view", "2"],
-							["live_view", "501"]
-						],
-						"contentType": "document",
-						"Request_documentParseToJSON": function(xhrRequest){
-							const dataDocument = xhrRequest.response,
-								streamList_nodes = dataDocument.querySelectorAll("#channels-browse-content-grid li.channels-content-item");
-							
-							let streamListData_Map = new Map();
-							streamListData_Map.set("list", new Map());
-							
-							for(let node of streamList_nodes){
-								const currentChannelId = dataDocument.querySelector("meta[itemprop=channelId]").getAttribute("content");
-								
-								if(node.querySelector(".video-time") == null){
-									const streamId_node = node.querySelector("[data-context-item-id]"),
-										ownerId = node.querySelector("[data-ytid]");
-									
-									if((ownerId != null && ownerId.dataset.ytid == currentChannelId) && streamId_node != null){
-										const urlReg = /(?:http|https):\/\/.*/i,
-											streamId = streamId_node.dataset.contextItemId;
-										
-										if(node.querySelector(".yt-badge-live") == null){
-											continue;
-										}
-										
-										const streamName_node = node.querySelector(".yt-lockup-title a");
-										let streamName = (streamName_node != null)? streamName_node.textContent : "";
-										let streamURL = (urlReg.test(streamName_node.href))? streamName_node.href : "";
-										
-										const streamCurrentViewers_node = node.querySelector(".yt-lockup-meta-info");
-										//if(streamCurrentViewers_node.querySelector(".localized-date") != null){/**		Programmed events		**/
-										//	continue;
-										//}
-										let streamCurrentViewers = (streamCurrentViewers_node != null)? parseInt(streamCurrentViewers_node.textContent.replace(/\s/,"").replace(/,/,"")) : null;
-										
-										const videoThumb_node = node.querySelector(".video-thumb img");
-										let videoThumbUrl = videoThumb_node.src;
-										
-										streamListData_Map.get("list").set(streamId, {
-											"streamName": streamName,
-											"streamURL": streamURL,
-											"streamOwnerLogo": videoThumbUrl,
-											"streamCurrentViewers": streamCurrentViewers
-										});
-									}
-								}
-							}
-							return streamListData_Map;
-						}
 					}
 					if(typeof nextPageToken == "string"){obj.content.push(["pageToken", nextPageToken]);}
 				} else {
 					obj = {
-						"url": "http://www.youtube.com/watch",
-						"overrideMimeType": "text/html; charset=utf-8",
+						"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLiveInfo.php",
+						"overrideMimeType": "text/plain; charset=utf-8",
 						"content": [
-							["v", id]
-						],
-						"contentType": "document",
-						"Request_documentParseToJSON": youtube.Request_documentParseToJSON
+							["id", id]
+						]
 					}
 				}
 			}
@@ -243,21 +166,11 @@ const youtube = {
 	"API_channelInfos":
 		function(id){
 			const apiKey = getPreference("youtube_api_key").replace(/\s/,""),
-				referrer = getPreference("youtube_api_referrer"),
-				youtube_patreon_password = getPreference("youtube_patreon_password").replace(/\s/,"");
+				referrer = getPreference("youtube_api_referrer");
 			
 			let obj = {};
 			
-			if(youtube_patreon_password != ""){
-				obj = {
-					"url": "https://livenotifier.zatsunenomokou.eu/youtube_getChannel.php",
-					"overrideMimeType": "text/plain; charset=utf-8",
-					"content": [
-						["id", website_channel_id.exec(id)[1]],
-						["password", youtube_patreon_password]
-					]
-				}
-			} else if(typeof apiKey == "string" && apiKey != ""){
+			if(typeof apiKey == "string" && apiKey != ""){
 				obj = {
 					"url": "https://www.googleapis.com/youtube/v3/channels",
 					"overrideMimeType": "text/plain; charset=utf-8",
@@ -275,10 +188,11 @@ const youtube = {
 				}
 			} else {
 				obj = {
-					"url": `https://www.youtube.com/channel/${website_channel_id.exec(id)[1]}`,
-					"overrideMimeType": "text/html; charset=utf-8",
-					"contentType": "document",
-					"Request_documentParseToJSON": youtube.Request_documentParseToJSON
+					"url": "https://livenotifier.zatsunenomokou.eu/youtube_getChannel.php",
+					"overrideMimeType": "text/plain; charset=utf-8",
+					"content": [
+						["id", website_channel_id.exec(id)[1]]
+					]
 				}
 			}
 			return obj;
@@ -324,10 +238,12 @@ const youtube = {
 			const data = xhrResponse.json;
 			if(responseValidity == "success"){
 				if(data.hasOwnProperty("items") == true && typeof data.items.length == "number" && data.items.length == 1){
+					
 					if(data.items[0].hasOwnProperty("snippet") == true && data.items[0].snippet.hasOwnProperty("channelId") == true){
+						console.dir(data)
 						return {
 							streamId: `channel::${data.items[0].snippet.channelId}`,
-							streamName: (typeof data.items[0].snippet.title == "string")? data.items[0].snippet.title : data.items[0].snippet.channelId
+							streamName: (typeof data.items[0].snippet.channelTitle == "string")? data.items[0].snippet.channelTitle : data.items[0].snippet.channelId
 						};
 					} else if(data.items[0].hasOwnProperty("id") == true && typeof data.items[0].id == "string"){
 						return {
