@@ -57,7 +57,7 @@ function copyToClipboard(string){
 			if(result){
 				copy(string);
 			} else {
-				consoleMsg("log", "Clipboard writing permission not granted");
+				console.log("Clipboard writing permission not granted");
 				chrome.permissions.request({
 					permissions: ['clipboardWrite'],
 				}, function(result) {
@@ -705,6 +705,13 @@ function insertStreamNode(newLine, website, id, contentId, type, streamData, onl
 	return null;
 }
 
+$(document).on("click", ".item-stream", streamItemClick);
+$(document).on("click", ".item-stream .deleteStreamButton",	newDeleteStreamButton_onClick);
+$(document).on("click", ".item-stream .ignoreStreamButton",	newIgnoreStreamButton_onClick);
+$(document).on("click", ".item-stream .copyStreamURL",		newCopyStreamURLButton_onClick);
+$(document).on("click", ".item-stream .editStreamButton",	newEditStreamButton_onClick);
+$(document).on("click", ".item-stream .shareStreamButton",	newShareStreamButton_onClick);
+
 function listener(website, id, contentId, type, streamSettings, streamData){
 	let online = false;
 	switch(type){
@@ -769,13 +776,6 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	}
 	const newNode = insertStreamNode(Mustache.render(streamTemplate, streamRenderData), website, id, contentId, type, streamData, online);
 
-	$(newNode).click(streamItemClick);
-	$(newNode).find(".deleteStreamButton").click(newDeleteStreamButton_onClick);
-	$(newNode).find(".ignoreStreamButton").click(newIgnoreStreamButton_onClick);
-	$(newNode).find(".copyStreamURL").click(newCopyStreamURLButton_onClick);
-	$(newNode).find(".editStreamButton").click(newEditStreamButton_onClick);
-	$(newNode).find(".shareStreamButton").click(newShareStreamButton_onClick);
-	
 	if(typeof liveStatus.lastCheckStatus == "string" && liveStatus.lastCheckStatus != "" && liveStatus.lastCheckStatus != "success"){
 		let debugDataNode = document.querySelector("#debugData");
 		let newDebugItem = document.createElement('div');
