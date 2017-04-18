@@ -49,10 +49,10 @@
 			<div>
 				<span class="streamStatus">{{streamStatus}}</span>{{/online}}
 				<span class="stream_control">
-					<span class="deleteStreamButton" data-id='{{streamId}}' data-website='{{streamWebsite}}' data-translate-title="Delete" data-placement="left" onClick="newDeleteStreamButton_onClick()">delete</span>
-					<span class="ignoreStreamButton" data-id='{{streamId}}' data-website='{{streamWebsite}}' data-translate-title="IgnoreStream" data-placement="left" onClick="newIgnoreStreamButton_onClick()">visibility_off</span>
+					<span class="deleteStreamButton" data-id='{{streamId}}' data-website='{{streamWebsite}}' data-translate-title="Delete" data-placement="left">delete</span>
+					<span class="ignoreStreamButton" data-id='{{streamId}}' data-website='{{streamWebsite}}' data-translate-title="IgnoreStream" data-placement="left">visibility_off</span>
 					{{^unsupportedType}}{{#streamURL}}
-						<span class="copyStreamURL" data-id='{{streamId}}' data-content-id='{{contentId}}' data-website='{{streamWebsite}}' data-translate-title="copyURL" data-placement="left" onClick="newCopyStreamURLButton_onClick()"></span>
+						<span class="copyStreamURL" data-id='{{streamId}}' data-content-id='{{contentId}}' data-website='{{streamWebsite}}' data-translate-title="copyURL" data-placement="left"></span>
 					{{/streamURL}}{{/unsupportedType}}
 					<span class="editStreamButton" data-id='{{streamId}}' data-content-id='{{contentId}}' data-website='{{streamWebsite}}' data-title='{{streamName}}' data-stream-settings='{{streamSettings}}' data-translate-title="Settings" data-placement="left"></span>
 					{{#online}}

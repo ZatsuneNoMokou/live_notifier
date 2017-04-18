@@ -543,28 +543,12 @@ function newPreferenceNode(parent, id, prefObj){
 		});
 		node.appendChild(output);
 	}
-	
-	switch(prefObj.type){
-		case "string":
-			prefNode.addEventListener("input", settingNode_onChange);
-			break;
-		case "integer":
-		case "bool":
-		case "color":
-		case "menulist":
-			prefNode.addEventListener("change", settingNode_onChange);
-			break;
-		case "control":
-			if(id == "export_preferences"){
-				prefNode.addEventListener("click", exportPrefsToFile);
-			} else if(id == "import_preferences"){
-				prefNode.addEventListener("click", importPrefsFromFile); //(backgroundPage != null)? backgroundPage.importPrefsFromFile : importPrefsFromFile);
-			} else if(id.indexOf("_import") != -1){
-				prefNode.addEventListener("click", import_onClick);
-			}
-			break;
-	}
 }
+$(document).on("input", "[data-setting-type='string']", settingNode_onChange);
+$(document).on("change", "[data-setting-type='integer'],[data-setting-type='bool'],[data-setting-type='color'],[data-setting-type='menulist']", settingNode_onChange);
+$(document).on("click", "#export_preferences", exportPrefsToFile);
+$(document).on("click", "#import_preferences", importPrefsFromFile);
+$(document).on("click", "[id$='_import']", import_onClick); // [id$='_import'] => Every id that end with _import
 
 /*		---- Import/Export preferences from file ----		*/
 function simulateClick(node) {
@@ -624,7 +608,7 @@ function importPrefsFromFile(event){
 				if(file_JSONData != null){
 					if(file_JSONData.hasOwnProperty("live_notifier_version") == true && file_JSONData.hasOwnProperty("preferences") == true && typeof file_JSONData.preferences == "object"){
 						for(let prefId in file_JSONData.preferences){
-							if(typeof options[prefId].type != "undefined" && options[prefId].type != "control" && options[prefId].type != "file" && typeof file_JSONData.preferences[prefId] == typeof options_default_sync[prefId]){
+							if(options[prefId] && typeof options[prefId].type != "undefined" && options[prefId].type != "control" && options[prefId].type != "file" && typeof file_JSONData.preferences[prefId] == typeof options_default_sync[prefId]){
 								if(mergePreferences){
 									let oldPref = getPreference(prefId);
 									let newPrefArray;
