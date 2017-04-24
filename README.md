@@ -1,5 +1,11 @@
 # Live notifier
-Web Extension to be notified of streams from Beam, Dailymotion, Hitbox, Picarto.TV – Creative Live Streaming, Twitch, and Youtube.
+Web Extension to be notified of streams from&nbsp;:
+* Beam
+* Dailymotion
+* Hitbox
+* Picarto.TV – Creative Live Streaming (https://picarto.tv/)
+* Twitch
+* Youtube.
 
 More information on the Mozilla addon page https://addons.mozilla.org/fr/firefox/addon/live-notifier/
 
