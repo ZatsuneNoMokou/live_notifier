@@ -5,7 +5,7 @@ Web Extension to be notified of streams from&nbsp;:
 * Hitbox
 * Picarto.TV – Creative Live Streaming (https://picarto.tv/)
 * Twitch
-* Youtube.
+* Youtube
 
 More information on the Mozilla addon page https://addons.mozilla.org/fr/firefox/addon/live-notifier/
 
