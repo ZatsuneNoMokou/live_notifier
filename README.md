@@ -1,5 +1,5 @@
 # Live notifier
-Web Extension to be notified of streams from&nbsp;:
+Web Extension notifying streams from&nbsp;:
 * Beam
 * Dailymotion
 * Hitbox
@@ -7,7 +7,7 @@ Web Extension to be notified of streams from&nbsp;:
 * Twitch
 * Youtube
 
-More information on the Mozilla addon page https://addons.mozilla.org/fr/firefox/addon/live-notifier/
+More information on the [Mozilla add-on page](https://addons.mozilla.org/fr/firefox/addon/live-notifier/), the Web Extension is also available on the [Chrome Store](https://chrome.google.com/webstore/detail/live-notifier/dfepdpabjeepgmiaapoppelpadpcbnmf)
 
 perfect-scrollbar is from https://github.com/noraesae/perfect-scrollbar (License MIT).
 
