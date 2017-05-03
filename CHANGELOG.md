@@ -8,6 +8,9 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 10.0.5
+* Fix: YouTube online streams URL was channel's one instead of the stream one.
+
 # 10.0.4
 * i: In the panel, no more event attached to stream items in the pane, only one attached to the body (better performances)
 * i: Almost no events attached to preferences in the same way

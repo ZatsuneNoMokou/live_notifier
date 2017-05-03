@@ -240,7 +240,6 @@ const youtube = {
 				if(data.hasOwnProperty("items") == true && typeof data.items.length == "number" && data.items.length == 1){
 					
 					if(data.items[0].hasOwnProperty("snippet") == true && data.items[0].snippet.hasOwnProperty("channelId") == true){
-						console.dir(data)
 						return {
 							streamId: `channel::${data.items[0].snippet.channelId}`,
 							streamName: (typeof data.items[0].snippet.channelTitle == "string")? data.items[0].snippet.channelTitle : data.items[0].snippet.channelId
@@ -352,7 +351,7 @@ const youtube = {
 				} else {
 					streamData.streamName = data.streamName;
 				}
-				streamData.streamURL = (typeof data.streamURL == "string")? data.streamURL : "";
+				streamData.streamURL = (typeof data.streamURL == "string")? data.streamURL : ((typeof data.streamUrl == "string")? data.streamUrl : "");
 				streamData.streamOwnerLogo = data.streamOwnerLogo;
 				streamData.streamCurrentViewers = data.streamCurrentViewers;
 				streamData.liveStatus.API_Status = true;
