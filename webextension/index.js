@@ -1921,7 +1921,7 @@ function importStreams(website, id, url, pageNumber){
 					resolve("ImportEnd_DataNull");
 				}
 			}
-		}
+		};
 		
 		if(current_API.hasOwnProperty("headers") === true){
 			importStreams_RequestOptions.headers = current_API.headers;
@@ -2040,113 +2040,124 @@ function getRedirectedURL(URL, maxRedirect){
 // Begin to check lives
 let interval;
 function initAddon(){
-		chrome.contextMenus.removeAll();
-		chrome.contextMenus.create({
-			"type": "normal",
-			"id": "livenotifier_contextMenu",
-			"title": _("Add_this"),
-			"contexts": ["link"],
-			"targetUrlPatterns": ["http://*/*", "https://*/*"],
-			"onclick": function(info, tab){
-				activeTab = tab;
-				let url = info.linkUrl;
-				consoleMsg("info", `[ContextMenu] URL: ${url}`);
-				
-				getRedirectedURL(url, 5)
-					.then((result) => {
-						if((result.indexOf("http://") === 0 || result.indexOf("https://") === 0) && url !== result){
-							consoleMsg("info", `Redirected URL: ${result}`)
-							addStreamFromPanel({"ContextMenu_URL": result});
-						} else {
-							addStreamFromPanel({"ContextMenu_URL": url});
-						}
-					})
-					.catch((error) => {
-						if(typeof error === "object"){
-							consoleDir(error);
-						} else {
-							consoleMsg("warn", error);
-						}
+	chrome.contextMenus.removeAll();
+	chrome.contextMenus.create({
+		"type": "normal",
+		"id": "livenotifier_contextMenu",
+		"title": _("Add_this"),
+		"contexts": ["link"],
+		"targetUrlPatterns": ["http://*/*", "https://*/*"],
+		"onclick": function(info, tab){
+			activeTab = tab;
+			let url = info.linkUrl;
+			consoleMsg("info", `[ContextMenu] URL: ${url}`);
+
+			getRedirectedURL(url, 5)
+				.then((result) => {
+					if((result.indexOf("http://") === 0 || result.indexOf("https://") === 0) && url !== result){
+						consoleMsg("info", `Redirected URL: ${result}`)
+						addStreamFromPanel({"ContextMenu_URL": result});
+					} else {
 						addStreamFromPanel({"ContextMenu_URL": url});
-					})
-			}
-		});
-		
-		/*		----- Move localStorage (HTML5) to chrome local storage area -----		*/
-		for(let prefId in localStorage){
-			if(localStorage.hasOwnProperty(prefId) && localStorage.getItem(prefId) !== null){
-				savePreference(prefId, localStorage.getItem(prefId));
-			}
+					}
+				})
+				.catch((error) => {
+					if(typeof error === "object"){
+						consoleDir(error);
+					} else {
+						consoleMsg("warn", error);
+					}
+					addStreamFromPanel({"ContextMenu_URL": url});
+				})
 		}
-		localStorage.clear();
-		
-		let localToRemove = ["livestreamer_cmd_to_clipboard","livestreamer_cmd_quality","youtube_patreon_password"];
-		/* 		----- Importation/Removal of old preferences -----		*/
-		if(getPreference("stream_keys_list") === ""){
-			let importSreamsFromOldVersion = function(){
-				let somethingElseThanSpaces = /[^\s]+/;
-				let newPrefTable = [];
-				websites.forEach((websiteAPI, website) => {
-					let pref = getPreference(`${website}_keys_list`);
-					if(typeof pref !== "undefined" && pref !== "" && somethingElseThanSpaces.test(pref)){
-						let myTable = pref.split(",");
-						for(let i in myTable){
+	});
+
+	/*		----- Move localStorage (HTML5) to chrome local storage area -----		*/
+	for(let prefId in localStorage){
+		if(localStorage.hasOwnProperty(prefId) && localStorage.getItem(prefId) !== null){
+			savePreference(prefId, localStorage.getItem(prefId));
+		}
+	}
+	localStorage.clear();
+
+	let localToRemove = ["livestreamer_cmd_to_clipboard","livestreamer_cmd_quality","youtube_patreon_password"];
+	/* 		----- Importation/Removal of old preferences -----		*/
+	if(getPreference("stream_keys_list") === ""){
+		let importSreamsFromOldVersion = function(){
+			let somethingElseThanSpaces = /[^\s]+/;
+			let newPrefTable = [];
+			websites.forEach((websiteAPI, website) => {
+				let pref = getPreference(`${website}_keys_list`);
+				if(typeof pref !== "undefined" && pref !== "" && somethingElseThanSpaces.test(pref)){
+					let myTable = pref.split(",");
+					for(let i in myTable){
+						if(myTable.hasOwnProperty(i)){
 							newPrefTable.push(`${website}::${myTable[i]}`);
 						}
 					}
-				});
-				savePreference("stream_keys_list", newPrefTable.join(", "));
-				websites.forEach((websiteAPI, website) => {
-					localToRemove.push(`${website}_keys_list`);
-					if(appGlobal.currentPreferences.hasOwnProperty("notification_type")){
-						delete appGlobal.currentPreferences[`${website}_keys_list`];
-					}
-				})
-			};
-			importSreamsFromOldVersion();
-		}
-		
-		/*if(typeof chrome.runtime.onInstalled != "undefined" && typeof getPreference("livenotifier_version") == "string"){
-			localToRemove.push("livenotifier_version");
-			if(appGlobal.currentPreferences.hasOwnProperty("livenotifier_version")){
-				delete appGlobal.currentPreferences.livenotifier_version;
-			}
-		}*/
-		if(typeof getPreference("notification_type") === "string"){
-			localToRemove.push("notification_type");
-			if(appGlobal.currentPreferences.hasOwnProperty("notification_type")){
-				delete appGlobal.currentPreferences.notification_type;
-			}
-		}
-		if(localToRemove.length > 0){
-			chrome.storage.local.remove(localToRemove, function(){
-				if(typeof chrome.runtime.lastError === "object" && chrome.runtime.lastError !== null){
-					consoleMsg("warn", `Error removing preference(s) from chrome local storage: ${chrome.runtime.lastError}`);
 				}
 			});
-		}
-		
-		let toRemove = ["livenotifier_version","notification_type","livestreamer_cmd_to_clipboard","livestreamer_cmd_quality"];
-		websites.forEach((websiteAPI, website) => {
-			toRemove.push(`${website}_keys_list`);
-		});
+			savePreference("stream_keys_list", newPrefTable.join(", "));
+			websites.forEach((websiteAPI, website) => {
+				localToRemove.push(`${website}_keys_list`);
+				if(appGlobal.currentPreferences.hasOwnProperty("notification_type")){
+					delete appGlobal.currentPreferences[`${website}_keys_list`];
+				}
+			})
+		};
+		importSreamsFromOldVersion();
+	}
 
-		if(typeof chrome.storage.sync === "object"){
-			chrome.storage.sync.remove(toRemove, function(){
-				if(typeof chrome.runtime.lastError !== "undefined" && chrome.runtime.lastError !== null){
-					consoleMsg("warn", `Error removing preference(s) from chrome sync storage: ${chrome.runtime.lastError}`);
-				}
-			});
+	if(typeof getPreference("hitbox_user_id") === "string"){
+		savePreference("smashcast_user_id", getPreference("hitbox_user_id"));
+		localToRemove.push("hitbox_user_id");
+	}
+	if(typeof getPreference("beam_user_id") === "string"){
+		savePreference("mixer_user_id", getPreference("beam_user_id"));
+		localToRemove.push("beam_user_id");
+	}
+
+	/*if(typeof chrome.runtime.onInstalled != "undefined" && typeof getPreference("livenotifier_version") == "string"){
+		localToRemove.push("livenotifier_version");
+		if(appGlobal.currentPreferences.hasOwnProperty("livenotifier_version")){
+			delete appGlobal.currentPreferences.livenotifier_version;
 		}
-		
-		/* 		----- Fin Importation/Removal des vieux paramères -----		*/
-		
-		websites.forEach((websiteAPI, website, array) => {
-			liveStatus.set(website, new Map());
-			channelInfos.set(website, new Map());
+	}*/
+	if(typeof getPreference("notification_type") === "string"){
+		localToRemove.push("notification_type");
+		if(appGlobal.currentPreferences.hasOwnProperty("notification_type")){
+			delete appGlobal.currentPreferences.notification_type;
+		}
+	}
+	if(localToRemove.length > 0){
+		chrome.storage.local.remove(localToRemove, function(){
+			if(typeof chrome.runtime.lastError === "object" && chrome.runtime.lastError !== null){
+				consoleMsg("warn", `Error removing preference(s) from chrome local storage: ${chrome.runtime.lastError}`);
+			}
 		});
-		
-		checkLives();
+	}
+
+	let toRemove = ["livenotifier_version","notification_type","livestreamer_cmd_to_clipboard","livestreamer_cmd_quality"];
+	websites.forEach((websiteAPI, website) => {
+		toRemove.push(`${website}_keys_list`);
+	});
+
+	if(typeof chrome.storage.sync === "object"){
+		chrome.storage.sync.remove(toRemove, function(){
+			if(typeof chrome.runtime.lastError !== "undefined" && chrome.runtime.lastError !== null){
+				consoleMsg("warn", `Error removing preference(s) from chrome sync storage: ${chrome.runtime.lastError}`);
+			}
+		});
+	}
+
+	/* 		----- Fin Importation/Removal des vieux paramères -----		*/
+
+	websites.forEach((websiteAPI, website, array) => {
+		liveStatus.set(website, new Map());
+		channelInfos.set(website, new Map());
+	});
+
+	checkLives();
 }
 
 // Checking if updated

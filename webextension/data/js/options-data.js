@@ -27,20 +27,20 @@ optionsData.options = {
 		"group": "dailymotion",
 		"prefLevel": "advanced"
 	},
-	/*			Hitbox			*/
-	"hitbox_user_id": {
-		"title": "Your Hitbox id",
-		"description": "Enter your Hitbox id to be able to import the stream(s) you follow.",
+	/*			Smashcast			*/
+	"smashcast_user_id": {
+		"title": "Your Smashcast id",
+		"description": "Enter your Smashcast id to be able to import the stream(s) you follow.",
 		"type": "string",
 		"value": "",
-		"group": "hitbox",
+		"group": "smashcast",
 		"prefLevel": "advanced"
 	},
-	"hitbox_import": {
-		"title": "Import the Hitbox stream(s) you follow",
+	"smashcast_import": {
+		"title": "Import the Smashcast stream(s) you follow",
 		"label": "Import",
 		"type": "control",
-		"group": "hitbox",
+		"group": "smashcast",
 		"prefLevel": "advanced"
 	},
 	/*			Twitch			*/
@@ -60,19 +60,19 @@ optionsData.options = {
 		"prefLevel": "advanced"
 	},
 	/*			Beam			*/
-	"beam_user_id": {
-		"title": "Your Beam id",
-		"description": "Enter your Beam id to be able to import the stream(s) you follow.",
+	"mixer_user_id": {
+		"title": "Your Mixer id",
+		"description": "Enter your Mixer id to be able to import the stream(s) you follow.",
 		"type": "string",
 		"value": "",
-		"group": "beam",
+		"group": "mixer",
 		"prefLevel": "advanced"
 	},
-	"beam_import": {
-		"title": "Import the Beam stream(s) you follow.",
+	"mixer_import": {
+		"title": "Import the Mixer stream(s) you follow.",
 		"label": "Import",
 		"type": "control",
-		"group": "beam",
+		"group": "mixer",
 		"prefLevel": "advanced"
 	},
 	/*			Youtube			*/

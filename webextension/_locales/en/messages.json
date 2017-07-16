@@ -255,18 +255,6 @@
 	"stream_keys_list_description": {
 		"message": "Stream list in a comma separated list"
 	},
-	"beam_user_id_title": {
-		"message": "Your Beam id"
-	},
-	"beam_user_id_description": {
-		"message": "Enter to be able to import the stream(s) you follow"
-	},
-	"beam_import_title":{
-		"message": "Import the Beam stream(s) you follow"
-	},
-	"beam_import": {
-		"message": "Import"
-	},
 	"dailymotion_user_id_title": {
 		"message": "Your Dailymotion id"
 	},
@@ -279,16 +267,28 @@
 	"dailymotion_import":{
 		"message": "Import"
 	},
-	"hitbox_user_id_title": {
-		"message": "Your Hitbox id"
+	"mixer_user_id_title": {
+		"message": "Your Mixer id"
 	},
-	"hitbox_user_id_description": {
+	"mixer_user_id_description": {
 		"message": "Enter to be able to import the stream(s) you follow"
 	},
-	"hitbox_import_title":{
-		"message": "Import the Hitbox stream(s) you follow"
+	"mixer_import_title":{
+		"message": "Import the Mixer stream(s) you follow"
 	},
-	"hitbox_import":{
+	"mixer_import": {
+		"message": "Import"
+	},
+	"smashcast_user_id_title": {
+		"message": "Your Smashcast id"
+	},
+	"smashcast_user_id_description": {
+		"message": "Enter to be able to import the stream(s) you follow"
+	},
+	"smashcast_import_title":{
+		"message": "Import the Smashcast stream(s) you follow"
+	},
+	"smashcast_import":{
 		"message": "Import"
 	},
 	"twitch_user_id_title": {

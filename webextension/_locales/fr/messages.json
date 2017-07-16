@@ -255,18 +255,6 @@
 	"stream_keys_list_description": {
 		"message": "Liste des streams dans une liste séparée par des virgules"
 	},
-	"beam_user_id_title": {
-		"message": "Votre id Beam"
-	},
-	"beam_user_id_description": {
-		"message": "Saisir pour pouvoir importer les streameurs que vous suivez"
-	},
-	"beam_import_title":{
-		"message": "Importez les streameurs Beam que vous suivez"
-	},
-	"beam_import": {
-		"message": "Importer"
-	},
 	"dailymotion_user_id_title": {
 		"message": "Votre id Dailymotion"
 	},
@@ -279,16 +267,28 @@
 	"dailymotion_import":{
 		"message": "Importer"
 	},
-	"hitbox_user_id_title": {
-		"message": "Votre id Hitbox"
+	"mixer_user_id_title": {
+		"message": "Votre id Mixer"
 	},
-	"hitbox_user_id_description": {
+	"mixer_user_id_description": {
 		"message": "Saisir pour pouvoir importer les streameurs que vous suivez"
 	},
-	"hitbox_import_title":{
-		"message": "Importez les streameurs Hitbox que vous suivez"
+	"mixer_import_title":{
+		"message": "Importez les streameurs Mixer que vous suivez"
 	},
-	"hitbox_import": {
+	"mixer_import": {
+		"message": "Importer"
+	},
+	"smashcast_user_id_title": {
+		"message": "Votre id Smashcast"
+	},
+	"smashcast_user_id_description": {
+		"message": "Saisir pour pouvoir importer les streameurs que vous suivez"
+	},
+	"smashcast_import_title":{
+		"message": "Importez les streameurs Smashcast que vous suivez"
+	},
+	"smashcast_import": {
 		"message": "Importer"
 	},
 	"twitch_user_id_title": {
