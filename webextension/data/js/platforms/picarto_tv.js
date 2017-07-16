@@ -8,23 +8,21 @@ const picarto_tv = {
 	]),
 	"API_addStream":
 		function(source_website, id){
-			let obj = {
+			return {
 				url: `https://api.picarto.tv/v1/channel/name/${id}`,
 				overrideMimeType: "application/json; charset=utf-8"
-			}
-			return obj;
+			};
 		},
 	"API":
 		function(id){
-			let obj = {
+			return {
 				url: `https://api.picarto.tv/v1/channel/id/${id}`,
 				overrideMimeType: "application/json; charset=utf-8"
-			}
-			return obj;
+			};
 		},
 	"checkResponseValidity":
 		function(data){
-			if(data.statusCode == 400 || data.statusCode == 403 || data.statusCode == 404){
+			if(data.statusCode === 400 || data.statusCode === 403 || data.statusCode === 404){
 				return `error (${data.statusCode})`;
 			} else {
 				return "success";
@@ -33,7 +31,7 @@ const picarto_tv = {
 	"addStream_getId":
 		function(source_website, id, response, streamListSetting, responseValidity){
 			const data = response.json;
-			if(responseValidity == "success"){
+			if(responseValidity === "success"){
 				return {
 					streamId: data.user_id,
 					streamName: data.name
@@ -57,5 +55,5 @@ const picarto_tv = {
 			streamData.liveStatus.API_Status = data["online"];
 			return streamData;
 		}
-}
+};
 websites.set("picarto_tv", picarto_tv);

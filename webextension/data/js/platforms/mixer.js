@@ -1,41 +1,38 @@
-const beam = {
-	"title": "Beam",
+const mixer = {
+	"title": "Mixer",
 	"addStream_URLpatterns": new Map([
-		["beam", [
-			/^(?:http|https):\/\/beam\.pro\/([^\/\?\&]+)/
+		["mixer", [
+			/^(?:http|https):\/\/mixer\.com\/([^\/\?\&]+)/
 		]]
 	]),
 	"API_addStream":
 		function(source_website, id){
-			return beam.API(id);
+			return mixer.API(id);
 		},
 	"API":
 		function(id){
-			let obj = {
-				url: `https://beam.pro/api/v1/channels/${id}`,
+			return {
+				url: `https://mixer.com/api/v1/channels/${id}`,
 				overrideMimeType: "text/plain; charset=utf-8"
-			}
-			return obj;
+			};
 		},
 	"importAPIGetUserId":
 		function(id){
-			let obj = {
-				url: `https://beam.pro/api/v1/channels/${id}`,
+			return {
+				url: `https://mixer.com/api/v1/channels/${id}`,
 				overrideMimeType: "text/plain; charset=utf-8"
-			}
-			return obj;
+			};
 		},
 	"importAPI":
 		function(id){
-			let obj = {
-				url: `https://beam.pro/api/v1/users/${id}/follows?fields=id,token`,
+			return {
+				url: `https://mixer.com/api/v1/users/${id}/follows?fields=id,token`,
 				overrideMimeType: "text/plain; charset=utf-8"
-			}
-			return obj;
+			};
 		},
 	"checkResponseValidity":
 		function(data){
-			if(data == "Channel not found." || data.statusCode == 404){
+			if(data === "Channel not found." || data.statusCode === 404){
 				return "error";
 			} else {
 				return "success";
@@ -44,10 +41,10 @@ const beam = {
 	"addStream_getId":
 		function(source_website, id, response, streamListSetting, responseValidity){
 			const data = response.json;
-			if(responseValidity == "success"){
+			if(responseValidity === "success"){
 				return {
 					streamId: id,
-					streamName: (data.user && typeof data.user.username == "string")? data.user.username : id
+					streamName: (data.user && typeof data.user.username === "string")? data.user.username : id
 				};
 			}
 			return null;
@@ -59,11 +56,11 @@ const beam = {
 			streamData.streamName = data.user["username"];
 			streamData.streamStatus = data["name"];
 			
-			if(typeof data.user["avatarUrl"] == "string" && data.user["avatarUrl"] != ""){
+			if(typeof data.user["avatarUrl"] === "string" && data.user["avatarUrl"] !== ""){
 				streamData.streamOwnerLogo = data["user"]["avatarUrl"];
 			}
 			streamData.streamCurrentViewers = parseInt(data["viewersCurrent"]);
-			if(typeof data.user.social["twitter"] == "string" && data.user.social["twitter"] != "" && twitterID_from_url.test(data.user.social["twitter"])){
+			if(typeof data.user.social["twitter"] === "string" && data.user.social["twitter"] !== "" && twitterID_from_url.test(data.user.social["twitter"])){
 				streamData.twitterID = twitterID_from_url.exec(data.user.social["twitter"])[1];
 			}
 			
@@ -78,14 +75,14 @@ const beam = {
 		function(id, data, streamListSetting){
 			let obj = {
 				list: []
-			}
+			};
 			
-			if(typeof data == "object"){
+			if(typeof data === "object"){
 				for(let item of data){
 					obj.list.push(item["token"]);
 				}
 			}
 			return obj;
 		}
-}
-websites.set("beam", beam);
+};
+websites.set("mixer", mixer);

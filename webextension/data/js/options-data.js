@@ -308,18 +308,20 @@ optionsData.options = {
 		"sync": false,
 		"value": "0.0.0"
 	}
-}
+};
 
 optionsData.options_default = {};
 optionsData.options_default_sync = {};
 
-for(var id in optionsData.options){
-	var option = optionsData.options[id];
-	if(typeof option.value != "undefined"){
-		optionsData.options_default[id] = option.value;
-		
-		if(!(typeof option.sync == "boolean" && option.sync == false)){
-			optionsData.options_default_sync[id] = option.value;
+for(let id in optionsData.options){
+	if(optionsData.options.hasOwnProperty(id)){
+		let option = optionsData.options[id];
+		if(typeof option.value !== "undefined"){
+			optionsData.options_default[id] = option.value;
+
+			if(!(typeof option.sync === "boolean" && option.sync === false)){
+				optionsData.options_default_sync[id] = option.value;
+			}
 		}
 	}
 }

@@ -21,14 +21,14 @@ class color{
 	getHSL(){
 		let r = this.R;let g = this.G;let b = this.B;
 		
-		r /= 255, g /= 255, b /= 255;
-		var max = Math.max(r, g, b), min = Math.min(r, g, b);
-		var h, s, l = (max + min) / 2;
+		r /= 255; g /= 255; b /= 255;
+		let max = Math.max(r, g, b), min = Math.min(r, g, b);
+		let h, s, l = (max + min) / 2;
 
 		if(max == min){
 			h = s = 0; // achromatic
 		}else{
-			var d = max - min;
+			let d = max - min;
 			s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
 			switch(max){
 				case r: h = (g - b) / d + (g < b ? 6 : 0); break;
@@ -46,8 +46,8 @@ function theme_cache_update(colorStylesheetNode){
 	const currentTheme = getPreference("panel_theme"),
 		background_color = getPreference("background_color");
 	
-	if(backgroundPage_theme_cache != null && colorStylesheetNode != null && currentTheme == backgroundPage_theme_cache.dataset.theme && background_color == backgroundPage_theme_cache.dataset.background_color){
-		if(colorStylesheetNode != null && currentTheme == colorStylesheetNode.dataset.theme && background_color == colorStylesheetNode.dataset.background_color){
+	if(backgroundPage_theme_cache !== null && colorStylesheetNode !== null && currentTheme === backgroundPage_theme_cache.dataset.theme && background_color === backgroundPage_theme_cache.dataset.background_color){
+		if(colorStylesheetNode !== null && currentTheme === colorStylesheetNode.dataset.theme && background_color === colorStylesheetNode.dataset.background_color){
 			console.info("Loaded theme is already good");
 			return null;
 		} else {
@@ -56,21 +56,21 @@ function theme_cache_update(colorStylesheetNode){
 		}
 	} else {
 		const baseColor = new color(background_color);
-		if(typeof baseColor != "object"){return null;}
+		if(typeof baseColor !== "object"){return null;}
 		backgroundPage_theme_cache = document.createElement("style");
 		backgroundPage_theme_cache.id = "generated-color-stylesheet";
 		const baseColor_hsl = baseColor.getHSL(),
 			baseColor_L = JSON.parse(baseColor_hsl.L.replace("%",""))/100;
-		let values;
-		if(currentTheme == "dark"){
-			var textColor_stylesheet = "@import url(css/panel-text-color-white.css);";
+		let values, textColor_stylesheet;
+		if(currentTheme === "dark"){
+			textColor_stylesheet = "@import url(css/panel-text-color-white.css);";
 			if(baseColor_L > 0.5 || baseColor_L < 0.1){
 				values = ["19%","13%","26%","13%"];
 			} else {
 				values = [(baseColor_L + 0.06) * 100 + "%", baseColor_L * 100 + "%", (baseColor_L + 0.13) * 100 + "%", baseColor_L * 100 + "%"];
 			}
-		} else if(currentTheme == "light"){
-			var textColor_stylesheet = "@import url(css/panel-text-color-black.css);";
+		} else if(currentTheme === "light"){
+			textColor_stylesheet = "@import url(css/panel-text-color-black.css);";
 			if(baseColor_L < 0.5 /*|| baseColor_L > 0.9*/){
 				values = ["87%","74%","81%","87%"];
 			} else {
@@ -91,7 +91,7 @@ input[type=range]::-webkit-slider-runnable-track{background-color:hsl(${baseColo
 input[type=range]::-moz-range-track{background-color:hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[1]});}
 
 header, .item-stream, footer{box-shadow: 0px 0px 5px 0px hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[3]});}
-`
+`;
 		backgroundPage_theme_cache.dataset.theme = currentTheme;
 		backgroundPage_theme_cache.dataset.background_color = background_color;
 		//console.log(baseColor.rgbCode());

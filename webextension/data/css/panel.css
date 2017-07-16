@@ -250,15 +250,19 @@ footer, footer *{
 .item-stream[data-stream-website="dailymotion"] .streamTitle::before, .debugItem[data-stream-website="dailymotion"] .debugTitle::before{
 	background-image:url("/data/images/dailymotion-icon.png");
 }
-.item-stream[data-stream-website="hitbox"] .streamTitle::before, .debugItem[data-stream-website="hitbox"] .debugTitle::before{
-	background-image:url("/data/images/hitbox-icon.svg");
+.item-stream[data-stream-website="smashcast"] .streamTitle::before, .debugItem[data-stream-website="hitbox"] .debugTitle::before{
+	background-image:url("/data/images/smashcast-icon-White.png");
+	background-size:15px 15px;
+}
+body[data-theme='light'] .item-stream[data-stream-website="smashcast"] .streamTitle::before, body[data-theme='light'] .debugItem[data-stream-website="hitbox"] .debugTitle::before{
+	background-image:url("/data/images/smashcast-icon.png");
 	background-size:15px 15px;
 }
 .item-stream[data-stream-website="twitch"] .streamTitle::before, .debugItem[data-stream-website="twitch"] .debugTitle::before{
 	background-image:url("/data/images/GlitchIcon_WhiteonPurple.png");
 }
-.item-stream[data-stream-website="beam"] .streamTitle::before, .debugItem[data-stream-website="beam"] .debugTitle::before{
-	background-image:url("/data/images/beam_ball_color.svg");
+.item-stream[data-stream-website="mixer"] .streamTitle::before, .debugItem[data-stream-website="mixer"] .debugTitle::before{
+	background-image:url("/data/images/MixerMerge_Light.svg");
 	background-size:15px 15px;
 }
 .item-stream[data-stream-website="youtube"] .streamTitle::before, .debugItem[data-stream-website="youtube"] .debugTitle::before{
