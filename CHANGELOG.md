@@ -1,7 +1,7 @@
 # Firefox Web Extension Support
 * /!\ Missing/Not working well on Firefox:
   * Clipboard (Currently using a workaround, but [Bug 1272869](https://bugzilla.mozilla.org/show_bug.cgi?id=1272869) ~~[Bug 1197451 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1197451)~~ )
-  * Permission API ( [Bug 1197420](https://bugzilla.mozilla.org/show_bug.cgi?id=1197420) )
+  * ~~Permission API ( [Bug 1197420 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1197420) )~~ (Fixed in Firefox 55)
   * Button on notifications (Using notification without them alike Opera) ( [Bug 1190681](https://bugzilla.mozilla.org/show_bug.cgi?id=1190681) )
   * Importing from file using the panel with Firefox Web Extensions ( [Bug 1292701](https://bugzilla.mozilla.org/show_bug.cgi?id=1292701) )
   * HTML title (tooltips) not showing (Currently using a workaround)
