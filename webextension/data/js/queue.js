@@ -34,7 +34,7 @@ class Queue {
 					
 					return true;
 				}
-			}
+			};
 			
 			let itemDone = (queueItem, data)=>{
 				currentlyExecuting--;
@@ -50,10 +50,10 @@ class Queue {
 					console.error(err);
 				}
 				
-				if(!next() && currentlyExecuting == 0){
+				if(!next() && currentlyExecuting === 0){
 					resolve(result);
 				}
-			}
+			};
 			
 			let execItem = (queueItem)=>{
 				return new Promise((resolve, reject)=>{
@@ -78,10 +78,10 @@ class Queue {
 						resolve(callback_result);
 					}
 				});
-			}
+			};
 			
 			
-			if(typeof this.limit == "number" && this.limit > 0){
+			if(typeof this.limit ==="number" && this.limit > 0){
 				for(let i=1;i<=this.limit;i++){
 					if(!next()) break;
 				}

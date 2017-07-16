@@ -2,11 +2,11 @@
 
 // Avoid keeping init node in memory
 let panelinitjs_node = document.querySelector("#panelInit");
-panelinitjs_node.parentNode.removeChild(panelinitjs_node)
+panelinitjs_node.parentNode.removeChild(panelinitjs_node);
 
 function sendDataToMain(id, data){
 	function responseCallback(response){
-		if(typeof response != "undefined"){
+		if(typeof response !== "undefined"){
 			console.group();
 			console.info(`Port response of ${id}: `);
 			console.groupEnd();
@@ -27,7 +27,7 @@ let appGlobal = backgroundPage.appGlobal;
 
 function copyToClipboard(string){
 	let copy = function(string){
-		if(document.querySelector("#copy_form") != null){
+		if(document.querySelector("#copy_form") !== null){
 			let node = document.querySelector("#copy_form");
 			node.parentNode.removeChild(node);
 		}
@@ -48,9 +48,9 @@ function copyToClipboard(string){
 		}
 		
 		copy_form.parentNode.removeChild(copy_form);
-	}
+	};
 	
-	if(typeof chrome.permissions != "undefined"){
+	if(typeof chrome.permissions !== "undefined"){
 		chrome.permissions.contains({
 			permissions: ['clipboardWrite'],
 		}, function(result) {
@@ -89,37 +89,31 @@ let checkMissing = appGlobal.checkMissing;
 
 let _ = chrome.i18n.getMessage;
 
-var refreshStreamsButton = document.querySelector("#refreshStreams");
-
-function refreshButtonClick(){
+$(document).on("click", "#refreshStreams", ()=>{
 	sendDataToMain("refreshStreams","");
-}
-refreshStreamsButton.addEventListener("click",refreshButtonClick,false);
+});
 
-var addStreamButton = document.querySelector("#addStream");
-
-function addStreamButtonClick(){
+$(document).on("click", "#addStream", ()=>{
 	sendDataToMain("addStream","");
-}
-addStreamButton.addEventListener("click",addStreamButtonClick,false);
+});
 
-var disableNotificationsButton = document.querySelector("#disableNotifications");
-function disableNotifications_onClick(){
+$(document).on("click", "#disableNotifications", ()=>{
+	let disableNotificationsButton = document.querySelector("#disableNotifications");
 	appGlobal["notificationGlobalyDisabled"] = !appGlobal["notificationGlobalyDisabled"];
 	disableNotificationsButton.classList.toggle("off", backgroundPage.appGlobal["notificationGlobalyDisabled"]);
-	
-	$(disableNotificationsButton).tooltip("hide")
+
+	$(disableNotificationsButton).tooltip("hide");
 	disableNotificationsButton.dataset.originalTitle = disableNotificationsButton.title = _((backgroundPage.appGlobal["notificationGlobalyDisabled"])? "GloballyDisabledNotifications" : "GloballyDisableNotifications");
 	$(disableNotificationsButton).tooltip("show");
-}
-disableNotificationsButton.addEventListener("click", disableNotifications_onClick)
+
+});
 
 function allowDrop(event){
 	event.preventDefault();
 }
 function drag(event) {
 	let node = event.target;
-	if(node.draggable == true && node.dataset.streamId != null){
+	if(node.draggable === true && node.dataset.streamId !== null){
 		let id = node.dataset.streamId;
 		let website = node.dataset.streamWebsite;
 		
@@ -139,13 +133,13 @@ function drop(event) {
 	sendDataToMain("deleteStream", {id: data.id, website: data.website});
 }
 function dragenter(event){
-	if(event.target.classList.contains('dragover') == true){
+	if(event.target.classList.contains('dragover') === true){
 		let dropDiv = document.querySelector("#deleteStream");
 		dropDiv.classList.add("active");
 	}
 }
 function dragleave(event){
-	if(event.target.classList.contains('dragover') == false){//Chrome only: FALSE
+	if(event.target.classList.contains('dragover') === false){//Chrome only: FALSE
 		let dropDiv = document.querySelector("#deleteStream");
 		dropDiv.classList.remove("active");
 	}
@@ -165,7 +159,7 @@ function deleteStreamButtonClick(){
 	if(streamChangeMode){
 		let toDelete = document.querySelectorAll(".item-stream .deleteStreamButton.active");
 		for(let node of toDelete){
-			if(typeof node.tagName == "string"){
+			if(typeof node.tagName === "string"){
 				node.classList.remove("active");
 			}
 		}
@@ -192,7 +186,7 @@ let confirmChanges_Node = document.querySelector("#confirmChanges"),
 function cancelChanges(){
 	let toDelete = document.querySelectorAll(".item-stream .deleteStreamButton.active");
 	for(let node of toDelete){
-		if(typeof node.tagName == "string"){
+		if(typeof node.tagName === "string"){
 			node.classList.remove("active");
 		}
 	}
@@ -203,16 +197,16 @@ function confirmChanges(){
 	if(streamChangeMode){
 		let toDeleteMap = new Map();
 		let toDelete = document.querySelectorAll(".item-stream .deleteStreamButton.active");
-		if(toDelete != null){
+		if(toDelete !== null){
 			for(let node of toDelete){
-				if(typeof node.tagName == "string"){
+				if(typeof node.tagName === "string"){
 					node.classList.remove("active");
 					let id = node.dataset.id,
 						website = node.dataset.website;
 					if(!toDeleteMap.has(website)){
 						toDeleteMap.set(website, []);
 					}
-					if(toDeleteMap.get(website).indexOf(id) == -1){
+					if(toDeleteMap.get(website).indexOf(id) === -1){
 						toDeleteMap.get(website).push(id);
 					}
 				}
@@ -240,7 +234,6 @@ let toggle_search_button = document.querySelector("button#searchStream");
 let searchInput_onInput_Loaded = false;
 function searchContainer_Toggle(){
 	let searchInputContainer = document.querySelector("#searchInputContainer");
-	let hiddenClass = /\s*hide/i;
 	
 	let searchInput = document.querySelector("input#searchInput");
 	if(!searchInput_onInput_Loaded){
@@ -298,34 +291,36 @@ function selectSection(sectionNodeId){
 	let settings_node = document.querySelector("#settings_container");
 	let debugSection = document.querySelector("section#debugSection");
 	
-	if(typeof sectionNodeId == "string" && sectionNodeId != ""){
+	if(typeof sectionNodeId === "string" && sectionNodeId !== ""){
 		let sectionList = [streamList, streamEditor, settings_node, debugSection];
 		
 		let sectionEnabled = false;
 		for(let i in sectionList){
-			if(sectionList[i].id == sectionNodeId){
-				sectionEnabled = true;
-				unhideClassNode(sectionList[i]);
-				scrollbar_update(sectionNodeId);
-				
-				switch(sectionNodeId){
-					case "streamList":
-						setting_Enabled = false;
-						sendDataToMain("refreshPanel", "");
-						break;
-					case "settings_container":
-						if(!optionsLoaded){
-							optionsLoaded = true;
-							loadPreferences("section#settings_container #preferences");
-						}
-						setting_Enabled = true;
-						break;
+			if(sectionList.hasOwnProperty(i)){
+				if(sectionList[i].id === sectionNodeId){
+					sectionEnabled = true;
+					unhideClassNode(sectionList[i]);
+					scrollbar_update(sectionNodeId);
+
+					switch(sectionNodeId){
+						case "streamList":
+							setting_Enabled = false;
+							sendDataToMain("refreshPanel", "");
+							break;
+						case "settings_container":
+							if(!optionsLoaded){
+								optionsLoaded = true;
+								loadPreferences("section#settings_container #preferences");
+							}
+							setting_Enabled = true;
+							break;
+					}
+				} else {
+					hideClassNode(sectionList[i]);
 				}
-			} else {
-				hideClassNode(sectionList[i]);
 			}
 		}
-		if(sectionEnabled == false){
+		if(sectionEnabled === false){
 			unhideClassNode(streamList);
 		}
 	}
@@ -339,13 +334,11 @@ function setting_Toggle(sectionNodeId){
 }
 settings_button.addEventListener("click", setting_Toggle, false);
 
-let open_optionpage_node = document.querySelector("#open_optionpage");
-open_optionpage_node.addEventListener("click", (event) => { chrome.runtime.openOptionsPage(); }, false);
+$(document).on("click", "#open_optionpage", ()=>{chrome.runtime.openOptionsPage()});
 
-let ignoreHideIgnore_node = document.querySelector("#ignoreHideIgnore");
-ignoreHideIgnore_node.addEventListener("click", (event) => { ignoreHideIgnore = true; }, false);
+$(document).on("click", "#ignoreHideIgnore", ()=>{ignoreHideIgnore = true;});
 
-if(typeof chrome.storage.sync == "object"){
+if(typeof chrome.storage.sync === "object"){
 	document.querySelector("#syncContainer").classList.remove("hide");
 	
 	let restaure_sync_button = document.querySelector("#restaure_sync");
@@ -357,13 +350,11 @@ if(typeof chrome.storage.sync == "object"){
 
 /*				---- Debug section ----				*/
 
-let close_debugSection = document.querySelector("#close_debugSection");
-close_debugSection.addEventListener("click", function(event){
+$(document).on("click", "#close_debugSection", ()=>{
 	selectSection("streamList");
-}, false);
+});
 
-let versionNode = document.querySelector("#current_version");
-versionNode.addEventListener("dblclick", enableDebugSection);
+$(document).on("dblclick", "#current_version", enableDebugSection);
 
 function enableDebugSection(){
 	if(getPreference("showAdvanced") && getPreference("showExperimented")){
@@ -381,34 +372,29 @@ function enableDebugSection(){
 
 /*			---- Stream Editor----			*/
 
-let closeEditorButton = document.querySelector("#closeEditor");
-closeEditorButton.addEventListener("click", function(event){
+$(document).on("click", "#closeEditor", ()=>{
 	selectSection("streamList");
-}, false);
+});
 
-let saveEditedStreamButton = document.querySelector("#saveEditedStream");
-function saveEditedStreamButton_onClick(event){
-	let node = this;
-	
-	let website = node.dataset.website;
-	let id = node.dataset.id;
-	let contentId = node.dataset.contentId;
-	
-	let customURL_node = document.querySelector("#customURL");
-	
+$(document).on("click", "#saveEditedStream", function(){
+	const node = this;
+
+	let website = node.dataset.website,
+		id = node.dataset.id,
+		contentId = node.dataset.contentId,
+		customURL_node = document.querySelector("#customURL");
+
 	function removeEmplyItems(obj){
 		for(let i in obj){
-			if(obj[i] == "" /* || /^\s+$/ */){
+			if(obj.hasOwnProperty(i) && obj[i] === "" /* || /^\s+$/ */){
 				delete obj[i];
 			}
 		}
-		console.warn(JSON.stringify(obj))
-		console.dir(obj)
 		return obj;
 	}
-	
+
 	let streamSettingsData = {
-		streamURL: (customURL_node.validity.valid == true)? customURL_node.value : "",
+		streamURL: (customURL_node.validity.valid === true)? customURL_node.value : "",
 		statusBlacklist: removeEmplyItems(document.querySelector("#streamEditor #status_blacklist").value.split('\n')),
 		statusWhitelist: removeEmplyItems(document.querySelector("#streamEditor #status_whitelist").value.split('\n')),
 		gameBlacklist: removeEmplyItems(document.querySelector("#streamEditor #game_blacklist").value.split('\n')),
@@ -422,25 +408,24 @@ function saveEditedStreamButton_onClick(event){
 		notifyVocalOnline: document.querySelector("#streamEditor #notifyVocalOnline").checked,
 		notifyOffline: document.querySelector("#streamEditor #notifyOffline").checked,
 		notifyVocalOffline: document.querySelector("#streamEditor #notifyVocalOffline").checked
-	}
-	
+	};
+
 	sendDataToMain("streamSetting_Update", {
 		website: website,
 		id: id,
 		contentId: contentId,
 		streamSettingsData: streamSettingsData
 	});
-	
+
 	selectSection("streamList");
-}
-saveEditedStreamButton.addEventListener("click", saveEditedStreamButton_onClick, false);
+});
 
 /*			---- Stream Editor end----			*/
 let ignoreHideIgnore = false;
 function updatePanelData(data){
 	console.log("Updating panel data");
 	
-	if(typeof data.doUpdateTheme == "boolean" && data.doUpdateTheme == true){
+	if(typeof data.doUpdateTheme === "boolean" && data.doUpdateTheme === true){
 		theme_update();
 	}
 	
@@ -450,14 +435,14 @@ function updatePanelData(data){
 	let show_offline_in_panel = getPreference("show_offline_in_panel");
 	
 	let streamListSettings = new streamListFromSetting().mapDataAll;
-	streamListSettings.forEach((streamList, website, array) => {
-		streamList.forEach((value, id, array) => {
+	streamListSettings.forEach((streamList, website) => {
+		streamList.forEach((value, id) => {
 			if(!ignoreHideIgnore){
-				if(typeof streamList.get(id).ignore == "boolean" && streamList.get(id).ignore == true){
+				if(typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true){
 					//console.info(`[Live notifier - Panel] Ignoring ${id}`);
 					return;
 				}
-				if(typeof streamList.get(id).hide == "boolean" && streamList.get(id).hide == true){
+				if(typeof streamList.get(id).hide === "boolean" && streamList.get(id).hide === true){
 					//console.info(`[Live notifier - Panel] Hiding ${id}`);
 					return;
 				}
@@ -483,10 +468,10 @@ function updatePanelData(data){
 					listener(website, id, contentId, "channel", streamList.get(id), channelInfos.get(website).get(id));
 				} else if(websites.has(website)){
 					console.info(`Currrently no data for ${id} (${website})`);
-					if((typeof streamList.get(id).ignore == "boolean" && streamList.get(id).ignore == true) || (typeof streamList.get(id).hide == "boolean" && streamList.get(id).hide == true)){
+					if((typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true) || (typeof streamList.get(id).hide === "boolean" && streamList.get(id).hide === true)){
 						let contentId = id;
 						let streamData = {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
-						let website_channel_id = appGlobal["website_channel_id"]
+						let website_channel_id = appGlobal["website_channel_id"];
 						if(website_channel_id.test(streamData.streamName)){
 							streamData.streamName = website_channel_id.exec(streamData.streamName)[1];
 						}
@@ -500,11 +485,11 @@ function updatePanelData(data){
 				}
 			}
 		});
-	})
+	});
 	scrollbar_update("streamList");
 	
-	liveStatus.forEach((website_liveStatus, website, array) => {
-		website_liveStatus.forEach((id_liveStatus, id, array) => {
+	liveStatus.forEach((website_liveStatus, website) => {
+		website_liveStatus.forEach((id_liveStatus, id) => {
 			// Clean the streams already deleted but status still exist
 			if(!streamListSettings.get(website).has(id)){
 				console.info(`${id} from ${website} was already deleted but not from liveStatus ${(channelInfos.get(website).has(id))? "and channelInfos" : ""}`);
@@ -514,17 +499,17 @@ function updatePanelData(data){
 				}
 			}
 		})
-	})
+	});
 	
 	checkMissing();
 	
 	//Update online steam count in the panel
 	let onlineCount = appGlobal["onlineCount"];
-	listenerOnlineCount((onlineCount == 0)? _("No_stream_online") :  _("count_stream_online", onlineCount.toString()));
+	listenerOnlineCount((onlineCount === 0)? _("No_stream_online") :  _("count_stream_online", onlineCount.toString()));
 	
 	if(show_offline_in_panel){
-		var offlineCount = getOfflineCount();
-		listenerOfflineCount((offlineCount == 0)? _("No_stream_offline") :  _("count_stream_offline", offlineCount.toString()));
+		let offlineCount = getOfflineCount();
+		listenerOfflineCount((offlineCount === 0)? _("No_stream_offline") :  _("count_stream_offline", offlineCount.toString()));
 	} else {
 		listenerOfflineCount("");
 	}
@@ -533,7 +518,7 @@ function updatePanelData(data){
 	debug_checkingLivesState_node.className = appGlobal["checkingLivesFinished"];
 	
 	//Update Live notifier version displayed in the panel preferences
-	if(typeof appGlobal["version"] == "string"){
+	if(typeof appGlobal["version"] === "string"){
 		current_version(appGlobal["version"]);
 	}
 }
@@ -554,10 +539,12 @@ function initList(data){
 	let streamItems = document.querySelectorAll(".item-stream");
 	if(streamItems.length > 0){
 		for(let i in streamItems){
-			let node = streamItems[i];
-			if(typeof node.removeChild != "undefined"){
-				node.removeEventListener("click", streamItemClick);
-				node.parentNode.removeChild(node);
+			if(streamItems.hasOwnProperty(i)){
+				let node = streamItems[i];
+				if(typeof node.removeChild !== "undefined"){
+					node.removeEventListener("click", streamItemClick);
+					node.parentNode.removeChild(node);
+				}
 			}
 		}
 	}
@@ -645,14 +632,14 @@ function newEditStreamButton_onClick(event){
 	document.querySelector("#streamEditor #game_blacklist").value = (streamSettings.gameBlacklist)? streamSettings.gameBlacklist.join("\n") : "";
 	document.querySelector("#streamEditor #game_whitelist").value = (streamSettings.gameWhitelist)? streamSettings.gameWhitelist.join("\n") : "";
 	document.querySelector("#streamEditor #twitter").value = (streamSettings.twitter)? streamSettings.twitter : "";
-	document.querySelector("#streamEditor #hideStream").checked = (typeof streamSettings.hide == "boolean")? streamSettings.hide : false;
-	document.querySelector("#streamEditor #ignoreStream").checked = (typeof streamSettings.ignore == "boolean")? streamSettings.ignore : false;
-	document.querySelector("#streamEditor #iconIgnore").checked = (typeof streamSettings.iconIgnore == "boolean")? streamSettings.iconIgnore : false;
-	document.querySelector("#streamEditor #vocalStreamName").value = (typeof streamSettings.vocalStreamName == "string")? streamSettings.vocalStreamName : "";
-	document.querySelector("#streamEditor #notifyOnline").checked = (typeof streamSettings.notifyOnline == "boolean")? streamSettings.notifyOnline : true;
-	document.querySelector("#streamEditor #notifyVocalOnline").checked = (typeof streamSettings.notifyVocalOnline == "boolean")? streamSettings.notifyVocalOnline : true;
-	document.querySelector("#streamEditor #notifyOffline").checked = (typeof streamSettings.notifyOffline == "boolean")? streamSettings.notifyOffline : false;
-	document.querySelector("#streamEditor #notifyVocalOffline").checked = (typeof streamSettings.notifyVocalOffline == "boolean")? streamSettings.notifyVocalOffline : false;
+	document.querySelector("#streamEditor #hideStream").checked = (typeof streamSettings.hide === "boolean")? streamSettings.hide : false;
+	document.querySelector("#streamEditor #ignoreStream").checked = (typeof streamSettings.ignore === "boolean")? streamSettings.ignore : false;
+	document.querySelector("#streamEditor #iconIgnore").checked = (typeof streamSettings.iconIgnore === "boolean")? streamSettings.iconIgnore : false;
+	document.querySelector("#streamEditor #vocalStreamName").value = (typeof streamSettings.vocalStreamName === "string")? streamSettings.vocalStreamName : "";
+	document.querySelector("#streamEditor #notifyOnline").checked = (typeof streamSettings.notifyOnline === "boolean")? streamSettings.notifyOnline : true;
+	document.querySelector("#streamEditor #notifyVocalOnline").checked = (typeof streamSettings.notifyVocalOnline === "boolean")? streamSettings.notifyVocalOnline : true;
+	document.querySelector("#streamEditor #notifyOffline").checked = (typeof streamSettings.notifyOffline === "boolean")? streamSettings.notifyOffline : false;
+	document.querySelector("#streamEditor #notifyVocalOffline").checked = (typeof streamSettings.notifyVocalOffline === "boolean")? streamSettings.notifyVocalOffline : false;
 	
 	unhideClassNode(streamEditor);
 	scrollbar_update("streamEditor");
@@ -692,7 +679,7 @@ function insertStreamNode(newLine, website, id, contentId, type, streamData, onl
 	} else {
 		if(statusStreamList.length > 0){
 			for(let streamNode of statusStreamList){
-				if(typeof streamNode.tagName == "string"){
+				if(typeof streamNode.tagName === "string"){
 					let streamNode_title = streamNode.dataset.streamName;
 					if(streamData.streamName.toLowerCase() < streamNode_title.toLowerCase()){
 						return $(newLine).insertBefore(streamNode);
@@ -702,7 +689,6 @@ function insertStreamNode(newLine, website, id, contentId, type, streamData, onl
 		}
 		return $(newLine).appendTo(statusNode);
 	}
-	return null;
 }
 
 $(document).on("click", ".item-stream", streamItemClick);
@@ -734,9 +720,9 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 		"streamWebsiteLowercase": website.toLowerCase(),
 		//"streamUrl": streamUrl,
 		"streamType": type,
-		"unsupportedType": (type == "unsupported"),
+		"unsupportedType": (type === "unsupported"),
 		"streamSettings": JSON.stringify(streamSettings)
-	}
+	};
 	
 	if(online){
 		streamRenderData.streamStatus = streamData.streamStatus;
@@ -745,38 +731,38 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 			streamRenderData.streamGame = streamData.streamGame;
 			streamRenderData.streamGameLowercase = streamData.streamGame.toLowerCase();
 		}
-		if(typeof streamData.streamCurrentViewers == "number"){
-			let viewer_number = (typeof streamData.streamCurrentViewers == "number")? streamData.streamCurrentViewers : parseInt(streamData.streamCurrentViewers);
+		if(typeof streamData.streamCurrentViewers === "number"){
+			let viewer_number = (typeof streamData.streamCurrentViewers === "number")? streamData.streamCurrentViewers : parseInt(streamData.streamCurrentViewers);
 			streamRenderData.streamCurrentViewers = (viewer_number < 1000)? viewer_number : ((Math.round(viewer_number / 100)/10) + "k");
 		}
 	}
 
 	//let streamUrl = (type == "live" || type == "channel")? getStreamURL(website, id, contentId, true) : "";
 	const websiteStreamURL = getStreamURL(website, id, contentId, false);
-	if(websiteStreamURL != "" && websiteStreamURL != null){
+	if(websiteStreamURL !== "" && websiteStreamURL !== null){
 		streamRenderData.streamURL = websiteStreamURL;
 	}
 
-	if(typeof streamData.facebookID == "string" && streamData.facebookID != ""){
+	if(typeof streamData.facebookID === "string" && streamData.facebookID !== ""){
 		streamRenderData.facebookId = streamData.facebookID;
 	}
-	if(typeof streamData.twitterID == "string" && streamData.twitterID != ""){
+	if(typeof streamData.twitterID === "string" && streamData.twitterID !== ""){
 		streamRenderData.twitterId = streamData.twitterID;
 	}
 
 	let streamLogo = "";
-	if(online && typeof streamData.streamCategoryLogo == "string" && streamData.streamCategoryLogo != ""){
+	if(online && typeof streamData.streamCategoryLogo === "string" && streamData.streamCategoryLogo !== ""){
 		streamLogo  = streamData.streamCategoryLogo;
-	} else if(typeof streamData.streamOwnerLogo == "string" && streamData.streamOwnerLogo != ""){
+	} else if(typeof streamData.streamOwnerLogo === "string" && streamData.streamOwnerLogo !== ""){
 		streamLogo  = streamData.streamOwnerLogo;
 	}
 	
-	if(typeof streamLogo == "string" && streamLogo != ""){
+	if(typeof streamLogo === "string" && streamLogo !== ""){
 		streamRenderData.streamLogo = streamLogo;
 	}
 	const newNode = insertStreamNode(Mustache.render(streamTemplate, streamRenderData), website, id, contentId, type, streamData, online);
 
-	if(typeof liveStatus.lastCheckStatus == "string" && liveStatus.lastCheckStatus != "" && liveStatus.lastCheckStatus != "success"){
+	if(typeof liveStatus.lastCheckStatus === "string" && liveStatus.lastCheckStatus !== "" && liveStatus.lastCheckStatus !== "success"){
 		let debugDataNode = document.querySelector("#debugData");
 		let newDebugItem = document.createElement('div');
 		newDebugItem.classList.add("debugItem");
@@ -807,7 +793,7 @@ function streamItemClick(){
 	let website = node.dataset.streamWebsite;
 	
 	let streamUrl = getStreamURL(website, id, contentId, true);
-	if(streamChangeMode == false && streamUrl != null && streamUrl != ""){
+	if(streamChangeMode === false && streamUrl !==null && streamUrl !== ""){
 		sendDataToMain("openTab", streamUrl);
 	}
 }
@@ -821,7 +807,7 @@ function current_version(version){
 function theme_update(){
 	let panelColorStylesheet = theme_cache_update(document.querySelector("#generated-color-stylesheet"));
 	
-	if(typeof panelColorStylesheet == "object" && panelColorStylesheet !== null){
+	if(typeof panelColorStylesheet === "object" && panelColorStylesheet !== null){
 		console.info("Theme update");
 		
 		let currentThemeNode = document.querySelector("#generated-color-stylesheet");
@@ -834,8 +820,8 @@ function theme_update(){
 }
 
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse){
-	if(message.receiver == "Live_Notifier_Panel"){
-		console.group()
+	if(message.receiver === "Live_Notifier_Panel"){
+		console.group();
 		console.info("Message:");
 		console.dir(message);
 		console.groupEnd();
@@ -853,16 +839,9 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse){
 
 let scrollbar = {"streamList": null, "settings_container": null};
 function load_scrollbar(id){
-	let scroll_node;
-	if(id == "streamList"){
-		scroll_node = document.querySelector('#streamList');
-	} else if(id == "settings_container"){
-		scroll_node = document.querySelector('#settings_container');
-	} else if(id == "streamEditor"){
-		scroll_node = document.querySelector('#streamEditor');
-	} else if(id == "debugSection"){
-		scroll_node = document.querySelector('#debugSection');
-	} else {
+	let scroll_node = document.querySelector(`#${id}`);
+
+	if(scroll_node === null) {
 		console.warn(`[Live notifier] Unkown scrollbar id (${id})`);
 		return null;
 	}
@@ -879,9 +858,9 @@ function load_scrollbar(id){
 }
 
 function scrollbar_update(nodeId){
-	if(typeof nodeId == "string" && nodeId != ""){
+	if(typeof nodeId === "string" && nodeId !== ""){
 		let scrollbar_node = document.querySelector(`#${nodeId}`);
-		if(scrollbar_node != null){
+		if(scrollbar_node !== null){
 			$(scrollbar_node).perfectScrollbar('update');
 			//Ps.update(scrollbar_node);
 		}
@@ -902,4 +881,4 @@ window.onresize = function(){
 	scrollbar_update("streamEditor");
 	scrollbar_update("settings_container");
 	scrollbar_update("debugSection");
-}
+};

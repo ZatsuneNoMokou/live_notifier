@@ -1,9 +1,9 @@
 # Live notifier
 Web Extension notifying streams from&nbsp;:
-* Beam
 * Dailymotion
-* Hitbox
+* Mixer (Formely known as Beam)
 * Picarto.TV – Creative Live Streaming (https://picarto.tv/)
+* Smashcast (Formely known as Hitbox)
 * Twitch
 * Youtube
 

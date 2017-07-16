@@ -544,11 +544,13 @@ function newPreferenceNode(parent, id, prefObj){
 		node.appendChild(output);
 	}
 }
-$(document).on("input", "[data-setting-type='string']", settingNode_onChange);
-$(document).on("change", "[data-setting-type='integer'],[data-setting-type='bool'],[data-setting-type='color'],[data-setting-type='menulist']", settingNode_onChange);
-$(document).on("click", "#export_preferences", exportPrefsToFile);
-$(document).on("click", "#import_preferences", importPrefsFromFile);
-$(document).on("click", "[id$='_import']", import_onClick); // [id$='_import'] => Every id that end with _import
+if(typeof $ !== "undefined"){
+	$(document).on("input", "[data-setting-type='string']", settingNode_onChange);
+	$(document).on("change", "[data-setting-type='integer'],[data-setting-type='bool'],[data-setting-type='color'],[data-setting-type='menulist']", settingNode_onChange);
+	$(document).on("click", "#export_preferences", exportPrefsToFile);
+	$(document).on("click", "#import_preferences", importPrefsFromFile);
+	$(document).on("click", "[id$='_import']", import_onClick); // [id$='_import'] => Every id that end with _import
+}
 
 /*		---- Import/Export preferences from file ----		*/
 function simulateClick(node) {

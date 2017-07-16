@@ -21,7 +21,7 @@ const youtube = {
 				itempropNodes = responseDoc.querySelectorAll("#watch7-content > [itemprop], body > [itemprop], head > [itemprop]");
 			let jsonDATA = null;
 			
-			if(itempropNodes != null){
+			if(itempropNodes !== null){
 				jsonDATA = {};
 				
 				const getPropValue = function(node){
@@ -31,8 +31,8 @@ const youtube = {
 							return node.getAttribute("content");
 							break;
 						case "link":
-							const link = node.getAttribute("href");
-							if(link.indexOf("//") == 0){
+							let link = node.getAttribute("href");
+							if(link.indexOf("//") === 0){
 								link = `https:${link}`;
 							}
 							return link;
@@ -46,19 +46,19 @@ const youtube = {
 								content[subNodeId] = getPropValue(subNode);
 							}
 							
-							if(id == "author" && content.hasOwnProperty("url")){
+							if(id === "author" && content.hasOwnProperty("url")){
 								return content.url;
 							} else {
 								return content;
 							}
 							break;
 						default:
-							console.group()
+							console.group();
 							console.warn(node.tagName.toLowerCase());
 							console.dir(node);
 							console.groupEnd();
 					}
-				}
+				};
 				
 				for(let node of itempropNodes){
 					const id = node.getAttribute("itemprop");
@@ -84,18 +84,18 @@ const youtube = {
 				"overrideMimeType": "text/html; charset=utf-8",
 				"contentType": "document",
 				"Request_documentParseToJSON": youtube.Request_documentParseToJSON
-			}
-			if(source_website == "c::youtube"){
+			};
+			if(source_website === "c::youtube"){
 				obj.url = `https://www.youtube.com/c/${id}`;
-			} else if(source_website == "user::youtube"){
+			} else if(source_website === "user::youtube"){
 				obj.url = `https://www.youtube.com/user/${id}`;
-			} else if(source_website == "video::youtube"){
+			} else if(source_website === "video::youtube"){
 				return youtube.API(id);
 				/*obj.url = "https://www.youtube.com/watch";
 				obj.content = [
 					["v", id]
 				]*/
-			} else if(website_channel_id.test(source_website) == true){
+			} else if(website_channel_id.test(source_website) === true){
 				return youtube.API_channelInfos(`channel::${id}`);
 			}
 			return obj;
@@ -107,7 +107,7 @@ const youtube = {
 
 			let obj = {};
 			
-			if(typeof apiKey == "string" && apiKey != ""){
+			if(typeof apiKey === "string" && apiKey !== ""){
 				if(website_channel_id.test(id)){
 					obj = {
 						"url": "https://www.googleapis.com/youtube/v3/search",
@@ -120,8 +120,8 @@ const youtube = {
 							["fields", "items(id),nextPageToken"],
 							["key", apiKey]
 						]
-					}
-					if(typeof nextPageToken == "string"){obj.content.push(["pageToken", nextPageToken]);}
+					};
+					if(typeof nextPageToken === "string"){obj.content.push(["pageToken", nextPageToken]);}
 				} else {
 					obj = {
 						"url": "https://www.googleapis.com/youtube/v3/videos",
@@ -135,7 +135,7 @@ const youtube = {
 						]
 					}
 				}
-				if(typeof referrer == "string" && referrer != ""){
+				if(typeof referrer === "string" && referrer !== ""){
 					obj.headers = {
 						"referrer": referrer
 					}
@@ -149,8 +149,8 @@ const youtube = {
 						"content": [
 							["id", website_channel_id.exec(id)[1]]
 						]
-					}
-					if(typeof nextPageToken == "string"){obj.content.push(["pageToken", nextPageToken]);}
+					};
+					if(typeof nextPageToken === "string"){obj.content.push(["pageToken", nextPageToken]);}
 				} else {
 					obj = {
 						"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLiveInfo.php",
@@ -170,7 +170,7 @@ const youtube = {
 			
 			let obj = {};
 			
-			if(typeof apiKey == "string" && apiKey != ""){
+			if(typeof apiKey === "string" && apiKey !== ""){
 				obj = {
 					"url": "https://www.googleapis.com/youtube/v3/channels",
 					"overrideMimeType": "text/plain; charset=utf-8",
@@ -180,8 +180,8 @@ const youtube = {
 						["fields", "items(id,snippet)"],
 						["key", apiKey]
 					]
-				}
-				if(typeof referrer == "string" && referrer != ""){
+				};
+				if(typeof referrer === "string" && referrer !== ""){
 					obj.headers = {
 						"referrer": referrer
 					}
@@ -198,7 +198,7 @@ const youtube = {
 			return obj;
 		},
 	"importAPI": function(id){
-		const obj = {
+		return {
 			"url": "https://www.youtube.com/subscription_manager?action_takeout=1",
 			//"overrideMimeType": "application/xml; charset=utf-8",
 			"overrideMimeType": "text/html; charset=utf-8",
@@ -207,7 +207,7 @@ const youtube = {
 				let userChannelList = {"list": null};
 				const getId = /https\:\/\/www\.youtube\.com\/feeds\/videos\.xml\?channel_id\=([^&]+)/i,
 					dataDocument = xhrRequest.response;
-				if(dataDocument.querySelector("outline") != null){
+				if(dataDocument.querySelector("outline") !== null){
 					userChannelList.list = [];
 					let userChannelList_nodes = xhrRequest.response.querySelectorAll("outline[xmlUrl]");
 					for(let node of userChannelList_nodes){
@@ -218,13 +218,12 @@ const youtube = {
 				}
 				return userChannelList;
 			}
-		}
-		return obj;
+		};
 	},
 	"checkResponseValidity":
 		function(data){
-			if(data.hasOwnProperty("error") == true && typeof data.error == "object"){
-				if(data.error.hasOwnProperty("message") == true && typeof data.error.message == "string"){
+			if(data.hasOwnProperty("error") === true && typeof data.error === "object"){
+				if(data.error.hasOwnProperty("message") === true && typeof data.error.message === "string"){
 					return data.error.message;
 				} else {
 					return "error";
@@ -236,29 +235,29 @@ const youtube = {
 	"addStream_getId":
 		function(source_website, id, xhrResponse, streamListSetting, responseValidity){
 			const data = xhrResponse.json;
-			if(responseValidity == "success"){
-				if(data.hasOwnProperty("items") == true && typeof data.items.length == "number" && data.items.length == 1){
+			if(responseValidity === "success"){
+				if(data.hasOwnProperty("items") === true && typeof data.items.length === "number" && data.items.length === 1){
 					
-					if(data.items[0].hasOwnProperty("snippet") == true && data.items[0].snippet.hasOwnProperty("channelId") == true){
+					if(data.items[0].hasOwnProperty("snippet") === true && data.items[0].snippet.hasOwnProperty("channelId") === true){
 						return {
 							streamId: `channel::${data.items[0].snippet.channelId}`,
-							streamName: (typeof data.items[0].snippet.channelTitle == "string")? data.items[0].snippet.channelTitle : data.items[0].snippet.channelId
+							streamName: (typeof data.items[0].snippet.channelTitle === "string")? data.items[0].snippet.channelTitle : data.items[0].snippet.channelId
 						};
-					} else if(data.items[0].hasOwnProperty("id") == true && typeof data.items[0].id == "string"){
+					} else if(data.items[0].hasOwnProperty("id") === true && typeof data.items[0].id === "string"){
 						return {
 							streamId: `channel::${data.items[0].id}`,
-							streamName: (data.items[0].snippet && typeof data.items[0].snippet.title == "string")? data.items[0].snippet.title : data.items[0].id
+							streamName: (data.items[0].snippet && typeof data.items[0].snippet.title === "string")? data.items[0].snippet.title : data.items[0].id
 						};
 					}
 				} else if(data.hasOwnProperty("channelId")){
 					const dataDocument = xhrResponse.response;
 					
 					const channelIdPropItem = dataDocument.querySelector("meta[itemprop=channelId]");
-					if(channelIdPropItem != null && typeof channelIdPropItem.hasAttribute("content")){
+					if(channelIdPropItem !== null && typeof channelIdPropItem.hasAttribute("content")){
 						const channelNamePropItem = dataDocument.querySelector("meta[itemprop=name]");
 						return {
 							streamId: `channel::${channelIdPropItem.getAttribute("content")}`,
-							streamName: (channelNamePropItem != null && typeof channelNamePropItem.hasAttribute("content"))? channelNamePropItem.getAttribute("content") : channelIdPropItem.getAttribute("content")
+							streamName: (channelNamePropItem !== null && typeof channelNamePropItem.hasAttribute("content"))? channelNamePropItem.getAttribute("content") : channelIdPropItem.getAttribute("content")
 						};
 					}// else {
 						//let linkNode = dataDocument.querySelector("#content .qualified-channel-title a");
@@ -305,33 +304,33 @@ const youtube = {
 					streamData.liveStatus.API_Status = false;
 				}
 				return streamData;
-			} else */ if(data.hasOwnProperty("items") == true && typeof data.items.length == "number" && data.items.length == 1){
+			} else */ if(data.hasOwnProperty("items") === true && typeof data.items.length === "number" && data.items.length == 1){
 				streamData.streamURL = "https://www.youtube.com/watch?v=" + contentId;
 				
 				data = data.items[0];
 				snippetData = data.snippet;
 				
-				if(typeof snippetData.title == "string" && snippetData.title != ""){
+				if(typeof snippetData.title === "string" && snippetData.title !== ""){
 					streamData.streamName = snippetData.title;
 				}
 				/*if(typeof snippetData.description == "string" && snippetData.description != ""){
 					streamData.streamStatus = snippetData.description;
 				}*/
-				if(typeof currentChannelInfo == "object" && currentChannelInfo != null && typeof currentChannelInfo.streamName == "string"){
+				if(typeof currentChannelInfo === "object" && currentChannelInfo !== null && typeof currentChannelInfo.streamName === "string"){
 					streamData.streamStatus = streamData.streamName;
 					streamData.streamName = currentChannelInfo.streamName;
 				}
 				
-				if(snippetData.hasOwnProperty("thumbnails") == true){
-					if(snippetData.thumbnails.hasOwnProperty("high") == true && snippetData.thumbnails.high.hasOwnProperty("url") == true && typeof snippetData.thumbnails.high.url == "string"){
+				if(snippetData.hasOwnProperty("thumbnails") === true){
+					if(snippetData.thumbnails.hasOwnProperty("high") === true && snippetData.thumbnails.high.hasOwnProperty("url") === true && typeof snippetData.thumbnails.high.url === "string"){
 						streamData.streamOwnerLogo = snippetData.thumbnails.high.url;
-					} else if(snippetData.thumbnails.hasOwnProperty("default") == true && snippetData.thumbnails["default"].hasOwnProperty("url") == true && typeof snippetData.thumbnails.high.url == "string"){
+					} else if(snippetData.thumbnails.hasOwnProperty("default") === true && snippetData.thumbnails["default"].hasOwnProperty("url") === true && typeof snippetData.thumbnails.high.url === "string"){
 						streamData.streamOwnerLogo = snippetData.thumbnails["default"].url;
 					}
 				}
 				
 				streamData.streamCurrentViewers = "";
-				if(data.hasOwnProperty("liveStreamingDetails") == true && data.liveStreamingDetails.hasOwnProperty("concurrentViewers") == true && typeof data.liveStreamingDetails.concurrentViewers != "undefined"){
+				if(data.hasOwnProperty("liveStreamingDetails") === true && data.liveStreamingDetails.hasOwnProperty("concurrentViewers") === true && typeof data.liveStreamingDetails.concurrentViewers !== "undefined"){
 					switch(typeof data.liveStreamingDetails.concurrentViewers){
 						case "string":
 							streamData.streamCurrentViewers = parseInt(data.liveStreamingDetails.concurrentViewers);
@@ -345,13 +344,13 @@ const youtube = {
 				streamData.liveStatus.API_Status = true;
 				return streamData;
 			} else if(data.hasOwnProperty("streamOwnerLogo")){
-				if(currentChannelInfo.streamName != ""){
+				if(currentChannelInfo.streamName !== ""){
 					streamData.streamName = currentChannelInfo.streamName;
 					streamData.streamStatus = data.streamName;
 				} else {
 					streamData.streamName = data.streamName;
 				}
-				streamData.streamURL = (typeof data.streamURL == "string")? data.streamURL : ((typeof data.streamUrl == "string")? data.streamUrl : "");
+				streamData.streamURL = (typeof data.streamURL === "string")? data.streamURL : ((typeof data.streamUrl === "string")? data.streamUrl : "");
 				streamData.streamOwnerLogo = data.streamOwnerLogo;
 				streamData.streamCurrentViewers = data.streamCurrentViewers;
 				streamData.liveStatus.API_Status = true;
@@ -364,28 +363,32 @@ const youtube = {
 		function(id, website, data, pageNumber){
 			let obj = {
 				streamList: new Map()
-			}
+			};
 			
-			if(data.hasOwnProperty("list") == true){
+			if(data.hasOwnProperty("list") === true){
 				let list = data.list;
 				
 				for(let contentId in list){
-					obj.streamList.set(contentId, list[contentId]);
+					if(list.hasOwnProperty(contentId)){
+						obj.streamList.set(contentId, list[contentId]);
+					}
 				}
 				obj.primaryRequest = false;
 				
 				return obj;
-			} else if(data.hasOwnProperty('items') == false){
+			} else if(data.hasOwnProperty('items') === false){
 				return obj;
 			} else {
 				let list = data.items;
 				
 				for(let i in list){
-					let contentId = list[i].id.videoId;
-					obj.streamList.set(contentId, null);
+					if(list.hasOwnProperty(i)){
+						let contentId = list[i].id.videoId;
+						obj.streamList.set(contentId, null);
+					}
 				}
 				
-				if(data.hasOwnProperty("nextPageToken") == true){
+				if(data.hasOwnProperty("nextPageToken") === true){
 					obj.nextPageToken = data.nextPageToken;
 				}
 				return obj;
@@ -396,13 +399,13 @@ const youtube = {
 			let streamData = currentChannelInfo;
 			
 			if(data.hasOwnProperty("channelId")){
-				if(typeof data.name == "string" && data.url != ""){
+				if(typeof data.name === "string" && data.url !== ""){
 					streamData.streamName = data.name;
 				}
 				
-				if(data.hasOwnProperty("thumbnailUrl") && typeof data.thumbnailUrl == "string" && data.thumbnailUrl != ""){
+				if(data.hasOwnProperty("thumbnailUrl") && typeof data.thumbnailUrl === "string" && data.thumbnailUrl !== ""){
 					streamData.streamOwnerLogo = data.thumbnailUrl;
-				} else if(data.hasOwnProperty("thumbnail") && data.hasOwnProperty("url") && typeof data.thumbnail.url == "string" && data.thumbnail.url != ""){
+				} else if(data.hasOwnProperty("thumbnail") && data.hasOwnProperty("url") && typeof data.thumbnail.url === "string" && data.thumbnail.url !== ""){
 					streamData.streamOwnerLogo = data.thumbnail.url;
 				}
 				
@@ -410,37 +413,37 @@ const youtube = {
 				if(data.hasOwnProperty("author")){
 					if(Array.isArray(data.author)){
 						for(let item of data.author){
-							if(typeof item == "string" && item.indexOf("youtube.com/") != -1){
+							if(typeof item === "string" && item.indexOf("youtube.com/") !== -1){
 								streamData.streamURL = item;
 								urlFound = true;
 								break;
 							}
 						}
 					} else {
-						if(typeof data.author == "string" && data.author.indexOf("youtube.com/") != -1){
+						if(typeof data.author === "string" && data.author.indexOf("youtube.com/") !== -1){
 							streamData.streamURL = data.author;
 							urlFound = true;
 						}
 					}
 				} else if(!urlFound){
-					if(data.hasOwnProperty("url") && typeof data.url == "string" && data.url.indexOf("youtube.com/") != -1){
+					if(data.hasOwnProperty("url") && typeof data.url === "string" && data.url.indexOf("youtube.com/") !== -1){
 						streamData.streamURL = data.url;
 					}
 				}
-			} else if(data.hasOwnProperty("items") == true && typeof data.items.length == "number" && data.items.length == 1){
+			} else if(data.hasOwnProperty("items") === true && typeof data.items.length === "number" && data.items.length === 1){
 				data = data.items[0].snippet;
 				
-				if(typeof data.title == "string" && data.title != ""){
+				if(typeof data.title === "string" && data.title !== ""){
 					streamData.streamName = data.title;
 				}
-				if(typeof data.customUrl == "string" && data.customUrl != ""){
+				if(typeof data.customUrl === "string" && data.customUrl !== ""){
 					streamData.streamURL = "http://www.youtube.com/c/" + data.customUrl;
 				}
 				
-				if(data.hasOwnProperty("thumbnails") == true){
-					if(data.thumbnails.hasOwnProperty("high") == true && data.thumbnails.high.hasOwnProperty("url") == true && typeof data.thumbnails.high.url == "string"){
+				if(data.hasOwnProperty("thumbnails") === true){
+					if(data.thumbnails.hasOwnProperty("high") === true && data.thumbnails.high.hasOwnProperty("url") === true && typeof data.thumbnails.high.url === "string"){
 						streamData.streamOwnerLogo = data.thumbnails.high.url;
-					} else if(data.thumbnails.hasOwnProperty("default") == true && data.thumbnails["default"].hasOwnProperty("url") == true && typeof data.thumbnails.high.url == "string"){
+					} else if(data.thumbnails.hasOwnProperty("default") === true && data.thumbnails["default"].hasOwnProperty("url") === true && typeof data.thumbnails.high.url === "string"){
 						streamData.streamOwnerLogo = data.thumbnails["default"].url;
 					}
 				}
@@ -451,11 +454,11 @@ const youtube = {
 		function(id, data, streamListSetting, pageNumber){
 			let obj = {
 				list: null
-			}
-			if(data != null && data.list != null && Array.isArray(data.list)){
+			};
+			if(data !== null && data.list !== null && Array.isArray(data.list)){
 				obj.list = data.list;
 			}
 			return obj;
 		}
-}
+};
 websites.set("youtube", youtube);
