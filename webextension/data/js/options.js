@@ -1,11 +1,9 @@
 'use strict';
 
-var backgroundPage = chrome.extension.getBackgroundPage();
-let options = backgroundPage.optionsData.options;
-let options_default = backgroundPage.optionsData.options_default;
-let options_default_sync = backgroundPage.optionsData.options_default_sync;
+var backgroundPage = browser.extension.getBackgroundPage();
+let options = backgroundPage.options;
 
-let _ = chrome.i18n.getMessage;
+let _ = browser.i18n.getMessage;
 
 var theme_cache_update = backgroundPage.backgroundTheme.theme_cache_update;
 
@@ -38,13 +36,13 @@ function sendDataToMain(id, data){
 
 loadPreferences("section#preferences");
 
-let loadJS = chrome.extension.getBackgroundPage().loadJS;
+let loadJS = browser.extension.getBackgroundPage().loadJS;
 function init(){
 	loadTranslations();
 }
 document.addEventListener('DOMContentLoaded',		init);
 
-if(typeof chrome.storage.sync === "object"){
+if(typeof browser.storage.sync === "object"){
 	document.querySelector("#syncContainer").classList.remove("hide");
 	
 	let restaure_sync_button = document.querySelector("#restaure_sync");

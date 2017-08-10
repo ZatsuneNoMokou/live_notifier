@@ -23,5 +23,5 @@ document.querySelector("#disableNotifications").dataset.translateTitle = (backgr
 let loadJS = chrome.extension.getBackgroundPage().loadJS;
 window.onload = function () {
 	window.onload = null;
-	loadJS(document, "/data/js/", ["lib/jquery-3.2.1.min.js", "lib/perfect-scrollbar.jquery.min.js", "lib/bootstrap.min.js", "options-api.js", "lib/mustache.min.js", "panel/panel.js"]);
+	loadJS(document, "/data/js/", ["lib/jquery.min.js", "lib/perfect-scrollbar.jquery.min.js", "lib/bootstrap.min.js", "/lib/browser-polyfill.min.js", "options-api.js", "lib/mustache.min.js", "panel/panel.js"]);
 };

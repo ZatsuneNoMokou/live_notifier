@@ -10,3 +10,4 @@ live_notifier-*.zip
 tmp/
 firefox/
 TODO.md
+node_modules

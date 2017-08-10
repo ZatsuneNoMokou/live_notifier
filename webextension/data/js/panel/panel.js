@@ -15,13 +15,11 @@ function sendDataToMain(id, data){
 	chrome.runtime.sendMessage({"sender": "Live_Notifier_Panel","receiver": "Live_Notifier_Main", "id": id, "data": data}, responseCallback);
 }
 
-var backgroundPage = chrome.extension.getBackgroundPage();
+var backgroundPage = browser.extension.getBackgroundPage();
 
 var theme_cache_update = backgroundPage.backgroundTheme.theme_cache_update;
 
-let options = backgroundPage.optionsData.options;
-let options_default = backgroundPage.optionsData.options_default;
-let options_default_sync = backgroundPage.optionsData.options_default_sync;
+let options = backgroundPage.options;
 
 let appGlobal = backgroundPage.appGlobal;
 
@@ -41,10 +39,21 @@ function copyToClipboard(string){
 		copy_form.select();
 		let clipboard_success = document.execCommand('Copy');
 		if(clipboard_success){
-			appGlobal.doNotif("Live notifier", _("clipboard_success"));
-			appGlobal.consoleMsg("info", `Copied: ${string}`);
+			appGlobal.doNotif({
+				"message": _("clipboard_success")
+			})
+				.catch(err=>{
+					console.warn(err);
+				});
+			console.info(`Copied: ${string}`);
 		} else {
-			appGlobal.doNotif("Live notifier", _("clipboard_failed"));
+			appGlobal.doNotif({
+				"message": _("clipboard_failed")
+			})
+				.catch(err=>{
+					console.warn(err);
+				})
+			;
 		}
 		
 		copy_form.parentNode.removeChild(copy_form);
@@ -74,7 +83,6 @@ function copyToClipboard(string){
 	}
 }
 
-
 let streamListFromSetting = appGlobal.streamListFromSetting;
 let websites = appGlobal.websites;
 let liveStatus = appGlobal.liveStatus;
@@ -87,7 +95,7 @@ let setIcon = appGlobal.setIcon;
 
 let checkMissing = appGlobal.checkMissing;
 
-let _ = chrome.i18n.getMessage;
+let _ = browser.i18n.getMessage;
 
 $(document).on("click", "#refreshStreams", ()=>{
 	sendDataToMain("refreshStreams","");
@@ -334,11 +342,11 @@ function setting_Toggle(sectionNodeId){
 }
 settings_button.addEventListener("click", setting_Toggle, false);
 
-$(document).on("click", "#open_optionpage", ()=>{chrome.runtime.openOptionsPage()});
+$(document).on("click", "#open_optionpage", ()=>{browser.runtime.openOptionsPage()});
 
 $(document).on("click", "#ignoreHideIgnore", ()=>{ignoreHideIgnore = true;});
 
-if(typeof chrome.storage.sync === "object"){
+if(typeof browser.storage.sync === "object"){
 	document.querySelector("#syncContainer").classList.remove("hide");
 	
 	let restaure_sync_button = document.querySelector("#restaure_sync");
@@ -449,7 +457,7 @@ function updatePanelData(data){
 			}
 			
 			if(liveStatus.has(website) && liveStatus.get(website).has(id) && liveStatus.get(website).get(id).size > 0){
-				liveStatus.get(website).get(id).forEach((streamData, contentId, array) => {
+				liveStatus.get(website).get(id).forEach((streamData, contentId) => {
 					getCleanedStreamStatus(website, id, contentId, streamList.get(id), streamData.liveStatus.API_Status);
 					
 					if(streamData.liveStatus.filteredStatus || (show_offline_in_panel && !streamData.liveStatus.filteredStatus)){
@@ -460,12 +468,12 @@ function updatePanelData(data){
 				})
 			} else {
 				if(channelInfos.has(website) && channelInfos.get(website).has(id)){
-					let streamData = channelInfos.get(website).get(id);
-					let contentId = id;
+					//let streamData = channelInfos.get(website).get(id);
+					//let contentId = id;
 					
 					//console.info(`Using channel infos for ${id} (${website})`);
 					
-					listener(website, id, contentId, "channel", streamList.get(id), channelInfos.get(website).get(id));
+					listener(website, id, /* contentId */ id, "channel", streamList.get(id), channelInfos.get(website).get(id));
 				} else if(websites.has(website)){
 					console.info(`Currrently no data for ${id} (${website})`);
 					if((typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true) || (typeof streamList.get(id).hide === "boolean" && streamList.get(id).hide === true)){
@@ -571,8 +579,8 @@ function newDeleteStreamButton_onClick(event){
 	event.stopPropagation();
 	
 	let node = this;
-	let id = node.dataset.id;
-	let website = node.dataset.website;
+	// let id = node.dataset.id;
+	// let website = node.dataset.website;
 	
 	node.classList.toggle("active");
 	//sendDataToMain("deleteStream", {id: id, website: website});
@@ -581,8 +589,8 @@ function newIgnoreStreamButton_onClick(event){
 	event.stopPropagation();
 	
 	let node = this;
-	let id = node.dataset.id;
-	let website = node.dataset.website;
+	// let id = node.dataset.id;
+	// let website = node.dataset.website;
 	
 	node.classList.toggle("active");
 }
@@ -590,10 +598,6 @@ function newShareStreamButton_onClick(event){
 	event.stopPropagation();
 	
 	let node = this;
-	let website = node.dataset.website;
-	let id = node.dataset.id;
-	let contentId = node.dataset.contentId;
-	
 	sendDataToMain("shareStream", {
 		website: node.dataset.website,
 		id: node.dataset.id,
@@ -675,7 +679,8 @@ function insertStreamNode(newLine, website, id, contentId, type, streamData, onl
 	document.querySelector("body").classList.toggle("groupedStreams", group_streams_by_websites);
 
 	if(group_streams_by_websites){
-		return $(`#streamList${((online)? "Online" : "Offline")} .${(websites.has(website))? website : "unsupported"}`).append(newLine);
+		const selector = `#streamList${((online)? "Online" : "Offline")} .${(websites.has(website))? website : "unsupported"}`;
+		return $(selector).append(newLine);
 	} else {
 		if(statusStreamList.length > 0){
 			for(let streamNode of statusStreamList){
@@ -760,7 +765,7 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	if(typeof streamLogo === "string" && streamLogo !== ""){
 		streamRenderData.streamLogo = streamLogo;
 	}
-	const newNode = insertStreamNode(Mustache.render(streamTemplate, streamRenderData), website, id, contentId, type, streamData, online);
+	/*const newNode =*/ insertStreamNode(Mustache.render(streamTemplate, streamRenderData), website, id, contentId, type, streamData, online);
 
 	if(typeof liveStatus.lastCheckStatus === "string" && liveStatus.lastCheckStatus !== "" && liveStatus.lastCheckStatus !== "success"){
 		let debugDataNode = document.querySelector("#debugData");
@@ -789,7 +794,7 @@ function streamItemClick(){
 	let node = this;
 	let id = node.dataset.streamId;
 	let contentId = node.dataset.contentId;
-	let online = node.dataset.online;
+	//let online = node.dataset.online;
 	let website = node.dataset.streamWebsite;
 	
 	let streamUrl = getStreamURL(website, id, contentId, true);
@@ -819,7 +824,7 @@ function theme_update(){
 	}
 }
 
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse){
+browser.runtime.onMessage.addListener((message, sender, sendResponse)=>{
 	if(message.receiver === "Live_Notifier_Panel"){
 		console.group();
 		console.info("Message:");
