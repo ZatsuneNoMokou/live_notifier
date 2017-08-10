@@ -4,7 +4,7 @@
 		"description": ""
 	},
 	"extShortDesc": {
-		"message": "Be notified of streams from Bream, Dailymotion, Hitbox, Twitch and Youtube.",
+		"message": "Be notified of streams from Dailymotion, Mixer, Smashcast, Twitch and Youtube.",
 		"description": "this will be used as short description in web stores: MUST BE 132 characters OR LESS"
 	},
 	"language": {
@@ -85,7 +85,7 @@
 	"No_stream_offline": {
 		"message": "No stream offline"
 	},
-	"count_streams_online": {
+	"count_stream_online": {
 		"message": "$count$ stream(s) online",
 		"placeholders": {
 			"count": {
