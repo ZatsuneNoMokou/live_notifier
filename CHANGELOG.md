@@ -8,7 +8,7 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
-# 11.0.0-alpha1
+# 11.0.0-alpha2
 * i: Updated perfect-scrollbar
 * i: Description updated for Smashcast and Mixer
 * i: Code cleanup / fixing
@@ -18,6 +18,7 @@
   * Mainly, it is a Promise based one, unlike the original one using callbacks
 * Fix: English localization
 * Fix: Errors with vocal messages
+* Fix: Importation of stream for Twitch (not sending parameters)
 
 # 10.1.1
 * Fix: Moved settings from Beam and Hitbox

@@ -108,7 +108,7 @@ const twitch = {
 		function(id, data, streamListSetting){
 			let obj = {
 				list: []
-			}
+			};
 			
 			if(data.hasOwnProperty("error")){
 				obj.list = null;

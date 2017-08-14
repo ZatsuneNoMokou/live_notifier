@@ -2001,6 +2001,9 @@ function importStreams(website, id, url, pageNumber){
 		if(current_API.hasOwnProperty("xmlToJSON") === true){
 			importStreams_RequestOptions.xmlToJSON = true;
 		}
+		if(current_API.hasOwnProperty("content") === true){
+			importStreams_RequestOptions.content = current_API.content;
+		}
 		if(current_API.hasOwnProperty("customJSONParse") === true){
 			importStreams_RequestOptions.customJSONParse = current_API.customJSONParse;
 		}
