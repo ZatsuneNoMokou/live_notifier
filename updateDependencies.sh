@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-npm install jquery perfect-scrollbar mustache webextension-polyfill requirejs
+npm install jquery perfect-scrollbar mustache webextension-polyfill
 
 cssLib='./webextension/data/css/lib'
 jsLib='./webextension/data/js/lib'

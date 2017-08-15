@@ -64,6 +64,41 @@ function mapToObj(myMap){
 }
 appGlobal["mapToObj"] = mapToObj;
 
+const splitUri = (function() { // https://codereview.stackexchange.com/questions/9574/faster-and-cleaner-way-to-parse-parameters-from-url-in-javascript-jquery/9630#9630
+	var splitRegExp = new RegExp(
+		'^' +
+		'(?:' +
+		'([^:/?#.]+)' +                         // scheme - ignore special characters
+		// used by other URL parts such as :,
+		// ?, /, #, and .
+		':)?' +
+		'(?://' +
+		'(?:([^/?#]*)@)?' +                     // userInfo
+		'([\\w\\d\\-\\u0100-\\uffff.%]*)' +     // domain - restrict to letters,
+		// digits, dashes, dots, percent
+		// escapes, and unicode characters.
+		'(?::([0-9]+))?' +                      // port
+		')?' +
+		'([^?#]+)?' +                           // path
+		'(?:\\?([^#]*))?' +                     // query
+		'(?:#(.*))?' +                          // fragment
+		'$')
+	;
+
+	return function (uri) {
+		let split;
+		split = uri.match(splitRegExp);
+		return {
+			'scheme':split[1],
+			'user_info':split[2],
+			'domain':split[3],
+			'port':split[4],
+			'path':split[5],
+			'query_data': split[6],
+			'fragment':split[7]
+		}
+	};
+})();
 function Request(options){
 	if(typeof options.url !== "string" && typeof options.onComplete !== "function"){
 		consoleMsg("warn", "Error in options");
@@ -76,9 +111,27 @@ function Request(options){
 				xhr = new XMLHttpRequest();
 			}
 			
-			const content = (Array.isArray(options.content) || options.content instanceof Map)? options.content : [];
+			let content = (Array.isArray(options.content) || options.content instanceof Map)? options.content : [];
+			if(method === 'GET'){
+				// Extract query data from url to put it with the other
+				const urlObj = splitUri(options.url);
+				if(typeof urlObj.query_data === "string" && urlObj.query_data !== ""){
+					let urlQuery = urlObj.query_data.split("&").map(value=>{
+						return value.split("=");
+					});
+					if(Array.isArray(urlQuery)){
+						if(Array.isArray(content)){
+							content = urlQuery.concat(content);
+						} else {
+							content = urlQuery;
+						}
+						options.url = options.url.replace("?"+urlObj.query_data, "");
+					}
+				}
+			}
+
 			const params = new Params(content);
-			
+
 			xhr.open(method, ((method === 'GET')? `${options.url}${(params.size > 0)? `?${params.encode()}` : ""}` : options.url), true);
 			
 			if(typeof options.contentType === "string"){
@@ -875,77 +928,63 @@ function streamSetting_Update(data){
 	streamListSetting.update();
 }
 
-function sendDataToPanel(id, data){
-	function responseCallback(response){
-		if(typeof response !== "undefined"){
-			consoleDir(response, `Port response of ${id}: `);
+appGlobal.sendDataToMain = function(sender, id, data){
+	if(sender === "Live_Notifier_Panel" || sender === "Live_Notifier_Embed" || sender === "Live_Notifier_Options"){
+		switch(id){
+			case "refreshPanel":
+				refreshPanel(data);
+				break;
+			case "importStreams":
+				let website = data;
+				consoleMsg("info", `Importing ${website}...`);
+				importButton(website);
+				break;
+			case "refreshStreams":
+				refreshStreamsFromPanel(data);
+				break;
+			case "addStream":
+				// Make sure to have up-to-date active tab AND its url
+				browser.tabs.query({active: true, lastFocusedWindow: true})
+					.then((tabs)=>{
+						activeTab = tabs[0];
+						addStreamFromPanel(data);
+					})
+				;
+				break;
+			case "deleteStream":
+				deleteStreamFromPanel(data);
+				break;
+			case "openTab":
+				openTabIfNotExist(data);
+				break;
+			case "panel_onload":
+				handleChange(data);
+				break;
+			case "shareStream":
+				shareStream(data);
+				break;
+			case "streamSetting_Update":
+				streamSetting_Update(data);
+				break;
+			default:
+				consoleMsg("warn", `Unkown message id (${id})`);
 		}
-	}
-	chrome.runtime.sendMessage({"sender": "Live_Notifier_Main","receiver": "Live_Notifier_Panel", "id": id, "data": data}, responseCallback);
-}
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse){
-	if(message.receiver === "Live_Notifier_Main"){
-		consoleDir(message, "Message:");
-		
-		let id = message.id;
-		let data = message.data;
-		
-		if(message.sender === "Live_Notifier_Panel" || message.sender === "Live_Notifier_Embed" || message.sender === "Live_Notifier_Options"){
-			switch(id){
-				case "refreshPanel":
-					refreshPanel(data);
-					break;
-				case "importStreams":
-					let website = message.data;
-					consoleMsg("info", `Importing ${website}...`);
-					importButton(website);
-					break;
-				case "refreshStreams":
-					refreshStreamsFromPanel(data);
-					break;
-				case "addStream":
-					// Make sure to have up-to-date active tab AND its url
-					browser.tabs.query({active: true, lastFocusedWindow: true})
-						.then((tabs)=>{
-							activeTab = tabs[0];
-							addStreamFromPanel(data);
-						})
-					;
-					break;
-				case "deleteStream":
-					deleteStreamFromPanel(data);
-					break;
-				case "openTab":
-					openTabIfNotExist(data);
-					break;
-				case "panel_onload":
-					handleChange(data);
-					break;
-				case "shareStream":
-					shareStream(data);
-					break;
-				case "streamSetting_Update":
-					streamSetting_Update(data);
-					break;
-				default:
-					consoleMsg("warn", `Unkown message id (${id})`);
-			}
-		} else if(message.sender === "Live_Streamer_Embed"){
-			switch(message.id){
-				case "addStream":
-					addStreamFromPanel(data);
-					break;
-			}
-		} else {
-			consoleMsg("warn", "Unknown sender");
+	} else if(sender === "Live_Streamer_Embed"){
+		switch(id){
+			case "addStream":
+				addStreamFromPanel(data);
+				break;
 		}
+	} else {
+		consoleMsg("warn", "Unknown sender");
 	}
-});
+};
 
-
-function updatePanelData(doUpdateTheme){
+function updatePanelData(doUpdateTheme=true){
 	// Update panel data
-	sendDataToPanel("updatePanelData", {"doUpdateTheme": (typeof doUpdateTheme !== "undefined")? doUpdateTheme : true});
+	if(typeof panel__UpdateData === "function"){
+		panel__UpdateData(doUpdateTheme);
+	}
 }
 
 function handleChange() {
@@ -1596,10 +1635,8 @@ function checkMissing(){
 		
 		if(listToCheck.size > 0){
 			let refresh = function(result){
-				if(typeof refreshPanel === "function"){
-					refreshPanel();
-				} else {
-					sendDataToMain("refreshPanel", "");
+				if(typeof panelUpdateData === "function"){
+					panelUpdateData();
 				}
 			};
 			checkLives(listToCheck)
@@ -2004,6 +2041,7 @@ function importStreams(website, id, url, pageNumber){
 		if(current_API.hasOwnProperty("content") === true){
 			importStreams_RequestOptions.content = current_API.content;
 		}
+
 		if(current_API.hasOwnProperty("customJSONParse") === true){
 			importStreams_RequestOptions.customJSONParse = current_API.customJSONParse;
 		}

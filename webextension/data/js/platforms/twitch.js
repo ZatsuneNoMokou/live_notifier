@@ -117,11 +117,9 @@ const twitch = {
 					for(let item of data.follows){
 						obj.list.push(item["channel"]["display_name"]);
 					}
-					
+
 					if(data.follows.length > 0 && typeof data._links.next === "string"){
 						obj.next = {"url": data._links.next};
-					} else {
-						obj.next = null;
 					}
 				}
 			}

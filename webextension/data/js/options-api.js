@@ -55,71 +55,6 @@ function loadTranslations(){
 	//observer.disconnect();
 }
 
-/*		---- get/save preference ----		*/
-function encodeString(string){
-	if(typeof string !== "string"){
-		console.warn(`encodeString: wrong type (${typeof string})`);
-		return string;
-	} else {
-		// Using a regexp with g flag, in a replace method let it replace all
-		string = string.replace(/%/g,"%25");
-		string = string.replace(/\:/g,"%3A");
-		string = string.replace(/,/g,"%2C");
-	}
-	return string;
-}
-function decodeString(string){
-	if(typeof string !== "string"){
-		console.warn(`encodeString: wrong type (${typeof string})`);
-		return string;
-	} else {
-		// Using a regexp with g flag, in a replace method let it replace all
-		string = string.replace(/%3A/g,":");
-		string = string.replace(/%2C/g,",");
-		string = string.replace(/%25/g,"%");
-	}
-	return string;
-}
-
-function getBooleanFromVar(string){
-	switch(typeof string){
-		case "boolean":
-			return string;
-			break;
-		case "number":
-		case "string":
-			if(string === "true" || string === "on" || string === 1){
-				return true;
-			} else if(string === "false" || string === "off" || string === 0){
-				return false;
-			} else {
-				console.warn(`getBooleanFromVar: Unkown boolean (${string})`);
-				return string;
-			}
-			break;
-		default:
-			console.warn(`getBooleanFromVar: Unknown type to make boolean (${typeof string})`);
-	}
-}
-function getFilterListFromPreference(string){
-	if(typeof string !== "string"){
-		console.warn("Type error");
-		string = "";
-	}
-	let list = string.split(",");
-	for(let i in list){
-		if(list.hasOwnProperty(i)){
-			if(list[i].length === 0){
-				delete list[i];
-				// Keep a null item, but this null is not considered in for..in loops
-			} else {
-				list[i] = decodeString(list[i]);
-			}
-		}
-	}
-	return list;
-}
-
 let chromeSettings;
 if(browser.extension.getBackgroundPage() !== null){
 	const backgroundPage = browser.extension.getBackgroundPage();
@@ -136,48 +71,22 @@ function getPreference(prefId){
 		return pref;
 	}
 }
-function getSyncPreferences(){
-	const syncPrefs = chromeSettings.getSyncPreferences();
-	if(syncPrefs!==undefined){
-		return syncPrefs;
-	}
-}
 function savePreference(prefId, value){
 	chromeSettings.set(prefId, value);
 }
 
-function getValueFromNode(node){
-	const tagName = node.tagName.toLowerCase();
-	if(tagName === "textarea"){
-		if(node.dataset.stringTextarea === "true"){
-			return node.value.replace(/\n/g, "");
-		} else if(node.dataset.stringList === "true"){
-			// Split as list, encode item, then make it back a string
-			return node.value.split("\n").map(encodeString).join(",");
-		} else {
-			return node.value;
-		}
-	} else if(node.type === "checkbox") {
-		return node.checked;
-	} else if(tagName === "input" && node.type === "number"){
-		return parseInt(node.value);
-	} else if(typeof node.value === "string"){
-		return node.value;
-	} else {
-		console.error("Problem with node trying to get value");
-	}
-}
-
 function settingNode_onChange(event){
-	const node = event.target,
+	const backgroundPage = browser.extension.getBackgroundPage(),
+		node = event.target,
 		settingName = node.id;
+
 	if(node.validity.valid){
-		const settingValue = getValueFromNode(node);
-		
-		savePreference(settingName, settingValue);
+		savePreference(settingName, backgroundPage.getValueFromNode(node));
 	}
 }
 function refreshSettings(event){
+	const backgroundPage = browser.extension.getBackgroundPage();
+
 	let prefId = "";
 	let prefValue = "";
 	if(typeof event.key === "string"){
@@ -198,7 +107,7 @@ function refreshSettings(event){
 			switch(chromeSettings.options.get(prefId).type){
 				case "string":
 					if(typeof chromeSettings.options.get(prefId).stringList === "boolean" && chromeSettings.options.get(prefId).stringList === true){
-						prefNode.value = getFilterListFromPreference(getPreference(prefId)).join("\n");
+						prefNode.value = backgroundPage.getFilterListFromPreference(getPreference(prefId)).join("\n");
 					} else {
 						prefNode.value = prefValue;
 					}
@@ -211,7 +120,7 @@ function refreshSettings(event){
 					prefNode.value = parseInt(prefValue);
 					break;
 				case "bool":
-					prefNode.checked = getBooleanFromVar(prefValue);
+					prefNode.checked = backgroundPage.getBooleanFromVar(prefValue);
 					break;
 				case "control":
 					// Nothing to update, no value
@@ -243,9 +152,7 @@ function refreshSettings(event){
 
 // Saves/Restaure options from/to browser.storage
 function saveOptionsInSync(event){
-	let settingsDataToSync = getSyncPreferences();
-	
-	browser.storage.sync.set(settingsDataToSync)
+	chromeSettings.saveInSync()
 		.then(()=>{
 			// Update status to let user know options were saved.
 			let status = document.getElementById('status');
@@ -267,94 +174,12 @@ function saveOptionsInSync(event){
 function restaureOptionsFromSync(event){
 	// Default values
 	let mergePreferences = event.shiftKey;
-	let appGlobal = (browser.extension.getBackgroundPage() !== null)? browser.extension.getBackgroundPage().appGlobal : appGlobal;
-	browser.storage.sync.get(chromeSettings.getSyncKeys())
-		.then(items=>{
-			for(let prefId in items){
-				if(items.hasOwnProperty(prefId)){
-					if(mergePreferences){
-						let oldPref = getPreference(prefId);
-						let newPrefArray;
-						switch(prefId){
-							case "stream_keys_list":
-								let oldPrefArray = oldPref.split(",");
-								newPrefArray = items[prefId].split(/,\s*/);
-								newPrefArray = oldPrefArray.concat(newPrefArray);
-
-								savePreference(prefId, newPrefArray.join());
-								let streamListSetting = new appGlobal.streamListFromSetting("", true);
-								streamListSetting.update();
-								break;
-							case "statusBlacklist":
-							case "statusWhitelist":
-							case "gameBlacklist":
-							case "gameWhitelist":
-								let toLowerCase = (str)=>{return str.toLowerCase()};
-								let oldPrefArrayLowerCase = oldPref.split(/,\s*/).map(toLowerCase);
-								newPrefArray = oldPref.split(/,\s*/);
-								items[prefId].split(/,\s*/).forEach(value=>{
-									if(oldPrefArrayLowerCase.indexOf(value.toLowerCase()) === -1){
-										newPrefArray.push(value);
-									}
-								});
-								savePreference(prefId, newPrefArray.join(","));
-								break;
-							default:
-								savePreference(prefId, items[prefId]);
-						}
-					} else {
-						savePreference(prefId, items[prefId]);
-					}
-				}
-
-			}
-		})
-		.catch(err=>{
-			if(err){
-				console.warn(err);
-			}
-		})
-	;
+	chromeSettings.restaureFromSync((typeof mergePreferences==="boolean")? mergePreferences : false);
 }
 
 /*		---- Node generation of settings ----		*/
 function loadPreferences(selector){
-	const container = document.querySelector(selector),
-		isPanelPage = location.pathname.indexOf("panel.html") !== -1,
-		body = document.querySelector("body");
-
-	chromeSettings.options.forEach((option, id)=>{
-		if(typeof option.type === "undefined"){
-			return;
-		}
-		if(option.hasOwnProperty("hidden") && typeof option.hidden === "boolean" && option.hidden === true){
-			return;
-		}
-		if(id === "showAdvanced"){
-			if(getPreference("showAdvanced")){
-				body.classList.add("showAdvanced");
-			} else {
-				body.classList.remove("showAdvanced");
-			}
-		}
-		if(id === "showExperimented"){
-			if(getPreference("showExperimented")){
-				body.classList.add("showExperimented");
-			} else {
-				body.classList.remove("showExperimented");
-			}
-		}
-
-		if(isPanelPage && ((typeof option.prefLevel === "string" && option.prefLevel === "experimented") || (option.hasOwnProperty("showPrefInPanel") && typeof option.showPrefInPanel === "boolean" && option.showPrefInPanel === false))){
-			return;
-		}
-
-		let groupNode = null;
-		if(typeof option.group === "string" && option.group !== ""){
-			groupNode = getPreferenceGroupNode(container, option.group);
-		}
-		newPreferenceNode(((groupNode === null)? container : groupNode), id, option);
-	});
+	chromeSettings.loadPreferencesNodes(document.querySelector(selector));
 	
 	browser.storage.onChanged.addListener((changes, area) => {
 		if(area === "local"){
@@ -364,145 +189,12 @@ function loadPreferences(selector){
 				}
 			}
 		}
-	})
-}
-function getPreferenceGroupNode(parent, groupId){
-	let groupNode = document.querySelector(`#${groupId}.pref_group`);
-	if(groupNode === null){
-		groupNode = document.createElement("div");
-		groupNode.id = groupId;
-		groupNode.classList.add("pref_group");
-		if(groupId === "dailymotion" || groupId === "smashcast" || groupId === "hitbox" || groupId === "twitch" || groupId === "mixer" || groupId === "beam"){
-			groupNode.classList.add("website_pref");
-		}
-		parent.appendChild(groupNode);
-	}
-	return groupNode;
+	});
 }
 function import_onClick(){
 	const getWebsite = /^(\w+)_import$/i,
 		website = getWebsite.exec(this.id)[1];
 	sendDataToMain("importStreams", website);
-}
-function newPreferenceNode(parent, id, prefObj){
-	let node = document.createElement("div");
-	node.classList.add("preferenceContainer");
-	if(typeof prefObj.prefLevel === "string"){
-		node.classList.add(prefObj.prefLevel);
-	}
-	
-	let labelNode = document.createElement("label");
-	labelNode.classList.add("preference");
-	if(typeof prefObj.description === "string"){
-		labelNode.title = prefObj.description;
-	}
-	labelNode.htmlFor = id;
-	if(prefObj.type !== "control"){
-		labelNode.dataset.translateTitle = `${id}_description`;
-	}
-	
-	let title = document.createElement("span");
-	title.id = `${id}_title`;
-	title.textContent = prefObj.title;
-	title.dataset.translateId = `${id}_title`;
-	labelNode.appendChild(title);
-	
-	let prefNode = null,
-		output;
-	switch(prefObj.type){
-		case "string":
-			if(typeof prefObj.stringTextArea === "boolean" && prefObj.stringTextArea === true){
-				prefNode = document.createElement("textarea");
-				prefNode.dataset.stringTextarea = true;
-				prefNode.value = getPreference(id);
-			} else if(typeof prefObj.stringList === "boolean" && prefObj.stringList === true){
-				prefNode = document.createElement("textarea");
-				prefNode.dataset.stringList = true;
-				prefNode.value = getFilterListFromPreference(getPreference(id)).join("\n");
-				
-				node.classList.add("stringList");
-			} else {
-				prefNode = document.createElement("input");
-				prefNode.type = "text";
-				prefNode.value = getPreference(id);
-			}
-			break;
-		case "integer":
-			prefNode = document.createElement("input");
-			prefNode.required = true;
-			if(typeof prefObj.rangeInput === "boolean" && prefObj.rangeInput === true && typeof prefObj.minValue === "number" && typeof prefObj.maxValue === "number"){
-				prefNode.type = "range";
-				prefNode.step = 1;
-				
-				output = document.createElement("output");
-			} else {
-				prefNode.type = "number";
-			}
-			if(typeof prefObj.minValue === "number"){
-				prefNode.min = prefObj.minValue;
-			}
-			if(typeof prefObj.maxValue === "number"){
-				prefNode.max = prefObj.maxValue;
-			}
-			prefNode.value = parseInt(getPreference(id));
-			break;
-		case "bool":
-			prefNode = document.createElement("input");
-			prefNode.type = "checkbox";
-			prefNode.checked = getBooleanFromVar(getPreference(id));
-			break;
-		case "color":
-			prefNode = document.createElement("input");
-			prefNode.type = "color";
-			prefNode.value = getPreference(id);
-			break;
-		case "control":
-			prefNode = document.createElement("button");
-			prefNode.textContent = prefObj.label;
-			break;
-		case "menulist":
-			prefNode = document.createElement("select");
-			prefNode.size = 2;
-			for(let o in prefObj.options){
-				if(prefObj.options.hasOwnProperty(o)){
-					let option = prefObj.options[o];
-
-					let optionNode = document.createElement("option");
-					optionNode.text = option.label;
-					optionNode.value = option.value;
-					optionNode.dataset.translateId = `${id}_${option.value}`;
-
-					prefNode.add(optionNode);
-				}
-			}
-			prefNode.value = getPreference(id);
-			break;
-	}
-	prefNode.id = id;
-	if(prefObj.type !== "control"){
-		prefNode.classList.add("preferenceInput");
-	}
-	if(prefObj.type === "control"){
-		prefNode.dataset.translateId = `${id}`;
-	}
-	
-	let isPanelPage = location.pathname.indexOf("panel.html") !== -1;
-	if(id.indexOf("_keys_list") !== -1 || (isPanelPage && id.indexOf("_user_id") !== -1) || (!isPanelPage && (id === "statusBlacklist" || id === "statusWhitelist" || id === "gameBlacklist" || id === "gameWhitelist"))){
-		node.classList.add("flex_input_text");
-	}
-	prefNode.dataset.settingType = prefObj.type;
-	
-	node.appendChild(labelNode);
-	node.appendChild(prefNode);
-	parent.appendChild(node);
-	
-	if(typeof prefNode.type === "string" && prefNode.type === "range"){
-		output.textContent = prefNode.value;
-		prefNode.addEventListener("change",function(){
-			output.textContent = prefNode.value;
-		});
-		node.appendChild(output);
-	}
 }
 if(typeof $ !== "undefined"){
 	$(document).on("input", "[data-setting-type='string']", settingNode_onChange);
@@ -524,18 +216,16 @@ function simulateClick(node) {
 }
 function exportPrefsToFile(event){
 	let appGlobal = (browser.extension.getBackgroundPage() !== null)? browser.extension.getBackgroundPage().appGlobal : appGlobal;
-	
-	let preferences = getSyncPreferences();
-	
+
 	let exportData = {
 		"live_notifier_version": appGlobal["version"],
-		"preferences": preferences
+		"preferences": chromeSettings.getSyncPreferences()
 	};
-	
+
 	let link = document.createElement("a");
 	link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData));
 	link.download = "live_notifier_preferences.json";
-	
+
 	simulateClick(link);
 }
 function importPrefsFromFile(event){
@@ -568,57 +258,8 @@ function importPrefsFromFile(event){
 				}
 				if(file_JSONData !== null){
 					if(file_JSONData.hasOwnProperty("live_notifier_version") && file_JSONData.hasOwnProperty("preferences") && typeof file_JSONData.preferences === "object"){
-						for(let prefId in file_JSONData.preferences){
-							if(file_JSONData.preferences.hasOwnProperty(prefId)){
-								if(prefId==="hitbox_user_id"){
-									file_JSONData.preferences["smashcast_user_id"] = file_JSONData.preferences["hitbox_user_id"];
-									delete file_JSONData.preferences["hitbox_user_id"];
-									prefId="smashcast_user_id";
-								}
-								if(prefId==="beam_user_id"){
-									file_JSONData.preferences["mixer_user_id"] = file_JSONData.preferences["beam_user_id"];
-									delete file_JSONData.preferences["beam_user_id"];
-									prefId="mixer_user_id";
-								}
-								if(chromeSettings.options.has(prefId) && typeof chromeSettings.options.get(prefId).type !== "undefined" && chromeSettings.options.get(prefId).type !== "control" && chromeSettings.options.get(prefId).type !== "file" && typeof file_JSONData.preferences[prefId] === typeof chromeSettings.defaultSettingsSync.get(prefId)){
-									if(mergePreferences){
-										let oldPref = getPreference(prefId);
-										let newPrefArray;
-										switch(prefId){
-											case "stream_keys_list":
-												let oldPrefArray = oldPref.split(",");
-												newPrefArray = file_JSONData.preferences[prefId].split(/,\s*/);
-												newPrefArray = oldPrefArray.concat(newPrefArray);
+						chromeSettings.importFromJSON(file_JSONData.preferences, (typeof mergePreferences==="boolean")? mergePreferences : false);
 
-												savePreference(prefId, newPrefArray.join());
-												let streamListSetting = new appGlobal.streamListFromSetting("", true);
-												streamListSetting.update();
-												break;
-											case "statusBlacklist":
-											case "statusWhitelist":
-											case "gameBlacklist":
-											case "gameWhitelist":
-												let toLowerCase = (str)=>{return str.toLowerCase()};
-												let oldPrefArrayLowerCase = oldPref.split(/,\s*/).map(toLowerCase);
-												newPrefArray = oldPref.split(/,\s*/);
-												file_JSONData.preferences[prefId].split(/,\s*/).forEach(value=>{
-													if(oldPrefArrayLowerCase.indexOf(value.toLowerCase()) === -1){
-														newPrefArray.push(value);
-													}
-												});
-												savePreference(prefId, newPrefArray.join(","));
-												break;
-											default:
-												savePreference(prefId, file_JSONData.preferences[prefId]);
-										}
-									} else {
-										savePreference(prefId, file_JSONData.preferences[prefId]);
-									}
-								} else {
-									console.warn(`Error trying to import ${prefId}`);
-								}
-							}
-						}
 						if(typeof refreshStreamsFromPanel === "function"){
 							refreshStreamsFromPanel();
 						} else {

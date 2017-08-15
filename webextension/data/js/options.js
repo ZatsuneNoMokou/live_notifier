@@ -23,15 +23,7 @@ theme_update();
 
 
 function sendDataToMain(id, data){
-	function responseCallback(response){
-		if(typeof response !== "undefined"){
-			console.group();
-			console.info(`Port response of ${id}: `);
-			console.dir(response);
-			console.groupEnd();
-		}
-	}
-	chrome.runtime.sendMessage({"sender": "Live_Notifier_Options","receiver": "Live_Notifier_Main", "id": id, "data": data}, responseCallback);
+	backgroundPage.appGlobal.sendDataToMain("Live_Notifier_Options", id,  data);
 }
 
 loadPreferences("section#preferences");
