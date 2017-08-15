@@ -1,6 +1,6 @@
 'use strict';
 
-var embed_selectors = ['iframe[src*="://www.dailymotion.com/embed/video/"]', 'iframe[src*="://www.hitbox.tv/"]', 'iframe[src*="://player.twitch.tv/?channel"]'];
+var embed_selectors = ['iframe[src*="://www.dailymotion.com/embed/video/"]', 'iframe[src*="://www.smashcast.tv/"]', 'iframe[src*="://www.hitbox.tv/"]', 'iframe[src*="://player.twitch.tv/?channel"]', 'iframe[src*="://mixer.com"]'];
 
 var embed_list = [];
 var message = {"embed_list": embed_list};

@@ -980,6 +980,10 @@ appGlobal.sendDataToMain = function(sender, id, data){
 	}
 };
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse)=>{
+	appGlobal.sendDataToMain(message.sender, message.id, message.data);
+});
+
 function updatePanelData(doUpdateTheme=true){
 	// Update panel data
 	if(typeof panel__UpdateData === "function"){
