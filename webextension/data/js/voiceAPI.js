@@ -10,7 +10,7 @@ function getVoiceLanguage(langCode){
 		}
 		return result;
 	};
-	return new Promise((resolve, reject) => {
+	return new Promise(resolve=>{
 		voices = speechSynthesis.getVoices();
 		if(voices.length === 0){
 			speechSynthesis.onvoiceschanged = function(){

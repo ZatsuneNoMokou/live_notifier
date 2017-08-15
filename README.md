@@ -11,6 +11,8 @@ More information on the [Mozilla add-on page](https://addons.mozilla.org/fr/fire
 
 perfect-scrollbar is from https://github.com/noraesae/perfect-scrollbar (License MIT).
 
+i18next and i18next-xhr-backend are from https://github.com/i18next/i18next and https://github.com/i18next/i18next-xhr-backend (License MIT).
+
 mustache.js (or Mustache) is from https://github.com/janl/mustache.js (License MIT).
 
 The icon of the addon (version 4 and later) is from https://pixabay.com/photo-978055/ (in [CC0 Public Domain](https://pixabay.com/fr/service/terms/#usage)). The "Material Icons" (version 2.11 and later) font is part of Google material design, in [CC-BY license](https://creativecommons.org/licenses/by/4.0/) (open source), is available [here](https://google.github.io/material-design-icons/).
