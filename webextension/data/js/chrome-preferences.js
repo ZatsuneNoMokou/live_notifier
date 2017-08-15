@@ -1,3 +1,90 @@
+/*		---- get/save preference ----		*/
+function encodeString(string){
+	if(typeof string !== "string"){
+		console.warn(`encodeString: wrong type (${typeof string})`);
+		return string;
+	} else {
+		// Using a regexp with g flag, in a replace method let it replace all
+		string = string.replace(/%/g,"%25");
+		string = string.replace(/\:/g,"%3A");
+		string = string.replace(/,/g,"%2C");
+	}
+	return string;
+}
+function decodeString(string){
+	if(typeof string !== "string"){
+		console.warn(`encodeString: wrong type (${typeof string})`);
+		return string;
+	} else {
+		// Using a regexp with g flag, in a replace method let it replace all
+		string = string.replace(/%3A/g,":");
+		string = string.replace(/%2C/g,",");
+		string = string.replace(/%25/g,"%");
+	}
+	return string;
+}
+
+function getBooleanFromVar(string){
+	switch(typeof string){
+		case "boolean":
+			return string;
+			break;
+		case "number":
+		case "string":
+			if(string === "true" || string === "on" || string === 1){
+				return true;
+			} else if(string === "false" || string === "off" || string === 0){
+				return false;
+			} else {
+				console.warn(`getBooleanFromVar: Unkown boolean (${string})`);
+				return string;
+			}
+			break;
+		default:
+			console.warn(`getBooleanFromVar: Unknown type to make boolean (${typeof string})`);
+	}
+}
+function getFilterListFromPreference(string){
+	if(typeof string !== "string"){
+		console.warn("Type error");
+		string = "";
+	}
+	let list = string.split(",");
+	for(let i in list){
+		if(list.hasOwnProperty(i)){
+			if(list[i].length === 0){
+				delete list[i];
+				// Keep a null item, but this null is not considered in for..in loops
+			} else {
+				list[i] = decodeString(list[i]);
+			}
+		}
+	}
+	return list;
+}
+
+function getValueFromNode(node){
+	const tagName = node.tagName.toLowerCase();
+	if(tagName === "textarea"){
+		if(node.dataset.stringTextarea === "true"){
+			return node.value.replace(/\n/g, "");
+		} else if(node.dataset.stringList === "true"){
+			// Split as list, encode item, then make it back a string
+			return node.value.split("\n").map(encodeString).join(",");
+		} else {
+			return node.value;
+		}
+	} else if(node.type === "checkbox") {
+		return node.checked;
+	} else if(tagName === "input" && node.type === "number"){
+		return parseInt(node.value);
+	} else if(typeof node.value === "string"){
+		return node.value;
+	} else {
+		console.error("Problem with node trying to get value");
+	}
+}
+
 class ChromePreferences extends Map{
 	constructor(options){
 		super(new Map());
@@ -147,6 +234,295 @@ class ChromePreferences extends Map{
 			keysArray.push(key);
 		});
 		return keysArray;
+	}
+	importFromJSON(preferences, mergePreferences=false){
+		for(let prefId in preferences){
+			if(preferences.hasOwnProperty(prefId)){
+				if(prefId==="hitbox_user_id"){
+					preferences["smashcast_user_id"] = preferences["hitbox_user_id"];
+					delete preferences["hitbox_user_id"];
+					prefId="smashcast_user_id";
+				}
+				if(prefId==="beam_user_id"){
+					preferences["mixer_user_id"] = preferences["beam_user_id"];
+					delete preferences["beam_user_id"];
+					prefId="mixer_user_id";
+				}
+				if(this.options.has(prefId) && typeof this.options.get(prefId).type !== "undefined" && this.options.get(prefId).type !== "control" && this.options.get(prefId).type !== "file" && typeof preferences[prefId] === typeof this.defaultSettingsSync.get(prefId)){
+					if(mergePreferences){
+						let oldPref = this.get(prefId);
+						let newPrefArray;
+						switch(prefId){
+							case "stream_keys_list":
+								let oldPrefArray = oldPref.split(",");
+								newPrefArray = preferences[prefId].split(/,\s*/);
+								newPrefArray = oldPrefArray.concat(newPrefArray);
+
+								this.set(prefId, newPrefArray.join());
+								let streamListSetting = new appGlobal.streamListFromSetting("", true);
+								streamListSetting.update();
+								break;
+							case "statusBlacklist":
+							case "statusWhitelist":
+							case "gameBlacklist":
+							case "gameWhitelist":
+								let toLowerCase = (str)=>{return str.toLowerCase()};
+								let oldPrefArrayLowerCase = oldPref.split(/,\s*/).map(toLowerCase);
+								newPrefArray = oldPref.split(/,\s*/);
+								preferences[prefId].split(/,\s*/).forEach(value=>{
+									if(oldPrefArrayLowerCase.indexOf(value.toLowerCase()) === -1){
+										newPrefArray.push(value);
+									}
+								});
+								this.set(prefId, newPrefArray.join(","));
+								break;
+							default:
+								this.set(prefId, preferences[prefId]);
+						}
+					} else {
+						this.set(prefId, preferences[prefId]);
+					}
+				} else {
+					console.warn(`Error trying to import ${prefId}`);
+				}
+			}
+		}
+	}
+	saveInSync(){
+		return browser.storage.sync.set(this.getSyncPreferences());
+	}
+	restaureFromSync(mergePreferences=false){
+		return new Promise(resolve=>{
+			let appGlobal = (browser.extension.getBackgroundPage() !== null)? browser.extension.getBackgroundPage().appGlobal : appGlobal;
+			browser.storage.sync.get(this.getSyncKeys())
+				.then(items=>{
+					for(let prefId in items){
+						if(items.hasOwnProperty(prefId)){
+							if(mergePreferences){
+								let oldPref = this.get(prefId);
+								let newPrefArray;
+								switch(prefId){
+									case "stream_keys_list":
+										let oldPrefArray = oldPref.split(",");
+										newPrefArray = items[prefId].split(/,\s*/);
+										newPrefArray = oldPrefArray.concat(newPrefArray);
+
+										this.set(prefId, newPrefArray.join());
+										let streamListSetting = new appGlobal.streamListFromSetting("", true);
+										streamListSetting.update();
+										break;
+									case "statusBlacklist":
+									case "statusWhitelist":
+									case "gameBlacklist":
+									case "gameWhitelist":
+										let toLowerCase = (str)=>{return str.toLowerCase()};
+										let oldPrefArrayLowerCase = oldPref.split(/,\s*/).map(toLowerCase);
+										newPrefArray = oldPref.split(/,\s*/);
+										items[prefId].split(/,\s*/).forEach(value=>{
+											if(oldPrefArrayLowerCase.indexOf(value.toLowerCase()) === -1){
+												newPrefArray.push(value);
+											}
+										});
+										this.set(prefId, newPrefArray.join(","));
+										break;
+									default:
+										this.set(prefId, items[prefId]);
+								}
+							} else {
+								this.set(prefId, items[prefId]);
+							}
+						}
+					}
+					resolve("success");
+				})
+				.catch(err=>{
+					if(err){
+						console.warn(err);
+					}
+					reject(err);
+				})
+			;
+		});
+	}
+
+
+	loadPreferencesNodes(container){
+		const doc = container.ownerDocument,
+			isPanelPage = container.baseURI.indexOf("panel.html") !== -1,
+			body = doc.querySelector("body");
+
+		this.options.forEach((option, id)=>{
+			if(typeof option.type === "undefined"){
+				return;
+			}
+			if(option.hasOwnProperty("hidden") && option.hidden === true){
+				return;
+			}
+			if(id === "showAdvanced"){
+				if(this.get("showAdvanced")){
+					body.classList.add("showAdvanced");
+				} else {
+					body.classList.remove("showAdvanced");
+				}
+			}
+			if(id === "showExperimented"){
+				if(this.get("showExperimented")){
+					body.classList.add("showExperimented");
+				} else {
+					body.classList.remove("showExperimented");
+				}
+			}
+
+			if(isPanelPage && ((typeof option.prefLevel === "string" && option.prefLevel === "experimented") || (option.hasOwnProperty("showPrefInPanel") && typeof option.showPrefInPanel === "boolean" && option.showPrefInPanel === false))){
+				return;
+			}
+
+			let groupNode = null;
+			if(typeof option.group === "string" && option.group !== ""){
+				const groupId = option.group;
+				groupNode = doc.querySelector(`#${groupId}.pref_group`);
+
+				if(groupNode === null){
+					groupNode = doc.createElement("div");
+					groupNode.id = groupId;
+					groupNode.classList.add("pref_group");
+					if(groupId === "dailymotion" || groupId === "smashcast" || groupId === "hitbox" || groupId === "twitch" || groupId === "mixer" || groupId === "beam"){
+						groupNode.classList.add("website_pref");
+					}
+					container.appendChild(groupNode);
+				}
+			}
+
+			if(groupNode===null){
+				groupNode = container;
+			}
+
+			groupNode.appendChild(this.newPreferenceNode(groupNode, id));
+		});
+	}
+	newPreferenceNode(parent, id){
+		const prefObj = this.options.get(id);
+
+		let node = document.createElement("div");
+		node.classList.add("preferenceContainer");
+		if(typeof prefObj.prefLevel === "string"){
+			node.classList.add(prefObj.prefLevel);
+		}
+
+		let labelNode = document.createElement("label");
+		labelNode.classList.add("preference");
+		if(typeof prefObj.description === "string"){
+			labelNode.title = prefObj.description;
+		}
+		labelNode.htmlFor = id;
+		if(prefObj.type !== "control"){
+			labelNode.dataset.translateTitle = `${id}_description`;
+		}
+
+		let title = document.createElement("span");
+		title.id = `${id}_title`;
+		title.textContent = prefObj.title;
+		title.dataset.translateId = `${id}_title`;
+		labelNode.appendChild(title);
+
+		let prefNode = null,
+			output;
+		switch(prefObj.type){
+			case "string":
+				if(typeof prefObj.stringTextArea === "boolean" && prefObj.stringTextArea === true){
+					prefNode = document.createElement("textarea");
+					prefNode.dataset.stringTextarea = true;
+					prefNode.value = this.get(id);
+				} else if(typeof prefObj.stringList === "boolean" && prefObj.stringList === true){
+					prefNode = document.createElement("textarea");
+					prefNode.dataset.stringList = true;
+					prefNode.value = getFilterListFromPreference(this.get(id)).join("\n");
+
+					node.classList.add("stringList");
+				} else {
+					prefNode = document.createElement("input");
+					prefNode.type = "text";
+					prefNode.value = this.get(id);
+				}
+				break;
+			case "integer":
+				prefNode = document.createElement("input");
+				prefNode.required = true;
+				if(typeof prefObj.rangeInput === "boolean" && prefObj.rangeInput === true && typeof prefObj.minValue === "number" && typeof prefObj.maxValue === "number"){
+					prefNode.type = "range";
+					prefNode.step = 1;
+
+					output = document.createElement("output");
+				} else {
+					prefNode.type = "number";
+				}
+				if(typeof prefObj.minValue === "number"){
+					prefNode.min = prefObj.minValue;
+				}
+				if(typeof prefObj.maxValue === "number"){
+					prefNode.max = prefObj.maxValue;
+				}
+				prefNode.value = parseInt(this.get(id));
+				break;
+			case "bool":
+				prefNode = document.createElement("input");
+				prefNode.type = "checkbox";
+				prefNode.checked = getBooleanFromVar(this.get(id));
+				break;
+			case "color":
+				prefNode = document.createElement("input");
+				prefNode.type = "color";
+				prefNode.value = this.get(id);
+				break;
+			case "control":
+				prefNode = document.createElement("button");
+				prefNode.textContent = prefObj.label;
+				break;
+			case "menulist":
+				prefNode = document.createElement("select");
+				prefNode.size = 2;
+				for(let o in prefObj.options){
+					if(prefObj.options.hasOwnProperty(o)){
+						let option = prefObj.options[o];
+
+						let optionNode = document.createElement("option");
+						optionNode.text = option.label;
+						optionNode.value = option.value;
+						optionNode.dataset.translateId = `${id}_${option.value}`;
+
+						prefNode.add(optionNode);
+					}
+				}
+				prefNode.value = this.get(id);
+				break;
+		}
+		prefNode.id = id;
+		if(prefObj.type !== "control"){
+			prefNode.classList.add("preferenceInput");
+		}
+		if(prefObj.type === "control"){
+			prefNode.dataset.translateId = `${id}`;
+		}
+
+		prefNode.dataset.settingType = prefObj.type;
+
+		node.appendChild(labelNode);
+		node.appendChild(prefNode);
+
+		let isPanelPage = parent.baseURI.indexOf("panel.html") !== -1;
+		if(id.indexOf("_keys_list") !== -1 || (isPanelPage && id.indexOf("_user_id") !== -1) || (!isPanelPage && (id === "statusBlacklist" || id === "statusWhitelist" || id === "gameBlacklist" || id === "gameWhitelist"))){
+			node.classList.add("flex_input_text");
+		}
+
+		if(typeof prefNode.type === "string" && prefNode.type === "range"){
+			output.textContent = prefNode.value;
+			prefNode.addEventListener("change",function(){
+				output.textContent = prefNode.value;
+			});
+			node.appendChild(output);
+		}
+
+		return node;
 	}
 }
 ChromePreferences.prototype.originalGet = ChromePreferences.prototype.get;

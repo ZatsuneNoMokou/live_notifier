@@ -4,16 +4,9 @@
 let panelinitjs_node = document.querySelector("#panelInit");
 panelinitjs_node.parentNode.removeChild(panelinitjs_node);
 
-function sendDataToMain(id, data){
-	function responseCallback(response){
-		if(typeof response !== "undefined"){
-			console.group();
-			console.info(`Port response of ${id}: `);
-			console.groupEnd();
-		}
-	}
-	chrome.runtime.sendMessage({"sender": "Live_Notifier_Panel","receiver": "Live_Notifier_Main", "id": id, "data": data}, responseCallback);
-}
+/*function sendDataToMain(id, data){
+	chrome.runtime.sendMessage({"sender": "Live_Notifier_Panel","receiver": "Live_Notifier_Main", "id": id, "data": data});
+}*/
 
 var backgroundPage = browser.extension.getBackgroundPage();
 
@@ -22,6 +15,10 @@ var theme_cache_update = backgroundPage.backgroundTheme.theme_cache_update;
 let options = backgroundPage.options;
 
 let appGlobal = backgroundPage.appGlobal;
+
+let sendDataToMain = function (id, data) {
+	appGlobal.sendDataToMain("Live_Notifier_Panel", id, data);
+};
 
 function copyToClipboard(string){
 	let copy = function(string){
@@ -430,10 +427,10 @@ $(document).on("click", "#saveEditedStream", function(){
 
 /*			---- Stream Editor end----			*/
 let ignoreHideIgnore = false;
-function updatePanelData(data){
+function updatePanelData(doUpdateTheme=true){
 	console.log("Updating panel data");
 	
-	if(typeof data.doUpdateTheme === "boolean" && data.doUpdateTheme === true){
+	if(doUpdateTheme === true){
 		theme_update();
 	}
 	
@@ -824,23 +821,9 @@ function theme_update(){
 	}
 }
 
-browser.runtime.onMessage.addListener((message, sender, sendResponse)=>{
-	if(message.receiver === "Live_Notifier_Panel"){
-		console.group();
-		console.info("Message:");
-		console.dir(message);
-		console.groupEnd();
-		
-		let id = message.id;
-		let data = message.data;
-		
-		switch(id){
-			case "updatePanelData":
-				updatePanelData(data);
-				break;
-		}
-	}
-});
+backgroundPage.panel__UpdateData = (data)=>{
+	updatePanelData(data);
+};
 
 let scrollbar = {"streamList": null, "settings_container": null};
 function load_scrollbar(id){
@@ -874,7 +857,7 @@ function scrollbar_update(nodeId){
 
 loadTranslations();
 
-sendDataToMain("panel_onload","");
+sendDataToMain("panel_onload");
 
 load_scrollbar("streamList");
 load_scrollbar("streamEditor");

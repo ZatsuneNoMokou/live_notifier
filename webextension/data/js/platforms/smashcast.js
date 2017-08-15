@@ -1,13 +1,13 @@
 const smashcast = {
 	"title": "Smashcast",
 	"addStream_URLpatterns": new Map([
-		["hitbox", [
+		["smashcast", [
 			/^(?:http|https):\/\/www\.smashcast\.tv\/(?:embedchat\/)?([^\/\?\&]+).*$/
 		]]
 	]),
 	"API_addStream":
 		function(source_website, id){
-			return hitbox.API(id);
+			return smashcast.API(id);
 		},
 	"API":
 		function(id){
@@ -61,20 +61,20 @@ const smashcast = {
 					streamData.streamGame = data["category_name"];
 				}
 				if(data["category_logo_large"] !== null){
-					streamData.streamCategoryLogo = "http://edge.sf.hitbox.tv" + data["category_logo_large"];
+					streamData.streamCategoryLogo = "http://edge.sf.smashcast.tv" + data["category_logo_large"];
 				} else if(data["category_logo_small"] !== null){
-					streamData.streamCategoryLogo = "http://edge.sf.hitbox.tv" + data["category_logo_small"];
+					streamData.streamCategoryLogo = "http://edge.sf.smashcast.tv" + data["category_logo_small"];
 				} else {
 					streamData.streamCategoryLogo = "";
 				}
-				if(streamData.streamCategoryLogo === "http://edge.sf.hitbox.tv/static/img/generic/blank.gif"){
+				if(streamData.streamCategoryLogo === "http://edge.sf.smashcast.tv/static/img/generic/blank.gif"){
 					streamData.streamCategoryLogo = "";
 				}
 				
 				if(typeof data.channel["user_logo"] === "string" && data.channel["user_logo"].indexOf("/static/img/generic/default-user-") === -1){
-					streamData.streamOwnerLogo = "http://edge.sf.hitbox.tv" + data.channel["user_logo"];
+					streamData.streamOwnerLogo = "http://edge.sf.smashcast.tv" + data.channel["user_logo"];
 				} else if(typeof data.channel["user_logo"] !== "string" && data.channel["user_logo"].indexOf("/static/img/generic/default-user-") === -1){
-					streamData.streamOwnerLogo = "http://edge.sf.hitbox.tv" + data.channel["user_logo_small"];
+					streamData.streamOwnerLogo = "http://edge.sf.smashcast.tv" + data.channel["user_logo_small"];
 				} else {
 					streamData.streamOwnerLogo = "";
 				}
@@ -105,7 +105,7 @@ const smashcast = {
 				
 				if(data.following.length > 0){
 					const nextPageNumber = ((typeof pageNumber === "number")? pageNumber : 1) + 1,
-						nextUrl = hitbox.importAPI(id).url + "&offset=" + nextPageNumber;
+						nextUrl = smashcast.importAPI(id).url + "&offset=" + nextPageNumber;
 					obj.next = {"url": nextUrl, "pageNumber": nextPageNumber};
 				} else {
 					obj.next = null;

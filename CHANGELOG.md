@@ -8,7 +8,12 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
-# 11.0.0-alpha2
+# 11.0.1 - 11.0.4
+* Fix: Error on Firefox with runtime api for messages
+* Fix: Case where "next" url return by API contain query data
+* Fix: Forgotten "hibox"
+
+# 11.0.0
 * i: Updated perfect-scrollbar
 * i: Description updated for Smashcast and Mixer
 * i: Code cleanup / fixing
