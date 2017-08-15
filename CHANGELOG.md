@@ -8,6 +8,10 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 11.1.0
+* +: Stopped using native (Web Extension API) translations to get pural support, with i18next
+* Fix: Panel css
+
 # 11.0.8-11.0.9
 * Fix: Get embed from page
 

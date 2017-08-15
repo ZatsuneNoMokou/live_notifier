@@ -1,0 +1,200 @@
+{
+	"Open_in_browser": "Open in browser",
+	"Close": "Close",
+	"Add": "Add",
+	"Delete": "Delete",
+	"DeleteIgnore": "Delete / Ignore",
+	"Cancel": "Cancel",
+	"Yes": "Yes",
+	"No": "No",
+	"Ok": "Ok",
+
+	"Search": "Search",
+	"Refresh": "Refresh",
+
+	"GloballyDisabledNotifications": "All notifications are disabled",
+	"GloballyDisableNotifications": "Temporarly disable notifications",
+
+	"Settings": "Settings",
+	"confirm_all_changes": "Confirm changes",
+	"cancelChanges": "Cancel changes",
+	"IgnoreStream": "Ignore the stream",
+	"copyURL": "Copy stream",
+	"shareStream": "Share stream",
+
+	"Stream_online": "Stream online",
+	"Stream_offline": "Stream offline",
+
+	"is_online": "is streaming",
+	"is_offline": "just finished a stream",
+
+	"No_stream_online": "No stream online",
+	"No_stream_offline": "No stream offline",
+
+	"count_stream_online": "{{count}} stream online",
+	"count_stream_online_plural": "{{count}} streams online",
+	"count_stream_offline": "{{count}} stream offline",
+	"count_stream_offline_plural": "{{count}} streams offline",
+
+	"Add_this": "Add this",
+
+	"is_already_configured": "is already configured.",
+	"hidden_ignored_reactivate": "is currently hidden / ignored, reactivate it?",
+	"hidden_ignored_reactivated": "was hidden / ignored and has been reactivated",
+
+	"wasnt_configured_but_error_retrieving_data": "wasn't configured, but an error occurred when retrieving data.",
+	"wasnt_configured_and_have_been_added": "wasn't configured, and have been added.",
+	"wasnt_configured_and_can_be_added": "wasn't configured, and can be added.",
+
+	"The_channel": "The channel {{channel}}",
+	"The_stream": "The stream {{channel}}",
+
+	"click_to_confirm": "click to confirm",
+
+	"importation_finished": "Importation finished for {{website}}",
+	"importation_finished_DataNull": "Importation finished with error for {{website}} ({{reason}})",
+	"importError_checkId": "check your id",
+	"importError_checkYouTubeConnexion": "check the connexion to your YouTube account on your browser",
+
+	"have_been_added": "have been added.",
+	"No_supported_stream_detected_in_the_current_tab_so_nothing_to_add": "No supported stream detected in the current tab, so, nothing to add.",
+	"I_am_watching_the_stream_of": "I am watching the stream of",
+	"will_be_deleted_are_you_sure": "will be deleted, are you sure?",
+	"has_been_deleted": "has been deleted.",
+	"clipboard_success": "Copied into the clipboad.",
+	"clipboard_failed": "Failed to copy to clipboad.\nIt is not supported or the permission is missing",
+
+	"Addon_have_been_updated": "Addon have been updated (version {{version}})",
+
+	"customURl_title": "Custom url",
+
+	"blacklist_title": "Blacklist",
+	"whitelist_title": "Whitelist",
+
+	"Status_title": "Status",
+	"Game_title": "Game",
+	"twitter_title": "Twitter",
+	"hideStream_title": "Hide stream",
+	"ignoreStream_title": "Ignore stream",
+	"iconIgnore_title": "Ignore for the icon",
+	"vocalStreamName_title": "Custom stream name pronounced on vocal notifications",
+
+	"notifyOnline_title": "Notification when the stream begin",
+	"notifyVocalOnline_title": "Vocal notification when the stream begin",
+	"notifyOffline_title": "Notification when the stream end",
+	"notifyVocalOffline_title": "Vocal notification when the stream end",
+
+	"vocal_volume_title": "Volume of vocal notifiations",
+	"vocal_volume_description": "In percent",
+
+	"open_optionpage": "Open option page",
+	"ignoreHideIgnore": "Temporarily disable Ignore/Hide",
+
+	"stream_keys_list_title": "Stream keys to notify",
+	"stream_keys_list_description": "Stream list in a comma separated list",
+
+	"dailymotion_user_id_title": "Your Dailymotion id",
+	"dailymotion_user_id_description": "Enter to be able to import the stream(s) you follow",
+	"dailymotion_import_title": "Import the Dailymotion stream(s) you follow",
+	"dailymotion_import": "Import",
+
+	"mixer_user_id_title": "Your Mixer id",
+	"mixer_user_id_description": "Enter to be able to import the stream(s) you follow",
+	"mixer_import_title": "Import the Mixer stream(s) you follow",
+	"mixer_import": "Import",
+
+	"smashcast_user_id_title": "Your Smashcast id",
+	"smashcast_user_id_description": "Enter to be able to import the stream(s) you follow",
+	"smashcast_import_title": "Import the Smashcast stream(s) you follow",
+	"smashcast_import": "Import",
+
+	"twitch_user_id_title": "Your Twitch id",
+	"twitch_user_id_description": "Enter to be able to import the stream(s) you follow",
+	"twitch_import_title": "Import the Twitch stream(s) you follow",
+	"twitch_import": "Import",
+
+	"youtube_import_title": "Import the YouTube channels you follow (current browser session)",
+	"youtube_import": "Import",
+	"youtube_api_key_title": "Your Youtube API Key (Optional)",
+	"youtube_api_key_description": "Use your own quota, and no cache limitation",
+	"youtube_api_referrer_title": "Your Youtube API Referrer (Optional)",
+	"youtube_api_referrer_description": "",
+
+	"youtube_patreon_password_title": "Patreon password (Optional, for my Patreon only)",
+	"youtube_patreon_password_description": "Fully use Youtube API, on my server",
+
+	"An_error_occurred_when_importing_check_your_id_or_the_website_availability": "An error occurred when importing, check your id or the website availability",
+
+	"check_delay_title": "Streams verification delay",
+	"check_delay_description": "Delay between verifications, in minute",
+	"check_limit_title": "Streams checked limit (0: no limit)",
+	"check_limit_description": "Number of stream checked simultaneously",
+
+	"timeout_delay_title": "Timeout delay of requests",
+	"timeout_delay_description": "Timeout delay of requests, in sec (between 10 and 30)",
+	"notify_online_title": "Show a notification when a stream start",
+	"notify_online_description": "Notification when checked",
+
+	"notify_vocal_online_title": "Play a vocal notification when a stream start",
+	"notify_vocal_online_description": "Notification when checked",
+
+	"notify_offline_title": "Show a notification when a stream finish",
+	"notify_offline_description": "Notification when checked",
+
+	"notify_vocal_offline_title": "Play a vocal notification when a stream finish",
+	"notify_vocal_offline_description": "Notification when checked",
+
+	"statusBlacklist_title": "Status blacklist",
+	"statusBlacklist_description": "Comma separated list",
+	"statusWhitelist_title": "Status whitelist",
+	"statusWhitelist_description": "Comma separated list",
+
+	"gameBlacklist_title": "Game blacklist",
+	"gameBlacklist_description": "Comma separated list",
+	"gameWhitelist_title": "Game whitelist",
+	"gameWhitelist_description": "Comma separated list",
+
+	"group_streams_by_websites_title":  "Group streams by website",
+	"group_streams_by_websites_description":  "Grouped when checked",
+
+	"show_offline_in_panel_title":  "Show offline streams in the panel",
+	"show_offline_in_panel_description":  "Shown when checked",
+
+	"confirm_addStreamFromPanel_title":  "Confirmation to add or reactivate streams",
+	"confirm_addStreamFromPanel_description": "Show a notification to confirm when adding or reactivate a stream of config (from panel)",
+	"confirm_deleteStreamFromPanel_title": "Confirmation to delete streams",
+	"confirm_deleteStreamFromPanel_description": "Show a notification to confirm when deleting a stream of config (from panel)",
+
+	"panel_theme_title": "Panel theme",
+	"panel_theme_description": "Choose the theme of the panel",
+	"panel_theme_dark": "Dark",
+	"panel_theme_light": "Light",
+
+	"background_color_title": "Panel color",
+	"background_color_description": "Choose base color of the panel",
+
+	"export_preferences_title": "Export preferences in a file",
+	"export_preferences": "Export",
+	"import_preferences_title": "Import preferences from a file",
+	"import_preferences": "Import",
+
+	"showAdvanced_title": "Show advanced settings",
+	"showAdvanced_description": "Enabled when checked",
+	"showExperimented_title": "Show setting for experimented users",
+	"showExperimented_description": "Enabled when checked",
+
+	"options_saved": "Options saved.",
+	"options_saved_sync": "Options saved in synchronisation.",
+
+	"save": "Save",
+	"sync_title": "Save / Restaure preferences from/to synchronization",
+	"restaure_sync": "Restaure",
+	"save_sync": "Save",
+	"debugInfo": "",
+	"debugDataLabel": "Error(s):",
+	"noErrorToShow": "No error to show.",
+	"debug_checkingLivesState": "State of the stream refresh",
+	"footer_title": "Addon under GPL v3 licence.",
+	"footer_by": "by",
+	"supportWithPatreon": "Support this addon and the Youtube support"
+}

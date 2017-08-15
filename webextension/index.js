@@ -1,7 +1,5 @@
 'use strict';
 
-let _ = browser.i18n.getMessage;
-
 // appGlobal: Accessible with browser.extension.getBackgroundPage();
 var appGlobal = {
 	loadJS: loadJS
@@ -573,7 +571,7 @@ function refreshPanel(data){
 	updatePanelData(doUpdateTheme);
 }
 function refreshStreamsFromPanel(){
-	let done = function(reason){
+	let done = ()=>{
 		updatePanelData();
 	};
 	if(appGlobal["checkingLivesFinished"]){
@@ -585,9 +583,9 @@ function refreshStreamsFromPanel(){
 
 function display_id(id, displayName){
 	if(website_channel_id.test(id)){
-		return _("The_channel", (typeof displayName === "string")? displayName : website_channel_id.exec(id)[1]);
+		return i18ex._("The_channel", {"channel": (typeof displayName === "string")? displayName : website_channel_id.exec(id)[1]});
 	} else {
-		return _("The_stream", (typeof displayName === "string")? displayName : id);
+		return i18ex._("The_stream", {"channel": (typeof displayName === "string")? displayName : id});
 	}
 }
 let activeTab;
@@ -633,7 +631,7 @@ function addStreamFromPanel(data){
 						id = pattern.exec(url)[1];
 						if(streamListSetting.streamExist(website, id)){
 							doNotif({
-								"message": `${display_id(id)} ${_("is_already_configured")}`
+								"message": `${display_id(id)} ${i18ex._("is_already_configured")}`
 							})
 								.catch(err=>{
 									consoleMsg("warn", err);
@@ -657,7 +655,7 @@ function addStreamFromPanel(data){
 									
 									if(website === "dailymotion" && responseValidity === "invalid_parameter"){
 										doNotif({
-											"message": _("No_supported_stream_detected_in_the_current_tab_so_nothing_to_add")
+											"message": i18ex._("No_supported_stream_detected_in_the_current_tab_so_nothing_to_add")
 										})
 											.catch(err=>{
 												consoleMsg("warn", err);
@@ -666,7 +664,7 @@ function addStreamFromPanel(data){
 										return null;
 									} else if(streamId === null){
 										doNotif({
-											"message": `${display_id(id)} ${_("wasnt_configured_but_error_retrieving_data")}`
+											"message": `${display_id(id)} ${i18ex._("wasnt_configured_but_error_retrieving_data")}`
 										})
 											.catch(err=>{
 												consoleMsg("warn", err);
@@ -675,7 +673,7 @@ function addStreamFromPanel(data){
 										return null;
 									} else if(typeof streamId === "boolean" && streamId === true){
 										doNotif({
-											"message": `${display_id(id)} ${_("is_already_configured")}`
+											"message": `${display_id(id)} ${i18ex._("is_already_configured")}`
 										})
 											.catch(err=>{
 												consoleMsg("warn", err);
@@ -691,7 +689,7 @@ function addStreamFromPanel(data){
 										const streamSettings = streamListSetting.mapDataAll.get(website).get(streamId);
 										if(streamSettings.hide === false && streamSettings.ignore === false){
 											doNotif({
-												"message": `${display_id(streamId, streamName)} ${_("is_already_configured")}`
+												"message": `${display_id(streamId, streamName)} ${i18ex._("is_already_configured")}`
 											})
 												.catch(err=>{
 													consoleMsg("warn", err);
@@ -700,7 +698,7 @@ function addStreamFromPanel(data){
 										} else {
 											if(getPreference("confirm_addStreamFromPanel")){
 												doNotif({
-													"message": `${display_id(streamId, streamName)} ${_("hidden_ignored_reactivate")}`,
+													"message": `${display_id(streamId, streamName)} ${i18ex._("hidden_ignored_reactivate")}`,
 													"buttons": [notifButtons.yes, notifButtons.no]
 												}, true)
 													.then(()=>{
@@ -719,7 +717,7 @@ function addStreamFromPanel(data){
 												streamSettings.ignore = false;
 												streamListSetting.update();
 												doNotif({
-													"message": `${display_id(streamId, streamName)} ${_("hidden_ignored_reactivated")}`
+													"message": `${display_id(streamId, streamName)} ${i18ex._("hidden_ignored_reactivated")}`
 												})
 													.catch(err=>{
 														consoleMsg("warn", err);
@@ -730,7 +728,7 @@ function addStreamFromPanel(data){
 									} else {
 										if(getPreference("confirm_addStreamFromPanel")){
 											doNotif({
-												"message": `${display_id(streamId, streamName)} ${_("wasnt_configured_and_can_be_added")}`,
+												"message": `${display_id(streamId, streamName)} ${i18ex._("wasnt_configured_and_can_be_added")}`,
 												"buttons": [notifButtons.addItem, notifButtons.cancel]
 											}, true)
 												.then(()=>{
@@ -752,7 +750,7 @@ function addStreamFromPanel(data){
 											streamListSetting.addStream(website, streamId, ((type === "embed")? active_tab_url : ""));
 											streamListSetting.update();
 											doNotif({
-												"message": `${display_id(streamId, streamName)} ${_("wasnt_configured_and_have_been_added")}`
+												"message": `${display_id(streamId, streamName)} ${i18ex._("wasnt_configured_and_have_been_added")}`
 											})
 												.catch(err=>{
 													consoleMsg("warn", err);
@@ -799,23 +797,13 @@ function addStreamFromPanel(data){
 		}
 	} else {
 		doNotif({
-			"message": _("No_supported_stream_detected_in_the_current_tab_so_nothing_to_add")
+			"message": i18ex._("No_supported_stream_detected_in_the_current_tab_so_nothing_to_add")
 		})
 			.catch(err=>{
 				consoleMsg("warn", err);
 			})
 		;
 	}
-}
-function deleteStreams(deleteMap){
-	let streamListSetting = new streamListFromSetting();
-
-	deleteMap.forEach((deleteMap_website, website) => {
-		for(let id of deleteMap_website){
-			streamListSetting.deleteStream(website, id);
-		}
-	});
-	streamListSetting.update();
 }
 function deleteStreamFromPanel(data){
 	let streamListSetting = new streamListFromSetting(data.website);
@@ -824,7 +812,7 @@ function deleteStreamFromPanel(data){
 	if(streamListSetting.streamExist(website, id)){
 		if(getPreference("confirm_deleteStreamFromPanel")){
 			doNotif({
-				"message": `${display_id(id)} ${_("will_be_deleted_are_you_sure")}`,
+				"message": `${display_id(id)} ${i18ex._("will_be_deleted_are_you_sure")}`,
 				"buttons": [notifButtons.deleteItem, notifButtons.cancel]
 			}, true)
 				.then(()=>{
@@ -832,7 +820,7 @@ function deleteStreamFromPanel(data){
 					streamListSetting.deleteStream(website, id);
 					streamListSetting.update();
 					doNotif({
-						"message": `${display_id(id)} ${_("has_been_deleted")}`
+						"message": `${display_id(id)} ${i18ex._("has_been_deleted")}`
 					})
 						.catch(err=>{
 							consoleMsg("warn", err);
@@ -849,7 +837,7 @@ function deleteStreamFromPanel(data){
 			streamListSetting.deleteStream(website, id);
 			streamListSetting.update();
 			doNotif({
-				"message": `${display_id(id)} ${_("has_been_deleted")}`
+				"message": `${display_id(id)} ${i18ex._("has_been_deleted")}`
 			})
 				.catch(err=>{
 					consoleMsg("warn", err);
@@ -859,19 +847,6 @@ function deleteStreamFromPanel(data){
 			refreshPanel(false);
 		}
 	}
-}
-
-function settingUpdate(data){
-	let settingName = data.settingName;
-	let settingValue = data.settingValue;
-	
-	let updatePanel = true;
-	if(typeof data.updatePanel !== "undefined"){
-		updatePanel = data.updatePanel;
-	}
-	
-	consoleMsg("log", `${settingName} - ${settingValue}`);
-	savePreference(settingName, settingValue);
 }
 
 function shareStream(data){
@@ -886,7 +861,7 @@ function shareStream(data){
 	let streamURL = getStreamURL(website, id, contentId, true);
 	let streamStatus = streamData.streamStatus;
 	
-	let facebookID = (typeof streamList.get(id).facebook === "string" && streamList.get(id).facebook !== "")? streamList.get(id).facebook : streamData.twitterID;
+	// let facebookID = (typeof streamList.get(id).facebook === "string" && streamList.get(id).facebook !== "")? streamList.get(id).facebook : streamData.twitterID;
 	let twitterID = (typeof streamList.get(id).twitter === "string" && streamList.get(id).twitter !== "")? streamList.get(id).twitter : streamData.twitterID;
 	
 	let streamerAlias = streamName;
@@ -900,7 +875,7 @@ function shareStream(data){
 		consoleMsg("info", `${id}/${contentId} (${website}) twitter ID: ${twitterID}`);
 	}
 	
-	let shareMessage = `${_("I_am_watching_the_stream_of")} ${streamerAlias}, "${streamStatus}"`;
+	let shareMessage = `${i18ex._("I_am_watching_the_stream_of")} ${streamerAlias}, "${streamStatus}"`;
 	
 	//let url = `https:\/\/twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${streamURL}&hashtags=LiveNotifier${(twitterID != "")? `&related=${twitterID}` : ""}`;
 	let url = `https:\/\/twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${streamURL}${(twitterID !== "")? `&related=${twitterID}` : ""}&via=LiveNotifier`;
@@ -940,7 +915,7 @@ appGlobal.sendDataToMain = function(sender, id, data){
 				importButton(website);
 				break;
 			case "refreshStreams":
-				refreshStreamsFromPanel(data);
+				refreshStreamsFromPanel();
 				break;
 			case "addStream":
 				// Make sure to have up-to-date active tab AND its url
@@ -980,7 +955,7 @@ appGlobal.sendDataToMain = function(sender, id, data){
 	}
 };
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse)=>{
+chrome.runtime.onMessage.addListener(message=>{
 	appGlobal.sendDataToMain(message.sender, message.id, message.data);
 });
 
@@ -1016,16 +991,6 @@ function openTabIfNotExist(url){
 		});
 }
 
-const notifButtons = {
-	"openUrl": {title: _("Open_in_browser"), iconUrl: "/data/images/ic_open_in_browser_black_24px.svg"},
-	"close": {title: _("Close"), iconUrl: "/data/images/ic_close_black_24px.svg"},
-	"addItem": {title: _("Add"), iconUrl: "/data/images/ic_add_circle_black_24px.svg"},
-	"deleteItem": {title: _("Delete"), iconUrl: "/data/images/ic_delete_black_24px.svg"},
-	"cancel": {title: _("Cancel"), iconUrl: "/data/images/ic_cancel_black_24px.svg"},
-	"yes": {title: _("Yes"), iconUrl: "/data/images/ic_add_circle_black_24px.svg"},
-	"no": {title: _("No"), iconUrl: "/data/images/ic_cancel_black_24px.svg"}
-};
-
 const chromeNotifications = new ChromeNotificationControler();
 function doNotif(options, suffixConfirmIfNoButtons=false){
 	return new Promise((resolve, reject)=>{
@@ -1041,7 +1006,7 @@ function doNotif(options, suffixConfirmIfNoButtons=false){
 		}
 
 		if(suffixConfirmIfNoButtons === true){
-			options.title = `${options.title} (${_("click_to_confirm")})`;
+			options.title = `${options.title} (${i18ex._("click_to_confirm")})`;
 		} else if(chromeNotifications.chromeAPI_button_availability === true && (!options.buttons || !Array.isArray(options.buttons))){ // 2 buttons max per notification, the 2nd button is used as a cancel (no action) button in Live Notifier
 			options.buttons = [notifButtons.close];
 		}
@@ -1204,13 +1169,13 @@ function doStreamNotif(website, id, contentId, streamSetting){
 	
 	let streamName = streamData.streamName;
 	let streamOwnerLogo = streamData.streamOwnerLogo;
-	let streamCategoryLogo = streamData.streamCategoryLogo;
+	//let streamCategoryLogo = streamData.streamCategoryLogo;
 	let streamLogo = "";
-	
+
 	if(typeof streamOwnerLogo === "string" && streamOwnerLogo !== ""){
 		streamLogo  = streamOwnerLogo;
 	}
-	
+
 	let isStreamOnline_filtered = getCleanedStreamStatus(website, id, contentId, streamSetting, online);
 	
 	if(appGlobal["notificationGlobalyDisabled"] === true){
@@ -1222,7 +1187,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 			if((typeof streamList.get(id).notifyOnline === "boolean")? streamList.get(id).notifyOnline : getPreference("notify_online") === true){
 				let streamStatus = ((streamData.streamStatus !== "")? ": " + streamData.streamStatus : "") + ((streamData.streamGame !== "")? (" (" + streamData.streamGame + ")") : "");
 				let notifOptions = {
-					"title": _("Stream_online"),
+					"title": i18ex._("Stream_online"),
 					"message": `${streamName}${streamStatus}`,
 					"buttons": [notifButtons.openUrl, notifButtons.close]
 				};
@@ -1246,7 +1211,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 					|| (channelData!==null && channelData.liveStatus.notifiedStatus_Vocal === false)
 				) && ((typeof streamList.get(id).notifyVocalOnline === "boolean")? streamList.get(id).notifyVocalOnline : getPreference("notify_vocal_online")) === true
 			){
-				voiceReadMessage(_("language"), `${(typeof streamList.get(id).vocalStreamName === "string")? streamList.get(id).vocalStreamName : streamName} ${_("is_online")}`);
+				voiceReadMessage(i18ex._("language"), `${(typeof streamList.get(id).vocalStreamName === "string")? streamList.get(id).vocalStreamName : streamName} ${i18ex._("is_online")}`);
 				if(channelData!==null){
 					channelData.liveStatus.notifiedStatus_Vocal = isStreamOnline_filtered;
 				} else {
@@ -1259,7 +1224,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 			if((typeof streamList.get(id).notifyOffline === "boolean")? streamList.get(id).notifyOffline : getPreference("notify_offline") === true){
 				if(streamLogo !== ""){
 					doNotif({
-						"title": _("Stream_offline"),
+						"title": i18ex._("Stream_offline"),
 						"message": streamName,
 						"iconUrl": streamLogo
 					})
@@ -1269,7 +1234,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 					;
 				} else {
 					doNotif({
-						"title": _("Stream_offline"),
+						"title": i18ex._("Stream_offline"),
 						"message": streamName
 					})
 						.catch(err=>{
@@ -1285,7 +1250,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 					|| (channelData!==null && channelData.liveStatus.notifiedStatus_Vocal===true)
 				) && ((typeof streamList.get(id).notifyVocalOffline === "boolean")? streamList.get(id).notifyVocalOffline : getPreference("notify_vocal_offline")) === true
 			){
-				voiceReadMessage(_("language"), `${(typeof streamList.get(id).vocalStreamName === "string")? streamList.get(id).vocalStreamName : streamName} ${_("is_offline")}`);
+				voiceReadMessage(i18ex._("language"), `${(typeof streamList.get(id).vocalStreamName === "string")? streamList.get(id).vocalStreamName : streamName} ${i18ex._("is_offline")}`);
 				if(channelData!==null){
 					channelData.liveStatus.notifiedStatus_Vocal = isStreamOnline_filtered;
 				} else {
@@ -1302,7 +1267,7 @@ function getOfflineCount(){
 	let offlineCount = 0;
 	
 	let streamListSetting = (new streamListFromSetting()).mapDataAll;
-	websites.forEach((websiteAPI, website, array) => {
+	websites.forEach((websiteAPI, website) => {
 		streamListSetting.get(website).forEach((streamList, id) => {
 			if(typeof streamList.ignore === "boolean" && streamList.ignore === true){
 				// Ignoring stream with ignore set to true from online count
@@ -1314,7 +1279,7 @@ function getOfflineCount(){
 				if(liveStatus.get(website).get(id).size === 0){
 					offlineCount++;
 				} else {
-					liveStatus.get(website).get(id).forEach((streamData, contentId) => {
+					liveStatus.get(website).get(id).forEach(streamData=>{
 						if(!streamData.liveStatus.filteredStatus){
 							offlineCount++;
 						}
@@ -1353,9 +1318,9 @@ function setIcon(){
 	});
 	
 	if(badgeOnlineCount > 0){
-		browser.browserAction.setTitle({title: _("count_stream_online", badgeOnlineCount.toString())});
+		browser.browserAction.setTitle({title: i18ex._("count_stream_online", {"count": badgeOnlineCount})});
 	} else {
-		browser.browserAction.setTitle({title: _("No_stream_online")});
+		browser.browserAction.setTitle({title: i18ex._("No_stream_online")});
 	}
 	
 	let badgeImage = (badgeOnlineCount > 0)? online_badgeData : offline_badgeData;
@@ -1923,7 +1888,7 @@ function importButton(website){
 		consoleDir(reason, `Importation for ${website} finished`);
 		if(typeof reason === "string" && reason === "ImportEnd"){
 			doNotif({
-				"message": _("importation_finished", (websites.get(website).hasOwnProperty("title"))? websites.get(website).title : website)
+				"message": i18ex._("importation_finished", {"website": (websites.get(website).hasOwnProperty("title"))? websites.get(website).title : website})
 			})
 				.catch(err=>{
 					consoleMsg("warn", err);
@@ -1931,10 +1896,11 @@ function importButton(website){
 			;
 		} else if(typeof reason === "string" && reason === "ImportEnd_DataNull"){
 			doNotif({
-				"message": _("importation_finished_DataNull",
-					[((websites.get(website).hasOwnProperty("title"))? websites.get(website).title : website),
-						((website !== "youtube")? _("importError_checkId") : _("importError_checkYouTubeConnexion"))]
-				)
+				"message": i18ex._("importation_finished_DataNull",
+					{
+						"website": ((websites.get(website).hasOwnProperty("title"))? websites.get(website).title : website),
+						"reason": ((website !== "youtube")? i18ex._("importError_checkId") : i18ex._("importError_checkYouTubeConnexion"))
+					})
 			})
 				.catch(err=>{
 					consoleMsg("warn", err);
@@ -1954,7 +1920,7 @@ function importButton(website){
 				if(checkResponseValidity(website, response) !== "success"){
 					consoleMsg("warn", `Sometimes bad things just happen - ${website} - ${response.url}`);
 					doNotif({
-						"message": _("An_error_occurred_when_importing_check_your_id_or_the_website_availability")
+						"message": i18ex._("An_error_occurred_when_importing_check_your_id_or_the_website_availability")
 					})
 						.catch(err=>{
 							consoleMsg("warn", err);
@@ -2155,7 +2121,7 @@ function initAddon(){
 	browser.contextMenus.create({
 		"type": "normal",
 		"id": "livenotifier_contextMenu",
-		"title": _("Add_this"),
+		"title": i18ex._("Add_this"),
 		"contexts": ["link"],
 		"targetUrlPatterns": ["http://*/*", "https://*/*"],
 		"onclick": function(info, tab){
@@ -2295,7 +2261,7 @@ function checkIfUpdated(details){
 					((current_version_numbers[1] === previousVersion_numbers[1]) && (current_version_numbers[2] === previousVersion_numbers[2]) && (current_version_numbers[3] > previousVersion_numbers[3]))
 				){
 					doNotif({
-						"message": _("Addon_have_been_updated", current_version)
+						"message": i18ex._("Addon_have_been_updated", {"version": current_version})
 					})
 						.catch(err=>{
 							consoleMsg("warn", err);
@@ -2312,8 +2278,19 @@ function checkIfUpdated(details){
 	//}
 }
 
-chromeSettings.loadingPromise
+let notifButtons;
+Promise.all([chromeSettings.loadingPromise, i18ex.loadingPromise])
 	.then(()=>{
+		notifButtons = {
+			"openUrl": {title: i18ex._("Open_in_browser"), iconUrl: "/data/images/ic_open_in_browser_black_24px.svg"},
+			"close": {title: i18ex._("Close"), iconUrl: "/data/images/ic_close_black_24px.svg"},
+			"addItem": {title: i18ex._("Add"), iconUrl: "/data/images/ic_add_circle_black_24px.svg"},
+			"deleteItem": {title: i18ex._("Delete"), iconUrl: "/data/images/ic_delete_black_24px.svg"},
+			"cancel": {title: i18ex._("Cancel"), iconUrl: "/data/images/ic_cancel_black_24px.svg"},
+			"yes": {title: i18ex._("Yes"), iconUrl: "/data/images/ic_add_circle_black_24px.svg"},
+			"no": {title: i18ex._("No"), iconUrl: "/data/images/ic_cancel_black_24px.svg"}
+		};
+
 		appGlobal.chromeSettings = chromeSettings;
 		consoleDir(chromeSettings,"Current preferences in the local storage:");
 
@@ -2343,62 +2320,3 @@ chromeSettings.loadingPromise
 			.catch(initAddon)
 	})
 ;
-
-//browser.storage.local.get(optionsData.options_default)
-/*browser.storage.local.get(null)
-	.then((currentLocalStorage)=>{
-		let currentPreferences = {};
-		for(let prefId in currentLocalStorage){
-			if(!currentLocalStorage.hasOwnProperty(prefId)){ // Make sure to not loop constructors
-				continue;
-			}
-			if(optionsData.options_default.hasOwnProperty(prefId)){
-				currentPreferences[prefId] = currentLocalStorage[prefId];
-			} else {
-				currentPreferences[prefId] = currentLocalStorage[prefId];
-				console.warn(`${prefId} has no default value (value: currentLocalStorage[prefId])`);
-			}
-		}
-
-		// Load default settings for the missing settings without saving them in the storage
-		for(let prefId in optionsData.options_default){
-			if(!optionsData.options_default.hasOwnProperty(prefId)){ // Make sure to not loop constructors
-				continue;
-			}
-			if(!currentPreferences.hasOwnProperty(prefId)){
-				currentPreferences[prefId] = optionsData.options_default[prefId];
-			}
-		}
-
-		appGlobal.currentPreferences = currentPreferences;
-		consoleDir(currentPreferences,"Current preferences in the local storage:");
-
-		// if(typeof browser.runtime.onInstalled == "object" && typeof browser.runtime.onInstalled.removeListener == "function"){
-		// 	browser.runtime.onInstalled.addListener(checkIfUpdated);
-		// } else {
-		// consoleMsg("warn", "browser.runtime.onInstalled is not available");
-		let details;
-		if(typeof getPreference("livenotifier_version") === "string" && getPreference("livenotifier_version") !== ""){
-			details = {
-				"reason": "unknown",
-				"previousVersion": getPreference("livenotifier_version")
-			}
-		} else {
-			details = {
-				"reason": "install",
-				"previousVersion": "0.0.0"
-			}
-}
-
-checkIfUpdated(details);
-//}
-
-loadJS(document, "/data/js/", ["backgroundTheme.js"]);
-loadJS(document, "/data/js/platforms/", ["dailymotion.js", "mixer.js", "picarto_tv.js", "smashcast.js", "twitch.js", "youtube.js"])
-	.then(initAddon)
-	.catch(initAddon)
-})
-.catch(err=>{
-	if(err) consoleMsg("error", err);
-})
-;*/

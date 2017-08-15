@@ -11,7 +11,7 @@
 	"short_name": "LiveNotifierDev",
 	"description": "__MSG_extShortDesc__",
 	"author": "Zatsune No Mokou",
-	"version": "11.0.9",
+	"version": "11.1.0",
 	"icons": {
 		"96": "/icon_96.png",
 		"128": "/icon_128.png"
@@ -23,6 +23,9 @@
 			"/data/js/options-data.js",
 			"/data/js/chrome-preferences.js",
 			"/data/js/loadJS.js",
+			"/data/js/locales/i18next.min.js",
+			"/data/js/locales/i18nextXHRBackend.min.js",
+			"/data/js/locales/i18extended.js",
 			"/data/js/options-api.js",
 			"/data/js/voiceAPI.js",
 			"/data/js/lib/xml2jsobj.js",

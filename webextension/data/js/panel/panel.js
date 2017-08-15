@@ -37,7 +37,7 @@ function copyToClipboard(string){
 		let clipboard_success = document.execCommand('Copy');
 		if(clipboard_success){
 			appGlobal.doNotif({
-				"message": _("clipboard_success")
+				"message": i18ex._("clipboard_success")
 			})
 				.catch(err=>{
 					console.warn(err);
@@ -45,7 +45,7 @@ function copyToClipboard(string){
 			console.info(`Copied: ${string}`);
 		} else {
 			appGlobal.doNotif({
-				"message": _("clipboard_failed")
+				"message": i18ex._("clipboard_failed")
 			})
 				.catch(err=>{
 					console.warn(err);
@@ -92,8 +92,6 @@ let setIcon = appGlobal.setIcon;
 
 let checkMissing = appGlobal.checkMissing;
 
-let i18n = browser.i18n.getMessage;
-
 $(document).on("click", "#refreshStreams", ()=>{
 	sendDataToMain("refreshStreams","");
 });
@@ -108,7 +106,7 @@ $(document).on("click", "#disableNotifications", ()=>{
 	disableNotificationsButton.classList.toggle("off", backgroundPage.appGlobal["notificationGlobalyDisabled"]);
 
 	$(disableNotificationsButton).tooltip("hide");
-	disableNotificationsButton.dataset.originalTitle = disableNotificationsButton.title = i18n((backgroundPage.appGlobal["notificationGlobalyDisabled"])? "GloballyDisabledNotifications" : "GloballyDisableNotifications");
+	disableNotificationsButton.dataset.originalTitle = disableNotificationsButton.title = i18ex._((backgroundPage.appGlobal["notificationGlobalyDisabled"])? "GloballyDisabledNotifications" : "GloballyDisableNotifications");
 	$(disableNotificationsButton).tooltip("show");
 
 });
@@ -510,11 +508,11 @@ function updatePanelData(doUpdateTheme=true){
 	
 	//Update online steam count in the panel
 	let onlineCount = appGlobal["onlineCount"];
-	listenerOnlineCount((onlineCount === 0)? i18n("No_stream_online") :  i18n("count_stream_online", onlineCount.toString()));
+	listenerOnlineCount((onlineCount === 0)? i18ex._("No_stream_online") :  i18ex._("count_stream_online", {count: onlineCount}));
 	
 	if(show_offline_in_panel){
 		let offlineCount = getOfflineCount();
-		listenerOfflineCount((offlineCount === 0)? i18n("No_stream_offline") :  i18n("count_stream_offline", offlineCount.toString()));
+		listenerOfflineCount((offlineCount === 0)? i18ex._("No_stream_offline") :  i18ex._("count_stream_offline", {count: offlineCount}));
 	} else {
 		listenerOfflineCount("");
 	}

@@ -1,12 +1,12 @@
 html{
-	margin:0px;
-	padding:0px;
+	margin:0;
+	padding:0;
 	height:350px;
 	overflow:hidden;
 	font-weight:300;
 }
 body{
-	margin:0px;
+	margin:0;
 	height:100%;
 	width:285px;
 	/*width:100%;*/
@@ -76,20 +76,20 @@ input[type=range]:-moz-focusring{
 }
 
 button{
-	padding:0px 8px;
-	border:0px none;
+	padding:0 8px;
+	border:0 none;
 	border-radius:1px;
 	margin-left:5px;
 	font-weight:700;
 }
-.ps-theme-slimScrollbar .ps-scrollbar-x-rail, .ps-theme-slimScrollbar .ps-scrollbar-y-rail{
+.ps--theme_slimScrollbar .ps__scrollbar-x-rail, .ps--theme_slimScrollbar .ps__scrollbar-y-rail{
 	background-color:transparent !important;
 }
-.ps-theme-slimScrollbar .ps-scrollbar-x-rail, .ps-theme-slimScrollbar .ps-scrollbar-x{
+.ps--theme_slimScrollbar .ps__scrollbar-x-rail, .ps--theme_slimScrollbar .ps__scrollbar-x{
 	border-radius:6px !important;
 	height:6px !important;
 }
-.ps-theme-slimScrollbar .ps-scrollbar-y-rail, .ps-theme-slimScrollbar .ps-scrollbar-y{
+.ps--theme_slimScrollbar .ps__scrollbar-y-rail, .ps--theme_slimScrollbar .ps__scrollbar-y{
 	border-radius:6px !important;
 	width:6px !important;
 }
@@ -107,8 +107,8 @@ header button{
 	/*min-width:64px;*/
 	min-width:42px;
 	max-width:64px;
-	padding:0px 8px;
-	border:0px none;
+	padding:0 8px;
+	border:0 none;
 	border-radius:1px;
 	margin-left:5px;
 	font-weight:700;
@@ -170,12 +170,12 @@ header button{
 	position:absolute;
 }
 #streamOnlineCountLabel, #streamOfflineCountLabel{
-	margin:0px;
-	padding:0px;
+	margin:0;
+	padding:0;
 }
 
-item-stream .streamTitle{
-	font-size:15px;
+.item-stream .streamTitle{
+	font-size:1.1em;
 }
 *,
 .item-stream .streamCurrentViewers .material-icons,
@@ -188,7 +188,7 @@ footer, footer *{
 	font-size:12px;
 }
 .item-stream {
-	margin:7px 0px;
+	margin:7px 0;
 	padding:7px 14px;
 	background-repeat:no-repeat;
 	background-position:3px center;
@@ -344,12 +344,12 @@ body.groupedStreams #streamListOnline > div.group, body.groupedStreams #streamLi
 	/*padding-bottom:2px !important;*/
 }
 .item-stream h1{
-	margin:0px;
-	padding:0px;
+	margin:0;
+	padding:0;
 }
 .item-stream p{
-	margin:0px;
-	padding:0px;
+	margin:0;
+	padding:0;
 	max-height:38px;
 	overflow:hidden;
 	text-overflow:ellipsis;
@@ -439,7 +439,7 @@ body.groupedStreams #streamListOnline > div.group, body.groupedStreams #streamLi
 	height:30px;
 }
 #streamEditor > div:not(.streamEditor_group){
-	margin:3px 0px;
+	margin:3px 0;
 }
 .streamEditor_group{
 	display:block;
@@ -557,6 +557,7 @@ label.flex_input_text{
 }
 .preferenceContainer button{
 	height:25px;
+	margin: 2px 0;
 }
 .preferenceContainer input[type=text]{
 	max-height:25px;
@@ -582,7 +583,7 @@ input[type=number]{
 }
 #settings_container .pref_sync.pref_group #sync_control_container button{
 	flex:2;
-	margin:2px 0px;
+	margin:2px 0;
 }
 
 #debugInfo{
@@ -592,7 +593,7 @@ input[type=number]{
 }
 #close_debugSection{
 	position:absolute;
-	right:0px;
+	right:0;
 	height:30px;
 	width:30px;
 }

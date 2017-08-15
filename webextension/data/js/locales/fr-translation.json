@@ -1,0 +1,201 @@
+{
+	"Open_in_browser": "Ouvrir dans le navigateur",
+	"Close": "Fermer",
+	"Add": "Ajouter",
+	"Delete": "Supprimer",
+	"DeleteIgnore": "Supprimer / Ignorer",
+	"Cancel": "Annuler",
+	"Yes": "Oui",
+	"No": "Non",
+	"Ok": "Ok",
+
+	"Search": "Recherche",
+	"Refresh": "Rafraichir",
+
+	"GloballyDisabledNotifications": "Toutes les notifications sont désactivées",
+	"GloballyDisableNotifications": "Désactiver temporairement les notifications",
+
+	"Settings": "Options",
+	"confirm_all_changes": "Confirmer les changements",
+	"cancelChanges": "Annuler les changements",
+	"IgnoreStream": "Ignorer stream",
+	"copyURL": "Copier l'URL",
+	"shareStream": "Partager le stream",
+
+	"Stream_online": "Stream en ligne",
+	"Stream_offline": "Stream hors ligne",
+
+	"is_online": "est en stream",
+	"is_offline": "viens de finir un stream",
+
+	"No_stream_online": "Aucun stream en ligne",
+	"No_stream_offline": "Aucun stream hors ligne",
+
+	"count_stream_online": "{{count}} stream en ligne",
+	"count_stream_online_plural": "{{count}} streams en ligne",
+	"count_stream_offline": "{{count}} stream hors ligne",
+	"count_stream_offline_plural": "{{count}} streams hors ligne",
+
+	"Add_this": "Ajouter cela",
+
+	"is_already_configured": "est déjà configuré.",
+	"hidden_ignored_reactivate": "est actuellement caché / ignoré, le réactiver?",
+	"hidden_ignored_reactivated": "était caché / ignoré et a été réactivé",
+
+	"wasnt_configured_but_error_retrieving_data": "n'était pas configuré, mais une erreur s'est produite lors de la récupération des données.",
+	"wasnt_configured_and_have_been_added": "n'était pas configuré, et a été ajouté.",
+	"wasnt_configured_and_can_be_added": "n'était pas configuré, et peut être ajouté.",
+
+	"The_channel": "La chaine {{channel}}",
+	"The_stream": "Le stream {{channel}}",
+
+	"click_to_confirm": "cliquer pour confirmer",
+
+	"importation_finished": "Importation terminée pour {{website}}",
+	"importation_finished_DataNull": "Importation terminée avec erreur pour {{website}} ({{reason}})",
+	"importError_checkId": "vérifiez votre identifiant",
+	"importError_checkYouTubeConnexion": "vérifiez la connexion à votre compte YouTube sur votre navigateur",
+
+	"have_been_added": "a été ajouté.",
+	"No_supported_stream_detected_in_the_current_tab_so_nothing_to_add": "Aucun stream supporté détecté dans l'onglet actuel, donc, rien à ajouter.",
+	"I_am_watching_the_stream_of": "Je regarde le stream de",
+	"will_be_deleted_are_you_sure": "va être supprimé, êtes-vous certain(e)?",
+	"has_been_deleted": "a été supprimé.",
+	"clipboard_success": "Copié dans le presse-papier",
+	"clipboard_failed": "Echec de la copie dans le presse-papier. Ceci n'est pas supporté, ou la permission est manquante",
+
+	"Addon_have_been_updated": "Extension mise à jour (version {{version}})",
+
+	"customURl_title": "URL personalisée",
+
+	"blacklist_title": "Liste noire",
+	"whitelist_title": "Liste blanche",
+
+	"Status_title": "Status",
+	"Game_title": "Jeu",
+	"twitter_title":"Twitter",
+	"hideStream_title": "Cacher le stream",
+	"ignoreStream_title": "Ignorer le stream",
+	"iconIgnore_title": "Ignorer pour l'icone",
+	"vocalStreamName_title": "Nom de stream pronouncé pour les notifications vocales",
+
+	"notifyOnline_title": "Notification lorsque le stream commence",
+	"notifyVocalOnline_title": "Notification vocale lorsque le stream commence",
+	"notifyOffline_title": "Notification lorsque le stream fini",
+	"notifyVocalOffline_title": "Notification vocale lorsque le stream fini",
+
+	"vocal_volume_title": "Volume des notifications vocales",
+	"vocal_volume_description": "En pourcent",
+
+	"open_optionpage": "Ouvrir la page d'option",
+	"ignoreHideIgnore": "Désactiver temporairement Ignorer/Cacher",
+
+	"stream_keys_list_title": "Clés de streams à notifier",
+	"stream_keys_list_description": "Liste des streams dans une liste séparée par des virgules",
+
+	"dailymotion_user_id_title": "Votre id Dailymotion",
+	"dailymotion_user_id_description": "Saisir pour pouvoir importer les streameurs que vous suivez",
+	"dailymotion_import_title": "Importez les streameurs Dailymotion que vous suivez",
+	"dailymotion_import": "Importer",
+
+	"mixer_user_id_title": "Votre id Mixer",
+	"mixer_user_id_description": "Saisir pour pouvoir importer les streameurs que vous suivez",
+	"mixer_import_title": "Importez les streameurs Mixer que vous suivez",
+	"mixer_import": "Importer",
+
+	"smashcast_user_id_title": "Votre id Smashcast",
+	"smashcast_user_id_description": "Saisir pour pouvoir importer les streameurs que vous suivez",
+	"smashcast_import_title": "Importez les streameurs Smashcast que vous suivez",
+	"smashcast_import": "Importer",
+
+	"twitch_user_id_title": "Votre id Twitch",
+	"twitch_user_id_description": "Saisir pour pouvoir importer les streameurs que vous suivez",
+	"twitch_import_title": "Importez les streameurs Twitch que vous suivez",
+	"twitch_import": "Importer",
+
+	"youtube_import_title": "Importer les chaines YouTube que vous suivez (session actuelle du navigateur)",
+	"youtube_import": "Importer",
+	"youtube_api_key_title": "Votre clé d'API Youtube (Optionnel)",
+	"youtube_api_key_description": "Utiliser votre propre quota, et aucune limitation de cache",
+	"youtube_api_referrer_title": "Votre réferrant d'API Youtube (Optionnel)",
+	"youtube_api_referrer_description": "",
+
+	"youtube_patreon_password_title": "Mot de passe Patreon (Optionnel, réservé à mes Patreon)",
+	"youtube_patreon_password_description": "Utiliser complètement l'API Youtube, sur mon serveur",
+
+	"An_error_occurred_when_importing_check_your_id_or_the_website_availability": "Une erreur s'est produite lors de l'importation, vérifier votre id ou la disponibilité du site",
+
+	"check_delay_title": "Délais de vérification de streams",
+	"check_delay_description": "Délai entre chaque vérification, en minute",
+	"check_limit_title": "Limite de vérification de streams  (0: aucune limite)",
+	"check_limit_description": "Nombre de stream(s) vérifiés simultanément",
+
+	"timeout_delay_title": "Délai de timeout des requêtes",
+	"timeout_delay_description": "Délai de timeout des requêtes, en secondes (entre 10 et 30)",
+
+	"notify_online_title": "Affiche une notification lorsqu'un stream commence",
+	"notify_online_description": "Notification quand cochée",
+
+	"notify_vocal_online_title": "Lit une notification vocale lorsqu'un stream commence",
+	"notify_vocal_online_description": "Notification quand cochée",
+
+	"notify_offline_title": "Affiche une notification lorsqu'un stream se finit",
+	"notify_offline_description": "Notification quand cochée",
+
+	"notify_vocal_offline_title": "Lit une notification vocale lorsqu'un stream se finit",
+	"notify_vocal_offline_description": "Notification quand cochée",
+
+	"statusBlacklist_title": "Liste noire de status",
+	"statusBlacklist_description": "Liste séparée de virgules",
+	"statusWhitelist_title": "Liste blanche de status",
+	"statusWhitelist_description": "Liste séparée de virgules",
+
+	"gameBlacklist_title": "Liste noire de jeu(x)",
+	"gameBlacklist_description": "Liste séparée de virgules",
+	"gameWhitelist_title": "Liste blanche de jeu(x)",
+	"gameWhitelist_description": "Liste séparée de virgules",
+
+	"group_streams_by_websites_title": "Grouper les streams par site",
+	"group_streams_by_websites_description": "Grouper quand coché",
+
+	"show_offline_in_panel_title": "Afficher les stream hors ligne dans le panel",
+	"show_offline_in_panel_description": "Affiché quand coché",
+
+	"confirm_addStreamFromPanel_title": "Confirmation pour ajouter et réactiver des streams",
+	"confirm_addStreamFromPanel_description": "Affiche une notification pour confirmer lors d'un ajout ou la réactivation de stream de configuration (depuis le panel)",
+	"confirm_deleteStreamFromPanel_title": "Confirmation pour supprimer des streams",
+	"confirm_deleteStreamFromPanel_description": "Affiche une notification pour confirmer lors d'un ajout de stream de configuration (depuis le panel)",
+
+	"panel_theme_title": "Thème du panel",
+	"panel_theme_description": "Choix du thème pour le panel",
+	"panel_theme_dark": "Sombre",
+	"panel_theme_light": "Clair",
+
+	"background_color_title": "Couleur du panel",
+	"background_color_description": "Choix de la couleur de base du panel",
+
+	"export_preferences_title": "Exporter les préférences dans un fichier",
+	"export_preferences": "Exporter",
+	"import_preferences_title": "Importer les préférences depuis un fichier",
+	"import_preferences": "Importer",
+
+	"showAdvanced_title": "Afficher les options avancées",
+	"showAdvanced_description": "Activé si coché",
+	"showExperimented_title": "Afficher les options pour utilisateur experimenté",
+	"showExperimented_description": "Activé si coché",
+
+	"options_saved": "Options enregistrées.",
+	"options_saved_sync": "Options enregistrées dans la synchronisation.",
+
+	"save": "Enregistrer",
+	"sync_title": "Enregistrer / Restaurer les préférences depuis/vers la synchronisation",
+	"restaure_sync": "Restaurer",
+	"save_sync": "Enregistrer",
+	"debugInfo": "Les erreurs sont en Anglais (principalement parce que les APIs sont en Anglais). ",
+	"debugDataLabel": "Erreur(s):",
+	"noErrorToShow": "Aucune erreur à afficher.",
+	"debug_checkingLivesState": "Etat de vérification des streams",
+	"footer_title": "Addon sous licence GPL v3.",
+	"footer_by": "par",
+	"supportWithPatreon": "Supportez l'addon et le support Youtube"
+}

@@ -1,24 +1,39 @@
 'use strict';
 
+let chromeSettings,
+	i18ex;
+if(browser.extension.getBackgroundPage() !== null){
+	const backgroundPage = browser.extension.getBackgroundPage();
+	if(backgroundPage.hasOwnProperty("chromeSettings")){
+		chromeSettings = backgroundPage.chromeSettings;
+	} else {
+		chromeSettings = backgroundPage.chromeSettings = new ChromePreferences(options);
+	}
+
+	if(backgroundPage.hasOwnProperty("i18ex")){
+		i18ex = backgroundPage.i18ex;
+	} else {
+		i18ex = backgroundPage.i18ex = new i18extended(browser.i18n.getMessage("language"));
+	}
+}
+
 /*		---- Nodes translation ----		*/
 function translateNodes(){
-	const _ = browser.i18n.getMessage;
 	for(let node of document.querySelectorAll("[data-translate-id]")){
 		if(typeof node.tagName === "string"){
-			node.textContent = _(node.dataset.translateId);
+			node.textContent = i18ex._(node.dataset.translateId);
 			delete node.dataset.translateId;
 		}
 	}
 }
 function translateNodes_title(){
-	const _ = browser.i18n.getMessage;
 	for(let node of document.querySelectorAll("[data-translate-title]")){
 		if(typeof node.tagName === "string"){
 			node.dataset.toggle = "tooltip";
 			if(typeof node.dataset.placement !== "string"){
 				node.dataset.placement = "auto";
 			}
-			node.title = _(node.dataset.translateTitle);
+			node.title = i18ex._(node.dataset.translateTitle);
 			$(node).tooltip({
 				"trigger": "hover"
 			});
@@ -28,41 +43,35 @@ function translateNodes_title(){
 }
 
 function loadTranslations(){
-	let body = document.querySelector('body'),
-		observer = new MutationObserver(function(mutations) {
-			mutations.forEach(function(mutation) {
-				if(mutation.type === "childList"){
-					translateNodes(document);
-					translateNodes_title(document);
-				}
-			});
-		});
-	
-	// configuration of the observer:
-	const config = {
-		attributes: false,
-		childList: true,
-		subtree: true
-	};
-	
-	translateNodes();
-	translateNodes_title();
-	
-	// pass in the target node, as well as the observer options
-	observer.observe(body, config);
-	
-	// later, you can stop observing
-	//observer.disconnect();
-}
+	i18ex.loadingPromise
+		.then(()=>{
+			let body = document.querySelector('body'),
+				observer = new MutationObserver(function(mutations) {
+					mutations.forEach(function(mutation) {
+						if(mutation.type === "childList"){
+							translateNodes(document);
+							translateNodes_title(document);
+						}
+					});
+				});
 
-let chromeSettings;
-if(browser.extension.getBackgroundPage() !== null){
-	const backgroundPage = browser.extension.getBackgroundPage();
-	if(backgroundPage.hasOwnProperty("chromeSettings")){
-		chromeSettings = backgroundPage.chromeSettings;
-	} else {
-		chromeSettings = backgroundPage.chromeSettings = new ChromePreferences(options);
-	}
+			// configuration of the observer:
+			const config = {
+				attributes: false,
+				childList: true,
+				subtree: true
+			};
+
+			translateNodes();
+			translateNodes_title();
+
+			// pass in the target node, as well as the observer options
+			observer.observe(body, config);
+
+			// later, you can stop observing
+			//observer.disconnect();
+		})
+	;
 }
 
 function getPreference(prefId){
@@ -157,7 +166,7 @@ function saveOptionsInSync(event){
 			// Update status to let user know options were saved.
 			let status = document.getElementById('status');
 			if(status !== null){
-				status.textContent = _("options_saved_sync");
+				status.textContent = i18ex._("options_saved_sync");
 
 				setTimeout(function() {
 					status.textContent = '';
