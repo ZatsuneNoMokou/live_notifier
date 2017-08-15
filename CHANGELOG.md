@@ -8,6 +8,15 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 11.0.7
+* Fix: Rollback on Smashcast pictures surprisingly using "hitbox.tv"
+
+# 11.0.6
+* Fix: Problem with onResize event on Firefox, in panel
+
+# 11.0.5
+* Fix: Problem with webextension pollyfill on Firefox, in panel
+
 # 11.0.1 - 11.0.4
 * Fix: Error on Firefox with runtime api for messages
 * Fix: Case where "next" url return by API contain query data
