@@ -46,7 +46,7 @@ mkdir tmp
 
 echo ""
 echo "Copying into tmp folder"
-cp -rt tmp ./webextension/data ./webextension/_locales ./webextension/icon*.png ./webextension/index.js ./webextension/LICENSE ./webextension/manifest.json
+cp -rt tmp ./webextension/data ./webextension/_locales ./webextension/icon*.png ./webextension/init.js ./webextension/LICENSE ./webextension/manifest.json
 
 echo ""
 echo "Read to clean files!"

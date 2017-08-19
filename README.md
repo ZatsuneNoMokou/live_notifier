@@ -11,6 +11,8 @@ More information on the [Mozilla add-on page](https://addons.mozilla.org/fr/fire
 
 perfect-scrollbar is from https://github.com/noraesae/perfect-scrollbar (License MIT).
 
+Debounce (from Lodash) is from https://github.com/lodash/lodash (License MIT).
+
 i18next and i18next-xhr-backend are from https://github.com/i18next/i18next and https://github.com/i18next/i18next-xhr-backend (License MIT).
 
 mustache.js (or Mustache) is from https://github.com/janl/mustache.js (License MIT).

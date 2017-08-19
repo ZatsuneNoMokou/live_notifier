@@ -12,7 +12,7 @@ select:hover{
 	color: rgba(0, 0, 0, 0.5);
 }
 #deleteStream.active{
-	text-shadow: 0 0 20px rrgba(0, 0, 0, 0.5);
+	text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 /*			---- Disabled / Hint text ----			*/
 footer{

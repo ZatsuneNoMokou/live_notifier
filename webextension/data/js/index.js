@@ -1,9 +1,7 @@
 'use strict';
 
 // appGlobal: Accessible with browser.extension.getBackgroundPage();
-var appGlobal = {
-	loadJS: loadJS
-};
+var appGlobal = {};
 
 let myIconURL = "/data/live_offline.svg";
 
@@ -991,7 +989,16 @@ function openTabIfNotExist(url){
 		});
 }
 
-const chromeNotifications = new ChromeNotificationControler();
+const chromeNotifications = new ChromeNotificationControler(),
+	notifButtons = {
+		"openUrl": {title: i18ex._("Open_in_browser"), iconUrl: "/data/images/ic_open_in_browser_black_24px.svg"},
+		"close": {title: i18ex._("Close"), iconUrl: "/data/images/ic_close_black_24px.svg"},
+		"addItem": {title: i18ex._("Add"), iconUrl: "/data/images/ic_add_circle_black_24px.svg"},
+		"deleteItem": {title: i18ex._("Delete"), iconUrl: "/data/images/ic_delete_black_24px.svg"},
+		"cancel": {title: i18ex._("Cancel"), iconUrl: "/data/images/ic_cancel_black_24px.svg"},
+		"yes": {title: i18ex._("Yes"), iconUrl: "/data/images/ic_add_circle_black_24px.svg"},
+		"no": {title: i18ex._("No"), iconUrl: "/data/images/ic_cancel_black_24px.svg"}
+	};
 function doNotif(options, suffixConfirmIfNoButtons=false){
 	return new Promise((resolve, reject)=>{
 		if(typeof options !== "object" || options === null){
@@ -1386,37 +1393,7 @@ function checkResponseValidity(website, response){
 	}
 }
 
-function isMap(myMap){
-	return (myMap instanceof Map || myMap.constructor.name === "Map");
-}
-function PromiseWaitAll(promises){
-	if(Array.isArray(promises) || isMap(promises)){
-		let count = (isMap(promises))? promises.size : promises.length;
-		let results = {};
-		return new Promise(function(resolve, reject){
-			promises.forEach((promise, index) => {
-				let handler = data => {
-					results[index] = data;
-					if(--count === 0){
-						resolve(results);
-					}
-				};
-				
-				if(promise instanceof Promise){
-					promise.then(handler);
-					promise.catch(handler);
-				} else {
-					handler(promise);
-				}
-			});
-			if(count === 0){
-				resolve(results);
-			}
-		});
-	} else {
-		throw "promises should be an Array or Map of Promise"
-	}
-}
+
 function convertMS(ms) { // From https://gist.github.com/remino/1563878 with the ms rest added
 	let d, h, m, s, new_ms;
 	s = Math.floor(ms / 1000);
@@ -2177,8 +2154,8 @@ function initAddon(){
 			savePreference("stream_keys_list", newPrefTable.join(", "));
 			websites.forEach((websiteAPI, website) => {
 				localToRemove.push(`${website}_keys_list`);
-				if(appGlobal.currentPreferences.hasOwnProperty("notification_type")){
-					delete appGlobal.currentPreferences[`${website}_keys_list`];
+				if(chromeSettings.has(`${website}_keys_list`)){
+					chromeSettings.delete(`${website}_keys_list`);
 				}
 			})
 		};
@@ -2202,8 +2179,8 @@ function initAddon(){
 	}*/
 	if(typeof getPreference("notification_type") === "string"){
 		localToRemove.push("notification_type");
-		if(appGlobal.currentPreferences.hasOwnProperty("notification_type")){
-			delete appGlobal.currentPreferences.notification_type;
+		if(chromeSettings.has("notification_type")){
+			chromeSettings.delete("notification_type");
 		}
 	}
 	if(localToRemove.length > 0){
@@ -2278,45 +2255,32 @@ function checkIfUpdated(details){
 	//}
 }
 
-let notifButtons;
-Promise.all([chromeSettings.loadingPromise, i18ex.loadingPromise])
-	.then(()=>{
-		notifButtons = {
-			"openUrl": {title: i18ex._("Open_in_browser"), iconUrl: "/data/images/ic_open_in_browser_black_24px.svg"},
-			"close": {title: i18ex._("Close"), iconUrl: "/data/images/ic_close_black_24px.svg"},
-			"addItem": {title: i18ex._("Add"), iconUrl: "/data/images/ic_add_circle_black_24px.svg"},
-			"deleteItem": {title: i18ex._("Delete"), iconUrl: "/data/images/ic_delete_black_24px.svg"},
-			"cancel": {title: i18ex._("Cancel"), iconUrl: "/data/images/ic_cancel_black_24px.svg"},
-			"yes": {title: i18ex._("Yes"), iconUrl: "/data/images/ic_add_circle_black_24px.svg"},
-			"no": {title: i18ex._("No"), iconUrl: "/data/images/ic_cancel_black_24px.svg"}
-		};
+(()=>{
+	appGlobal.chromeSettings = chromeSettings;
+	consoleDir(chromeSettings,"Current preferences in the local storage:");
 
-		appGlobal.chromeSettings = chromeSettings;
-		consoleDir(chromeSettings,"Current preferences in the local storage:");
-
-		/*if(typeof browser.runtime.onInstalled == "object" && typeof browser.runtime.onInstalled.removeListener == "function"){
-			browser.runtime.onInstalled.addListener(checkIfUpdated);
-		} else {*/
-		//consoleMsg("warn", "browser.runtime.onInstalled is not available");
-		let details;
-		if(typeof getPreference("livenotifier_version") === "string" && getPreference("livenotifier_version") !== ""){
-			details = {
-				"reason": "unknown",
-				"previousVersion": getPreference("livenotifier_version")
-			}
-		} else {
-			details = {
-				"reason": "install",
-				"previousVersion": "0.0.0"
-			}
+	/*if(typeof browser.runtime.onInstalled == "object" && typeof browser.runtime.onInstalled.removeListener == "function"){
+		browser.runtime.onInstalled.addListener(checkIfUpdated);
+	} else {*/
+	//consoleMsg("warn", "browser.runtime.onInstalled is not available");
+	let details;
+	if(typeof getPreference("livenotifier_version") === "string" && getPreference("livenotifier_version") !== ""){
+		details = {
+			"reason": "unknown",
+			"previousVersion": getPreference("livenotifier_version")
 		}
+	} else {
+		details = {
+			"reason": "install",
+			"previousVersion": "0.0.0"
+		}
+	}
 
-		checkIfUpdated(details);
-		//}
+	checkIfUpdated(details);
+	//}
 
-		loadJS(document, "/data/js/", ["backgroundTheme.js"]);
-		loadJS(document, "/data/js/platforms/", ["dailymotion.js", "mixer.js", "picarto_tv.js", "smashcast.js", "twitch.js", "youtube.js"])
-			.then(initAddon)
-			.catch(initAddon)
-	})
-;
+	zDK.loadJS(document, ["dailymotion.js", "mixer.js", "picarto_tv.js", "smashcast.js", "twitch.js", "youtube.js"], "/data/js/platforms/")
+		.then(initAddon)
+		.catch(initAddon)
+	}
+)();
