@@ -20,14 +20,14 @@ if(typeof optionColorStylesheet === "object" && optionColorStylesheet !== null){
 document.querySelector("#disableNotifications").classList.toggle("off", backgroundPage.appGlobal["notificationGlobalyDisabled"]);
 document.querySelector("#disableNotifications").dataset.translateTitle = (backgroundPage.appGlobal["notificationGlobalyDisabled"])? "GloballyDisabledNotifications" : "GloballyDisableNotifications";
 
-let loadJS = chrome.extension.getBackgroundPage().loadJS;
+
 window.onload = function () {
 	window.onload = null;
-	let jsFiles = ["lib/jquery.min.js", "lib/perfect-scrollbar.jquery.min.js", "lib/bootstrap.min.js"];
+	let jsFiles = ["lib/jquery.slim.min.js", "lib/perfect-scrollbar.jquery.min.js", "lib/bootstrap.min.js"];
 	if(typeof browser==="undefined"||browser===null){
 		jsFiles.push("/lib/browser-polyfill.min.js");
 	}
-	jsFiles = jsFiles.concat(["options-api.js", "lib/mustache.min.js", "lib/underscore-min.js", "panel/panel.js"]);
+	jsFiles = jsFiles.concat(["options-api.js", "lib/mustache.min.js", "lib/lodash.custom.min.js", "panel/panel.js"]);
 
-	loadJS(document, "/data/js/", jsFiles);
+	backgroundPage.zDK.loadJS(document, jsFiles);
 };

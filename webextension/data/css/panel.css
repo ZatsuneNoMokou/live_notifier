@@ -154,7 +154,7 @@ header button{
 	overflow:hidden;
 	position:relative;
 	height:100%;
-	padding:0px 10px 3px 4px;
+	padding:0 10px 3px 4px;
 }
 #searchInputContainer{
 	position:relative;
@@ -225,7 +225,7 @@ footer, footer *{
 }
 .item-stream.onlineItem.streamLogo{
 	padding-left:58px;
-	background-size:50px auto;
+	background-size:45px auto;
 	min-height:37px;
 }
 .item-stream.offlineItem.streamLogo{
@@ -648,7 +648,7 @@ footer > div{
 	display:flex;
 	flex:6;
 	border:none;
-	padding:0px;
+	padding:0;
 	flex-direction:column;
 }
 footer > div > *{

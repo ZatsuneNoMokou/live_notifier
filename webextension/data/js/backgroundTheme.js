@@ -90,7 +90,7 @@ input[type=range]::-moz-range-thumb{background-color: hsl(${baseColor_hsl.H}, ${
 input[type=range]::-webkit-slider-runnable-track{background-color:hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[1]});}
 input[type=range]::-moz-range-track{background-color:hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[1]});}
 
-header, .item-stream, footer{box-shadow: 0px 0px 5px 0px hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[3]});}
+header, .item-stream, footer{box-shadow: 0 0 5px 0 hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[3]});}
 `;
 		backgroundPage_theme_cache.dataset.theme = currentTheme;
 		backgroundPage_theme_cache.dataset.background_color = background_color;

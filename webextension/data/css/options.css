@@ -16,7 +16,7 @@ body{
 	overflow:hidden;
 	position:relative;
 	
-	padding:0px 8px;
+	padding:0 8px;
 }
 
 *{
@@ -83,10 +83,10 @@ input[type=range]:-moz-focusring{
 }
 
 button{
-	padding:0px 8px;
-	border:0px none;
+	padding:0 8px;
+	border:0 none;
 	border-radius:1px;
-	margin:2px 5px 2px 0px;
+	margin:2px 5px 2px 0;
 	font-weight:700;
 	height:25px;
 }

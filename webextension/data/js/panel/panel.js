@@ -867,5 +867,8 @@ window.onresize = _.debounce(event=>{
 		scrollbar_update("streamEditor");
 		scrollbar_update("settings_container");
 		scrollbar_update("debugSection");
-	}, 500);
+	}, 100, {
+		maxWait: 200
+	})
+;
 
