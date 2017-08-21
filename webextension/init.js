@@ -16,12 +16,10 @@ if(browser.extension.getBackgroundPage() !== null){
 				"voiceAPI.js"
 			])
 				.then(()=>{
-					zDK.loadJS(document, [
-						"backgroundTheme.js"
-					]);
 					PromiseWaitAll([chromeSettings.loadingPromise, i18ex.loadingPromise])
 						.then(()=>{
 							zDK.loadJS(document, [
+								"backgroundTheme.js",
 								"index.js"
 							])
 								.catch(err)
