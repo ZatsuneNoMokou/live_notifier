@@ -4,25 +4,43 @@ class ZDK{
 
 		let loadPromise = ()=>{
 			return new Promise((resolve, reject)=>{
-				let libArray = [
-					"lib/i18next.min.js",
-					"lib/i18nextXHRBackend.min.js",
+				const loadDependencies = ()=>{
+					return new Promise((resolve, reject)=>{
+						let libArray = [
+							"lib/i18next.min.js",
+							"lib/i18nextXHRBackend.min.js",
 
-					"lib/xml2jsobj.js"
-				];
+							"lib/xml2jsobj.js"
+						];
 
-				let classesArray = [
-					"classes/chrome-notification-controler.js",
-					"classes/chrome-preferences.js",
-					"classes/i18extended.js",
-					"classes/PromiseWaitAll.js",
-					"classes/queue.js"
-				];
+						let classesArray = [
+							"classes/chrome-notification-controler.js",
+							"classes/chrome-preferences.js",
+							"classes/i18extended.js",
+							"classes/PromiseWaitAll.js",
+							"classes/queue.js"
+						];
 
-				this.loadJS(document, libArray.concat(classesArray))
-					.then(resolve)
-					.catch(reject)
-				;
+						this.loadJS(document, libArray.concat(classesArray))
+							.then(resolve)
+							.catch(reject)
+						;
+					});
+				};
+				if(typeof browser === "object" && browser !== "null"){
+					loadDependencies()
+						.then(resolve)
+						.catch(reject)
+					;
+				} else {
+					this.loadJS(document, ["lib/browser-polyfill.min.js"])
+						.then(()=>{
+							resolve(loadDependencies());
+						})
+						.catch(reject)
+					;
+				}
+
 			})
 		};
 

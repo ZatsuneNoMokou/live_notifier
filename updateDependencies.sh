@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-npm update jquery perfect-scrollbar mustache webextension-polyfill i18next i18next-xhr-backend
+
+moduleList="jquery perfect-scrollbar mustache webextension-polyfill i18next i18next-xhr-backend"
+npm install $moduleList
+npm update $moduleList
 npm update lodash-cli -g
 
 cssLib='./webextension/data/css/lib'
