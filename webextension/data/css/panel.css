@@ -8,7 +8,7 @@ html{
 body{
 	margin:0;
 	height:100%;
-	width:285px;
+	width:290px;
 	/*width:100%;*/
 	display:flex;
 	flex-direction:column;
@@ -40,6 +40,12 @@ input[type=range]{
 	-webkit-appearance:none;
 	/*width:300px;*/
 	background-color:transparent;
+	margin: 10px 0;
+}
+input[type=range] ~ output::before{
+	content: '';
+	display: inline-block;
+	width: 0.4em;
 }
 input[type=range]::-webkit-slider-runnable-track{
 	/*width:300px;*/
@@ -98,6 +104,7 @@ button{
 header{
 	display:flex;
 	flex-direction:row;
+	justify-content:space-between;
 	padding:5px 2px;
 	min-height:36px;
 }
@@ -112,6 +119,9 @@ header button{
 	border-radius:1px;
 	margin-left:5px;
 	font-weight:700;
+}
+header button:last-of-type {
+	margin-right: 5px;
 }
 #deleteStream i{
 	font-size:16px;
@@ -512,6 +522,9 @@ body .preferenceContainer.experimented{
 }
 .preferenceContainer.stringList .preferenceInput:not(select){
 	flex:2;
+}
+.preferenceContainer:not(.stringList) .preferenceInput[type='range']{
+	flex:6;
 }
 .preference{
 	display:inline;

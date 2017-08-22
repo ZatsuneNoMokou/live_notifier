@@ -153,6 +153,13 @@ function refreshSettings(event){
 			if(prefId === "panel_theme" || prefId === "background_color" && typeof theme_update === "function"){
 				theme_update();
 			}
+			if(
+				typeof applyPanelSize === "function"
+				&&
+				(prefId === "panel_height" || prefId === "panel_width")
+			){
+				applyPanelSize();
+			}
 		}
 	}
 }

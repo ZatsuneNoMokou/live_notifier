@@ -515,9 +515,9 @@ class ChromePreferences extends Map{
 		}
 
 		if(typeof prefNode.type === "string" && prefNode.type === "range"){
-			output.textContent = prefNode.value;
+			output.textContent = `${prefNode.value}${((typeof prefObj.rangeOutputUnit==="string")? prefObj.rangeOutputUnit : "")}`;
 			prefNode.addEventListener("change",function(){
-				output.textContent = prefNode.value;
+				output.textContent = `${prefNode.value}${((typeof prefObj.rangeOutputUnit==="string")? prefObj.rangeOutputUnit : "")}`;
 			});
 			node.appendChild(output);
 		}
