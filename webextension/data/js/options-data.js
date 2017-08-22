@@ -127,6 +127,7 @@ const options = {
 		"minValue": 10,
 		"maxValue": 30,
 		"rangeInput": true,
+		"rangeOutputUnit": "s",
 		"group": "checking",
 		"prefLevel": "experimented"
 	},
@@ -171,6 +172,7 @@ const options = {
 		"minValue": 0,
 		"maxValue": 100,
 		"rangeInput": true,
+		"rangeOutputUnit": "%",
 		"prefLevel": "basic"
 	},
 	/*				Filters				*/
@@ -205,6 +207,31 @@ const options = {
 		"value": "",
 		"group": "filters",
 		"prefLevel": "advanced"
+	},
+	/*				Panel size					*/
+	"panel_height": {
+		"title": "Panel's height",
+		"description": "Size in pixels",
+		"type": "integer",
+		"value": 350,
+		"minValue": 350,
+		"maxValue": 600,
+		"rangeInput": true,
+		"rangeOutputUnit": "px",
+		"group": "panelSize",
+		"prefLevel": "basic"
+	},
+	"panel_width": {
+		"title": "Panel's width",
+		"description": "Size in pixels",
+		"type": "integer",
+		"value": 290,
+		"minValue": 290,
+		"maxValue": 700,
+		"group": "panelSize",
+		"rangeInput": true,
+		"rangeOutputUnit": "px",
+		"prefLevel": "basic"
 	},
 	/*			Show in panel			*/
 	"group_streams_by_websites": {

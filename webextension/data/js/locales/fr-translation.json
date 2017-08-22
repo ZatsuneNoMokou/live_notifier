@@ -163,6 +163,12 @@
 	"show_offline_in_panel_title": "Afficher les stream hors ligne dans le panel",
 	"show_offline_in_panel_description": "Affiché quand coché",
 
+	"panel_height_title": "Hauteur du panel",
+	"panel_height_description": "Taille en pixels",
+
+	"panel_width_title": "Largeur du panel",
+	"panel_width_description": "Taille en pixels",
+
 	"confirm_addStreamFromPanel_title": "Confirmation pour ajouter et réactiver des streams",
 	"confirm_addStreamFromPanel_description": "Affiche une notification pour confirmer lors d'un ajout ou la réactivation de stream de configuration (depuis le panel)",
 	"confirm_deleteStreamFromPanel_title": "Confirmation pour supprimer des streams",

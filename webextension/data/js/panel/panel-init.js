@@ -3,6 +3,14 @@
 var backgroundPage = chrome.extension.getBackgroundPage();
 var getPreference = backgroundPage.getPreference;
 
+const applyPanelSize = ()=>{
+	const html = document.querySelector("html"),
+		body = document.querySelector("body");
+	html.style.height = getPreference("panel_height");
+	body.style.width = getPreference("panel_width");
+};
+applyPanelSize();
+
 var theme_cache_update = backgroundPage.backgroundTheme.theme_cache_update;
 var optionColorStylesheet = theme_cache_update(document.querySelector("#generated-color-stylesheet"));
 

@@ -8,6 +8,11 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 11.3.0
+* +: Ability to add a unit to range inputs
+* +: Height and width settings to resize the panel
+  * i: Style updates due to that change
+
 # 11.2.2
 * Fix: Does not load browser pollyfill when not needed (Firefox)
 * Fix: Loading backgroundTheme.js too early, messing with preferences

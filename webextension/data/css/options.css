@@ -45,8 +45,14 @@ select option, select:hover option{
 
 input[type=range]{
 	-webkit-appearance:none;
+	margin: 10px 0;
 	width:300px;
 	background-color:transparent;
+}
+input[type=range] ~ output::before{
+	content: '';
+	display: inline-block;
+	width: 0.4em;
 }
 input[type=range]::-webkit-slider-runnable-track{
 	width:300px;
