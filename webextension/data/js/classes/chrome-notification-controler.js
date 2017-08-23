@@ -4,20 +4,38 @@ class ChromeNotificationControler{
 		const chromeNotifications = this.chromeNotifications = new Map();
 
 		browser.notifications.onClicked.addListener(function(notificationId){
-			if(chromeNotifications.has(notificationId) && typeof chromeNotifications.get(notificationId) === "function"){
-				chromeNotifications.get(notificationId)("onClicked");
+			if(chromeNotifications.has(notificationId) && typeof chromeNotifications.get(notificationId).fn === "function"){
+				chromeNotifications.get(notificationId).fn("onClicked");
 			}
 		});
 		if(browser.notifications.onButtonClicked){
-			browser.notifications.onButtonClicked.addListener(function(notificationId, buttonIndex){
-				if(chromeNotifications.has(notificationId) && typeof chromeNotifications.get(notificationId) === "function"){
-					chromeNotifications.get(notificationId)("onButtonClicked", buttonIndex);
+			browser.notifications.onButtonClicked.addListener((notificationId, buttonIndex)=>{
+				if(chromeNotifications.has(notificationId) && typeof chromeNotifications.get(notificationId).fn === "function"){
+					chromeNotifications.get(notificationId).fn("onButtonClicked", buttonIndex);
 				}
 			});
 		}
-		/*browser.notifications.onClosed.addListener(notificationId=>{
-			console.log("closed: " + notificationId);
-		});*/
+		browser.notifications.onClosed.addListener((notificationId, byUser=false)=>{
+			if(byUser===true && this.chromeNotifications.has(notificationId)){
+				this.chromeNotifications.get(notificationId).isClosed = true;
+			}
+		});
+
+		this.notificationCleaner = setInterval(()=>{
+			browser.notifications.getAll()
+				.then(activeNotifications=>{
+					this.chromeNotifications.forEach((notifTimer, notificationId)=>{
+						if(activeNotifications.hasOwnProperty(notificationId)===false){
+							if(typeof chromeNotifications.get(notificationId).fn === "function"){
+								chromeNotifications.get(notificationId).fn((chromeNotifications.get(notificationId).isClosed)? "closed" : "timeout");
+							} else {
+								console.warn(`${notifId} has timed out but data problem.`);
+							}
+						}
+					});
+				})
+			;
+		}, 10 * 1000);
 	}
 
 	send(options=null){
@@ -67,36 +85,48 @@ class ChromeNotificationControler{
 
 			sendNotification(options)
 				.then(notificationId=>{
-					//console.log(`Successfully created notification "${notificationId}"`);
-					let timeout = setTimeout(()=>{
-						if(this.chromeNotifications.has(notificationId)){
-							this.chromeNotifications.delete(notificationId);
-							reject("timedout");
-						}
-					}, 60 * 1000);
-					this.chromeNotifications.set(notificationId, (triggeredType, buttonIndex=null)=>{
-						//console.log(`${triggeredType} from notification "${notificationId}"`);
-						clearTimeout(timeout);
+					this.chromeNotifications.set(notificationId, {
+						"isClosed": false,
+						"fn": (triggeredType, buttonIndex = null)=>{
+							this.clear(notificationId);
 
-						browser.notifications.clear(notificationId);
-						// 0 is the first button, used as button of action
-						if((!this.chromeAPI_button_availability && buttonIndex===null) || typeof buttonIndex==="number"){
-							resolve({
-								"triggeredType": triggeredType,
-								"notificationId": notificationId,
-								"buttonIndex": buttonIndex
-							});
-						} else {
-							reject({
-								"triggeredType": triggeredType,
-								"notificationId": notificationId,
-								"buttonIndex": buttonIndex
-							});
+							if (
+								triggeredType === "timeout"
+								||
+								triggeredType === "closed"
+								||
+								(
+									(this.chromeAPI_button_availability === true && typeof buttonIndex !== "number")
+									||
+									(this.chromeAPI_button_availability === false && buttonIndex !== null)
+								)
+							) {
+								reject({
+									"triggeredType": triggeredType,
+									"notificationId": notificationId,
+									"buttonIndex": buttonIndex
+								});
+							} else {
+								// 0 is the first button, used as button of action
+								resolve({
+									"triggeredType": triggeredType,
+									"notificationId": notificationId,
+									"buttonIndex": buttonIndex
+								});
+							}
 						}
-					})
+					});
 				})
 				.catch(reject)
 			;
 		});
 	};
+	clear(notificationId=null){
+		if(notificationId!==null && this.chromeNotifications.has(notificationId)){
+			browser.notifications.clear(notificationId);
+			this.chromeNotifications.delete(notificationId);
+			return true;
+		}
+		return false;
+	}
 }
