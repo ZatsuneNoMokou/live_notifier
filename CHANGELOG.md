@@ -8,6 +8,15 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 11.4.1
+* Fix: Fail in a condition concerning notifications without buttons support
+
+# 11.4.0
+* Fix: Range input position in option page, in Firefox
+* Fix: Ability to detect closed notification when supported, and only remove (internally) the notification when it not active anymore (avoid a randomly defined timeout delay)
+	* i: Based on [notifications.getAll()](https://developer.mozilla.org/en-US/Add-ons/webextensions/API/notifications/getAll) that return active notifications
+	* i: See the byUser parameter support of the notification onClosed event ([notifications.onClosed on MDN Web Doc](https://developer.mozilla.org/en-US/Add-ons/webextensions/API/notifications/onClosed#Parameters))
+
 # 11.3.0
 * +: Ability to add a unit to range inputs
 * +: Height and width settings to resize the panel
@@ -40,7 +49,7 @@
 * Fix: Problem with onResize event on Firefox, in panel
 
 # 11.0.5
-* Fix: Problem with webextension pollyfill on Firefox, in panel
+* Fix: Problem with Web Extension pollyfill on Firefox, in panel
 
 # 11.0.1 - 11.0.4
 * Fix: Error on Firefox with runtime api for messages
@@ -53,7 +62,7 @@
 * i: Code cleanup / fixing
 * i: Reworked notifications, moving into a Promise way
 * i: Reworked preferences, moving it into a Class / Map
-* +: Added webextension-pollyfill, making possible to use the Web Extension API from Mozilla on Opera and Chromium/Google Chrome
+* +: Added Web Extension-pollyfill, making possible to use the Web Extension API from Mozilla on Opera and Chromium/Google Chrome
   * Mainly, it is a Promise based one, unlike the original one using callbacks
 * Fix: English localization
 * Fix: Errors with vocal messages
@@ -250,17 +259,17 @@
 * Fix: Delete the translation data attribute (data-translate-id / data-translate-title) after translate it, to avoid re-process it again
 
 # 8.0.0
-* i: perfect-scrollbar update (0.6.12) and in option page in the Webextension
+* i: perfect-scrollbar update (0.6.12) and in option page in the Web Extension
 * i: Channel information before stream process to use Youtube channel name in stream name
-* i: Changed Request function to be more alike Firefox API (Request().get) (Webextension only)
-* i: loadJS now using Promise and no callback anymore (Webextension only)
+* i: Changed Request function to be more alike Firefox API (Request().get) (Web Extension only)
+* i: loadJS now using Promise and no callback anymore (Web Extension only)
 * i: Changed websites, streamListFromSetting, and live data (live status and channel info) from object to Map
 * i: Replaced some for in loops with array.forEach like ones
 * i: Moved all console.* from stream Requests to one result
-* i: *Starting to test Webextension in Firefox*, with needed changes (Webextension/Firefox)
-* i: Moved the loadPreferences function for option and panel to option-api (Webextension only)
-* i: SVG pictures are now rendered into canvas using Image and not canvg (Webextension only)
-* i: Preferences now using chrome local storage area, with a copy of the preferences in a variable to avoid async (Webextension only)
+* i: *Starting to test Web Extension in Firefox*, with needed changes (Web Extension/Firefox)
+* i: Moved the loadPreferences function for option and panel to option-api (Web Extension only)
+* i: SVG pictures are now rendered into canvas using Image and not canvg (Web Extension only)
+* i: Preferences now using chrome local storage area, with a copy of the preferences in a variable to avoid async (Web Extension only)
 * +: Add headers support with the custom Request function
 * +: Add Youtube support
 * +: Re-arranged function to add stream to allow getting IDs from user and video pages with Youtube
@@ -268,20 +277,20 @@
 * +: Moved importation real user id
 * +: Now using the promise system to detect end and refresh panel after
 * +: Global timing for checkLives
-* +: Grouped timing for checkLives streams (Webextension only)
+* +: Grouped timing for checkLives streams (Web Extension only)
 * +: Stream setting to ignore streams on the icon
-* +: Chrome API notification, contextMessage to say it's notification from "Live notifier" (Webextension only)
-* +: Theme on the option page (Webextension only)
+* +: Chrome API notification, contextMessage to say it's notification from "Live notifier" (Web Extension only)
+* +: Theme on the option page (Web Extension only)
 * +: Streams configured with unsupported / not load website are now shown in the panel
 * +: Add a custom timeout in Request (30s)
-* +: Pressing shift when clicking on the button to import from file or sync will merge instead of replacing (Webextension only)
+* +: Pressing shift when clicking on the button to import from file or sync will merge instead of replacing (Web Extension only)
 * +: Hidden request timeout preference
 * +: Voice notification not enabled by default
 * -: Deleted Request_Get function, no longer needed to avoid copy/paste problem (Firefox only)
-* -: Dropped Web notifications support (Webextension only)
+* -: Dropped Web notifications support (Web Extension only)
 * Fix: Unsuccessful channel list requests
-* Fix: Online icon badge (Webextension only)
-* Fix: Stream setting not displayed in option page (Webextension only)
+* Fix: Online icon badge (Web Extension only)
+* Fix: Stream setting not displayed in option page (Web Extension only)
 * Fix: Beam importation
 * Fix: Some French translations
 * Fix: Using onClick event again on notification without buttons
@@ -317,17 +326,17 @@
 * i: Detaching port when receiving embed from page instead of removing listener after (Firefox only)
 * i: Remove more panel listeners on addon unload (Firefox only)
 * +: Moved URL patterns to the websites JS
-* Fix: checkingLivesState not updated well in appGlobal (Webextension only)
+* Fix: checkingLivesState not updated well in appGlobal (Web Extension only)
 * Fix: Avoid re-requesting refresh if checkingLivesState not null (previous refresh not ended, or not well)
-* Fix: Request_Get now use "loadend" on the XMLHttpRequest addEventListener event, to execute onComplete on errors too, alike Firefox Request API (Webextension only)
-* Fix: Avoid duplicates of the contextMenu "Add this", removing all previous ones (Webextension only)
+* Fix: Request_Get now use "loadend" on the XMLHttpRequest addEventListener event, to execute onComplete on errors too, alike Firefox Request API (Web Extension only)
+* Fix: Avoid duplicates of the contextMenu "Add this", removing all previous ones (Web Extension only)
 * Fix: Adding Dailymotion channels
 
 # 7.1.2
 * Fix: Notification not saved as done (Firefox only)
 
 # 7.1.1
-* Fix: Forgotten test (Webextention only)
+* Fix: Forgotten test (Web Extention only)
 * Fix: Stream refresh end init
 
 # 7.1.0
@@ -341,10 +350,10 @@
 * i: Now display offline streams in panel by default
 * i: Moved JS files
 * +: Make variable from API const instead of let (Firefox only)
-* +: loadJS, to load JS files (Webextension only)
+* +: loadJS, to load JS files (Web Extension only)
 * +: Moved stream platforms related code to other script files
-* +: Custom Request function to act alike Firefox Request API (return null when response cannot be parsed in JSON) (Webextension only)
-* +: Custom Request function to fit Webextension version, to avoid copy/paste fails (Firefox only)
+* +: Custom Request function to act alike Firefox Request API (return null when response cannot be parsed in JSON) (Web Extension only)
+* +: Custom Request function to fit Web Extension version, to avoid copy/paste fails (Firefox only)
 * +: Import and export of preferences (functions use the panel in Firefox)
 * +: Display streams errors in hidden section, in the panel
 * +: Single function to load scrollbars
@@ -352,7 +361,7 @@
 # 6.3.3
 * -: Cleaning old settings
 * Fix: No longer store live notifier version in a pref, using load or install reason to make update notification
-* Fix: When the settings has no default value, getPreference return directly the value from localeStorage, if any (Webextension)
+* Fix: When the settings has no default value, getPreference return directly the value from localeStorage, if any (Web Extension)
 
 # 6.3.2
 * Fix: Check streams that are not checked yet (manualled added for exemple), when opening panel
@@ -367,14 +376,14 @@
 * +: Replaced setAttribute and getAttribute for data-* attribute by dataset.*
 * +: Some material icons now inserted by CSS instead of js created node
 * Fix: Case when no current viewer provided
-* Fix: Panel setting auto-refresh with input event (Webextension)
+* Fix: Panel setting auto-refresh with input event (Web Extension)
 * Fix: Empty Twitch status
 
 # 6.2.0
 * +: Now use Element.classList to change classes
 
 # 6.1.3
-* Fix: Revert of 6.1.2 and renaming the old preference dailymotion_check_delay to check_delay to have same preference name as the Webextension version (Firefox only)
+* Fix: Revert of 6.1.2 and renaming the old preference dailymotion_check_delay to check_delay to have same preference name as the Web Extension version (Firefox only)
 
 # 6.1.2
 * Fix: Copy/Paste error in options-data.js (Firefox only)
@@ -384,24 +393,24 @@
 
 # 6.1.0
 * i: The function importing stream key list (before 6.x.x) now delete the old preferences, not only keeping empty strings
-* +: Stream key list in a textarea (Webextension only)
+* +: Stream key list in a textarea (Web Extension only)
 * Fix: Space after comma when streamListFromSetting update the stream list
-* Fix: Forgotten sender, in index.js, to receive from embeds (Webextension only)
+* Fix: Forgotten sender, in index.js, to receive from embeds (Web Extension only)
 
 # 6.0.0
-* i: Start using class system, Firefox 45 min requied because of it (ECMAScript 6, Firefox only, already started for Webextension)
-* i: Moved panel data update to panel script, reducing port usage (Webextension only)
+* i: Start using class system, Firefox 45 min requied because of it (ECMAScript 6, Firefox only, already started for Web Extension)
+* i: Moved panel data update to panel script, reducing port usage (Web Extension only)
 * +: Fused website preferences, avoiding one preference per website
 * +: streamListFromSetting use a variable as cache to not re-process each time
 * Fix: Header min height
-* Fix: Load canvas sooner to avoid icon/badge load problems (Webextension only)
+* Fix: Load canvas sooner to avoid icon/badge load problems (Web Extension only)
 * Fix: streamListFromSetting send empty objects if no stream for a website, to avoid errors or undefined
 * Fix: Renamed getPreferences to getPreference, because it make more sense
 
 # 5.24.0:
 * +: Simplified port usage, no longer use connect/disconnect
 * +: More button on notifications (when buttons are supported)
-* Fix: Stop displaying "click to confirm" in notification titles when buttons (Webextension) are used 
+* Fix: Stop displaying "click to confirm" in notification titles when buttons (Web Extension) are used 
 
 # 5.23.0:
 * +: List support using textarea in settings (option and panel, except Firefox option page)
@@ -410,14 +419,14 @@
 # 5.22.0:
 * +: Global filters (blacklist/whitelist status and game)
 * Fix: Notifications using not "cleaned" status
-* Fix: Notifications without action not showing (Webextension only)
-* Fix: Port with import buttons (Webextension only)
+* Fix: Notifications without action not showing (Web Extension only)
+* Fix: Port with import buttons (Web Extension only)
 
 # 5.21.0:
-* +: Now using localStorage event to update displayed settings and reduce port usage (Webextension only)
-* +: Move options functions to options-api.js to make reuse to my other(s) webextension(s) easier (Webextension only)
+* +: Now using localStorage event to update displayed settings and reduce port usage (Web Extension only)
+* +: Move options functions to options-api.js to make reuse to my other(s) Web Extension(s) easier (Web Extension only)
 * i: Minor css change
-* -: Port from/to option page (Webextension only)
+* -: Port from/to option page (Web Extension only)
 
 # 5.20.1:
 * Fix: Tempory replaced "via" with hashtag with stream share
@@ -465,26 +474,26 @@
 
 # 5.16.1:
 * Fix: Default translation of panel settings (Firefox only)
-* Fix: Console log of notification (Webextension only)
+* Fix: Console log of notification (Web Extension only)
 
 # 5.16.0:
 * +: Option on the panel reworked, more automated, alike the chrome option page (using port to translate in Firefox, couldn't find better way)
-* +: Option data move in an external file (so panel will use it too) (Webextension only)
-* +: Move default options definition (Webextension only)
+* +: Option data move in an external file (so panel will use it too) (Web Extension only)
+* +: Move default options definition (Web Extension only)
 * +: Dev version now showing (Dev) at the end of the name (Firefox only)
-* i: Option data structure to avoid "complex" structure (Webextension only)
+* i: Option data structure to avoid "complex" structure (Web Extension only)
 * Fix: Addon description localization (Firefox only)
 * Fix: package.json for the mozilla build (Firefox only)
 
 # 5.15.0:
-* +: Sync automation in the option page (sync get and save from the list, no manual list) (Webextension only)
-* i: Code cleanup in option page due to automation (Webextension only)
-* i: Option data structure (Webextension only)
-* i: Don't put the input of the preference in the label, and now using the for attribute on the labels (Webextension only)
-* Fix: French localization (Webextension only)
+* +: Sync automation in the option page (sync get and save from the list, no manual list) (Web Extension only)
+* i: Code cleanup in option page due to automation (Web Extension only)
+* i: Option data structure (Web Extension only)
+* i: Don't put the input of the preference in the label, and now using the for attribute on the labels (Web Extension only)
+* Fix: French localization (Web Extension only)
 
 # 5.14.0:
-* +: Option page reworked, more automated, sync part not changed (Webextension only)
+* +: Option page reworked, more automated, sync part not changed (Web Extension only)
 
 # 5.13.1:
 * Fix: Stream key list update
@@ -496,10 +505,10 @@
 
 # # 5.12.0:
 * * +: Addon version in the bottom of the settings, in the panel
-* * i: Moved html and js files of options to data folder  (Webextension only)
-* * Fix: Restauration from sync for beam keys list  (Webextension only)
-* * Fix: Warning using canvg  (Webextension only)
-* * Fix: Console info instead of warn to show when ports are not connected / disconnected  (Webextension only)
+* * i: Moved html and js files of options to data folder  (Web Extension only)
+* * Fix: Restauration from sync for beam keys list  (Web Extension only)
+* * Fix: Warning using canvg  (Web Extension only)
+* * Fix: Console info instead of warn to show when ports are not connected / disconnected  (Web Extension only)
 
 # 5.11.2:
 * Fix: Verification delay setting localization
@@ -517,11 +526,11 @@
 * Fix: Localization of import buttons (Firefox only)
 
 # 5.10.5
-* Fix: Load theme of panel earlier and avoid to fully load it each time the panel is opened/loaded  (Webextension only)
+* Fix: Load theme of panel earlier and avoid to fully load it each time the panel is opened/loaded  (Web Extension only)
 
 # 5.10.4
-* Fix: Beam importation  (Webextension only)
-* Fix: Performance issues on panel load (Webextension only)
+* Fix: Beam importation  (Web Extension only)
+* Fix: Performance issues on panel load (Web Extension only)
 
 # 5.10.3:
 * Fix: Various bug fix
@@ -545,7 +554,7 @@
 * i: Reduced online stream height
 
 # 5.8.1:
-* Fix: Context menu title (Webextension only)
+* Fix: Context menu title (Web Extension only)
 
 # 5.8.0:
 * +: Add streams from context menu
@@ -561,11 +570,11 @@
 # 5.7.2
 * Fix: Dailymotion channels pattern missing
 * Fix: Localization (Firefox only)
-* Fix: Notication with Webextension API and button available (Webextension only)
+* Fix: Notication with Web Extension API and button available (Web Extension only)
 * Fix: Removed Android from manifest, toggle button api not working / missing
 
 # 5.7.1:
-* Fix: Notication with Webextension API and button available (Webextension only)
+* Fix: Notication with Web Extension API and button available (Web Extension only)
 
 # 5.7.0
 * +: Alphabetical order of streams (and no longer grouped by website)
@@ -584,12 +593,12 @@
 * Fix: Error importing streams in Beam
 
 # 5.5.2:
-* Fix: badgeIcon (SVG to canvas) in Chrome (Webextension only)
-* Fix: Updated manifest homepage url (Webextension only)
+* Fix: badgeIcon (SVG to canvas) in Chrome (Web Extension only)
+* Fix: Updated manifest homepage url (Web Extension only)
 
 # 5.5.1:
 * Fix: Error importing streams in Beam when id does not exist
-* Fix: Notification with Webextension API for Opera (Known issue: events) (Opera only)
+* Fix: Notification with Web Extension API for Opera (Known issue: events) (Opera only)
 
 # 5.5.0:
 * +: Support importing followed streams in Beam
@@ -619,12 +628,12 @@
 * +: Support filtering game (with website providing this information)
 * +: Use 1k style for >1000 viewers
 * Fix: Lower case search with stream filters
-* Fix: Active tab var does not refresh URL during navigation (Webextension only)
+* Fix: Active tab var does not refresh URL during navigation (Web Extension only)
 * Fix: Make sure that the count of online / offline streams is updated properly with filters
 
 # 5.2.0:
 * +: Make additional stream setting data possible
-* +: Start using class system (ES6) (Webextension only for now)
+* +: Start using class system (ES6) (Web Extension only for now)
 * +: Whitelist and/or blacklist for stream status
 
 # 5.1.1:
@@ -641,7 +650,7 @@
 * +: Add support to multi stream per setting, allowing to support using Dailymotion channel as setting instead of only videos
 * +: Using the add button (from the panel) on Dailymotion with an embed or a page of a video will add the Dailymotion channel
 * Fix: Use Twitch display name to get exact streamer case (uppercase and lowercase letters)
-* Fix: Adding streams from panel button (embed, and Webextension only)
+* Fix: Adding streams from panel button (embed, and Web Extension only)
 
 # 4.7.2
 * +: Add current version in the updated notification
@@ -666,7 +675,7 @@
 * Fix: Panel html
 * Fix: Style of settings from the panel
 * Fix: Control stream buttons (position)
-* Fix: Localization (copy Livestreamer title)
+* Fix: Localization (copy LiveStreamer title)
 
 # 4.6.0:
 * +: Added 2 buttons to streams, to delete a stream and to copy the Livestreamer command
@@ -725,7 +734,7 @@
 * +: Main icon size
 
 # 4.0.0:
-* i: *Starting Webextension version*
+* i: *Starting Web Extension version*
 * +: New addon icon (SVG). Source picture from https://pixabay.com/fr/surveiller-live-%C3%A9cran-978055/ in CC0 (Public Domain)
 
 # 3.3.5:
