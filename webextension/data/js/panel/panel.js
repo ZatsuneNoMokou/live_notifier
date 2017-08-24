@@ -12,9 +12,7 @@ var backgroundPage = browser.extension.getBackgroundPage();
 
 var theme_cache_update = backgroundPage.backgroundTheme.theme_cache_update;
 
-let options = backgroundPage.options;
-
-let appGlobal = backgroundPage.appGlobal;
+let {options, appGlobal} = backgroundPage;
 
 let sendDataToMain = function (id, data) {
 	appGlobal.sendDataToMain("Live_Notifier_Panel", id, data);
@@ -80,17 +78,19 @@ function copyToClipboard(string){
 	}
 }
 
-let streamListFromSetting = appGlobal.streamListFromSetting;
-let websites = appGlobal.websites;
-let liveStatus = appGlobal.liveStatus;
-let channelInfos = appGlobal.channelInfos;
-let getCleanedStreamStatus = appGlobal.getCleanedStreamStatus;
-let getStreamURL = appGlobal.getStreamURL;
-let getOfflineCount = appGlobal.getOfflineCount;
-let doStreamNotif = appGlobal.doStreamNotif;
-let setIcon = appGlobal.setIcon;
+const Mustache = backgroundPage.Mustache;
 
-let checkMissing = appGlobal.checkMissing;
+let { streamListFromSetting,
+	websites,
+	liveStatus,
+	channelInfos,
+	getCleanedStreamStatus,
+	getStreamURL,
+	getOfflineCount,
+	doStreamNotif,
+	setIcon,
+	checkMissing } = appGlobal;
+
 
 $(document).on("click", "#refreshStreams", ()=>{
 	sendDataToMain("refreshStreams","");
@@ -654,10 +654,8 @@ function newCopyStreamURLButton_onClick(event){
 	copyToClipboard(getStreamURL(website, id, contentId, false));
 }
 
-const streamTemplate = $('#streamTemplate').html(),
-	streamListTemplate = $('#streamListTemplate').html();
-Mustache.parse(streamTemplate);   // optional, speeds up future uses
-Mustache.parse(streamListTemplate);   // optional, speeds up future uses
+const streamTemplate = appGlobal.mustacheTemplates.get("streamTemplate"),
+	streamListTemplate = appGlobal.mustacheTemplates.get("streamListTemplate");
 
 const websitesList = [];
 websites.forEach((value, id)=>{
