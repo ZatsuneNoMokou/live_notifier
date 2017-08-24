@@ -1,0 +1,14 @@
+<div id="streamListOnline">
+	<div id="streamOnlineCountLabel"></div>
+	{{#websites}}
+		<div class="{{.}} group">{{thetitle}}</div>
+	{{/websites}}
+	<div class="unsupported group"></div>
+</div>
+<div id="streamListOffline">
+	<div id="streamOfflineCountLabel"></div>
+	{{#websites}}
+		<div class="{{.}} group"></div>
+	{{/websites}}
+	<div class="unsupported group"></div>
+</div>

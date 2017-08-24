@@ -8,6 +8,12 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 11.5.0
+* i: Load Mustache in the Web Extension background instead of the panel
+	* i: Moving Mustache templates from panel to proper files, and loading them in background page
+	* i: Moving backgroundTheme's style into a Mustache Template
+* i: Request function moved to ZDK.js
+
 # 11.4.1
 * Fix: Fail in a condition concerning notifications without buttons support
 

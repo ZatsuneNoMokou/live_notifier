@@ -35,7 +35,7 @@ window.onload = function () {
 	if(typeof browser==="undefined"||browser===null){
 		jsFiles.push("/lib/browser-polyfill.min.js");
 	}
-	jsFiles = jsFiles.concat(["options-api.js", "lib/mustache.min.js", "lib/lodash.custom.min.js", "panel/panel.js"]);
+	jsFiles = jsFiles.concat(["options-api.js", "lib/lodash.custom.min.js", "panel/panel.js"]);
 
 	backgroundPage.zDK.loadJS(document, jsFiles);
 };

@@ -63,35 +63,28 @@ function theme_cache_update(colorStylesheetNode){
 			baseColor_L = JSON.parse(baseColor_hsl.L.replace("%",""))/100;
 		let values, textColor_stylesheet;
 		if(currentTheme === "dark"){
-			textColor_stylesheet = "@import url(css/panel-text-color-white.css);";
 			if(baseColor_L > 0.5 || baseColor_L < 0.1){
 				values = ["19%","13%","26%","13%"];
 			} else {
 				values = [(baseColor_L + 0.06) * 100 + "%", baseColor_L * 100 + "%", (baseColor_L + 0.13) * 100 + "%", baseColor_L * 100 + "%"];
 			}
 		} else if(currentTheme === "light"){
-			textColor_stylesheet = "@import url(css/panel-text-color-black.css);";
 			if(baseColor_L < 0.5 /*|| baseColor_L > 0.9*/){
 				values = ["87%","74%","81%","87%"];
 			} else {
 				values = [baseColor_L * 100 + "%", (baseColor_L - 0.13) * 100 + "%", (baseColor_L - 0.06) * 100 + "%", baseColor_L * 100 + "%"];
 			}
 		}
-		backgroundPage_theme_cache.textContent = `
-${textColor_stylesheet}
-body {background-color: hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[0]});}
-header, footer{background-color: hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[1]});}
-header button, button, input[type=number], select, .item-stream {background-color: hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[2]});}
-#deleteStreamTooltip {background-color: hsla(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[2]}, 0.95);}
 
-input[type=range]::-webkit-slider-thumb{background-color: hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[2]});}
-input[type=range]::-moz-range-thumb{background-color: hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[2]});}
-
-input[type=range]::-webkit-slider-runnable-track{background-color:hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[1]});}
-input[type=range]::-moz-range-track{background-color:hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[1]});}
-
-header, .item-stream, footer{box-shadow: 0 0 5px 0 hsl(${baseColor_hsl.H}, ${baseColor_hsl.S}, ${values[3]});}
-`;
+		backgroundPage_theme_cache.textContent = Mustache.render(appGlobal.mustacheTemplates.get("backgroundTheme"), {
+			"isDarkTheme": (currentTheme === "dark"),
+			"isLightTheme": (currentTheme === "light"),
+			"baseColor_hsl": baseColor_hsl,
+			"light0": values[0],
+			"light1": values[1],
+			"light2": values[2],
+			"light3": values[3]
+		});
 		backgroundPage_theme_cache.dataset.theme = currentTheme;
 		backgroundPage_theme_cache.dataset.background_color = background_color;
 		//console.log(baseColor.rgbCode());
