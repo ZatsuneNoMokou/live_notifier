@@ -1,4 +1,4 @@
-<div id="{{streamWebsite}}/{{streamId}}/{{contentId}}" class="item-stream cursor{{#online}} onlineItem{{/online}}{{^online}} offlineItem{{/online}}{{#streamLogo}} streamLogo{{/streamLogo}}"
+<div id="{{streamWebsite}}/{{streamId}}/{{contentId}}" class="item-stream cursor{{#online}} onlineItem{{/online}}{{^online}} offlineItem{{/online}}"
 	{{#streamStatus}}
 		data-stream-status='{{streamStatus}}' data-stream-status-lowercase='{{streamStatusLowercase}}'
 	{{/streamStatus}}
@@ -9,10 +9,7 @@
 	data-stream-website='{{streamWebsite}}' data-stream-website-lowercase='{{streamWebsiteLowercase}}'
 	data-stream-type='{{streamType}}'
 	data-stream-settings='{{streamSettings}}'
-	draggable="true"
-	{{#streamLogo}}
-		style="background-image: url(&quot;{{streamLogo}}&quot;);"
-	{{/streamLogo}}>
+	draggable="true">
 	{{#online}}
 	<div>
 		{{/online}}<span class="streamTitle">{{streamName}}</span>{{#online}}

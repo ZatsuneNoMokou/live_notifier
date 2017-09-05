@@ -1,4 +1,4 @@
-{{#isDarkTheme}}@import url('css/panel-text-color-white.css');{{/isDarkTheme}} {{#isLightTheme}}@import url('css/panel-text-color-dark.css');{{/isLightTheme}}
+{{#isDarkTheme}}@import url('css/panel-text-color-white.css');{{/isDarkTheme}} {{#isLightTheme}}@import url('css/panel-text-color-black.css');{{/isLightTheme}}
 
 body {
 	background-color: hsl({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light0}});
