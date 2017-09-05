@@ -1179,141 +1179,128 @@ function timingEnd(id){
 		throw `${id} not started`;
 	}
 }
-function getBase64Picture(pictureNode){
-	// Return base64 picture node loaded, and return a promise if not
-	let loadImageData = function(){
-		let canvas = document.createElement("canvas");
-		canvas.width = pictureNode.naturalWidth;
-		canvas.height = pictureNode.naturalHeight;
-		
-		let ctx = canvas.getContext("2d");
-		ctx.drawImage(pictureNode, 0, 0);
-		
-		return canvas.toDataURL();
-	};
-	if(pictureNode.complete === true){
-		return loadImageData();
-	} else {
-		return new Promise(function(resolve, reject){
-			pictureNode.onload = function(){
-				resolve(loadImageData());
-			}
-		})
-	}
-}
 
 let DATAs, streamsTimings, needCheckMissing = false;
 appGlobal["checkingLivesFinished"] = true;
-function checkLives(idArray){
-	return new Promise(function(resolve, reject){
-		let promises = new Map();
-		
-		DATAs = new Map();
-		streamsTimings = new Map();
-		appGlobal["checkingLivesFinished"] = false;
-		timing("checkLives");
-		
-		let streamListSetting = new streamListFromSetting();
-		
-		let listToCheck;
-		if(typeof idArray !== "undefined" && idArray instanceof Map){
-			listToCheck = idArray;
-		} else {
-			listToCheck = streamListSetting.mapDataAll;
-			consoleDir(mapToObj(streamListSetting.mapDataAll), "[Live Notifier] Checking lives...");
-		}
-		
-		let checkQueue = new Queue(getPreference("check_limit"));
-		
-		websites.forEach((websiteAPI, website) => {
-			if(listToCheck.has(website)){
-				listToCheck.get(website).forEach((streamList, id) => {
-					if(typeof streamList.ignore === "boolean" && streamList.ignore === true){
-						//consoleMsg("info", `Ignoring ${id}`);
-						return;
-					}
-					
-					checkQueue.enqueue(getPrimary, `${website}::${id}`, id, "", website, streamList);
-				})
-			}
-		});
-		
-		let onStreamCheckBegin = function(queueId, args){
-			let id = args[0],
-				contentId = args[1],
-				website = args[2],
-				streamSetting = args[3];
-			
-			timing(`${website}::${id}`);
-		};
-		let onStreamCheckEnd = function(queueId, promiseResult, args){
-			let id = args[0],
-				contentId = args[1],
-				website = args[2],
-				streamSetting = args[3];
-			
-			let streamList = listToCheck.get(website).get(id);
-			
-			streamsTimings.set(`${website}::${id}`, timingEnd(`${website}::${id}`).timing);
-			if((typeof promiseResult === "string" && promiseResult.indexOf("StreamChecked") !== -1) || (typeof promiseResult === "object" && JSON.stringify(promiseResult).indexOf("StreamChecked") !== -1)){
-				liveStatus.get(website).get(id).forEach((value, contentId, array) => {
-					if((typeof promiseResult === "string" && promiseResult.indexOf("StreamChecked") !== -1) || (typeof promiseResult === "object" && typeof promiseResult[contentId] === "string" && promiseResult[contentId].indexOf("StreamChecked") !== -1)){
-						doStreamNotif(website, id, contentId, streamList);
-					}
-				})
-			}
-			if(channelInfos.has(website) && channelInfos.get(website).has(id)){
-				channelListEnd(website, id, streamListSetting.mapDataAll.get(website).get(id));
-			}
-			setIcon();
-		};
-		
-		let onCheckEnd = function(result){
-			if(getPreference("showAdvanced") && getPreference("showExperimented")){
-				console.group();
-				consoleMsg("info", `[Live notifier] Live check end`);
-				
-				consoleDir(result, `Promises result:`);
-				
-				if(typeof performance.clearResourceTimings === "function"){
-					performance.clearResourceTimings();
+async function checkLives(idArray){
+	DATAs = new Map();
+	streamsTimings = new Map();
+	appGlobal["checkingLivesFinished"] = false;
+	timing("checkLives");
+
+	let streamListSetting = new streamListFromSetting();
+
+	let listToCheck;
+	if(typeof idArray !== "undefined" && idArray instanceof Map){
+		listToCheck = idArray;
+	} else {
+		listToCheck = streamListSetting.mapDataAll;
+		consoleDir(mapToObj(streamListSetting.mapDataAll), "[Live Notifier] Checking lives...");
+	}
+
+	let checkQueue = new Queue(getPreference("check_limit"));
+
+	websites.forEach((websiteAPI, website) => {
+		if(listToCheck.has(website)){
+			listToCheck.get(website).forEach((streamList, id) => {
+				if(typeof streamList.ignore === "boolean" && streamList.ignore === true){
+					//consoleMsg("info", `Ignoring ${id}`);
+					return;
 				}
-				consoleMsg("info", "checkLives: " + timingEnd("checkLives").timing);
-				consoleDir(streamsTimings, `Timings:`);
-				
-				consoleDir(mapToObj(DATAs), `DATAs:`);
-				
-				console.groupEnd();
-			}
-			
-			appGlobal["checkingLivesFinished"] = true;
-			resolve(result);
-			
-			if(!(typeof idArray !== "undefined" && idArray instanceof Map)){ // Only reset interval if it's a "full" check
-				clearInterval(interval);
-				interval = setInterval(checkLives, getPreference('check_delay') * 60000);
-			}
-			
-			if(needCheckMissing){
-				checkMissing();
-			}
-		};
-		
-		if(checkQueue.queue.size === 0){
-			setIcon();
-			appGlobal["checkingLivesFinished"] = true;
-		} else {
-			checkQueue.run(onStreamCheckBegin, onStreamCheckEnd)
-				.then(onCheckEnd)
-				.catch(onCheckEnd)
+
+				checkQueue.enqueue(getPrimary, `${website}::${id}`, id, "", website, streamList);
+			})
 		}
-		
+	});
+
+	if(checkQueue.queue.size === 0){
+		setIcon();
+		appGlobal["checkingLivesFinished"] = true;
+	} else {
+		let result;
+		try{
+			result = await checkQueue.run(
+				(queueId, args)=>{ // onStreamCheckBegin
+					let id = args[0],
+						contentId = args[1],
+						website = args[2],
+						streamSetting = args[3];
+
+					timing(`${website}::${id}`);
+				},
+				(queueId, promiseResult, args)=>{ // onStreamCheckEnd
+					let id = args[0],
+						contentId = args[1],
+						website = args[2],
+						streamSetting = args[3];
+
+					let streamList = listToCheck.get(website).get(id);
+
+					streamsTimings.set(`${website}::${id}`, timingEnd(`${website}::${id}`).timing);
+					if((typeof promiseResult === "string" && promiseResult.indexOf("StreamChecked") !== -1) || (typeof promiseResult === "object" && JSON.stringify(promiseResult).indexOf("StreamChecked") !== -1)){
+						const imgArrayPreload = [];
+						liveStatus.get(website).get(id).forEach((streamData, contentId) => {
+							if((typeof promiseResult === "string" && promiseResult.indexOf("StreamChecked") !== -1) || (typeof promiseResult === "object" && typeof promiseResult[contentId] === "string" && promiseResult[contentId].indexOf("StreamChecked") !== -1)){
+								doStreamNotif(website, id, contentId, streamList);
+
+								let streamLogo = "";
+								if(streamData.online && typeof streamData.streamCategoryLogo === "string" && streamData.streamCategoryLogo !== ""){
+									streamLogo  = streamData.streamCategoryLogo;
+								} else if(typeof streamData.streamOwnerLogo === "string" && streamData.streamOwnerLogo !== ""){
+									streamLogo  = streamData.streamOwnerLogo;
+								}
+
+								if(streamLogo!=="" && imgArrayPreload.indexOf(streamLogo)===-1){
+									imgArrayPreload.push(streamLogo);
+									loadImage(streamLogo);
+								}
+							}
+						})
+					}
+					if(channelInfos.has(website) && channelInfos.get(website).has(id)){
+						channelListEnd(website, id, streamListSetting.mapDataAll.get(website).get(id));
+					}
+					setIcon();
+				}
+			);
+		} catch (err){
+			result = err;
+		}
+
+		if(getPreference("showAdvanced") && getPreference("showExperimented")){
+			console.group();
+			consoleMsg("info", `[Live notifier] Live check end`);
+
+			consoleDir(result, `Promises result:`);
+
+			if(typeof performance.clearResourceTimings === "function"){
+				performance.clearResourceTimings();
+			}
+			consoleMsg("info", "checkLives: " + timingEnd("checkLives").timing);
+			consoleDir(streamsTimings, `Timings:`);
+
+			consoleDir(mapToObj(DATAs), `DATAs:`);
+
+			console.groupEnd();
+		}
+
 		if(!(typeof idArray !== "undefined" && idArray instanceof Map)){ // Only reset interval if it's a "full" check
 			clearInterval(interval);
 			interval = setInterval(checkLives, getPreference('check_delay') * 60000);
 		}
 
-	})
+		if(needCheckMissing){
+			checkMissing();
+		}
+
+		appGlobal["checkingLivesFinished"] = true;
+		return result;
+	}
+
+	if(!(typeof idArray !== "undefined" && idArray instanceof Map)){ // Only reset interval if it's a "full" check
+		clearInterval(interval);
+		interval = setInterval(checkLives, getPreference('check_delay') * 60000);
+	}
 }
 function checkMissing(){
 	if(appGlobal["checkingLivesFinished"]){
@@ -1336,14 +1323,13 @@ function checkMissing(){
 		});
 		
 		if(listToCheck.size > 0){
-			let refresh = function(result){
-				if(typeof panelUpdateData === "function"){
-					panelUpdateData();
-				}
-			};
 			checkLives(listToCheck)
-				.then(refresh)
-				.catch(refresh)
+				.complete(result=>{
+					consoleMsg("info", result);
+					if(typeof panelUpdateData === "function"){
+						panelUpdateData();
+					}
+				})
 		}
 	} else {
 		needCheckMissing = true;
@@ -1424,63 +1410,59 @@ function getPrimary(id, contentId, website, streamSetting, nextPageToken){
 }
 appGlobal["getPrimary"] = getPrimary;
 
-function processChannelList(id, website, streamSetting, response, nextPageToken){
-	return new Promise(function(resolve, reject){
-		let promises = new Map();
-		
-		let data = response.json;
-		
-		if(!channelInfos.get(website).has(id)){
-			let defaultChannelInfos = channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": "", "liveList": new Map()}, "streamName": (website_channel_id.test(id) === true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+async function processChannelList(id, website, streamSetting, response, nextPageToken){
+	let promises = new Map();
+
+	let data = response.json;
+
+	if(!channelInfos.get(website).has(id)){
+		channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": "", "liveList": new Map()}, "streamName": (website_channel_id.test(id) === true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+	}
+
+	let responseValidity = checkResponseValidity(website, response);
+	if(responseValidity === "success"){
+		let streamListData;
+		if(typeof nextPageToken === "undefined" || nextPageToken === null){
+			// First loop
+			channelInfos.get(website).get(id).liveStatus.liveList = new Map();
+
+			streamListData = websites.get(website).channelList(id, website, data);
+		} else {
+			streamListData = websites.get(website).channelList(id, website, data, nextPageToken);
 		}
-		
-		let responseValidity = checkResponseValidity(website, response);
-		if(responseValidity === "success"){
-			let streamListData;
-			if(typeof nextPageToken === "undefined" || nextPageToken === null){
-				// First loop
-				channelInfos.get(website).get(id).liveStatus.liveList = new Map();
-				
-				streamListData = websites.get(website).channelList(id, website, data);
-			} else {
-				streamListData = websites.get(website).channelList(id, website, data, nextPageToken);
-			}
-			
-			if(!isMap(streamListData.streamList) || streamListData.streamList.size === 0){
-				resolve((isMap(streamListData.streamList))? "EmptyList" : "InvalidList");
-			} else {
-				streamListData.streamList.forEach((value, contentId, array) => {
-					channelInfos.get(website).get(id).liveStatus.liveList.set(contentId, "");
-					
-					if(streamListData.hasOwnProperty("primaryRequest") && typeof streamListData.primaryRequest === "boolean" && !streamListData.primaryRequest){
-						promises.set(contentId, processPrimary(id, contentId, website, streamSetting, {"json": value}));
-					} else {
-						if(value !== null){
-							if(!liveStatus.get(website).get(id).has(contentId)){
-								let defaultStatus = liveStatus.get(website).get(id).set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
-							}
-							for(let infoId in value){
-								if(value.hasOwnProperty(infoId)){
-									liveStatus.get(website).get(id).get(contentId)[infoId] = value[infoId];
-								}
+
+		if(!isMap(streamListData.streamList) || streamListData.streamList.size === 0){
+			return ((isMap(streamListData.streamList))? "EmptyList" : "InvalidList");
+		} else {
+			streamListData.streamList.forEach((value, contentId) => {
+				channelInfos.get(website).get(id).liveStatus.liveList.set(contentId, "");
+
+				if(streamListData.hasOwnProperty("primaryRequest") && typeof streamListData.primaryRequest === "boolean" && !streamListData.primaryRequest){
+					promises.set(contentId, processPrimary(id, contentId, website, streamSetting, {"json": value}));
+				} else {
+					if(value !== null){
+						if(!liveStatus.get(website).get(id).has(contentId)){
+							let defaultStatus = liveStatus.get(website).get(id).set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+						}
+						for(let infoId in value){
+							if(value.hasOwnProperty(infoId)){
+								liveStatus.get(website).get(id).get(contentId)[infoId] = value[infoId];
 							}
 						}
-						promises.set(contentId, getPrimary(id, contentId, website, streamSetting));
 					}
-				});
-				
-				if(streamListData.hasOwnProperty("nextPageToken")){
-					promises.set("next", getPrimary(id, "", website, streamSetting, streamListData.nextPageToken));
+					promises.set(contentId, getPrimary(id, contentId, website, streamSetting));
 				}
-				
-				PromiseWaitAll(promises)
-					.then(resolve)
-					.catch(reject)
+			});
+
+			if(streamListData.hasOwnProperty("nextPageToken")){
+				promises.set("next", getPrimary(id, "", website, streamSetting, streamListData.nextPageToken));
 			}
-		} else {
-			resolve(responseValidity);
+
+			return await PromiseWaitAll(promises);
 		}
-	})
+	} else {
+		return responseValidity;
+	}
 }
 function channelListEnd(website, id, streamSetting){
 	liveStatus.get(website).get(id).forEach((value, contentId) => {
@@ -1492,129 +1474,136 @@ function channelListEnd(website, id, streamSetting){
 	})
 }
 
-function processPrimary(id, contentId, website, streamSetting, response){
-	return new Promise(function(resolve, reject){
-		let data = response.json;
-		if(!liveStatus.get(website).get(id).has(contentId)){
-			let defaultStatus = liveStatus.get(website).get(id).set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
-		}
-		let responseValidity = liveStatus.get(website).get(id).get(contentId).liveStatus.lastCheckStatus = checkResponseValidity(website, response);
-		if(responseValidity === "success"){
-			let liveState = websites.get(website).checkLiveStatus(id, contentId, data, liveStatus.get(website).get(id).get(contentId), (channelInfos.has(website) && channelInfos.get(website).has(id))? channelInfos.get(website).get(id) : null);
-			if(liveState !== null){
-				liveStatus.get(website).get(id).set(contentId, liveState);
-				
-				if(websites.get(website).hasOwnProperty("API_second") === true){
-					let second_API = websites.get(website).API_second(contentId);
-					
-					let second_API_RequestOptions = {
-						url: second_API.url,
-						overrideMimeType: second_API.overrideMimeType,
-						onComplete: function (response) {
-							let data_second = response.json;
-							
-							if(!DATAs.get(`${website}/${id}`).has(contentId)){
-								DATAs.get(`${website}/${id}`).set(contentId, new Map())
-							}
-							DATAs.get(`${website}/${id}`).get(contentId).set("getSecond", {"url": response.url, "data": data_second});
-							
-							let responseValidity = checkResponseValidity(website, response);
-							if(responseValidity === "success"){
-								let newLiveStatus = websites.get(website).seconderyInfo(id, contentId, data_second, liveStatus.get(website).get(id).get(contentId));
-								if(typeof newLiveStatus === "object" && newLiveStatus !== null){
-									liveStatus.get(website).get(id).set(contentId, newLiveStatus);
-									resolve("StreamChecked_With2ndAPI");
-								} else {
-									resolve("StreamChecked");
-								}
-							} else {
-								resolve(responseValidity);
-							}
-							//doStreamNotif(website, id, contentId, streamSetting);
-							//setIcon();
-						}
-					};
-					
-					if(second_API.hasOwnProperty("headers") === true){
-						second_API_RequestOptions.headers = second_API.headers;
-					}
-					if(second_API.hasOwnProperty("content")=== true){
-						second_API_RequestOptions.content = second_API.content;
-					}
-					if(second_API.hasOwnProperty("contentType") === true){
-						second_API_RequestOptions.contentType = second_API.contentType;
-					}
-					if(second_API.hasOwnProperty("Request_documentParseToJSON") === true){
-						second_API_RequestOptions.Request_documentParseToJSON = second_API.Request_documentParseToJSON;
-					}
-					if(second_API.hasOwnProperty("customJSONParse") === true){
-						second_API_RequestOptions.customJSONParse = second_API.customJSONParse;
-					}
-					
-					Request(second_API_RequestOptions).get();
-				} else {
-					resolve("StreamChecked");
-					//doStreamNotif(website, id, contentId, streamSetting);
+async function processPrimary(id, contentId, website, streamSetting, response){
+	let data = response.json;
+	if(!liveStatus.get(website).get(id).has(contentId)){
+		liveStatus.get(website).get(id).set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+	}
+
+	let responseValidity = liveStatus.get(website).get(id).get(contentId).liveStatus.lastCheckStatus = checkResponseValidity(website, response);
+	if(responseValidity === "success"){
+		let liveState = websites.get(website).checkLiveStatus(id, contentId, data, liveStatus.get(website).get(id).get(contentId), (channelInfos.has(website) && channelInfos.get(website).has(id))? channelInfos.get(website).get(id) : null);
+		if(liveState !== null){
+			liveStatus.get(website).get(id).set(contentId, liveState);
+
+			if(websites.get(website).hasOwnProperty("API_second") === true){
+				let second_API = websites.get(website).API_second(contentId);
+
+				let second_API_RequestOptions = {
+					url: second_API.url,
+					overrideMimeType: second_API.overrideMimeType,
+				};
+
+				if(second_API.hasOwnProperty("headers") === true){
+					second_API_RequestOptions.headers = second_API.headers;
 				}
+				if(second_API.hasOwnProperty("content")=== true){
+					second_API_RequestOptions.content = second_API.content;
+				}
+				if(second_API.hasOwnProperty("contentType") === true){
+					second_API_RequestOptions.contentType = second_API.contentType;
+				}
+				if(second_API.hasOwnProperty("Request_documentParseToJSON") === true){
+					second_API_RequestOptions.Request_documentParseToJSON = second_API.Request_documentParseToJSON;
+				}
+				if(second_API.hasOwnProperty("customJSONParse") === true){
+					second_API_RequestOptions.customJSONParse = second_API.customJSONParse;
+				}
+
+				const response = await Request(second_API_RequestOptions).get();
+
+				let data_second = response.json;
+
+				if(!DATAs.get(`${website}/${id}`).has(contentId)){
+					DATAs.get(`${website}/${id}`).set(contentId, new Map())
+				}
+				DATAs.get(`${website}/${id}`).get(contentId).set("getSecond", {"url": response.url, "data": data_second});
+
+				let responseValidity = checkResponseValidity(website, response);
+				if(responseValidity === "success"){
+					let newLiveStatus = websites.get(website).seconderyInfo(id, contentId, data_second, liveStatus.get(website).get(id).get(contentId));
+					if(typeof newLiveStatus === "object" && newLiveStatus !== null){
+						liveStatus.get(website).get(id).set(contentId, newLiveStatus);
+						return "StreamChecked_With2ndAPI";
+					} else {
+						return "StreamChecked";
+					}
+				} else {
+					return responseValidity;
+				}
+				//doStreamNotif(website, id, contentId, streamSetting);
+				//setIcon();
 			} else {
-				consoleMsg("warn", "Unable to get stream state.");
-				resolve("liveState is null");
+				return "StreamChecked";
+				//doStreamNotif(website, id, contentId, streamSetting);
 			}
 		} else {
-			resolve(responseValidity);
+			consoleMsg("warn", "Unable to get stream state.");
+			return "liveState is null";
 		}
-	})
+	} else {
+		return responseValidity;
+	}
 }
-function getChannelInfo(website, id){
-	return new Promise(function(resolve, reject){
-		let channelInfos_API = websites.get(website).API_channelInfos(id);
-		
-		if(!channelInfos.get(website).has(id)){
-			let defaultChannelInfos = channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) === true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+async function getChannelInfo(website, id){
+	let channelInfos_API = websites.get(website).API_channelInfos(id);
+
+	if(!channelInfos.get(website).has(id)){
+		channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) === true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+	}
+
+	if(websites.get(website).hasOwnProperty("API_channelInfos") === true){
+		let getChannelInfo_RequestOptions = {
+			url: channelInfos_API.url,
+			overrideMimeType: channelInfos_API.overrideMimeType
+		};
+
+		if(channelInfos_API.hasOwnProperty("headers") === true){
+			getChannelInfo_RequestOptions.headers = channelInfos_API.headers;
 		}
-		if(websites.get(website).hasOwnProperty("API_channelInfos") === true){
-			let getChannelInfo_RequestOptions = {
-				url: channelInfos_API.url,
-				overrideMimeType: channelInfos_API.overrideMimeType,
-				onComplete: function (response) {
-					let data_channelInfos = response.json;
-					
-					if(!DATAs.has(`${website}/${id}`)){
-						DATAs.set(`${website}/${id}`, new Map());
-					}
-					DATAs.get(`${website}/${id}`).set("getChannelInfo", {"url": response.url, "data": data_channelInfos});
-					
-					let responseValidity = channelInfos.get(website).get(id).liveStatus.lastCheckStatus = checkResponseValidity(website, response);
-					if(responseValidity === "success"){
-						let newChannelInfos = websites.get(website).channelInfosProcess(id, data_channelInfos, channelInfos.get(website).get(id));
-						if(typeof newChannelInfos === "object" && newChannelInfos !== null){
-							channelInfos.get(website).set(id, newChannelInfos);
-						}
-					}
-					resolve(responseValidity);
-				}
-			};
-			
-			if(channelInfos_API.hasOwnProperty("headers") === true){
-				getChannelInfo_RequestOptions.headers = channelInfos_API.headers;
-			}
-			if(channelInfos_API.hasOwnProperty("content") === true){
-				getChannelInfo_RequestOptions.content = channelInfos_API.content;
-			}
-			if(channelInfos_API.hasOwnProperty("contentType") === true){
-				getChannelInfo_RequestOptions.contentType = channelInfos_API.contentType;
-			}
-			if(channelInfos_API.hasOwnProperty("Request_documentParseToJSON") === true){
-				getChannelInfo_RequestOptions.Request_documentParseToJSON = channelInfos_API.Request_documentParseToJSON;
-			}
-			if(channelInfos_API.hasOwnProperty("customJSONParse") === true){
-				getChannelInfo_RequestOptions.customJSONParse = channelInfos_API.customJSONParse;
-			}
-			
-			Request(getChannelInfo_RequestOptions).get();
+		if(channelInfos_API.hasOwnProperty("content") === true){
+			getChannelInfo_RequestOptions.content = channelInfos_API.content;
 		}
-	})
+		if(channelInfos_API.hasOwnProperty("contentType") === true){
+			getChannelInfo_RequestOptions.contentType = channelInfos_API.contentType;
+		}
+		if(channelInfos_API.hasOwnProperty("Request_documentParseToJSON") === true){
+			getChannelInfo_RequestOptions.Request_documentParseToJSON = channelInfos_API.Request_documentParseToJSON;
+		}
+		if(channelInfos_API.hasOwnProperty("customJSONParse") === true){
+			getChannelInfo_RequestOptions.customJSONParse = channelInfos_API.customJSONParse;
+		}
+
+		const response = await Request(getChannelInfo_RequestOptions).get();
+
+		let data_channelInfos = response.json;
+
+		if(!DATAs.has(`${website}/${id}`)){
+			DATAs.set(`${website}/${id}`, new Map());
+		}
+		DATAs.get(`${website}/${id}`).set("getChannelInfo", {"url": response.url, "data": data_channelInfos});
+
+		let responseValidity = channelInfos.get(website).get(id).liveStatus.lastCheckStatus = checkResponseValidity(website, response);
+		if(responseValidity === "success"){
+			let newChannelInfos = websites.get(website).channelInfosProcess(id, data_channelInfos, channelInfos.get(website).get(id));
+			if(typeof newChannelInfos === "object" && newChannelInfos !== null){
+				channelInfos.get(website).set(id, newChannelInfos);
+			}
+		}
+
+		return responseValidity;
+	}
 }
+const loadImage = appGlobal["loadImage"] = ZDK.memoize(async function (imageUrl){
+	const xhr = await Request({
+			"url": imageUrl,
+			"contentType": "blob"
+		}).get(),
+		base64data = await zDK.loadBlob(xhr.response)
+	;
+
+	return await zDK.getBase64Image(await zDK.loadImage(base64data), {"height": 86, "width": 48});
+}, ((getPreference('check_delay') * 60000>5)? getPreference('check_delay') : 5) + 1);
 
 function importButton(website){
 	let importationPromiseEnd = (reason) => {
@@ -1676,81 +1665,88 @@ function importButton(website){
 			.catch(importationPromiseEnd)
 	}
 }
-function importStreams(website, id, url, pageNumber){
-	return new Promise(function(resolve, reject){
-		let current_API = websites.get(website).importAPI(id);
-		
-		if(typeof url === "string" && url !== ""){
-			current_API.url = url;
-		} else {
-			timing(`import_${website}`);
-		}
-		let importStreams_RequestOptions = {
-			url: current_API.url,
-			overrideMimeType: current_API.overrideMimeType,
-			onComplete: function (response) {
-				let data = response.json;
-				
-				consoleDir(data, `${website} - ${id} (${response.url})`);
-				
-				let streamListSetting = new streamListFromSetting(website);
-				
-				let importStreamList_Data;
-				if(typeof pageNumber === "number"){
-					importStreamList_Data = websites.get(website).importStreamWebsites(id, data, streamListSetting, pageNumber);
-				} else {
-					importStreamList_Data = websites.get(website).importStreamWebsites(id, data, streamListSetting);
-				}
-				
-				if(importStreamList_Data.list !== null){
-					for(let id of importStreamList_Data.list){
-						streamListSetting.addStream(website, id, "");
-					}
-					streamListSetting.update();
-					
-					if(importStreamList_Data.hasOwnProperty("next") === true && importStreamList_Data.next !== null){
-						if(importStreamList_Data.next.hasOwnProperty("pageNumber") === true){
-							importStreams(website, id, importStreamList_Data.next.url, importStreamList_Data.next.pageNumber)
-								.then(resolve)
-								.catch(resolve)
-						} else {
-							importStreams(website, id, importStreamList_Data.next.url)
-								.then(resolve)
-								.catch(resolve)
-						}
-					} else {
-						importStreamsEnd(website, id);
-						resolve("ImportEnd");
-					}
-				} else {
-					importStreamsEnd(website, id);
-					resolve("ImportEnd_DataNull");
-				}
-			}
-		};
-		
-		if(current_API.hasOwnProperty("headers") === true){
-			importStreams_RequestOptions.headers = current_API.headers;
-		}
-		if(current_API.hasOwnProperty("contentType") === true){
-			importStreams_RequestOptions.contentType = current_API.contentType;
-		}
-		if(current_API.hasOwnProperty("Request_documentParseToJSON") === true){
-			importStreams_RequestOptions.Request_documentParseToJSON = current_API.Request_documentParseToJSON;
-		}
-		if(current_API.hasOwnProperty("xmlToJSON") === true){
-			importStreams_RequestOptions.xmlToJSON = true;
-		}
-		if(current_API.hasOwnProperty("content") === true){
-			importStreams_RequestOptions.content = current_API.content;
-		}
+async function importStreams(website, id, url, pageNumber){
+	let current_API = websites.get(website).importAPI(id);
 
-		if(current_API.hasOwnProperty("customJSONParse") === true){
-			importStreams_RequestOptions.customJSONParse = current_API.customJSONParse;
+	if(typeof url === "string" && url !== ""){
+		current_API.url = url;
+	} else {
+		timing(`import_${website}`);
+	}
+	let importStreams_RequestOptions = {
+		url: current_API.url,
+		overrideMimeType: current_API.overrideMimeType
+	};
+
+	if(current_API.hasOwnProperty("headers") === true){
+		importStreams_RequestOptions.headers = current_API.headers;
+	}
+	if(current_API.hasOwnProperty("contentType") === true){
+		importStreams_RequestOptions.contentType = current_API.contentType;
+	}
+	if(current_API.hasOwnProperty("Request_documentParseToJSON") === true){
+		importStreams_RequestOptions.Request_documentParseToJSON = current_API.Request_documentParseToJSON;
+	}
+	if(current_API.hasOwnProperty("xmlToJSON") === true){
+		importStreams_RequestOptions.xmlToJSON = true;
+	}
+	if(current_API.hasOwnProperty("content") === true){
+		importStreams_RequestOptions.content = current_API.content;
+	}
+
+	if(current_API.hasOwnProperty("customJSONParse") === true){
+		importStreams_RequestOptions.customJSONParse = current_API.customJSONParse;
+	}
+
+	const response = await Request(importStreams_RequestOptions).get();
+
+	let data = response.json;
+
+	consoleDir(data, `${website} - ${id} (${response.url})`);
+
+	let streamListSetting = new streamListFromSetting(website);
+
+	let importStreamList_Data;
+	if(typeof pageNumber === "number"){
+		importStreamList_Data = websites.get(website).importStreamWebsites(id, data, streamListSetting, pageNumber);
+	} else {
+		importStreamList_Data = websites.get(website).importStreamWebsites(id, data, streamListSetting);
+	}
+
+	if(importStreamList_Data.list !== null){
+		for(let id of importStreamList_Data.list){
+			streamListSetting.addStream(website, id, "");
 		}
-		
-		Request(importStreams_RequestOptions).get();
-	})
+		streamListSetting.update();
+
+		if(importStreamList_Data.hasOwnProperty("next") === true && importStreamList_Data.next !== null){
+			if(importStreamList_Data.next.hasOwnProperty("pageNumber") === true){
+				let recursive_result;
+				try{
+					recursive_result = await importStreams(website, id, importStreamList_Data.next.url, importStreamList_Data.next.pageNumber);
+				} catch(err){
+					recursive_result = err;
+				}
+
+				return recursive_result;
+			} else {
+				let recursive_result;
+				try{
+					recursive_result = await importStreams(website, id, importStreamList_Data.next.url);
+				} catch(err){
+					recursive_result = err;
+				}
+
+				return recursive_result;
+			}
+		} else {
+			importStreamsEnd(website, id);
+			return "ImportEnd";
+		}
+	} else {
+		importStreamsEnd(website, id);
+		return "ImportEnd_DataNull";
+	}
 }
 function importStreamsEnd(website, id){
 	setIcon();
@@ -1763,88 +1759,73 @@ function importStreamsEnd(website, id){
 let online_badgeData = null;
 let offline_badgeData = null;
 
-function loadSVGAsCanvas(id, src, width, height){
-	return new Promise((resolve, reject) => {
-		let old_node = document.querySelector(`canvas#id`);
-		if(old_node !== null){
-			old_node.parentNode.removeChild(old_node);
-		}
-		
-		let canvasNode = document.createElement('canvas');
-		canvasNode.id = id;
-		canvasNode.width = width;
-		canvasNode.height = height;
-		document.querySelector("body").appendChild(canvasNode);
-		  
-		// Get drawing context for the Canvas
-		let canvasContext = canvasNode.getContext('2d');
-		  
-		// Load up our image.
-		let mySVG = new Image();
-		mySVG.src = src;
-		mySVG.width = width;
-		mySVG.height = height;
-		// Render our SVG image to the canvas once it loads.
-		mySVG.onload = function(){
-			canvasContext.drawImage(mySVG, 0, 0, width, height);
-			resolve(canvasContext.getImageData(0, 0, width, height));
-		}
-	})
+async function loadSVGAsCanvas(id, src, width, height){
+	let old_node = document.querySelector(`canvas#id`);
+	if(old_node !== null){
+		old_node.parentNode.removeChild(old_node);
+	}
+
+	let canvasNode = document.createElement('canvas');
+	canvasNode.id = id;
+	canvasNode.width = width;
+	canvasNode.height = height;
+	document.querySelector("body").appendChild(canvasNode);
+
+	// Get drawing context for the Canvas
+	let canvasContext = canvasNode.getContext('2d');
+
+	// Load up our image.
+	let mySVG = await zDK.loadImage({
+		"src": src,
+		"height": height,
+		"width": width
+	});
+
+	// Render our SVG image to the canvas once it loads.
+	canvasContext.drawImage(mySVG, 0, 0, width, height);
+	return canvasContext.getImageData(0, 0, width, height);
 }
-function loadBadges(){
-	return new Promise((resolve, reject) => {
-		let canvasPromises = new Map();
-		
-		canvasPromises.set("live_online", loadSVGAsCanvas("live_online", "/data/live_online.svg", 19, 19));
-		canvasPromises.get("live_online").then((data) => {
-			if(data instanceof ImageData){
-				online_badgeData = data;
-			}
-		});
-		canvasPromises.set("live_offline", loadSVGAsCanvas("live_offline", "/data/live_offline.svg", 19, 19));
-		canvasPromises.get("live_offline").then((data) => {
-			if(data instanceof ImageData){
-				offline_badgeData = data;
-			}
-		});
-		
-		PromiseWaitAll(canvasPromises)
-			.then(resolve)
-			.catch(reject)
-	})
+async function loadBadges(){
+	let canvasPromises = new Map();
+
+	canvasPromises.set("live_online", loadSVGAsCanvas("live_online", "/data/live_online.svg", 19, 19));
+	canvasPromises.get("live_online").then((data) => {
+		if(data instanceof ImageData){
+			online_badgeData = data;
+		}
+	});
+	canvasPromises.set("live_offline", loadSVGAsCanvas("live_offline", "/data/live_offline.svg", 19, 19));
+	canvasPromises.get("live_offline").then((data) => {
+		if(data instanceof ImageData){
+			offline_badgeData = data;
+		}
+	});
+
+	return await PromiseWaitAll(canvasPromises);
 }
 loadBadges();
 
-function getRedirectedURL(URL, maxRedirect){
-	return new Promise((resolve, reject) => {
-		Request({
-			url: URL,
-			contentType: "document",
-			onComplete: function (data) {
-				if(data.response === null){
-					resolve(URL);
-				} else {
-					let redirectMetaNode = data.response.querySelector("meta[http-equiv=refresh]");
-					let getURL = /0;URL\=(.*)/i;
-					
-					if(typeof maxRedirect === "number" && redirectMetaNode !== null && getURL.test(redirectMetaNode.content)){
-						let newURL = getURL.exec(redirectMetaNode.content)[1];
-						getRedirectedURL(newURL, maxRedirect - 1)
-							.then((result) => {
-								resolve(result);
-							})
-							.catch((result) => {
-								reject(result);
-							})
-					} else if(typeof data.url === "string" && data.url !== ""){
-						resolve(data.url);
-					} else {
-						resolve(URL);
-					}
-				}
-			}
-		}).get();
-	})
+async function getRedirectedURL(URL, maxRedirect){
+	const data = await Request({
+		url: URL,
+		contentType: "document"
+	}).get();
+
+	if(data.response === null){
+		return URL;
+	} else {
+		let redirectMetaNode = data.response.querySelector("meta[http-equiv=refresh]");
+		let getURL = /0;URL\=(.*)/i;
+
+		if(typeof maxRedirect === "number" && redirectMetaNode !== null && getURL.test(redirectMetaNode.content)){
+			let newURL = getURL.exec(redirectMetaNode.content)[1];
+			return await getRedirectedURL(newURL, maxRedirect - 1);
+		} else if(typeof data.url === "string" && data.url !== ""){
+			return data.url;
+		} else {
+			return URL;
+		}
+	}
 }
 
 // Begin to check lives
@@ -2011,7 +1992,7 @@ function checkIfUpdated(details){
 	//}
 }
 
-(()=>{
+(async ()=>{
 	appGlobal.chromeSettings = chromeSettings;
 	consoleDir(chromeSettings,"Current preferences in the local storage:");
 
@@ -2035,8 +2016,12 @@ function checkIfUpdated(details){
 	checkIfUpdated(details);
 	//}
 
-	zDK.loadJS(document, ["dailymotion.js", "mixer.js", "picarto_tv.js", "smashcast.js", "twitch.js", "youtube.js"], "/data/js/platforms/")
-		.then(initAddon)
-		.catch(initAddon)
+	let platformsLoad_result;
+	try{
+		platformsLoad_result = await zDK.loadJS(document, ["dailymotion.js", "mixer.js", "picarto_tv.js", "smashcast.js", "twitch.js", "youtube.js"], "/data/js/platforms/");
+	} catch(err){
+		platformsLoad_result = err;
 	}
-)();
+
+	initAddon(platformsLoad_result);
+})();

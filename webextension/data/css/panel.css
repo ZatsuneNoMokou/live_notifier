@@ -81,6 +81,17 @@ input[type=range]:-moz-focusring{
 	outline-offset:-1px;
 }
 
+figure{
+	margin: 0;
+	padding: 0;
+}
+figure img{
+	max-height: 100%;
+	max-width: 100%;
+	-o-object-fit: contain;
+	   object-fit: contain;
+}
+
 button{
 	padding:0 8px;
 	border:0 none;
@@ -150,7 +161,7 @@ header button:last-of-type {
 }
 #deleteModeControles{
 	display:flex;
-	margin-bottom:7px;
+	margin-bottom:13px;
 	z-index:999999;
 }
 #deleteModeControles button{
@@ -198,12 +209,13 @@ footer, footer *{
 	font-size:12px;
 }
 .item-stream {
-	margin:7px 0;
-	padding:7px 14px;
 	background-repeat:no-repeat;
 	background-position:3px center;
-	justify-content:space-between;
 	flex-direction:column;
+	justify-content:space-between;
+	margin:7px 0;
+	padding:7px 14px;
+	position:relative;
 }
 .item-stream.offlineItem{
 	padding:7px;
@@ -221,8 +233,8 @@ footer, footer *{
 	background-size:auto 30px;
 }
 .item-stream.onlineItem{
-	position:relative;
 	display: flex;
+	padding-left:58px;
 	padding-right: 5px;
 }
 .item-stream.onlineItem > div{
@@ -234,13 +246,31 @@ footer, footer *{
 	flex-direction:column;
 }
 .item-stream.onlineItem.streamLogo{
-	padding-left:58px;
-	background-size:45px auto;
+	/*background-size:45px auto;*/
 	min-height:37px;
 }
+.item-stream.onlineItem figure.streamPicture {
+	left: 4px;
+	position: absolute;
+	-webkit-transform: translateY(-50%);
+	-moz-transform: translateY(-50%);
+	-ms-transform: translateY(-50%);
+	-o-transform: translateY(-50%);
+	transform: translateY(-50%);
+	top: 50%;
+}
 .item-stream.offlineItem.streamLogo{
-	padding-left:42px;
-	background-size:auto 28px;
+	/*padding-left:42px;*/
+	padding-left: 4px;
+	/*background-size:auto 28px;*/
+}
+.item-stream.offlineItem.streamLogo .streamTitle{
+	flex-grow: 1;
+	padding-left: 4px;
+}
+.item-stream.offlineItem figure.streamPicture {
+	max-height: 30px;
+	max-width: 30px;
 }
 .item-stream .streamTitle::before{
 	display:inline-block;
@@ -332,6 +362,7 @@ body[data-theme='light'] .item-stream[data-stream-website="picarto_tv"] .streamT
 }
 .item-stream.onlineItem:not(.streamLogo){
 	background-image:url("../online-stream.svg");
+	background-position: 12px 50%;
 }
 .item-stream.offlineItem:not(.streamLogo){
 	background-image:url("../offline-stream.svg");

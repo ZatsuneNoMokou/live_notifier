@@ -8,6 +8,17 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 11.6.1
+* Fix: Stream picture load in Firefox
+
+# 11.6.0
+* i: Chrome min version increased to 55, starting to use ECMA7 ([async function](https://developer.mozilla.org//docs/Web/JavaScript/Reference/Instructions/async_function), [await](https://developer.mozilla.org//docs/Web/JavaScript/Reference/Opérateurs/await))
+* i: Moving image loading and base64 generation to ZDK 
+* +: Custom Memoize, inspired of Underscore's one, to use a "memory" cache made of resized images, smaller
+	* i: The resized function should keep the pixel density on retina
+* Fix: Panel - Online stream logo position when no picture available
+* Fix: Panel - Ignore/Delete mode - Delete not working
+
 # 11.5.0
 * i: Load Mustache in the Web Extension background instead of the panel
 	* i: Moving Mustache templates from panel to proper files, and loading them in background page
@@ -20,8 +31,8 @@
 # 11.4.0
 * Fix: Range input position in option page, in Firefox
 * Fix: Ability to detect closed notification when supported, and only remove (internally) the notification when it not active anymore (avoid a randomly defined timeout delay)
-	* i: Based on [notifications.getAll()](https://developer.mozilla.org/en-US/Add-ons/webextensions/API/notifications/getAll) that return active notifications
-	* i: See the byUser parameter support of the notification onClosed event ([notifications.onClosed on MDN Web Doc](https://developer.mozilla.org/en-US/Add-ons/webextensions/API/notifications/onClosed#Parameters))
+	* i: Based on [notifications.getAll()](https://developer.mozilla.org//Add-ons/webextensions/API/notifications/getAll) that return active notifications
+	* i: See the byUser parameter support of the notification onClosed event ([notifications.onClosed on MDN Web Doc](https://developer.mozilla.org//Add-ons/webextensions/API/notifications/onClosed#Parameters))
 
 # 11.3.0
 * +: Ability to add a unit to range inputs

@@ -127,44 +127,48 @@ class ChromePreferences extends Map{
 			writable: false
 		});
 
-		let loadPromise = ()=>{
-			return new Promise(resolve=>{
-				browser.storage.local.get(null)
-					.then(currentLocalStorage=>{
-						for(let prefId in currentLocalStorage){
-							if(currentLocalStorage.hasOwnProperty(prefId)){ // Make sure to not loop constructors
-								if(this.defaultSettings.has(prefId)){
-									this.originalSet(prefId, currentLocalStorage[prefId]);
-								} else {
-									this.originalSet(prefId, currentLocalStorage[prefId]);
-									console.warn(`${prefId} has no default value (value: ${currentLocalStorage[prefId]})`);
-								}
+		let loadPromise = async ()=>{
+			let currentLocalStorage = null, err = "";
+			try{
+				currentLocalStorage = await browser.storage.local.get(null)
+			} catch(err){
+				Object.defineProperty(this, "loadingState", {
+					value: "failed",
+					configurable: true,
+					writable: false
+				});
+			}
+
+			if(this.loadingState==="failed"){
+				throw err;
+			} else {
+				if(currentLocalStorage!==null){
+					for(let prefId in currentLocalStorage){
+						if(currentLocalStorage.hasOwnProperty(prefId)){ // Make sure to not loop constructors
+							if(this.defaultSettings.has(prefId)){
+								this.originalSet(prefId, currentLocalStorage[prefId]);
+							} else {
+								this.originalSet(prefId, currentLocalStorage[prefId]);
+								console.warn(`${prefId} has no default value (value: ${currentLocalStorage[prefId]})`);
 							}
 						}
+					}
 
-						// Load default settings for the missing settings without saving them in the storage
-						this.defaultSettings.forEach((pref, prefId)=>{
-							if(!this.has(prefId)){
-								this.originalSet(prefId, pref);
-							}
-						});
-						Object.defineProperty(this, "loadingState", {
-							value: "success",
-							configurable: true,
-							writable: false
-						});
-						resolve(true);
-					})
-					.catch(err=>{
-						Object.defineProperty(this, "loadingState", {
-							value: "failed",
-							configurable: true,
-							writable: false
-						});
-						throw err;
-					})
-				;
-			})
+					// Load default settings for the missing settings without saving them in the storage
+					this.defaultSettings.forEach((pref, prefId)=>{
+						if(!this.has(prefId)){
+							this.originalSet(prefId, pref);
+						}
+					});
+				}
+
+				Object.defineProperty(this, "loadingState", {
+					value: "success",
+					configurable: true,
+					writable: false
+				});
+				return true;
+			}
 		};
 		Object.defineProperty(this, "loadingState", {
 			value: "loading",
@@ -291,58 +295,48 @@ class ChromePreferences extends Map{
 	saveInSync(){
 		return browser.storage.sync.set(this.getSyncPreferences());
 	}
-	restaureFromSync(mergePreferences=false){
-		return new Promise(resolve=>{
-			let appGlobal = (browser.extension.getBackgroundPage() !== null)? browser.extension.getBackgroundPage().appGlobal : appGlobal;
-			browser.storage.sync.get(this.getSyncKeys())
-				.then(items=>{
-					for(let prefId in items){
-						if(items.hasOwnProperty(prefId)){
-							if(mergePreferences){
-								let oldPref = this.get(prefId);
-								let newPrefArray;
-								switch(prefId){
-									case "stream_keys_list":
-										let oldPrefArray = oldPref.split(",");
-										newPrefArray = items[prefId].split(/,\s*/);
-										newPrefArray = oldPrefArray.concat(newPrefArray);
+	async restaureFromSync(mergePreferences=false){
+		const appGlobal = (browser.extension.getBackgroundPage() !== null)? browser.extension.getBackgroundPage().appGlobal : appGlobal,
+			items = await browser.storage.sync.get(this.getSyncKeys());
 
-										this.set(prefId, newPrefArray.join());
-										let streamListSetting = new appGlobal.streamListFromSetting("", true);
-										streamListSetting.update();
-										break;
-									case "statusBlacklist":
-									case "statusWhitelist":
-									case "gameBlacklist":
-									case "gameWhitelist":
-										let toLowerCase = (str)=>{return str.toLowerCase()};
-										let oldPrefArrayLowerCase = oldPref.split(/,\s*/).map(toLowerCase);
-										newPrefArray = oldPref.split(/,\s*/);
-										items[prefId].split(/,\s*/).forEach(value=>{
-											if(oldPrefArrayLowerCase.indexOf(value.toLowerCase()) === -1){
-												newPrefArray.push(value);
-											}
-										});
-										this.set(prefId, newPrefArray.join(","));
-										break;
-									default:
-										this.set(prefId, items[prefId]);
+		for(let prefId in items){
+			if(items.hasOwnProperty(prefId)){
+				if(mergePreferences){
+					let oldPref = this.get(prefId);
+					let newPrefArray;
+					switch(prefId){
+						case "stream_keys_list":
+							let oldPrefArray = oldPref.split(",");
+							newPrefArray = items[prefId].split(/,\s*/);
+							newPrefArray = oldPrefArray.concat(newPrefArray);
+
+							this.set(prefId, newPrefArray.join());
+							let streamListSetting = new appGlobal.streamListFromSetting("", true);
+							streamListSetting.update();
+							break;
+						case "statusBlacklist":
+						case "statusWhitelist":
+						case "gameBlacklist":
+						case "gameWhitelist":
+							let toLowerCase = (str)=>{return str.toLowerCase()};
+							let oldPrefArrayLowerCase = oldPref.split(/,\s*/).map(toLowerCase);
+							newPrefArray = oldPref.split(/,\s*/);
+							items[prefId].split(/,\s*/).forEach(value=>{
+								if(oldPrefArrayLowerCase.indexOf(value.toLowerCase()) === -1){
+									newPrefArray.push(value);
 								}
-							} else {
-								this.set(prefId, items[prefId]);
-							}
-						}
+							});
+							this.set(prefId, newPrefArray.join(","));
+							break;
+						default:
+							this.set(prefId, items[prefId]);
 					}
-					resolve("success");
-				})
-				.catch(err=>{
-					if(err){
-						console.warn(err);
-					}
-					reject(err);
-				})
-			;
-		});
+				} else {
+					this.set(prefId, items[prefId]);
+				}
+			}
+		}
+		return "success";
 	}
 
 
