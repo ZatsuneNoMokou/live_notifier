@@ -85,7 +85,7 @@ figure{
 	margin: 0;
 	padding: 0;
 }
-figure img{
+figure canvas, figure img{
 	max-height: 100%;
 	max-width: 100%;
 	-o-object-fit: contain;

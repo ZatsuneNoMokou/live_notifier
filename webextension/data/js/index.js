@@ -968,7 +968,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 				;
 			}
 			streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
-			
+
 			if(typeof speechSynthesis === "object"
 				&& ((channelData===null && streamData.liveStatus.notifiedStatus_Vocal === false)
 					|| (channelData!==null && channelData.liveStatus.notifiedStatus_Vocal === false)
@@ -1442,7 +1442,7 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 				} else {
 					if(value !== null){
 						if(!liveStatus.get(website).get(id).has(contentId)){
-							let defaultStatus = liveStatus.get(website).get(id).set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+							liveStatus.get(website).get(id).set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
 						}
 						for(let infoId in value){
 							if(value.hasOwnProperty(infoId)){
@@ -1477,7 +1477,7 @@ function channelListEnd(website, id, streamSetting){
 async function processPrimary(id, contentId, website, streamSetting, response){
 	let data = response.json;
 	if(!liveStatus.get(website).get(id).has(contentId)){
-		liveStatus.get(website).get(id).set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+		liveStatus.get(website).get(id).set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
 	}
 
 	let responseValidity = liveStatus.get(website).get(id).get(contentId).liveStatus.lastCheckStatus = checkResponseValidity(website, response);

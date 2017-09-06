@@ -265,7 +265,7 @@ class ZDK{
 				let ctx = canvas.getContext("2d");
 				ctx.drawImage(pictureNode, 0, 0);
 			}
-			return canvas.toDataURL();
+			return canvas;
 		} else {
 			throw "InvalidParameter";
 		}
