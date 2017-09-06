@@ -34,7 +34,12 @@ var appGlobal = {};
 	await zDK.loadingPromise;
 	await zDK.loadJS(document, [
 		"options-data.js",
-		"options-api.js",
+		"options-api.js"
+	]);
+
+	await PromiseWaitAll([chromeSettings.loadingPromise, i18ex.loadingPromise]);
+
+	await zDK.loadJS(document, [
 		"voiceAPI.js"
 	]);
 
@@ -42,7 +47,6 @@ var appGlobal = {};
 	templatesSource.set("backgroundTheme", "/data/js/backgroundTheme.mst");
 
 	templatesSource.set("streamTemplate", "/data/js/panel/streamTemplate.mst");
-	templatesSource.set("streamPictureTemplate", "/data/js/panel/streamPictureTemplate.mst");
 	templatesSource.set("streamListTemplate", "/data/js/panel/streamListTemplate.mst");
 	loadMustacheTemplates(templatesSource)
 		.then(async (loadMap)=>{
@@ -51,6 +55,5 @@ var appGlobal = {};
 			await zDK.loadJS(document, ["backgroundTheme.js"]);
 		})
 	;
-	await PromiseWaitAll([chromeSettings.loadingPromise, i18ex.loadingPromise]);
 	await zDK.loadJS(document, ["index.js"]);
 })();

@@ -788,15 +788,26 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 
 	if(typeof streamRenderData.streamLogo==="string"&&streamRenderData.streamLogo!==""){
 		appGlobal.loadImage(streamRenderData.streamLogo)
-			.then(base64Data=>{
-				console.warn(base64Data.length)
+			.then(oldCanvas=>{
 				const $streamOldPicture = $newNode.find(".streamPicture");
 				if($streamOldPicture.length>0){
 					$streamOldPicture.remove();
 				}
-				$newNode.prepend(Mustache.render(streamPictureTemplate, {
-					"imgSrc": base64Data
-				}));
+
+				const newCanvas = document.createElement('canvas'),
+					context = newCanvas.getContext('2d');
+
+				//set dimensions
+				newCanvas.width = oldCanvas.width;
+				newCanvas.height = oldCanvas.height;
+
+				//apply the old canvas to the new one
+				context.drawImage(oldCanvas, 0, 0);
+
+				const $imgNode = $("<figure class=\"streamPicture\"></figure>")
+					.append(newCanvas)
+				;
+				$newNode.prepend($imgNode);
 				$newNode.addClass("streamLogo");
 			})
 		;
