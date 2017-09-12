@@ -13,7 +13,7 @@ const twitch = {
 		function(id){
 			return {
 				"url": `https://api.twitch.tv/kraken/streams/${id}`,
-				"overrideMimeType": "application/vnd.twitchtv.v3+json; charset=utf-8", //"text/plain; charset=utf-8"
+				"overrideMimeType": "application/vnd.twitchtv.v5+json; charset=utf-8", //"text/plain; charset=utf-8"
 				"content": [
 					["client_id","kll57pgmkzth3mcr2p184gstqi77ex2"]
 				]
@@ -23,7 +23,7 @@ const twitch = {
 		function(id){
 			return {
 				"url": `https://api.twitch.tv/kraken/users/${id}`,
-				"overrideMimeType": "application/vnd.twitchtv.v3+json; charset=utf-8", //"text/plain; charset=utf-8"
+				"overrideMimeType": "application/vnd.twitchtv.v5+json; charset=utf-8", //"text/plain; charset=utf-8"
 				"content": [
 					["client_id","kll57pgmkzth3mcr2p184gstqi77ex2"]
 				]
@@ -33,7 +33,7 @@ const twitch = {
 		function(id){
 			return {
 				"url": `https://api.twitch.tv/kraken/users/${id}/follows/channels`,
-				"overrideMimeType": "application/vnd.twitchtv.v3+json; charset=utf-8", //"text/plain; charset=utf-8"
+				"overrideMimeType": "application/vnd.twitchtv.v5+json; charset=utf-8", //"text/plain; charset=utf-8"
 				"content": [
 					["client_id","kll57pgmkzth3mcr2p184gstqi77ex2"]
 				]
