@@ -17,7 +17,9 @@ i18next and i18next-xhr-backend are from https://github.com/i18next/i18next and 
 
 mustache.js (or Mustache) is from https://github.com/janl/mustache.js (License MIT).
 
-The icon of the addon (version 4 and later) is from https://pixabay.com/photo-978055/ (in [CC0 Public Domain](https://pixabay.com/fr/service/terms/#usage)). The "Material Icons" (version 2.11 and later) font is part of Google material design, in [CC-BY license](https://creativecommons.org/licenses/by/4.0/) (open source), is available [here](https://google.github.io/material-design-icons/).
+The icon of the addon (version 4 and later) is from https://pixabay.com/photo-978055/ (in [CC0 Public Domain](https://pixabay.com/fr/service/terms/#usage)).
+
+The "Material Icons" (version 2.11 and later) font is part of Google material design, in Apache 2.0 license (open source), is available [here](https://google.github.io/material-design-icons/).
 
 The "warning" website icon in the panel (version 8 and later), on the stream with a unsupported (or not loaded) website configured is under [CC0 Public Domain](https://pixabay.com/fr/service/terms/#usage) license, and is from from: https://pixabay.com/photo-34621/
 
