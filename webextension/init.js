@@ -9,7 +9,7 @@ async function loadMustacheTemplates(map) {
 
 	map.forEach((url, id) => {
 		templatePromises.set(id, Request({
-			url: chrome.extension.getURL(url)
+			url: browser.extension.getURL(url)
 		}).get())
 	});
 
@@ -27,10 +27,6 @@ async function loadMustacheTemplates(map) {
 var appGlobal = {};
 
 (async ()=>{
-	const err = err=>{
-		// Error occured
-		throw err;
-	};
 	await zDK.loadingPromise;
 	await zDK.loadJS(document, [
 		"options-data.js",

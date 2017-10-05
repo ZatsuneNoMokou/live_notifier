@@ -10,6 +10,7 @@
 	data-stream-type='{{streamType}}'
 	data-stream-settings='{{streamSettings}}'
 	draggable="true">
+	<figure class="streamPicture hide" data-src="{{streamLogo}}"></figure>
 	{{#online}}
 	<div>
 		{{/online}}<span class="streamTitle">{{streamName}}</span>{{#online}}

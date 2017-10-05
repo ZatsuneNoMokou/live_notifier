@@ -18,9 +18,9 @@ class streamListFromSetting{
 	constructor(requested_website, checkDuplicates=false){
 		let somethingElseThanSpaces = /[^\s]+/;
 		this.stringData = getPreference("stream_keys_list");
-		let pref = new String(this.stringData);
-		
-		if(streamListFromSetting_cache !== null && streamListFromSetting_cache.hasOwnProperty("stringData") && streamListFromSetting_cache.stringData == pref){
+		let pref = "" + this.stringData;
+
+		if(streamListFromSetting_cache !== null && streamListFromSetting_cache.hasOwnProperty("stringData") && streamListFromSetting_cache.stringData === pref){
 			//consoleMsg("log", "[Live notifier] streamListFromSetting: Using cache")
 			this.mapDataAll = streamListFromSetting_cache.mapDataAll;
 			//this.objDataAll = mapToObj(this.mapDataAll);
@@ -37,14 +37,14 @@ class streamListFromSetting{
 		websites.forEach((websiteAPI, website) => {
 			mapDataAll.set(website, new Map());
 		});
-		
+
 		if(pref !== "" && somethingElseThanSpaces.test(pref)){
 			let myTable = pref.split(/\s*,\s*/);
-			let reg= /\s*([^\s\:]+)\:\:([^\s]+)\s*(.*)?/;
+			let reg= /\s*([^\s:]+)::([^\s]+)\s*(.*)?/;
 			if(myTable.length > 0){
 				for(let item of myTable){
 					let url = /((?:http|https):\/\/.*)\s*$/;
-					let filters = /\s*(?:(\w+)\:\:(.+)\s*)/;
+					let filters = /\s*(?:(\w+)::(.+)\s*)/;
 					let cleanEndingSpace = /(.*)\s+$/;
 					
 					
@@ -76,7 +76,7 @@ class streamListFromSetting{
 					
 					if(checkDuplicates){
 						let checkDuplicates_result = "";
-						mapDataAll.get(website).forEach((value, i, array) => {
+						mapDataAll.get(website).forEach((value, i) => {
 							if(i.toLowerCase() === id.toLowerCase()){
 								checkDuplicates_result = i;
 							}
@@ -99,7 +99,7 @@ class streamListFromSetting{
 						}
 						
 						if(filters.test(data)){
-							let filter_id = /(?:(\w+)\:\:)/;
+							let filter_id = /(?:(\w+)::)/;
 							let scan_string = data;
 							while(filter_id.test(scan_string) === true){
 								let current_filter_result = scan_string.match(filter_id);
@@ -137,7 +137,7 @@ class streamListFromSetting{
 									mapDataAll.get(website).get(id)[current_filter_id] = decodeString(current_data);
 								} else {
 									if(checkDuplicates){
-										let toLowerCase = function(str){return str.toLowerCase();}
+										let toLowerCase = function(str){return str.toLowerCase();};
 										if(mapDataAll.get(website).get(id)[current_filter_id].map(toLowerCase).indexOf(decodeString(current_data).toLowerCase()) === -1){
 											mapDataAll.get(website).get(id)[current_filter_id].push(decodeString(current_data));
 										} else {
@@ -246,7 +246,9 @@ class streamListFromSetting{
 							filters = filters + " " + j + "::" + encodeString(streamSettings[j]);
 						} else {
 							for(let k in streamSettings[j]){
-								filters = filters + " " + j + "::" + encodeString(streamSettings[j][k]);
+								if(streamSettings[j].hasOwnProperty(k)){
+									filters = filters + " " + j + "::" + encodeString(streamSettings[j][k]);
+								}
 							}
 						}
 					}
@@ -272,7 +274,7 @@ function getStreamURL(website, id, contentId, usePrefUrl){
 	let streamList = (new streamListFromSetting(website)).mapData;
 	
 	if(streamList.has(id)){
-		if(streamList.get(id).streamURL != "" && usePrefUrl == true){
+		if(streamList.get(id).streamURL !== "" && usePrefUrl === true){
 			return streamList.get(id).streamURL;
 		} else {
 			if(liveStatus.get(website).has(id) && liveStatus.get(website).get(id).has(contentId)){
@@ -352,7 +354,7 @@ function addStreamFromPanel(data){
 		consoleMsg("info", "Current tab isn't a http/https url");
 		return false;
 	}
-	let active_tab_title = current_tab.title;
+	// let active_tab_title = current_tab.title;
 	let type;
 	let url_list;
 
@@ -959,7 +961,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 				}
 
 				doNotif(notifOptions)
-					.then(result=>{
+					.then(()=>{
 						openTabIfNotExist(getStreamURL(website, id, contentId, true));
 					})
 					.catch(err=>{
@@ -1068,7 +1070,7 @@ function setIcon(){
 				//consoleMsg("log", `[Live notifier - setIcon] ${id} of ${website} is ignored`);
 				//return;
 			} else {
-				id_liveStatus.forEach((streamData, contentId, array) => {
+				id_liveStatus.forEach((streamData, contentId) => {
 					if(streamData.liveStatus.filteredStatus && streamList.has(id)){
 						appGlobal["onlineCount"] = appGlobal["onlineCount"] + 1;
 						if(streamList.has(id) && !(typeof streamList.get(id).iconIgnore === "boolean" && streamList.get(id).iconIgnore === true)){
@@ -1100,7 +1102,7 @@ function setIcon(){
 }
 appGlobal["setIcon"] = setIcon;
 
-let website_channel_id = /channel\:\:(.*)/;
+let website_channel_id = /channel::(.*)/;
 appGlobal["website_channel_id"] = website_channel_id;
 let facebookID_from_url = /(?:http|https):\/\/(?:www\.)?facebook.com\/([^\/]+)(?:\/.*)?/;
 let twitterID_from_url = /(?:http|https):\/\/(?:www\.)?twitter.com\/([^\/]+)(?:\/.*)?/;
@@ -1221,11 +1223,7 @@ async function checkLives(idArray){
 		try{
 			result = await checkQueue.run(
 				(queueId, args)=>{ // onStreamCheckBegin
-					let id = args[0],
-						contentId = args[1],
-						website = args[2],
-						streamSetting = args[3];
-
+					let [id, contentId, website, streamSetting] = args;
 					timing(`${website}::${id}`);
 				},
 				(queueId, promiseResult, args)=>{ // onStreamCheckEnd
@@ -1803,7 +1801,12 @@ async function loadBadges(){
 
 	return await PromiseWaitAll(canvasPromises);
 }
-loadBadges();
+loadBadges()
+	.catch(err=>{
+		consoleMsg("warn", err);
+	})
+;
+
 
 async function getRedirectedURL(URL, maxRedirect){
 	const data = await Request({
@@ -1815,7 +1818,7 @@ async function getRedirectedURL(URL, maxRedirect){
 		return URL;
 	} else {
 		let redirectMetaNode = data.response.querySelector("meta[http-equiv=refresh]");
-		let getURL = /0;URL\=(.*)/i;
+		let getURL = /0;URL=(.*)/i;
 
 		if(typeof maxRedirect === "number" && redirectMetaNode !== null && getURL.test(redirectMetaNode.content)){
 			let newURL = getURL.exec(redirectMetaNode.content)[1];
@@ -1948,7 +1951,11 @@ function initAddon(){
 		channelInfos.set(website, new Map());
 	});
 
-	checkLives();
+	checkLives()
+		.catch(err=>{
+			consoleMsg("warn", err);
+		})
+	;
 }
 
 // Checking if updated

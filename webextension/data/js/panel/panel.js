@@ -8,11 +8,11 @@ panelinitjs_node.parentNode.removeChild(panelinitjs_node);
 	chrome.runtime.sendMessage({"sender": "Live_Notifier_Panel","receiver": "Live_Notifier_Main", "id": id, "data": data});
 }*/
 
-var backgroundPage = browser.extension.getBackgroundPage();
+// var backgroundPage = browser.extension.getBackgroundPage();
 
-var theme_cache_update = backgroundPage.backgroundTheme.theme_cache_update;
-
-let {options, appGlobal} = backgroundPage;
+let theme_cache_update = backgroundPage.backgroundTheme.theme_cache_update,
+	{appGlobal} = backgroundPage
+;
 
 let sendDataToMain = function (id, data) {
 	appGlobal.sendDataToMain("Live_Notifier_Panel", id, data);
@@ -265,7 +265,7 @@ function searchInput_onInput(){
 	let somethingElseThanSpaces = /[^\s]+/;
 	let search = searchInput.value.toLowerCase();
 	let searchCSS_Node = document.querySelector("#search-cssSelector");
-	let cssSelector = "";
+
 	if(search.length > 0 && somethingElseThanSpaces.test(search)){
 		searchCSS_Node.textContent = `
 .item-stream:not([data-stream-name-lowercase*="${search}"]):not([data-stream-status-lowercase*="${search}"]):not([data-stream-game-lowercase*="${search}"]):not([data-stream-website-lowercase*="${search}"]){
@@ -504,6 +504,8 @@ function updatePanelData(doUpdateTheme=true){
 			}
 		})
 	});
+
+	lazyLoading.updateStore();
 	
 	checkMissing();
 	
@@ -535,11 +537,82 @@ function removeAllChildren(node){
 	}
 }
 
-let group_streams_by_websites = true;
+
+class LazyLoading {
+	/*
+	 * From https://toddmotto.com/echo-js-simple-javascript-image-lazy-loading/
+	 * Changed:
+	 * - To turn it into ECMA6
+	 * - Use my custom image loader
+	 * - Load picture a bit under the current screen
+	 * - Debounce on the scroll event
+	 */
+	constructor(){
+		this.store = new Map();
+
+		document.querySelector("#streamList").addEventListener("scroll", _.debounce(()=>{
+			this.checkPictures();
+		}), 15, {
+			maxWait: 50
+		})
+		;
+	}
+	updateStore(){
+		const lazyImgs = document.querySelectorAll(".item-stream .streamPicture[data-src]");
+		for(let i in lazyImgs ){
+			if(lazyImgs.hasOwnProperty(i) && typeof lazyImgs[i].dataset.src==="string"){
+				this.store.set(lazyImgs[i], lazyImgs[i].dataset.src);
+				delete lazyImgs[i].dataset.src;
+			}
+		}
+		this.checkPictures();
+	}
+	checkPictures(){
+		this.store.forEach((src,node)=>{
+			const coords = node.getBoundingClientRect();
+			if((coords.top >= 0 && coords.left >= 0 && coords.top) <= 50 + (window.innerHeight || document.documentElement.clientHeight)){
+				this.loadImg(node, src);
+				this.store.delete(node);
+			}
+		});
+	}
+	loadImg(node, src){
+		appGlobal.loadImage(src)
+			.then(oldCanvas=>{
+				const newCanvas = document.createElement('canvas'),
+					context = newCanvas.getContext('2d');
+
+				//set dimensions
+				newCanvas.width = oldCanvas.width;
+				newCanvas.height = oldCanvas.height;
+
+				//apply the old canvas to the new one
+				context.drawImage(oldCanvas, 0, 0);
+
+				node.appendChild(newCanvas);
+
+				node.classList.remove("hide");
+				node.parentNode.classList.add("streamLogo");
+			})
+			.catch(err=>{
+				console.warn(err);
+			})
+		;
+	}
+}
+
+
+let group_streams_by_websites = true,
+	lazyLoading = null
+;
 function initList(data){
 	let showOffline = data.show_offline_in_panel;
 	group_streams_by_websites = data.group_streams_by_websites;
-	
+
+	if(lazyLoading===null){
+		lazyLoading=new LazyLoading();
+	}
+
 	let streamItems = document.querySelectorAll(".item-stream");
 	if(streamItems.length > 0){
 		for(let i in streamItems){
@@ -656,7 +729,6 @@ function newCopyStreamURLButton_onClick(event){
 }
 
 const streamTemplate = appGlobal.mustacheTemplates.get("streamTemplate"),
-	streamPictureTemplate = appGlobal.mustacheTemplates.get("streamPictureTemplate"),
 	streamListTemplate = appGlobal.mustacheTemplates.get("streamListTemplate");
 
 const websitesList = [];
@@ -786,13 +858,11 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 		scrollbar_update("debugSection");
 	}
 
-	if(typeof streamRenderData.streamLogo==="string"&&streamRenderData.streamLogo!==""){
+	/*if(typeof streamRenderData.streamLogo==="string"&&streamRenderData.streamLogo!==""){
 		appGlobal.loadImage(streamRenderData.streamLogo)
 			.then(oldCanvas=>{
-				const $streamOldPicture = $newNode.find(".streamPicture");
-				if($streamOldPicture.length>0){
-					$streamOldPicture.remove();
-				}
+				const $streamPicture = $newNode.find(".streamPicture");
+				$streamPicture.empty();
 
 				const newCanvas = document.createElement('canvas'),
 					context = newCanvas.getContext('2d');
@@ -804,14 +874,12 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 				//apply the old canvas to the new one
 				context.drawImage(oldCanvas, 0, 0);
 
-				const $imgNode = $("<figure class=\"streamPicture\"></figure>")
-					.append(newCanvas)
-				;
-				$newNode.prepend($imgNode);
+				$streamPicture.append(newCanvas);
+
 				$newNode.addClass("streamLogo");
 			})
 		;
-	}
+	}*/
 }
 function streamItemClick(){
 	let node = this;
@@ -890,7 +958,7 @@ load_scrollbar("streamEditor");
 load_scrollbar("settings_container");
 load_scrollbar("debugSection");
 
-window.onresize = _.debounce(event=>{
+window.onresize = _.debounce(()=>{
 		scrollbar_update("streamList");
 		scrollbar_update("streamEditor");
 		scrollbar_update("settings_container");

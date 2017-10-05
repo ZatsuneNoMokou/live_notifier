@@ -2,7 +2,7 @@ const twitch = {
 	"title": "Twitch",
 	"addStream_URLpatterns": new Map([
 		["twitch", [
-			/^(?:http|https):\/\/www\.twitch\.tv\/([^\/\?\&]+).*$/,/^(?:http|https):\/\/player\.twitch\.tv\/\?channel\=([\w\-]+).*$/
+			/^(?:http|https):\/\/(?:www|go|m)\.twitch\.tv\/([^\/\?\&]+).*$/,/^(?:http|https):\/\/player\.twitch\.tv\/\?channel\=([\w\-]+).*$/
 		]]
 	]),
 	"API_addStream":
