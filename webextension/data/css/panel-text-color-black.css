@@ -1,5 +1,5 @@
 /*			---- Primary text / Icons ----			*/
-body, header button, button, input[type=number], select, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteStreamTooltip, #searchInputContainer, #searchInput{
+body, header button, button, input[type='number'], input[type='checkbox'], input[type='radio'], select, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteStreamTooltip, #searchInputContainer, #searchInput{
 	color: #FFFFFF;
 	color: rgba(0, 0, 0, 0.8);
 }

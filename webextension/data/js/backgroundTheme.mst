@@ -1,37 +1,11 @@
-{{#isDarkTheme}}@import url('css/panel-text-color-white.css');{{/isDarkTheme}} {{#isLightTheme}}@import url('css/panel-text-color-black.css');{{/isLightTheme}}
+{{#isDarkTheme}}@import url('css/panel-theme-dark.css');
+@import url('css/panel-text-color-white.css');{{/isDarkTheme}} {{#isLightTheme}}@import url('css/panel-theme-light.css');
+@import url('css/panel-text-color-black.css');{{/isLightTheme}}
 
-body {
-	background-color: hsl({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light0}});
-}
-
-header, footer{
-	background-color: hsl({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light1}});
-}
-
-header button, button, input[type=number], select, .item-stream {
-	background-color: hsl({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light2}});
-}
-
-#deleteStreamTooltip {
-	background-color: hsla({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light2}}, 0.95);
-}
-
-input[type=range]::-webkit-slider-thumb{
-	background-color: hsl({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light2}});
-}
-
-input[type=range]::-moz-range-thumb{
-	background-color: hsl({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light2}});
-}
-
-input[type=range]::-webkit-slider-runnable-track{
-	background-color:hsl({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light1}});
-}
-
-input[type=range]::-moz-range-track{
-	background-color:hsl({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light1}});
-}
-
-header, .item-stream, footer{
-	box-shadow: 0 0 5px 0 hsl({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light3}});
+:root{
+	--bgLight0: hsl({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light0}});
+	--bgLight1: hsl({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light1}});
+	--bgLight2: hsl({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light2}});
+	--bgLight2_Opacity: hsla({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light2}}, 0.95);
+	--bgLight3: hsl({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light3}});
 }
