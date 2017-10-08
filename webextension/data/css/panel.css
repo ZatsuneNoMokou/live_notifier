@@ -488,13 +488,13 @@ body .preferenceContainer.experimented{
 	align-items:flex-end;
 	flex:1;
 }
+.preferenceContainer div.preferenceInput,
 .preferenceContainer.stringList .preferenceInput{
 	flex:2;
 }
 .preferenceContainer .preferenceInput[type='range']{
 	flex:6;
 }
-.preferenceContainer div.preferenceInput,
 .preferenceContainer select.preferenceInput,
 .preferenceContainer input[type='checkbox']{
 	flex: initial;
