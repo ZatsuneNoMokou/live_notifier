@@ -20,67 +20,6 @@ body{
 	max-width:600px;*/
 }
 
-input[type=text], input[type=number], input[type=url]{
-	border:1px solid #444;
-	border-radius:3px;
-	padding-left:2px;
-}
-select{
-	border:1px solid #444;
-	border-radius:3px;
-	padding-left:2px;
-	background-image: unset !important;
-	box-shadow:unset !important;
-}
-select option, select:hover option{
-	text-shadow:unset;
-}
-
-input[type=range]{
-	-webkit-appearance:none;
-	/*width:300px;*/
-	background-color:transparent;
-	margin: 10px 0;
-}
-input[type=range] ~ output::before{
-	content: '';
-	display: inline-block;
-	width: 0.4em;
-}
-input[type=range]::-webkit-slider-runnable-track{
-	/*width:300px;*/
-	height:5px;
-	border:none;
-	border-radius:1px;
-}
-input[type=range]::-webkit-slider-thumb{
-	-webkit-appearance: none;
-	border:none;
-	height:21px;
-	width:10px;
-	border-radius:1px;
-	margin-top:-8px;
-}
-input[type=range]::-moz-range-track{
-	/*width:300px;*/
-	height:5px;
-	border:none;
-	border-radius:1px;
-}
-input[type=range]::-moz-range-thumb{
-	border:none;
-	height:21px;
-	width:10px;
-	border-radius:1px;
-}
-input[type=range]:focus {
-	outline:none;
-}
-input[type=range]:-moz-focusring{
-	outline:1px solid white;
-	outline-offset:-1px;
-}
-
 figure{
 	margin: 0;
 	padding: 0;
@@ -547,15 +486,24 @@ body .preferenceContainer.experimented{
 }
 .preferenceContainer .preferenceInput{
 	align-items:flex-end;
-}
-.preferenceContainer:not(.stringList) .preferenceInput:not(select){
 	flex:1;
 }
-.preferenceContainer.stringList .preferenceInput:not(select){
+.preferenceContainer.stringList .preferenceInput{
 	flex:2;
 }
-.preferenceContainer:not(.stringList) .preferenceInput[type='range']{
+.preferenceContainer .preferenceInput[type='range']{
 	flex:6;
+}
+.preferenceContainer div.preferenceInput,
+.preferenceContainer select.preferenceInput,
+.preferenceContainer input[type='checkbox']{
+	flex: initial;
+}
+.preferenceContainer input[type='checkbox']{
+	margin-left: 0.2rem;
+}
+.preferenceContainer input[type='checkbox'] + .preference{
+	padding-left: 0.5rem;
 }
 .preference{
 	display:inline;
@@ -564,6 +512,9 @@ body .preferenceContainer.experimented{
 }
 .preference > span:after{
 	content:": ";
+}
+input[type='checkbox'] + label.preference > span::after{
+	content: none;
 }
 label:not(.flex_input_text){
 	display:inline;
@@ -602,12 +553,6 @@ label.flex_input_text{
 .preferenceContainer button{
 	height:25px;
 	margin: 2px 0;
-}
-.preferenceContainer input[type=text]{
-	max-height:25px;
-}
-input[type=checkbox]{
-	width:28px;
 }
 input[type=number]{
 	max-width:42px;

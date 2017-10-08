@@ -87,7 +87,7 @@ function savePreference(prefId, value){
 function settingNode_onChange(event){
 	const backgroundPage = browser.extension.getBackgroundPage(),
 		node = event.target,
-		settingName = node.id;
+		settingName = (node.tagName.toLowerCase()==="input"&&typeof node.type==="string"&&node.type.toLowerCase()==="radio")? node.name : node.id;
 
 	if(node.validity.valid){
 		savePreference(settingName, backgroundPage.getValueFromNode(node));
@@ -123,7 +123,16 @@ function refreshSettings(event){
 					break;
 				case "color":
 				case "menulist":
-					prefNode.value = prefValue;
+					if(prefNode.tagName.toLowerCase()==="div"){
+						const toCheck = prefNode.querySelector(`[value="${prefValue}"]`);
+						if(toCheck){
+							toCheck.checked = true;
+						} else {
+							console.warn(`Error trying to update "${prefId}"`);
+						}
+					} else {
+						prefNode.value = prefValue;
+					}
 					break;
 				case "integer":
 					prefNode.value = parseInt(prefValue);

@@ -473,21 +473,50 @@ class ChromePreferences extends Map{
 				prefNode.textContent = prefObj.label;
 				break;
 			case "menulist":
-				prefNode = document.createElement("select");
-				prefNode.size = 2;
-				for(let o in prefObj.options){
-					if(prefObj.options.hasOwnProperty(o)){
-						let option = prefObj.options[o];
+				if(Array.isArray(prefObj.options) && prefObj.options.length <= 5){
+					prefNode = document.createElement("div");
 
-						let optionNode = document.createElement("option");
-						optionNode.text = option.label;
-						optionNode.value = option.value;
-						optionNode.dataset.translateId = `${id}_${option.value}`;
+					const currentValue = this.get(id);
+					for(let o in prefObj.options){
+						if(prefObj.options.hasOwnProperty(o)){
+							let option = prefObj.options[o];
 
-						prefNode.add(optionNode);
+							let optionNode = document.createElement("input");
+							optionNode.type = "radio";
+							optionNode.id = option.label;
+							optionNode.name = id;
+							optionNode.value = option.value;
+							optionNode.checked = option.value === currentValue;
+
+							prefNode.appendChild(optionNode);
+
+							let optionNodeLabel = document.createElement("label");
+							optionNodeLabel.htmlFor = option.label;
+							optionNodeLabel.textContent = option.label;
+							optionNodeLabel.dataset.translateId = `${id}_${option.value}`;
+
+							prefNode.appendChild(optionNodeLabel);
+						}
 					}
+				} else {
+					prefNode = document.createElement("select");
+					prefNode.size = 5;
+
+					for(let o in prefObj.options){
+						if(prefObj.options.hasOwnProperty(o)){
+							let option = prefObj.options[o];
+
+							let optionNode = document.createElement("option");
+							optionNode.text = option.label;
+							optionNode.value = option.value;
+							optionNode.dataset.translateId = `${id}_${option.value}`;
+
+							prefNode.add(optionNode);
+						}
+					}
+
+					prefNode.value = this.get(id);
 				}
-				prefNode.value = this.get(id);
 				break;
 		}
 		prefNode.id = id;
@@ -500,8 +529,13 @@ class ChromePreferences extends Map{
 
 		prefNode.dataset.settingType = prefObj.type;
 
-		node.appendChild(labelNode);
-		node.appendChild(prefNode);
+		if(prefObj.type === "bool") {
+			node.appendChild(prefNode);
+			node.appendChild(labelNode);
+		} else {
+			node.appendChild(labelNode);
+			node.appendChild(prefNode);
+		}
 
 		let isPanelPage = parent.baseURI.indexOf("panel.html") !== -1;
 		if(id.indexOf("_keys_list") !== -1 || (isPanelPage && id.indexOf("_user_id") !== -1) || (!isPanelPage && (id === "statusBlacklist" || id === "statusWhitelist" || id === "gameBlacklist" || id === "gameWhitelist"))){

@@ -1,31 +1,38 @@
 @import "panel-text-color-white.css";
 
-body{
-	background-color: hsl(0, 0%, 19%); /*#303030;*/
+body {
+	background-color: var(--bgLight0, hsl(0, 0%, 19%)); /*#303030;*/
 }
-header, footer, input[type=number], select{
-	background-color: hsl(0, 0%, 13%); /*#212121;*/
+
+header, footer{
+	background-color: var(--bgLight1, hsl(0, 0%, 13%));
 }
-#deleteStreamTooltip{
-	background-color: hsla(0, 0%, 13%, 0.95); /*#212121;*/
+
+header button, button, input[type=number], select, .item-stream {
+	background-color: var(--bgLight2, hsl(0, 0%, 26%)); /*#424242;*/
 }
-header button, button, .item-stream{
-	background-color: hsl(0, 0%, 26%); /*#424242;*/
+
+#deleteStreamTooltip {
+	background-color: var(--bgLight2_Opacity, hsla(0, 0%, 26%, 0.95));
 }
+
 input[type=range]::-webkit-slider-thumb{
-	background-color: hsl(0, 0%, 26%); /*#424242;*/
+	background-color: var(--bgLight2, hsl(0, 0%, 26%)); /*#424242;*/
 }
+
 input[type=range]::-moz-range-thumb{
-	background-color: hsl(0, 0%, 26%); /*#424242;*/
+	background-color: var(--bgLight2, hsl(0, 0%, 26%)); /*#424242;*/
 }
+
 input[type=range]::-webkit-slider-runnable-track{
-	background-color:hsl(0, 0%, 13%);
+	background-color:var(--bgLight1, hsl(0, 0%, 13%));
 }
+
 input[type=range]::-moz-range-track{
-	background-color:hsl(0, 0%, 13%);
+	background-color:var(--bgLight1, hsl(0, 0%, 13%));
 }
 
 /*				---- Box shadow ----				*/
 header, .item-stream, footer{
-	box-shadow: 0 0 5px 0 hsl(0, 0%, 13%); /*#212121;*/
+	box-shadow: 0 0 5px 0 var(--bgLight3, hsl(0, 0%, 13%));
 }
