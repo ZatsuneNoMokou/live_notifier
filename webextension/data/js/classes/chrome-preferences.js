@@ -344,7 +344,6 @@ class ChromePreferences extends Map{
 		const doc = container.ownerDocument,
 			isPanelPage = container.baseURI.indexOf("panel.html") !== -1,
 			body = doc.querySelector("body");
-
 		this.options.forEach((option, id)=>{
 			if(typeof option.type === "undefined"){
 				return;
@@ -420,6 +419,8 @@ class ChromePreferences extends Map{
 		labelNode.appendChild(title);
 
 		let prefNode = null,
+			beforeInputLabel = null,
+			afterInputLabel = null,
 			output;
 		switch(prefObj.type){
 			case "string":
@@ -440,6 +441,7 @@ class ChromePreferences extends Map{
 				}
 				break;
 			case "integer":
+
 				prefNode = document.createElement("input");
 				prefNode.required = true;
 				if(typeof prefObj.rangeInput === "boolean" && prefObj.rangeInput === true && typeof prefObj.minValue === "number" && typeof prefObj.maxValue === "number"){
@@ -448,6 +450,16 @@ class ChromePreferences extends Map{
 
 					output = document.createElement("output");
 				} else {
+					beforeInputLabel = document.createElement("label");
+					beforeInputLabel.dataset.inputNumberControl = "moins";
+					beforeInputLabel.htmlFor = id;
+					beforeInputLabel.innerHTML = "<i class=\"material-icons\">remove_circle</i>";
+
+					afterInputLabel = document.createElement("label");
+					afterInputLabel.dataset.inputNumberControl = "plus";
+					afterInputLabel.htmlFor = id;
+					afterInputLabel.innerHTML = "<i class=\"material-icons\">add_circle</i>";
+
 					prefNode.type = "number";
 				}
 				if(typeof prefObj.minValue === "number"){
@@ -530,11 +542,25 @@ class ChromePreferences extends Map{
 		prefNode.dataset.settingType = prefObj.type;
 
 		if(prefObj.type === "bool") {
+			if(beforeInputLabel!==null){
+				node.appendChild(beforeInputLabel);
+			}
 			node.appendChild(prefNode);
+			if(afterInputLabel){
+				node.appendChild(afterInputLabel);
+			}
+
 			node.appendChild(labelNode);
 		} else {
 			node.appendChild(labelNode);
+
+			if(beforeInputLabel!==null){
+				node.appendChild(beforeInputLabel);
+			}
 			node.appendChild(prefNode);
+			if(afterInputLabel){
+				node.appendChild(afterInputLabel);
+			}
 		}
 
 		let isPanelPage = parent.baseURI.indexOf("panel.html") !== -1;

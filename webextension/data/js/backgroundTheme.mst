@@ -8,4 +8,5 @@
 	--bgLight2: hsl({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light2}});
 	--bgLight2_Opacity: hsla({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light2}}, 0.95);
 	--bgLight3: hsl({{baseColor_hsl.H}}, {{baseColor_hsl.S}}, {{light3}});
+	--InvColor: hsl({{invBaseColor_hue}}, {{baseColor_hsl.S}}, {{invBaseColor_light}});
 }

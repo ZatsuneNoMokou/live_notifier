@@ -1,7 +1,8 @@
 'use strict';
 
 let chromeSettings,
-	i18ex;
+	i18ex
+;
 if(browser.extension.getBackgroundPage() !== null){
 	const backgroundPage = browser.extension.getBackgroundPage();
 	if(backgroundPage.hasOwnProperty("chromeSettings")){
@@ -29,17 +30,15 @@ function translateNodes(){
 function translateNodes_title(){
 	for(let node of document.querySelectorAll("[data-translate-title]")){
 		if(typeof node.tagName === "string"){
-			node.dataset.toggle = "tooltip";
-			if(typeof node.dataset.placement !== "string"){
-				node.dataset.placement = "auto";
-			}
+			node.dataset.tooltip="";
 			node.title = i18ex._(node.dataset.translateTitle);
-			$(node).tooltip({
-				"trigger": "hover"
-			});
 			delete node.dataset.translateTitle;
 		}
 	}
+	tooltip.setOptions({
+		offsetDefault: 20
+	});
+	tooltip.refresh();
 }
 
 function loadTranslations(){
@@ -86,7 +85,7 @@ function savePreference(prefId, value){
 
 function settingNode_onChange(event){
 	const backgroundPage = browser.extension.getBackgroundPage(),
-		node = event.target,
+		node = this,
 		settingName = (node.tagName.toLowerCase()==="input"&&typeof node.type==="string"&&node.type.toLowerCase()==="radio")? node.name : node.id;
 
 	if(node.validity.valid){
@@ -221,12 +220,31 @@ function import_onClick(){
 		website = getWebsite.exec(this.id)[1];
 	sendDataToMain("importStreams", website);
 }
-if(typeof $ !== "undefined"){
-	$(document).on("input", "[data-setting-type='string']", settingNode_onChange);
-	$(document).on("change", "[data-setting-type='integer'],[data-setting-type='bool'],[data-setting-type='color'],[data-setting-type='menulist']", settingNode_onChange);
-	$(document).on("click", "#export_preferences", exportPrefsToFile);
-	$(document).on("click", "#import_preferences", importPrefsFromFile);
-	$(document).on("click", "[id$='_import']", import_onClick); // [id$='_import'] => Every id that end with _import
+if(browser.extension.getBackgroundPage()!==null && typeof domDelegate!=="undefined") {
+	const delegate = (function () {
+		const Delegate = domDelegate.Delegate;
+		return new Delegate(document.body);
+	})();
+	const liveEvent = function (type, selector, handler) {
+		delegate.on(type, selector, handler);
+	};
+
+	liveEvent("click", "[data-input-number-control]", function (e){
+		const label = this,
+			input = label.control,
+			action = label.dataset.inputNumberControl
+		;
+		if (action === "moins" || action === "plus") {
+			input[action === "plus" ? "stepUp" : "stepDown"](1);
+			settingNode_onChange.apply(input, [e, input])
+		}
+		return false;
+	});
+	liveEvent("input", "[data-setting-type='string']", settingNode_onChange);
+	liveEvent("change", "[data-setting-type='integer'],[data-setting-type='bool'],[data-setting-type='color'],input[data-setting-type='menulist'],[data-setting-type='menulist'] input[type='radio']", settingNode_onChange);
+	liveEvent("click", "#export_preferences", exportPrefsToFile);
+	liveEvent("click", "#import_preferences", importPrefsFromFile);
+	liveEvent("click", "[id$='_import']", import_onClick); // [id$='_import'] => Every id that end with _import
 }
 
 /*		---- Import/Export preferences from file ----		*/
@@ -239,7 +257,7 @@ function simulateClick(node) {
 	// Return true is the event haven't been canceled
 	return node.dispatchEvent(evt);
 }
-function exportPrefsToFile(event){
+function exportPrefsToFile(){
 	let appGlobal = (browser.extension.getBackgroundPage() !== null)? browser.extension.getBackgroundPage().appGlobal : appGlobal;
 
 	let exportData = {
@@ -255,14 +273,13 @@ function exportPrefsToFile(event){
 }
 function importPrefsFromFile(event){
 	let mergePreferences = (typeof event === "object" && typeof event.shiftKey === "boolean")? event.shiftKey : false;
-	let appGlobal = (browser.extension.getBackgroundPage() !== null)? browser.extension.getBackgroundPage().appGlobal : appGlobal;
 
 	console.warn("Merge: " + mergePreferences);
 	let node = document.createElement("input");
 	node.type = "file";
 	node.className = "hide";
 	node.addEventListener("change", function(){
-		node.parentNode.removeChild(node);
+		node.remove();
 		let fileLoader=new FileReader();
 		if(node.files.length === 0 || node.files.length > 1){
 			console.warn(`[Input error] ${node.files.length} file(s) selected `);

@@ -2,12 +2,30 @@ textarea[data-string-textarea]{
 	min-height:64px;
 }
 
-input[type='text'], input[type='number'], input[type='url']{
+input[type='text'], input[type='number'], input[type='url'], textarea {
 	border:1px solid #444;
 	border-radius:3px;
 	height:25px;
 	max-height:25px;
 	padding-left:2px;
+}
+
+input[type="number"] {
+	-webkit-appearance: textfield;
+	-moz-appearance: textfield;
+	appearance: textfield;
+	width: 3em;
+}
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+}
+[data-input-number-control]{
+	cursor: pointer;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 select{
@@ -70,10 +88,11 @@ input[type='range']:-moz-focusring{
 
 
 input[type='radio'], input[type='checkbox']{
-	cursor: pointer;
 	-webkit-appearance: none;
 	-moz-appearance: none;
 	appearance: none;
+	cursor: pointer;
+	display: inline;
 	outline: 0
 }
 input[type='checkbox']{

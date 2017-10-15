@@ -10,7 +10,7 @@
 	data-stream-type='{{streamType}}'
 	data-stream-settings='{{streamSettings}}'
 	draggable="true">
-	<figure class="streamPicture hide" data-src="{{streamLogo}}"></figure>
+	<figure class="streamPicture hide" {{#usePictureLazyLoading}}data-src="{{streamLogo}}"{{/usePictureLazyLoading}}></figure>
 	{{#online}}
 	<div>
 		{{/online}}<span class="streamTitle">{{streamName}}</span>{{#online}}
@@ -19,14 +19,14 @@
 	<div>
 		<span class="streamStatus">{{streamStatus}}</span>{{/online}}
 		<span class="stream_control">
-			<span class="deleteStreamButton" data-id='{{streamId}}' data-website='{{streamWebsite}}' data-translate-title="Delete" data-placement="left">delete</span>
-			<span class="ignoreStreamButton" data-id='{{streamId}}' data-website='{{streamWebsite}}' data-translate-title="IgnoreStream" data-placement="left">visibility_off</span>
+			<span class="deleteStreamButton" data-id='{{streamId}}' data-website='{{streamWebsite}}' data-translate-title="Delete">delete</span>
+			<span class="ignoreStreamButton" data-id='{{streamId}}' data-website='{{streamWebsite}}' data-translate-title="IgnoreStream">visibility_off</span>
 			{{^unsupportedType}}{{#streamURL}}
-				<span class="copyStreamURL" data-id='{{streamId}}' data-content-id='{{contentId}}' data-website='{{streamWebsite}}' data-translate-title="copyURL" data-placement="left"></span>
+				<span class="copyStreamURL" data-id='{{streamId}}' data-content-id='{{contentId}}' data-website='{{streamWebsite}}' data-translate-title="copyURL"></span>
 			{{/streamURL}}{{/unsupportedType}}
-			<span class="editStreamButton" data-id='{{streamId}}' data-content-id='{{contentId}}' data-website='{{streamWebsite}}' data-title='{{streamName}}' data-stream-settings='{{streamSettings}}' data-translate-title="Settings" data-placement="left"></span>
+			<span class="editStreamButton" data-id='{{streamId}}' data-content-id='{{contentId}}' data-website='{{streamWebsite}}' data-title='{{streamName}}' data-stream-settings='{{streamSettings}}' data-translate-title="Settings"></span>
 			{{#online}}
-				<span class="shareStreamButton" data-website='{{streamWebsite}}' data-id='{{streamId}}' data-content-id='{{contentId}}' data-translate-title="shareStream" data-placement="left"></span>
+				<span class="shareStreamButton" data-website='{{streamWebsite}}' data-id='{{streamId}}' data-content-id='{{contentId}}' data-translate-title="shareStream"></span>
 			{{/online}}
 		</span>
 	{{#online}}</div>{{/online}}

@@ -30,8 +30,9 @@ document.querySelector("#disableNotifications").dataset.translateTitle = (backgr
 
 window.onload = function () {
 	window.onload = null;
-	let jsFiles = ["lib/jquery.slim.min.js", "lib/perfect-scrollbar.jquery.min.js", "lib/bootstrap.min.js"];
+	let jsFiles = ["lib/dom-delegate.min.js", "lib/perfect-scrollbar.min.js", "lib/Tooltip.js"];
 	if(typeof browser==="undefined"||browser===null){
+		backgroundPage.zDK.isFirefox = false;
 		jsFiles.push("/lib/browser-polyfill.min.js");
 	}
 	jsFiles = jsFiles.concat(["options-api.js", "lib/lodash.custom.min.js", "panel/panel.js"]);

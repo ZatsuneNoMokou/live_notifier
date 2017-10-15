@@ -45,12 +45,10 @@ if(typeof browser.storage.sync === "object"){
 }
 
 
-/*let contentContainer = document.querySelector("#contentContainer");
-$(contentContainer).perfectScrollbar({
-	theme: "slimScrollbar",
+/*const ps = new PerfectScrollbar("#contentContainer", {
 	includePadding: true,
 	suppressScrollX: true
 });
 window.onresize = function(){
-	$(contentContainer).perfectScrollbar('update');
-}*/
+	ps.update();
+};*/
