@@ -2,7 +2,7 @@
 
 // Avoid keeping init node in memory
 let panelinitjs_node = document.querySelector("#panelInit");
-panelinitjs_node.parentNode.removeChild(panelinitjs_node);
+panelinitjs_node.remove();
 
 /*function sendDataToMain(id, data){
 	chrome.runtime.sendMessage({"sender": "Live_Notifier_Panel","receiver": "Live_Notifier_Main", "id": id, "data": data});
@@ -22,7 +22,7 @@ function copyToClipboard(string){
 	let copy = function(string){
 		if(document.querySelector("#copy_form") !== null){
 			let node = document.querySelector("#copy_form");
-			node.parentNode.removeChild(node);
+			node.remove();
 		}
 		let copy_form = document.createElement("textarea");
 		copy_form.id = "copy_form";
@@ -51,7 +51,7 @@ function copyToClipboard(string){
 			;
 		}
 		
-		copy_form.parentNode.removeChild(copy_form);
+		copy_form.remove();
 	};
 	
 	if(typeof chrome.permissions !== "undefined"){
@@ -80,6 +80,20 @@ function copyToClipboard(string){
 
 const Mustache = backgroundPage.Mustache;
 
+const delegate = (function () {
+	const Delegate = domDelegate.Delegate;
+	return new Delegate(document.body);
+})();
+const liveEvent = function (type, selector, handler) {
+	delegate.on(type, selector, handler);
+};
+const appendTo = function (sel, html, doc=document) {
+	return backgroundPage.zDK.appendTo(sel, html, doc);
+};
+const insertBefore = function (sel, html, doc=document) {
+	return backgroundPage.zDK.insertBefore(sel, html, doc);
+};
+
 let { streamListFromSetting,
 	websites,
 	liveStatus,
@@ -92,23 +106,26 @@ let { streamListFromSetting,
 	checkMissing } = appGlobal;
 
 
-$(document).on("click", "#refreshStreams", ()=>{
+liveEvent("click", "#refreshStreams", function(){
 	sendDataToMain("refreshStreams","");
 });
 
-$(document).on("click", "#addStream", ()=>{
+liveEvent("click", "#addStream", function(){
 	sendDataToMain("addStream","");
 });
 
-$(document).on("click", "#disableNotifications", ()=>{
+liveEvent("click", "#disableNotifications", ()=>{
 	let disableNotificationsButton = document.querySelector("#disableNotifications");
 	appGlobal["notificationGlobalyDisabled"] = !appGlobal["notificationGlobalyDisabled"];
 	disableNotificationsButton.classList.toggle("off", backgroundPage.appGlobal["notificationGlobalyDisabled"]);
 
-	$(disableNotificationsButton).tooltip("hide");
 	disableNotificationsButton.dataset.originalTitle = disableNotificationsButton.title = i18ex._((backgroundPage.appGlobal["notificationGlobalyDisabled"])? "GloballyDisabledNotifications" : "GloballyDisableNotifications");
-	$(disableNotificationsButton).tooltip("show");
 
+	const currentTooltip = document.querySelector("#tooltip");
+	if(currentTooltip!==null){
+		currentTooltip.remove();
+	}
+	tooltip.refresh();
 });
 
 function allowDrop(event){
@@ -141,12 +158,17 @@ function dragenter(event){
 		dropDiv.classList.add("active");
 	}
 }
-function dragleave(event){
-	if(event.target.classList.contains('dragover') === false){//Chrome only: FALSE
-		let dropDiv = document.querySelector("#deleteStream");
-		dropDiv.classList.remove("active");
+const dragleave = _.debounce(function (event){
+	if(event.target.classList.contains('dragover') === false){
+		setTimeout(()=>{ // Delaying leave event because Chrome send dragleave after an eventual new dragenter
+			let dropDiv = document.querySelector("#deleteStream");
+			dropDiv.classList.remove("active");
+		}, 20);
 	}
-}
+}, 20, {
+	maxWait: 40
+});
+
 let dropDiv = document.querySelector("#deleteStream");
 dropDiv.addEventListener("drop", drop);
 dropDiv.addEventListener("dragover", allowDrop);
@@ -338,9 +360,9 @@ function setting_Toggle(sectionNodeId){
 }
 settings_button.addEventListener("click", setting_Toggle, false);
 
-$(document).on("click", "#open_optionpage", ()=>{browser.runtime.openOptionsPage()});
+liveEvent("click", "#open_optionpage", ()=>{browser.runtime.openOptionsPage()});
 
-$(document).on("click", "#ignoreHideIgnore", ()=>{ignoreHideIgnore = true;});
+liveEvent("click", "#ignoreHideIgnore", ()=>{ignoreHideIgnore = true;});
 
 if(typeof browser.storage.sync === "object"){
 	document.querySelector("#syncContainer").classList.remove("hide");
@@ -354,11 +376,11 @@ if(typeof browser.storage.sync === "object"){
 
 /*				---- Debug section ----				*/
 
-$(document).on("click", "#close_debugSection", ()=>{
+liveEvent("click", "#close_debugSection", function(){
 	selectSection("streamList");
 });
 
-$(document).on("dblclick", "#current_version", enableDebugSection);
+liveEvent("dblclick", "#current_version", enableDebugSection);
 
 function enableDebugSection(){
 	if(getPreference("showAdvanced") && getPreference("showExperimented")){
@@ -376,14 +398,13 @@ function enableDebugSection(){
 
 /*			---- Stream Editor----			*/
 
-$(document).on("click", "#closeEditor", ()=>{
+liveEvent("click", "#closeEditor", function(){
 	selectSection("streamList");
 });
 
-$(document).on("click", "#saveEditedStream", function(){
-	const node = this;
-
-	let website = node.dataset.website,
+liveEvent("click", "#saveEditedStream", function(e){
+	let node = this,
+		website = node.dataset.website,
 		id = node.dataset.id,
 		contentId = node.dataset.contentId,
 		customURL_node = document.querySelector("#customURL");
@@ -552,8 +573,8 @@ class LazyLoading {
 
 		document.querySelector("#streamList").addEventListener("scroll", _.debounce(()=>{
 			this.checkPictures();
-		}), 15, {
-			maxWait: 50
+		}), 20, {
+			maxWait: 60
 		})
 		;
 	}
@@ -618,9 +639,9 @@ function initList(data){
 		for(let i in streamItems){
 			if(streamItems.hasOwnProperty(i)){
 				let node = streamItems[i];
-				if(typeof node.removeChild !== "undefined"){
+				if(typeof node.remove !== "undefined"){
 					node.removeEventListener("click", streamItemClick);
-					node.parentNode.removeChild(node);
+					node.remove();
 				}
 			}
 		}
@@ -653,6 +674,7 @@ function newDeleteStreamButton_onClick(event){
 	
 	node.classList.toggle("active");
 	//sendDataToMain("deleteStream", {id: id, website: website});
+	return false;
 }
 function newIgnoreStreamButton_onClick(event){
 	event.stopPropagation();
@@ -662,6 +684,7 @@ function newIgnoreStreamButton_onClick(event){
 	// let website = node.dataset.website;
 	
 	node.classList.toggle("active");
+	return false;
 }
 function newShareStreamButton_onClick(event){
 	event.stopPropagation();
@@ -672,6 +695,7 @@ function newShareStreamButton_onClick(event){
 		id: node.dataset.id,
 		contentId: node.dataset.contentId,
 	});
+	return false;
 }
 function newEditStreamButton_onClick(event){
 	event.stopPropagation();
@@ -716,6 +740,7 @@ function newEditStreamButton_onClick(event){
 	
 	unhideClassNode(streamEditor);
 	scrollbar_update("streamEditor");
+	return false;
 }
 function newCopyStreamURLButton_onClick(event){
 	event.stopPropagation();
@@ -726,6 +751,7 @@ function newCopyStreamURLButton_onClick(event){
 	let website = node.dataset.website;
 	
 	copyToClipboard(getStreamURL(website, id, contentId, false));
+	return false;
 }
 
 const streamTemplate = appGlobal.mustacheTemplates.get("streamTemplate"),
@@ -735,9 +761,9 @@ const websitesList = [];
 websites.forEach((value, id)=>{
 	websitesList.push(id);
 });
-$(Mustache.render(streamListTemplate, {
+appendTo("#streamList", Mustache.render(streamListTemplate, {
 	"websites": websitesList
-})).appendTo("#streamList");
+}));
 
 function insertStreamNode(newLine, website, id, contentId, type, streamData, online){
 	let statusNode = document.querySelector(`#streamList${(online)? "Online" : "Offline"}`),
@@ -747,29 +773,28 @@ function insertStreamNode(newLine, website, id, contentId, type, streamData, onl
 
 	if(group_streams_by_websites){
 		const selector = `#streamList${((online)? "Online" : "Offline")} .${(websites.has(website))? website : "unsupported"}`;
-		return $(newLine).appendTo(selector);
-		// return $(selector).append(newLine);
+		return appendTo(selector, newLine);
 	} else {
 		if(statusStreamList.length > 0){
 			for(let streamNode of statusStreamList){
 				if(typeof streamNode.tagName === "string"){
 					let streamNode_title = streamNode.dataset.streamName;
 					if(streamData.streamName.toLowerCase() < streamNode_title.toLowerCase()){
-						return $(newLine).insertBefore(streamNode);
+						return insertBefore(streamNode, newLine);
 					}
 				}
 			}
 		}
-		return $(newLine).appendTo(statusNode);
+		return appendTo(statusNode, newLine);
 	}
 }
 
-$(document).on("click", ".item-stream", streamItemClick);
-$(document).on("click", ".item-stream .deleteStreamButton",	newDeleteStreamButton_onClick);
-$(document).on("click", ".item-stream .ignoreStreamButton",	newIgnoreStreamButton_onClick);
-$(document).on("click", ".item-stream .copyStreamURL",		newCopyStreamURLButton_onClick);
-$(document).on("click", ".item-stream .editStreamButton",	newEditStreamButton_onClick);
-$(document).on("click", ".item-stream .shareStreamButton",	newShareStreamButton_onClick);
+liveEvent("click", ".item-stream .deleteStreamButton",	newDeleteStreamButton_onClick);
+liveEvent("click", ".item-stream .ignoreStreamButton",	newIgnoreStreamButton_onClick);
+liveEvent("click", ".item-stream .copyStreamURL",		newCopyStreamURLButton_onClick);
+liveEvent("click", ".item-stream .editStreamButton",	newEditStreamButton_onClick);
+liveEvent("click", ".item-stream .shareStreamButton",	newShareStreamButton_onClick);
+liveEvent("click", ".item-stream", streamItemClick);
 
 function listener(website, id, contentId, type, streamSettings, streamData){
 	let online = false;
@@ -794,7 +819,9 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 		//"streamUrl": streamUrl,
 		"streamType": type,
 		"unsupportedType": (type === "unsupported"),
-		"streamSettings": JSON.stringify(streamSettings)
+		"streamSettings": JSON.stringify(streamSettings),
+
+		"usePictureLazyLoading": true
 	};
 	
 	if(online){
@@ -833,6 +860,9 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	if(typeof streamLogo === "string" && streamLogo !== ""){
 		streamRenderData.streamLogo = streamLogo;
 	}
+	/*if(typeof backgroundPage.zDK.isFirefox==="boolean"&&backgroundPage.zDK.isFirefox===false){
+		streamRenderData.usePictureLazyLoading = false;
+	}*/
 	const $newNode = insertStreamNode(Mustache.render(streamTemplate, streamRenderData), website, id, contentId, type, streamData, online);
 
 	if(typeof liveStatus.lastCheckStatus === "string" && liveStatus.lastCheckStatus !== "" && liveStatus.lastCheckStatus !== "success"){
@@ -858,11 +888,15 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 		scrollbar_update("debugSection");
 	}
 
-	/*if(typeof streamRenderData.streamLogo==="string"&&streamRenderData.streamLogo!==""){
+	if(streamRenderData.usePictureLazyLoading===false && typeof streamRenderData.streamLogo==="string" && streamRenderData.streamLogo!==""){
 		appGlobal.loadImage(streamRenderData.streamLogo)
 			.then(oldCanvas=>{
-				const $streamPicture = $newNode.find(".streamPicture");
-				$streamPicture.empty();
+				const streamPicture = $newNode[0].querySelector(".streamPicture");
+				streamPicture.classList.remove("hide");
+
+				if(streamPicture.hasChildNodes()){
+					streamPicture.innerHTML="";
+				}
 
 				const newCanvas = document.createElement('canvas'),
 					context = newCanvas.getContext('2d');
@@ -874,12 +908,12 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 				//apply the old canvas to the new one
 				context.drawImage(oldCanvas, 0, 0);
 
-				$streamPicture.append(newCanvas);
+				streamPicture.appendChild(newCanvas);
 
 				$newNode.addClass("streamLogo");
 			})
 		;
-	}*/
+	}
 }
 function streamItemClick(){
 	let node = this;
@@ -907,7 +941,7 @@ function theme_update(){
 		console.info("Theme update");
 		
 		let currentThemeNode = document.querySelector("#generated-color-stylesheet");
-		currentThemeNode.parentNode.removeChild(currentThemeNode);
+		currentThemeNode.remove();
 
 		document.querySelector("body").dataset.theme = panelColorStylesheet.dataset.theme;
 
@@ -919,7 +953,9 @@ backgroundPage.panel__UpdateData = (data)=>{
 	updatePanelData(data);
 };
 
-let scrollbar = {"streamList": null, "settings_container": null};
+let scrollbar = {"streamList": null, "settings_container": null},
+	psList = new Map()
+;
 function load_scrollbar(id){
 	let scroll_node = document.querySelector(`#${id}`);
 
@@ -927,24 +963,18 @@ function load_scrollbar(id){
 		console.warn(`[Live notifier] Unkown scrollbar id (${id})`);
 		return null;
 	}
-	
-	$(scroll_node).perfectScrollbar({
-		theme: "slimScrollbar",
+
+	psList.set(id, new PerfectScrollbar(scroll_node, {
+		// theme: "slimScrollbar",
 		suppressScrollX: true
-	});
-	/*
-	Ps.initialize(scroll_node, {
-		theme: "slimScrollbar",
-		suppressScrollX: true
-	});*/
+	}));
 }
 
 function scrollbar_update(nodeId){
 	if(typeof nodeId === "string" && nodeId !== ""){
 		let scrollbar_node = document.querySelector(`#${nodeId}`);
-		if(scrollbar_node !== null){
-			$(scrollbar_node).perfectScrollbar('update');
-			//Ps.update(scrollbar_node);
+		if(scrollbar_node !== null && psList.has(nodeId)){
+			psList.get(nodeId).update();
 		}
 	}
 }

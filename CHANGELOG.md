@@ -8,6 +8,23 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 11.9.1
+* Fix: Translation id
+
+# 11.9.0
+* i: Updated perfect-scroll, new version without jQuery 
+* +: Complementary color in css theme, used for text inputs
+* +: Custom buttons for input numbers
+* +: "Live" event binding, using [ftdomdelegate](https://github.com/ftlabs/ftdomdelegate), to remove jQuery
+* +: [Tooltip](https://github.com/matthias-schuetz/Tooltip) (MIT license), replacing Bootstrap's one
+* -: Removed jQuery
+* -: Bootstrap Tooltip
+* Fix: (Finally, I hope) fix for drag enter/leave class applying
+
+# 11.8.3
+* +: Replace default input text and textarea style
+* Fix: Support to eventually disable stream picture lazyloading
+
 # 11.8.2
 * Fix: Forgotten test
 

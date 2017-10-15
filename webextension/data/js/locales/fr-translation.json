@@ -68,7 +68,7 @@
 
 	"Addon_have_been_updated": "Extension mise à jour (version {{version}})",
 
-	"customURl_title": "URL personalisée",
+	"customURL_title": "URL personalisée",
 
 	"blacklist_title": "Liste noire",
 	"whitelist_title": "Liste blanche",

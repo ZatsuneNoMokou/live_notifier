@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-moduleList="jquery perfect-scrollbar mustache webextension-polyfill i18next i18next-xhr-backend"
+moduleList="perfect-scrollbar mustache perfect-scrollbar webextension-polyfill i18next i18next-xhr-backend"
 npm install $moduleList
 npm update $moduleList
 npm update lodash-cli -g
@@ -8,17 +8,12 @@ npm update lodash-cli -g
 cssLib='./webextension/data/css/lib'
 jsLib='./webextension/data/js/lib'
 
-
-echo Copying jQuery...
-cp ./node_modules/jquery/dist/jquery.slim.min.js $jsLib
-cp ./node_modules/jquery/dist/jquery.slim.min.map $jsLib
-
 echo Copying mustache...
 cp ./node_modules/mustache/mustache.min.js $jsLib
 
 echo Copying perfect-scrollbar...
-cp ./node_modules/perfect-scrollbar/dist/css/perfect-scrollbar.min.css $cssLib
-cp ./node_modules/perfect-scrollbar/dist/js/perfect-scrollbar.jquery.min.js $jsLib
+cp ./node_modules/perfect-scrollbar/css/perfect-scrollbar.css $cssLib
+cp ./node_modules/perfect-scrollbar/dist/perfect-scrollbar.min.js $jsLib
 
 echo Copying webextension-polyfill...
 cp ./node_modules/webextension-polyfill/dist/browser-polyfill.min.js $jsLib
@@ -34,3 +29,16 @@ cp ./node_modules/i18next/i18next.min.js $jsLib
 
 echo Copying i18next-xhr-backend...
 cp ./node_modules/i18next-xhr-backend/i18nextXHRBackend.min.js $jsLib
+
+echo Downloading Tooltip...
+curl -L -# -o master.zip https://github.com/matthias-schuetz/Tooltip/archive/master.zip
+echo Copying Tooltip...
+mkdir tmp
+unzip -qq master.zip -d tmp
+rm master.zip
+cp ./tmp/Tooltip-master/css/tooltip.css $cssLib
+cp ./tmp/Tooltip-master/js/Tooltip.js $jsLib
+rm -R tmp
+
+echo Downloading/Copying dom-delegate...
+curl -L -# -o $jsLib/dom-delegate.min.js http://wzrd.in/standalone/dom-delegate@latest

@@ -7,7 +7,9 @@ select:hover{
 	color:unset !important;
 }
 /*		--- Secondary text / Base Color ----		*/
-.item-stream, .item-stream .streamTitle, .item-stream .streamStatus, .item-stream .streamCurrentViewers/*, #current_version*/{
+.item-stream, .item-stream .streamTitle, .item-stream .streamStatus, .item-stream .streamCurrentViewers/*, #current_version*/,
+input[type='text'], input[type='number'], input[type='url'], textarea,
+#tooltip {
 	color: #FFFFFF;
 	color: rgba(0, 0, 0, 0.5);
 }
@@ -23,6 +25,12 @@ footer{
 a{
 	color: #0062BD;
 	color: rgba(50, 159, 255, 0.8);
+}
+
+
+input,textarea {
+	color: #151515;
+	color: rgba(21, 21, 21, 0.8);
 }
 
 input:invalid {

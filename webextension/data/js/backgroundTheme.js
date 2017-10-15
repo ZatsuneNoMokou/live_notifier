@@ -61,7 +61,7 @@ function theme_cache_update(colorStylesheetNode){
 		backgroundPage_theme_cache.id = "generated-color-stylesheet";
 		const baseColor_hsl = baseColor.getHSL(),
 			baseColor_L = JSON.parse(baseColor_hsl.L.replace("%",""))/100;
-		let values, textColor_stylesheet;
+		let values;
 		if(currentTheme === "dark"){
 			if(baseColor_L > 0.5 || baseColor_L < 0.1){
 				values = ["19%","13%","26%","13%"];
@@ -83,13 +83,14 @@ function theme_cache_update(colorStylesheetNode){
 			"light0": values[0],
 			"light1": values[1],
 			"light2": values[2],
-			"light3": values[3]
+			"light3": values[3],
+			"invBaseColor_hue": ''+(baseColor_hsl.H - 360/2 * ((baseColor_hsl.H < 360/2)? 1 : -1)),
+			"invBaseColor_light": (currentTheme === "dark")? "77%" : "33%"
 		});
 		backgroundPage_theme_cache.dataset.theme = currentTheme;
 		backgroundPage_theme_cache.dataset.background_color = background_color;
 		//console.log(baseColor.rgbCode());
 		//console.log("hsl(" + baseColor_hsl.H + ", " + baseColor_hsl.S + ", " + baseColor_hsl.L + ")");
-		
 		return backgroundPage_theme_cache.cloneNode(true);
 	}
 }

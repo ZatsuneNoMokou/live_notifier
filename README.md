@@ -1,21 +1,22 @@
 # Live notifier
 Web Extension notifying streams from&nbsp;:
 * Dailymotion
-* Mixer (Formely known as Beam)
+* Mixer (Formerly known as Beam)
 * Picarto.TV – Creative Live Streaming (https://picarto.tv/)
-* Smashcast (Formely known as Hitbox)
+* Smashcast (Formerly known as Hitbox)
 * Twitch
 * Youtube
 
 More information on the [Mozilla add-on page](https://addons.mozilla.org/fr/firefox/addon/live-notifier/), the Web Extension is also available on the [Chrome Store](https://chrome.google.com/webstore/detail/live-notifier/dfepdpabjeepgmiaapoppelpadpcbnmf)
 
-perfect-scrollbar is from https://github.com/noraesae/perfect-scrollbar (License MIT).
-
-Debounce (from Lodash) is from https://github.com/lodash/lodash (License MIT).
-
-i18next and i18next-xhr-backend are from https://github.com/i18next/i18next and https://github.com/i18next/i18next-xhr-backend (License MIT).
-
-mustache.js (or Mustache) is from https://github.com/janl/mustache.js (License MIT).
+Sources:
+- perfect-scrollbar, from https://github.com/noraesae/perfect-scrollbar (License MIT).
+- Debounce (from Lodash), from https://github.com/lodash/lodash (License MIT).
+- i18next and i18next-xhr-backend are from https://github.com/i18next/i18next and https://github.com/i18next/i18next-xhr-backend (License MIT).
+- mustache.js (or Mustache), from https://github.com/janl/mustache.js (License MIT).
+- XML2jsobj, from https://www.sitepoint.com/how-to-convert-xml-to-a-javascript-object/
+- Tooltip, from https://github.com/matthias-schuetz/Tooltip/ (License MIT)
+- ftdomdelegate, from https://github.com/ftlabs/ftdomdelegate (License MIT)
 
 The icon of the addon (version 4 and later) is from https://pixabay.com/photo-978055/ (in [CC0 Public Domain](https://pixabay.com/fr/service/terms/#usage)).
 
@@ -26,5 +27,3 @@ The "warning" website icon in the panel (version 8 and later), on the stream wit
 The unknown website icon in the panel (version 10 and later), on the stream is under [CC0 Public Domain](https://pixabay.com/fr/service/terms/#usage) license, and is from from: https://pixabay.com/photo-1724292/
 
 Patreon logo from https://www.patreon.com/toolbox/media
-
-XML2jsobj is from https://www.sitepoint.com/how-to-convert-xml-to-a-javascript-object/

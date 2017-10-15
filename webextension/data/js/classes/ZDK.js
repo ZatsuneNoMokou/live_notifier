@@ -270,8 +270,63 @@ class ZDK{
 			throw "InvalidParameter";
 		}
 	}
-}
 
+	/**
+	 *
+	 * @param action
+	 * @param selector
+	 * @param html
+	 * @param doc
+	 * @returns {Element}
+	 */
+	insertHtml(action, selector, html, doc=document){
+		if(typeof action!=="string"||action===""){
+			throw "Wrong action";
+		}
+
+		const nodes = (typeof html==="object")? [html] : new DOMParser().parseFromString(html, 'text/html').body.childNodes,
+			target = (typeof selector==="object")? selector : doc.querySelector(selector)
+		;
+		if(target!==null){
+			for(let i in nodes){
+				if(nodes.hasOwnProperty(i)){
+					const node = nodes[i];
+					switch(action){
+						case "appendTo":
+							target.appendChild(node);
+							break;
+						case "insertBefore":
+							target.parentNode.insertBefore(node, target);
+							break;
+					}
+				}
+			}
+			return nodes;
+		} else {
+			return null;
+		}
+	}
+	/**
+	 * @param selector
+	 * @param html
+	 * @param doc
+	 * @returns {Element}
+	 */
+	appendTo(selector, html, doc=document){
+		return this.insertHtml("appendTo",selector,html,doc);
+	}
+
+	/**
+	 *
+	 * @param selector
+	 * @param html
+	 * @param doc
+	 * @returns {Element}
+	 */
+	insertBefore(selector, html, doc=document){
+		return this.insertHtml("insertBefore",selector,html,doc);
+	}
+}
 
 Promise.prototype.complete = function(fn){
 	this.then(fn).catch(fn);
