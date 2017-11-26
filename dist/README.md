@@ -1,6 +1,6 @@
-# /!\ IMPORTANT /!\
+ï»¿# /!\ IMPORTANT /!\
 
-**Attention**, cette version hébergée sur GitLab contient des fonctions de débogage **non destiné au public** et peut être instable. Cette version utilise un identifiant différent, les préférences stockées sont différentes de la version hébergée sur Mozilla (https://addons.mozilla.org/fr/firefox/addon/streams-notifier/ ).
+**Attention**, cette version hÃ©bergÃ©e sur GitLab contient des fonctions de dÃ©bogage **non destinÃ© au public** et peut Ãªtre instable. Cette version utilise un identifiant diffÃ©rent, les prÃ©fÃ©rences stockÃ©es sont diffÃ©rentes de la version hÃ©bergÃ©e sur Mozilla (https://addons.mozilla.org/fr/firefox/addon/streams-notifier/ ).
 
 [Installer Live notifier Dev](https://livenotifier.zatsunenomokou.eu/live_notifier_dev_install_master.php)
 

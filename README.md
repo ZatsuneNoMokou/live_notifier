@@ -15,7 +15,7 @@ Sources:
 - i18next and i18next-xhr-backend are from https://github.com/i18next/i18next and https://github.com/i18next/i18next-xhr-backend (License MIT).
 - mustache.js (or Mustache), from https://github.com/janl/mustache.js (License MIT).
 - XML2jsobj, from https://www.sitepoint.com/how-to-convert-xml-to-a-javascript-object/
-- Tooltip, from https://github.com/matthias-schuetz/Tooltip/ (License MIT)
+- Opentip (version in Live Notifier is a modified one because of a conflict), from https://github.com/enyo/opentip (License MIT)
 - ftdomdelegate, from https://github.com/ftlabs/ftdomdelegate (License MIT)
 
 The icon of the addon (version 4 and later) is from https://pixabay.com/photo-978055/ (in [CC0 Public Domain](https://pixabay.com/fr/service/terms/#usage)).

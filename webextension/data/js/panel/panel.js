@@ -28,7 +28,7 @@ function copyToClipboard(string){
 		copy_form.id = "copy_form";
 		copy_form.textContent = string;
 		copy_form.class = "hide";
-		document.querySelector("body").appendChild(copy_form);
+		document.body.appendChild(copy_form);
 		
 		copy_form.focus();
 		copy_form.select();
@@ -119,27 +119,32 @@ liveEvent("click", "#disableNotifications", ()=>{
 	appGlobal["notificationGlobalyDisabled"] = !appGlobal["notificationGlobalyDisabled"];
 	disableNotificationsButton.classList.toggle("off", backgroundPage.appGlobal["notificationGlobalyDisabled"]);
 
-	disableNotificationsButton.dataset.originalTitle = disableNotificationsButton.title = i18ex._((backgroundPage.appGlobal["notificationGlobalyDisabled"])? "GloballyDisabledNotifications" : "GloballyDisableNotifications");
-
-	const currentTooltip = document.querySelector("#tooltip");
-	if(currentTooltip!==null){
-		currentTooltip.remove();
+	if(disableNotificationsButton.dataset.opentipId){
+		document.querySelector(`#opentip-${disableNotificationsButton.dataset.opentipId} .ot-content`).textContent = i18ex._((backgroundPage.appGlobal["notificationGlobalyDisabled"])? "GloballyDisabledNotifications" : "GloballyDisableNotifications");
 	}
-	tooltip.refresh();
 });
 
 function allowDrop(event){
 	event.preventDefault();
 }
+let dragData = null;
 function drag(event) {
 	let node = event.target;
 	if(node.draggable === true && node.dataset.streamId !== null){
-		let id = node.dataset.streamId;
-		let website = node.dataset.streamWebsite;
-		
-		let data = {id: id, website: website};
-		
-		event.dataTransfer.setData("text", JSON.stringify(data));
+		let id = node.dataset.streamId,
+			website = node.dataset.streamWebsite,
+			contentId = node.dataset.contentId
+		;
+
+		dragData = {"id": id, "website": website};
+
+		let streamUrl = getStreamURL(website, id, contentId, true);
+		if(streamChangeMode === false && streamUrl !==null && streamUrl !== ""){
+			const dt = event.dataTransfer;
+			dt.setData("text/uri-list", streamUrl);
+			dt.setData("text/plain", streamUrl);
+		}
+
 	}
 }
 function drop(event) {
@@ -148,9 +153,9 @@ function drop(event) {
 	let dropDiv = document.querySelector("#deleteStream");
 	dropDiv.classList.remove("active");
 	
-	let data = JSON.parse(event.dataTransfer.getData("text"));
-	
-	sendDataToMain("deleteStream", {id: data.id, website: data.website});
+	sendDataToMain("deleteStream", dragData);
+
+	dragData = null;
 }
 function dragenter(event){
 	if(event.target.classList.contains('dragover') === true){
@@ -351,7 +356,7 @@ function selectSection(sectionNodeId){
 		}
 	}
 }
-function setting_Toggle(sectionNodeId){
+function setting_Toggle(){
 	if(setting_Enabled){
 		selectSection("streamList");
 	} else {
@@ -402,7 +407,7 @@ liveEvent("click", "#closeEditor", function(){
 	selectSection("streamList");
 });
 
-liveEvent("click", "#saveEditedStream", function(e){
+liveEvent("click", "#saveEditedStream", function(){
 	let node = this,
 		website = node.dataset.website,
 		id = node.dataset.id,
@@ -769,7 +774,7 @@ function insertStreamNode(newLine, website, id, contentId, type, streamData, onl
 	let statusNode = document.querySelector(`#streamList${(online)? "Online" : "Offline"}`),
 		statusStreamList = statusNode.querySelectorAll(".item-stream");
 
-	document.querySelector("body").classList.toggle("groupedStreams", group_streams_by_websites);
+	document.body.classList.toggle("groupedStreams", group_streams_by_websites);
 
 	if(group_streams_by_websites){
 		const selector = `#streamList${((online)? "Online" : "Offline")} .${(websites.has(website))? website : "unsupported"}`;
@@ -930,7 +935,6 @@ function streamItemClick(){
 
 function current_version(version){
 	let current_version_node = document.querySelector("#current_version");
-	//current_version_node.textContent = version;
 	current_version_node.dataset.currentVersion = version;
 }
 
@@ -943,9 +947,9 @@ function theme_update(){
 		let currentThemeNode = document.querySelector("#generated-color-stylesheet");
 		currentThemeNode.remove();
 
-		document.querySelector("body").dataset.theme = panelColorStylesheet.dataset.theme;
+		document.body.dataset.theme = panelColorStylesheet.dataset.theme;
 
-		document.querySelector("head").appendChild(panelColorStylesheet);
+		document.head.appendChild(panelColorStylesheet);
 	}
 }
 
@@ -953,9 +957,7 @@ backgroundPage.panel__UpdateData = (data)=>{
 	updatePanelData(data);
 };
 
-let scrollbar = {"streamList": null, "settings_container": null},
-	psList = new Map()
-;
+let psList = new Map();
 function load_scrollbar(id){
 	let scroll_node = document.querySelector(`#${id}`);
 

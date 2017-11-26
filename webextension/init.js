@@ -27,7 +27,6 @@ async function loadMustacheTemplates(map) {
 var appGlobal = {};
 
 (async ()=>{
-	await zDK.loadingPromise;
 	await zDK.loadJS(document, [
 		"options-data.js",
 		"options-api.js"
