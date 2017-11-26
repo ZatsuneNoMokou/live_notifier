@@ -27,25 +27,46 @@ function translateNodes(){
 		}
 	}
 }
+Opentip.styles.myDark = {
+	// Make it look like the alert style. If you omit this, it will default to "standard"
+	extends: "dark",
+	background: "#212121",
+	borderColor: "#212121"
+};
+Opentip.defaultStyle = "myDark"; // The default is "standard"
+
 function translateNodes_title(){
 	for(let node of document.querySelectorAll("[data-translate-title]")){
 		if(typeof node.tagName === "string"){
-			node.dataset.tooltip="";
-			node.title = i18ex._(node.dataset.translateTitle);
-			delete node.dataset.translateTitle;
+			const titleText =  i18ex._(node.dataset.translateTitle);
+
+			let error = false;
+			try{
+				const Ot = Opentip;
+				if(node.dataset.tooltipPosition){
+					const myOpentip = new Ot(node, titleText, "", {
+						"tipJoint": node.dataset.tooltipPosition
+					})
+				} else {
+					const myOpentip = new Ot(node, titleText)
+				}
+			} catch (err){
+				console.warn(err);
+				error = true;
+			}
+
+			if(error===false){
+				delete node.dataset.translateTitle;
+				node.removeAttribute("title");
+			}
 		}
 	}
-	tooltip.setOptions({
-		offsetDefault: 20
-	});
-	tooltip.refresh();
 }
 
 function loadTranslations(){
 	i18ex.loadingPromise
 		.then(()=>{
-			let body = document.querySelector('body'),
-				observer = new MutationObserver(function(mutations) {
+			let observer = new MutationObserver(function(mutations) {
 					mutations.forEach(function(mutation) {
 						if(mutation.type === "childList"){
 							translateNodes(document);
@@ -65,7 +86,7 @@ function loadTranslations(){
 			translateNodes_title();
 
 			// pass in the target node, as well as the observer options
-			observer.observe(body, config);
+			observer.observe(document.body, config);
 
 			// later, you can stop observing
 			//observer.disconnect();
@@ -245,6 +266,9 @@ if(browser.extension.getBackgroundPage()!==null && typeof domDelegate!=="undefin
 	liveEvent("click", "#export_preferences", exportPrefsToFile);
 	liveEvent("click", "#import_preferences", importPrefsFromFile);
 	liveEvent("click", "[id$='_import']", import_onClick); // [id$='_import'] => Every id that end with _import
+
+	const backgroundPage = browser.extension.getBackgroundPage();
+	backgroundPage.zDK.appendTo(document.body, "<div id='tooltip' class='hide'></div>", document);
 }
 
 /*		---- Import/Export preferences from file ----		*/

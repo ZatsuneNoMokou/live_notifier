@@ -10,9 +10,9 @@
 	
 	<!-- 		Google Material Design - Icon font 		-->
 	<link rel="stylesheet" type="text/css" media="all" href="css/fonts.css" />
-	
+
 	<link rel="stylesheet" href="css/lib/perfect-scrollbar.css" type="text/css" />
-	<link rel="stylesheet" href="css/lib/tooltip.css" type="text/css" />
+	<link rel="stylesheet" type="text/css" media="all" href="css/lib/opentip_modified.css" />
 </head>
 <body>
 	<header>
@@ -20,7 +20,7 @@
 		<button id="addStream" data-translate-title="Add"><i class="material-icons">add</i></button>
 		<button id="deleteStream" data-translate-title="DeleteIgnore" class="dragover"><i class="material-icons dragover deleteLogo">delete</i><i class="material-icons dragover">visibility_off</i></button>
 		<button id="searchStream" data-translate-title="Search"><i class="material-icons">search</i></button>
-		<button id="disableNotifications"></button>
+		<button id="disableNotifications" data-tooltip-position="bottom-right"></button>
 		<button id="refreshStreams" data-translate-title="Refresh"><i class="material-icons">refresh</i></button>
 		<button id="settings" data-translate-title="Settings"><i class="material-icons">settings</i></button>
 	</header>
@@ -86,7 +86,7 @@
 				--> <span id="current_version"></span>
 			</div>
 		</div>
-		<a id="patreonlogo" data-translate-title="supportWithPatreon" href="https://www.patreon.com/ZatsuneNoMokou" target="_blank"></a>
+		<a id="patreonlogo" data-translate-title="supportWithPatreon" data-tooltip-position="top right" href="https://www.patreon.com/ZatsuneNoMokou" target="_blank"></a>
 	</footer>
 	<script id="panelInit" src="js/panel/panel-init.js"></script>
 </body>

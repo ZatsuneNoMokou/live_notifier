@@ -2,81 +2,47 @@ class ZDK{
 	constructor(addonJsRoot){
 		this.addonJsRoot = addonJsRoot;
 
-		let loadPromise = async ()=>{
-			if(typeof browser !== "object" || browser === "null"){
-				await this.loadJS(document, ["lib/browser-polyfill.min.js"]);
-			}
-
-			let libArray = [
-				"lib/i18next.min.js",
-				"lib/i18nextXHRBackend.min.js",
-				"lib/mustache.min.js",
-
-				"lib/xml2jsobj.js"
-			];
-
-			let classesArray = [
-				"classes/chrome-notification-controler.js",
-				"classes/chrome-preferences.js",
-				"classes/i18extended.js",
-				"classes/PromiseWaitAll.js",
-				"classes/queue.js"
-			];
-
-			return await this.loadJS(document, libArray.concat(classesArray));
-		};
-
-
-		Object.defineProperty(this, "loadingState", {
-			value: "loading",
-			configurable: true,
-			writable: false
-		});
-		Object.defineProperty(this, "loadingPromise", {
-			writable: false,
-			value: loadPromise()
-		});
-
-
-		this.loadingPromise
-			.then(()=>{
-				Object.defineProperty(this, "ChromeNotificationControler", {
-					value: ChromeNotificationControler,
-					configurable: false,
-					writable: false
-				});
-				Object.defineProperty(this, "ChromePreferences", {
-					value: ChromePreferences,
-					configurable: false,
-					writable: false
-				});
-				Object.defineProperty(this, "i18extended", {
-					value: i18extended,
-					configurable: false,
-					writable: false
-				});
-				Object.defineProperty(this, "queue", {
-					value: queue,
-					configurable: false,
-					writable: false
-				});
-
-
-				Object.defineProperty(this, "loadingState", {
-					value: "success",
-					configurable: true,
-					writable: false
-				});
-			})
-
-			.catch(()=>{
-				Object.defineProperty(this, "loadingState", {
-					value: "failed",
-					configurable: true,
-					writable: false
-				});
-			})
-		;
+		if(typeof ChromeNotificationControler==="function"){
+			Object.defineProperty(this, "ChromeNotificationControler", {
+				value: ChromeNotificationControler,
+				configurable: false,
+				writable: false
+			});
+		} else {
+			console.warn(`"ChromeNotificationControler" not found.`)
+		}
+		if(typeof ChromePreferences==="function"){
+			Object.defineProperty(this, "ChromePreferences", {
+				value: ChromePreferences,
+				configurable: false,
+				writable: false
+			});
+		} else {
+			console.warn(`"ChromePreferences" not found.`)
+		}
+		if(typeof i18extended==="function"){
+			Object.defineProperty(this, "i18extended", {
+				value: i18extended,
+				configurable: false,
+				writable: false
+			});
+		} else {
+			console.warn(`"i18extended" not found.`)
+		}
+		if(typeof Queue==="function"){
+			Object.defineProperty(this, "Queue", {
+				value: Queue,
+				configurable: false,
+				writable: false
+			});
+			Object.defineProperty(this, "queue", {
+				value: Queue,
+				configurable: false,
+				writable: false
+			});
+		} else {
+			console.warn(`"Queue" not found.`)
+		}
 	}
 
 
@@ -325,6 +291,26 @@ class ZDK{
 	 */
 	insertBefore(selector, html, doc=document){
 		return this.insertHtml("insertBefore",selector,html,doc);
+	}
+
+	/**
+	 * Return the top and left position of a node, relative to the document
+	 * @param node
+	 * @return {{top: number, left: number}}
+	 */
+	static getOffset(node){
+		let x = 0,
+			y = 0
+		;
+		while(node && !isNaN(node.offsetLeft) && !isNaN(node.offsetTop)){
+			x += node.offsetLeft - node.scrollLeft;
+			y += node.offsetTop - node.scrollTop;
+			node = node.offsetParent;
+		}
+		return {
+			"top": y,
+			"left": x,
+		};
 	}
 }
 

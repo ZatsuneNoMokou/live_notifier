@@ -8,6 +8,14 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 11.10.0
+* i: Simplified loading
+* i: Changed ChromePreferences to use super to access to original methods
+* i: Changed Tooltip system (because of Firefox troubles)
+* i: Panel - Changed drag/drop data management
+  * Data, now, stored in a local variable
+  * Now drop the url of the stream
+
 # 11.9.1
 * Fix: Translation id
 
@@ -18,7 +26,7 @@
 * +: "Live" event binding, using [ftdomdelegate](https://github.com/ftlabs/ftdomdelegate), to remove jQuery
 * +: [Tooltip](https://github.com/matthias-schuetz/Tooltip) (MIT license), replacing Bootstrap's one
 * -: Removed jQuery
-* -: Bootstrap Tooltip
+* -: Bootstrap Tooltip, because it need jQuery
 * Fix: (Finally, I hope) fix for drag enter/leave class applying
 
 # 11.8.3

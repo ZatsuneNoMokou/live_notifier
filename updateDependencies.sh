@@ -30,15 +30,7 @@ cp ./node_modules/i18next/i18next.min.js $jsLib
 echo Copying i18next-xhr-backend...
 cp ./node_modules/i18next-xhr-backend/i18nextXHRBackend.min.js $jsLib
 
-echo Downloading Tooltip...
-curl -L -# -o master.zip https://github.com/matthias-schuetz/Tooltip/archive/master.zip
-echo Copying Tooltip...
-mkdir tmp
-unzip -qq master.zip -d tmp
-rm master.zip
-cp ./tmp/Tooltip-master/css/tooltip.css $cssLib
-cp ./tmp/Tooltip-master/js/Tooltip.js $jsLib
-rm -R tmp
+echo No automatic update for Opentip, manually modified files...
 
 echo Downloading/Copying dom-delegate...
 curl -L -# -o $jsLib/dom-delegate.min.js http://wzrd.in/standalone/dom-delegate@latest
