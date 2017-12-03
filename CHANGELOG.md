@@ -8,6 +8,9 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 11.10.2
+* Fix: Stream Settings - Whitelist/Blacklist not showing
+
 # 11.10.1
 * i: Now working on Waterfox, there was only a bug with localStorage migration
 * -: Remove Web Extension migration for 8.* (and previous) migration, no longer needed
