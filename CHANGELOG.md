@@ -8,6 +8,11 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 11.10.1
+* i: Now working on Waterfox, there was only a bug with localStorage migration
+* -: Remove Web Extension migration for 8.* (and previous) migration, no longer needed
+* Fix: Bug checking some streams when something going wrong with initial checking
+
 # 11.10.0
 * i: Simplified loading
 * i: Changed ChromePreferences to use super to access to original methods
@@ -333,7 +338,7 @@
 * i: *Starting to test Web Extension in Firefox*, with needed changes (Web Extension/Firefox)
 * i: Moved the loadPreferences function for option and panel to option-api (Web Extension only)
 * i: SVG pictures are now rendered into canvas using Image and not canvg (Web Extension only)
-* i: Preferences now using chrome local storage area, with a copy of the preferences in a variable to avoid async (Web Extension only)
+* i: Preferences now using chrome local storage area (not localStorage anymore), with a copy of the preferences in a variable to avoid async (Web Extension only)
 * +: Add headers support with the custom Request function
 * +: Add Youtube support
 * +: Re-arranged function to add stream to allow getting IDs from user and video pages with Youtube

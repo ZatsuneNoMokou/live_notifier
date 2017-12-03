@@ -1309,7 +1309,7 @@ function checkMissing(){
 				if(typeof streamList.ignore === "boolean" && streamList.ignore === true){
 					return;
 				}
-				if(!(liveStatus.get(website).has(id))){
+				if(liveStatus.has(website) && !(liveStatus.get(website).has(id))){
 					consoleMsg("info", `${id} from ${website} is not checked yet`);
 					
 					if(!listToCheck.has(website)){
@@ -1865,14 +1865,6 @@ function initAddon(){
 				})
 		}
 	});
-
-	/*		----- Move localStorage (HTML5) to Web Extension local storage area -----		*/
-	for(let prefId in localStorage){
-		if(localStorage.hasOwnProperty(prefId) && localStorage.getItem(prefId) !== null){
-			savePreference(prefId, localStorage.getItem(prefId));
-		}
-	}
-	localStorage.clear();
 
 	let localToRemove = ["livestreamer_cmd_to_clipboard","livestreamer_cmd_quality","youtube_patreon_password"];
 	/* 		----- Importation/Removal of old preferences -----		*/
