@@ -364,3 +364,5 @@
 * Fix: Some French translations
 * Fix: Using onClick event again on notification without buttons
 * Fix: Useless translations on preference nodes
+
+[old changelog](/CHANGELOG_archive.md)
