@@ -425,7 +425,7 @@ body.groupedStreams #streamListOnline > div.group, body.groupedStreams #streamLi
 	margin-top:14px;
 	margin-bottom:14px;
 }
-body:not(.showAdvanced) .streamEditor_group.whiteandblacklist{
+body:not(.showAdvanced) #settings_container .streamEditor_group.whiteandblacklist{
 	display:none !important;
 	visibility:hidden !important;
 }
