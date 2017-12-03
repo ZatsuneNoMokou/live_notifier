@@ -9,6 +9,8 @@ Web Extension notifying streams from&nbsp;:
 
 More information on the [Mozilla add-on page](https://addons.mozilla.org/fr/firefox/addon/live-notifier/), the Web Extension is also available on the [Chrome Store](https://chrome.google.com/webstore/detail/live-notifier/dfepdpabjeepgmiaapoppelpadpcbnmf)
 
+To **install the dev version**, look inside the [dist folder](/dist) and consider reading the message there before installing it.
+
 Sources:
 - perfect-scrollbar, from https://github.com/noraesae/perfect-scrollbar (License MIT).
 - Debounce (from Lodash), from https://github.com/lodash/lodash (License MIT).
