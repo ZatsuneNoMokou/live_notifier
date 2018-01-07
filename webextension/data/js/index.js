@@ -9,7 +9,7 @@ appGlobal["liveStatus"] = liveStatus;
 let channelInfos = new Map();
 appGlobal["channelInfos"] = channelInfos;
 
-const consoleMsg = appGlobal["consoleMsg"] = ZDK.consoleMsg;
+appGlobal["consoleMsg"] = ZDK.consoleMsg;
 const consoleDir = appGlobal["consoleDir"] = ZDK.consoleDir;
 const mapToObj = appGlobal["mapToObj"] = ZDK.mapToObj;
 
@@ -1322,7 +1322,7 @@ function checkMissing(){
 		
 		if(listToCheck.size > 0){
 			checkLives(listToCheck)
-				.complete(result=>{
+				.finally(result=>{
 					consoleMsg("info", result);
 					if(typeof panelUpdateData === "function"){
 						panelUpdateData();

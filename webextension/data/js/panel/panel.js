@@ -81,7 +81,7 @@ function copyToClipboard(string){
 const Mustache = backgroundPage.Mustache;
 
 const delegate = (function () {
-	const Delegate = domDelegate.Delegate;
+	// const Delegate = domDelegate.Delegate;
 	return new Delegate(document.body);
 })();
 const liveEvent = function (type, selector, handler) {

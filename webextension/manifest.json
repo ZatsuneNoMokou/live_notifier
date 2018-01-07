@@ -11,18 +11,18 @@
 	"short_name": "LiveNotifierDev",
 	"description": "__MSG_extShortDesc__",
 	"author": "Zatsune No Mokou",
-	"version": "11.10.2",
+	"version": "11.10.3",
 	"icons": {
 		"96": "/icon_96.png",
 		"128": "/icon_128.png"
 	},
 	"background": {
 		"scripts": [
-			"/data/js/lib/browser-polyfill.min.js",
+			"/data/js/lib/browser-polyfill.js",
 
-			"/data/js/lib/i18next.min.js",
-			"/data/js/lib/i18nextXHRBackend.min.js",
-			"/data/js/lib/mustache.min.js",
+			"/data/js/lib/i18next.js",
+			"/data/js/lib/i18nextXHRBackend.js",
+			"/data/js/lib/mustache.js",
 
 			"/data/js/lib/xml2jsobj.js",
 

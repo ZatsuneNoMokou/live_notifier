@@ -33,12 +33,12 @@ document.querySelector("#disableNotifications").dataset.translateTitle = (backgr
 
 window.onload = async function () {
 	window.onload = null;
-	let jsFiles = ["lib/dom-delegate.min.js", "lib/perfect-scrollbar.min.js", "lib/opentip-native_modified.js"];
+	let jsFiles = ["lib/dom-delegate.js", "lib/perfect-scrollbar.js", "lib/opentip-native_modified.js"];
 	if(typeof browser==="undefined"||browser===null){
 		backgroundPage.zDK.isFirefox = false;
-		jsFiles.push("/lib/browser-polyfill.min.js");
+		jsFiles.push("/lib/browser-polyfill.js");
 	}
-	jsFiles = jsFiles.concat(["options-api.js", "lib/lodash.custom.min.js",  "panel/panel.js"]);
+	jsFiles = jsFiles.concat(["options-api.js", "lib/lodash.custom.js",  "panel/panel.js"]);
 
 	backgroundPage.zDK.loadJS(document, jsFiles);
 };
