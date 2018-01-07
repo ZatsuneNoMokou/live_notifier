@@ -8,6 +8,11 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 11.10.3
+* Fix: Use uncompressed libs to avoid review rejections (Firefox)
+* Fix: Use [Promise.prototype.finally()](https://developer.mozilla.org//docs/Web/JavaScript/Reference/Global_Objects/Promise/finally) instead of creating a "complete" method, as a polyfill
+* Fix: ZDK Request now use mapToObj from itself
+
 # 11.10.2
 * Fix: Stream Settings - Whitelist/Blacklist not showing
 

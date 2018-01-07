@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-moduleList="perfect-scrollbar mustache perfect-scrollbar webextension-polyfill i18next i18next-xhr-backend"
+moduleList="perfect-scrollbar mustache perfect-scrollbar webextension-polyfill i18next i18next-xhr-backend dom-delegate"
 npm install $moduleList
 npm update $moduleList
 npm update lodash-cli -g
@@ -9,28 +9,28 @@ cssLib='./webextension/data/css/lib'
 jsLib='./webextension/data/js/lib'
 
 echo Copying mustache...
-cp ./node_modules/mustache/mustache.min.js $jsLib
+cp ./node_modules/mustache/mustache.js $jsLib
 
 echo Copying perfect-scrollbar...
 cp ./node_modules/perfect-scrollbar/css/perfect-scrollbar.css $cssLib
-cp ./node_modules/perfect-scrollbar/dist/perfect-scrollbar.min.js $jsLib
+cp ./node_modules/perfect-scrollbar/dist/perfect-scrollbar.js $jsLib
 
 echo Copying webextension-polyfill...
-cp ./node_modules/webextension-polyfill/dist/browser-polyfill.min.js $jsLib
-cp ./node_modules/webextension-polyfill/dist/browser-polyfill.min.js.map $jsLib
+cp ./node_modules/webextension-polyfill/dist/browser-polyfill.js $jsLib
+cp ./node_modules/webextension-polyfill/dist/browser-polyfill.js.map $jsLib
 
 echo Copying/Building Lodash Debounce - Custom Build # https://lodash.com/custom-builds
-lodash exports=global include=debounce --production --source-map
-mv lodash.custom.min.js $jsLib
-mv lodash.custom.min.map $jsLib
+lodash exports=global include=debounce --development --source-map
+mv lodash.custom.js $jsLib
+mv lodash.custom.map $jsLib
 
 echo Copying i18next...
-cp ./node_modules/i18next/i18next.min.js $jsLib
+cp ./node_modules/i18next/i18next.js $jsLib
 
 echo Copying i18next-xhr-backend...
-cp ./node_modules/i18next-xhr-backend/i18nextXHRBackend.min.js $jsLib
+cp ./node_modules/i18next-xhr-backend/i18nextXHRBackend.js $jsLib
 
 echo No automatic update for Opentip, manually modified files...
 
-echo Downloading/Copying dom-delegate...
-curl -L -# -o $jsLib/dom-delegate.min.js http://wzrd.in/standalone/dom-delegate@latest
+echo Copying dom-delegate...
+cp ./node_modules/dom-delegate/build/dom-delegate.js $jsLib

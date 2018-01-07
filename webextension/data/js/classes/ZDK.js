@@ -132,11 +132,17 @@ class ZDK{
 			}
 		}
 	}
+
+	/**
+	 * Turns a Map into a JSON object
+	 * @param {Map}  myMap
+	 * @returns {Object}
+	 */
 	static mapToObj(myMap){
 		if(myMap instanceof Map){
 			let obj = {};
 			myMap.forEach((value, index) => {
-				obj[index] = (value instanceof Map)? mapToObj(value) : value;
+				obj[index] = (value instanceof Map)? ZDK.mapToObj(value) : value;
 			});
 			return obj;
 		} else {
@@ -145,6 +151,29 @@ class ZDK{
 	}
 
 
+	/**
+	 * Ellipse str if the str string length is higher than strMaxLength
+	 * @param {String} str
+	 * @param {Number} strMaxLength Max string length wanted
+	 * @returns {String} String of strMaxLength length or less
+	 */
+	static stringEllipse(str, strMaxLength) {
+		if(typeof str!=="string" || typeof strMaxLength!=="number"){
+			throw "Argument type problem";
+		}
+		if(str.length>strMaxLength){
+			return `${str.substring(0, strMaxLength-3)}...`
+		} else {
+			return str;
+		}
+	}
+
+
+	/**
+	 *
+	 * @param {Object} obj
+	 * @returns {Promise<HTMLImageElement>}
+	 */
 	loadImage(obj={}){
 		return new Promise((resolve, reject)=>{
 			let imgNode;
@@ -183,6 +212,12 @@ class ZDK{
 			}
 		})
 	}
+
+	/**
+	 *
+	 * @param {Blob} blob
+	 * @return {Promise}
+	 */
 	loadBlob(blob){
 		return new Promise((resolve, reject)=>{
 			const reader = new FileReader();
@@ -242,7 +277,7 @@ class ZDK{
 	 * @param action
 	 * @param selector
 	 * @param html
-	 * @param doc
+	 * @param {HTMLDocument} doc
 	 * @returns {Element}
 	 */
 	insertHtml(action, selector, html, doc=document){
@@ -275,7 +310,7 @@ class ZDK{
 	/**
 	 * @param selector
 	 * @param html
-	 * @param doc
+	 * @param {HTMLDocument} doc
 	 * @returns {Element}
 	 */
 	appendTo(selector, html, doc=document){
@@ -286,7 +321,7 @@ class ZDK{
 	 *
 	 * @param selector
 	 * @param html
-	 * @param doc
+	 * @param {HTMLDocument} doc
 	 * @returns {Element}
 	 */
 	insertBefore(selector, html, doc=document){
@@ -314,10 +349,13 @@ class ZDK{
 	}
 }
 
-Promise.prototype.complete = function(fn){
-	this.then(fn).catch(fn);
-};
+var consoleMsg = ZDK.consoleMsg;
 
+if(typeof Promise.prototype.finally!=="function"){
+	Promise.prototype.finally = function(fn){
+		this.then(fn).catch(fn);
+	};
+}
 
 const splitUri = (function() { // https://codereview.stackexchange.com/questions/9574/faster-and-cleaner-way-to-parse-parameters-from-url-in-javascript-jquery/9630#9630
 	const splitRegExp = new RegExp(
@@ -364,10 +402,22 @@ class Params extends Map {
 		return array.join('&');
 	}
 }
+
+/**
+ *
+ * @param {Object} options
+ * @returns {{get: get, post: post}}
+ * @constructor
+ */
 function Request(options){
 	if(typeof options.url !== "string" /*&& typeof options.onComplete !== "function"*/){
 		consoleMsg("warn", "Error in options");
 	} else {
+		/**
+		 *
+		 * @param {String} method
+		 * @returns {Promise<Object>}
+		 */
 		let core = function(method){
 			return new Promise(resolve=>{
 				let xhr;
@@ -485,7 +535,7 @@ function Request(options){
 						let result = options.Request_documentParseToJSON(xhr);
 						if(result instanceof Map){
 							response.map = result;
-							response.json = mapToObj(result);
+							response.json = ZDK.mapToObj(result);
 						} else {
 							response.json = result;
 						}

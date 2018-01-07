@@ -27,13 +27,15 @@ function translateNodes(){
 		}
 	}
 }
-Opentip.styles.myDark = {
-	// Make it look like the alert style. If you omit this, it will default to "standard"
-	extends: "dark",
-	background: "#212121",
-	borderColor: "#212121"
-};
-Opentip.defaultStyle = "myDark"; // The default is "standard"
+if(typeof Opentip!=="undefined"){
+	Opentip.styles.myDark = {
+		// Make it look like the alert style. If you omit this, it will default to "standard"
+		extends: "dark",
+		background: "#212121",
+		borderColor: "#212121"
+	};
+	Opentip.defaultStyle = "myDark"; // The default is "standard"
+}
 
 function translateNodes_title(){
 	for(let node of document.querySelectorAll("[data-translate-title]")){
@@ -241,9 +243,9 @@ function import_onClick(){
 		website = getWebsite.exec(this.id)[1];
 	sendDataToMain("importStreams", website);
 }
-if(browser.extension.getBackgroundPage()!==null && typeof domDelegate!=="undefined") {
+if(browser.extension.getBackgroundPage()!==null && typeof Delegate!=="undefined") {
 	const delegate = (function () {
-		const Delegate = domDelegate.Delegate;
+		// const Delegate = domDelegate.Delegate;
 		return new Delegate(document.body);
 	})();
 	const liveEvent = function (type, selector, handler) {
