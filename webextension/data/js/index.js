@@ -12,6 +12,8 @@ appGlobal["channelInfos"] = channelInfos;
 appGlobal["consoleMsg"] = ZDK.consoleMsg;
 const consoleDir = appGlobal["consoleDir"] = ZDK.consoleDir;
 const mapToObj = appGlobal["mapToObj"] = ZDK.mapToObj;
+appGlobal["setTimeout"] = ZDK.setTimeout;
+appGlobal["getPageSize"] = ZDK.getPageSize;
 
 let streamListFromSetting_cache = null;
 class streamListFromSetting{
@@ -1328,6 +1330,7 @@ function checkMissing(){
 						panelUpdateData();
 					}
 				})
+			;
 		}
 	} else {
 		needCheckMissing = true;

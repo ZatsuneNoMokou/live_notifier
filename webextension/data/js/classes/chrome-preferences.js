@@ -253,32 +253,35 @@ ${err}`);
 	getRealValue(prefId){
 		if(this.has(prefId)){
 			const current_pref = super.get(prefId);
-			switch(typeof this.defaultSettings.get(prefId)){
-				case "string":
-					return current_pref;
-					break;
-				case "number":
-					if(isNaN(parseInt(current_pref))){
-						console.warn(`${prefId} is not a number (${current_pref})`);
-						return this.defaultSettings.get(prefId);
-					} else if(typeof this.options.get(prefId).minValue === "number" && parseInt(current_pref) < this.options.get(prefId).minValue){
-						return this.options.get(prefId).minValue;
-					} else if(typeof this.options.get(prefId).maxValue === "number" && parseInt(current_pref) > this.options.get(prefId).maxValue){
-						return this.options.get(prefId).maxValue;
-					} else {
-						return parseInt(current_pref);
-					}
-					break;
-				case "boolean":
-					return getBooleanFromVar(current_pref);
-					break;
-				case "undefined":
-					console.warn(`The setting "${prefId}" has no default value`);
-					return current_pref;
-					break;
-				default:
-					console.warn(`Unknown default type for the setting ${prefId}: ${typeof this.defaultSettings.get(prefId)}`);
-					return current_pref;
+			if(this.options.has(prefId)) {
+				switch (this.options.get(prefId).type) {
+					case "string":
+					case "color":
+					case "menulist":
+						return current_pref;
+						break;
+					case "integer":
+						if (isNaN(parseInt(current_pref))) {
+							console.warn(`${prefId} is not a number (${current_pref})`);
+							return this.defaultSettings.get(prefId);
+						} else if (typeof this.options.get(prefId).minValue === "number" && parseInt(current_pref) < this.options.get(prefId).minValue) {
+							return this.options.get(prefId).minValue;
+						} else if (typeof this.options.get(prefId).maxValue === "number" && parseInt(current_pref) > this.options.get(prefId).maxValue) {
+							return this.options.get(prefId).maxValue;
+						} else {
+							return parseInt(current_pref);
+						}
+						break;
+					case "bool":
+						return getBooleanFromVar(current_pref);
+						break;
+						break;
+					case "file":
+						return current_pref;
+						break;
+				}
+			} else {
+				console.warn(`Unknown preference "${prefId}"`);
 			}
 		} else if(typeof this.defaultSettings.get(prefId) !== "undefined"){
 			console.warn(`Preference ${prefId} not found, using default`);
@@ -409,6 +412,10 @@ ${err}`);
 	}
 
 
+	/**
+	 *
+	 * @param {HTMLElement} container
+	 */
 	loadPreferencesNodes(container){
 		const doc = container.ownerDocument,
 			isPanelPage = container.baseURI.indexOf("panel.html") !== -1,
@@ -462,6 +469,13 @@ ${err}`);
 			groupNode.appendChild(this.newPreferenceNode(groupNode, id));
 		});
 	}
+
+	/**
+	 *
+	 * @param {HTMLElement} parent
+	 * @param {String} id
+	 * @return {HTMLDivElement}
+	 */
 	newPreferenceNode(parent, id){
 		const prefObj = this.options.get(id);
 
@@ -488,8 +502,8 @@ ${err}`);
 		labelNode.appendChild(title);
 
 		let prefNode = null,
-			beforeInputLabel = null,
-			afterInputLabel = null,
+			beforeInputNode = null,
+			afterInputNode = null,
 			output;
 		switch(prefObj.type){
 			case "string":
@@ -519,15 +533,15 @@ ${err}`);
 
 					output = document.createElement("output");
 				} else {
-					beforeInputLabel = document.createElement("label");
-					beforeInputLabel.dataset.inputNumberControl = "moins";
-					beforeInputLabel.htmlFor = id;
-					beforeInputLabel.innerHTML = "<i class=\"material-icons\">remove_circle</i>";
+					beforeInputNode = document.createElement("label");
+					beforeInputNode.dataset.inputNumberControl = "moins";
+					beforeInputNode.htmlFor = id;
+					beforeInputNode.innerHTML = "<i class=\"material-icons\">remove_circle</i>";
 
-					afterInputLabel = document.createElement("label");
-					afterInputLabel.dataset.inputNumberControl = "plus";
-					afterInputLabel.htmlFor = id;
-					afterInputLabel.innerHTML = "<i class=\"material-icons\">add_circle</i>";
+					afterInputNode = document.createElement("label");
+					afterInputNode.dataset.inputNumberControl = "plus";
+					afterInputNode.htmlFor = id;
+					afterInputNode.innerHTML = "<i class=\"material-icons\">add_circle</i>";
 
 					prefNode.type = "number";
 				}
@@ -552,6 +566,23 @@ ${err}`);
 			case "control":
 				prefNode = document.createElement("button");
 				prefNode.textContent = prefObj.label;
+				break;
+			case "file":
+				prefNode = document.createElement("button");
+				prefNode.textContent = prefObj.label;
+
+				beforeInputNode = document.createElement("output");
+				beforeInputNode.id = id;
+				const filePrefValue = this.get(id);
+				if(filePrefValue!==null && typeof filePrefValue==="object" && filePrefValue.hasOwnProperty("name")){
+					beforeInputNode.textContent = filePrefValue.name;
+				}
+
+				afterInputNode = document.createElement("button");
+				afterInputNode.id = id;
+				afterInputNode.dataset.settingType = prefObj.type;
+				afterInputNode.dataset.action = "delete";
+				afterInputNode.dataset.translateId = "Delete";
 				break;
 			case "menulist":
 				if(Array.isArray(prefObj.options) && prefObj.options.length <= 5){
@@ -604,31 +635,31 @@ ${err}`);
 		if(prefObj.type !== "control"){
 			prefNode.classList.add("preferenceInput");
 		}
-		if(prefObj.type === "control"){
+		if(prefObj.type === "control" || prefObj.type === "file"){
 			prefNode.dataset.translateId = `${id}`;
 		}
 
 		prefNode.dataset.settingType = prefObj.type;
 
 		if(prefObj.type === "bool") {
-			if(beforeInputLabel!==null){
-				node.appendChild(beforeInputLabel);
+			if(beforeInputNode!==null){
+				node.appendChild(beforeInputNode);
 			}
 			node.appendChild(prefNode);
-			if(afterInputLabel){
-				node.appendChild(afterInputLabel);
+			if(afterInputNode){
+				node.appendChild(afterInputNode);
 			}
 
 			node.appendChild(labelNode);
 		} else {
 			node.appendChild(labelNode);
 
-			if(beforeInputLabel!==null){
-				node.appendChild(beforeInputLabel);
+			if(beforeInputNode!==null){
+				node.appendChild(beforeInputNode);
 			}
 			node.appendChild(prefNode);
-			if(afterInputLabel){
-				node.appendChild(afterInputLabel);
+			if(afterInputNode){
+				node.appendChild(afterInputNode);
 			}
 		}
 
@@ -646,5 +677,210 @@ ${err}`);
 		}
 
 		return node;
+	}
+
+	/**
+	 *
+	 * @param {String} appName
+	 * @param {HTMLDocument} doc
+	 */
+	exportPrefsToFile(appName, doc=document){
+		let exportData = {
+			"preferences": this.getSyncPreferences()
+		};
+
+		exportData[`${appName}_version`] = browser.runtime.getManifest().version;
+
+		let link = doc.createElement("a");
+		link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData));
+		link.download = "ztoolbox_preferences.json";
+
+		ZDK.simulateClick(link);
+	}
+
+	/**
+	 *
+	 * @param {HTMLDocument=document} doc
+	 * @param {Object=null} opts
+	 * @param {String=null} opts.readType
+	 * @param {Number=null} opts.fileMaxSize
+	 * @param {RegExp=null} opts.fileTypes
+	 * @param {String=null} opts.inputAccept
+	 * @return {Promise<FileList>}
+	 */
+	importDataFormFiles(doc=document, opts=null){
+		return new Promise((resolve, reject) => {
+			if(opts===null && typeof opts!=="object"){
+				reject("Wrong argument");
+				return;
+			}
+			if(!opts.hasOwnProperty("readType")){
+				opts.readType = null
+			}
+			if(!opts.hasOwnProperty("fileMaxSize")){
+				opts.fileMaxSize = null
+			}
+			if(!opts.hasOwnProperty("fileTypes")){
+				opts.fileTypes = null
+			}
+			if(!opts.hasOwnProperty("inputAccept")){
+				opts.inputAccept = null
+			}
+
+			let node = doc.createElement("input");
+			node.type = "file";
+			node.className = "hide";
+			if(opts.inputAccept!==null){
+				node.accept = opts.inputAccept;
+			}
+
+			node.addEventListener("change", async function(){
+				node.remove();
+
+				if(typeof node.files !== "undefined"){
+					let promiseList = [];
+					for(let file of node.files) {
+						if(opts.fileMaxSize!==null && file.size>opts.fileMaxSize) {
+							promiseList.push({
+								"error": "FileTooBig"
+							});
+						} else if(opts.fileTypes!==null && opts.fileTypes instanceof RegExp && !opts.fileTypes.test(file.type)){
+							promiseList.push({
+								"error": "WrongFileType"
+							});
+						} else {
+							if(opts.readType!==null){
+								promiseList.push(zDK.loadBlob(file, opts.readType));
+							} else {
+								promiseList.push(zDK.loadBlob(file));
+							}
+						}
+					}
+
+					let dataObj = await PromiseWaitAll(promiseList),
+						outputData= []
+					;
+
+					for(let index in dataObj){
+						if(dataObj.hasOwnProperty(index)){
+							if(typeof dataObj[index]==="string"){
+								outputData[index] = {
+									"name": node.files[index].name,
+									"data": dataObj[index]
+								};
+							} else {
+								outputData[index] = {
+									"name": node.files[index].name,
+									"error": (typeof dataObj[index]==="object" && dataObj[index].hasOwnProperty("error"))? dataObj[index].error : dataObj[index]
+								};
+							}
+						}
+					}
+
+					resolve(outputData);
+				} else {
+					reject();
+				}
+			});
+
+			doc.head.appendChild(node);
+			ZDK.simulateClick(node);
+		});
+	}
+
+	async prefNode_FileType_onChange(event){
+		const {target: prefNode} = event,
+			settingName = prefNode.id,
+			outputNode = prefNode.ownerDocument.querySelector(`output[id="${prefNode.id}"]`)
+		;
+
+		if(prefNode.dataset.action!==undefined && prefNode.dataset.action==="delete"){
+			this.set(prefNode.id, chromeSettings.defaultSettings.get(prefNode.id));
+
+			if(outputNode!==null){
+				outputNode.textContent = "";
+			}
+		} else {
+			const prefObj = this.options.get(prefNode.id);
+
+			let fileMaxSize = (prefObj.hasOwnProperty("fileMaxSize") && prefObj.fileMaxSize!=="null")? prefObj.fileMaxSize : null;
+			if(typeof fileMaxSize==="string"){
+				const number = parseInt(fileMaxSize);
+				if(!isNaN(number)){
+					fileMaxSize = number;
+				}
+			}
+
+			let filesData = null;
+
+			try {
+				filesData = await this.importDataFormFiles(prefNode.ownerDocument, {
+					"fileMaxSize": fileMaxSize,
+					"readType": (prefObj.hasOwnProperty("readType"))? prefObj.readType : "dataUrl",
+					"fileTypes": (prefObj.hasOwnProperty("fileTypes") && prefObj.fileTypes instanceof RegExp)? prefObj.fileTypes : null,
+					"inputAccept": (prefObj.hasOwnProperty("inputAccept"))? prefObj.inputAccept : null
+				});
+			} catch(e){
+				console.warn(e);
+			}
+
+			if(Array.isArray(filesData) && filesData.length>0){
+				if(filesData[0].hasOwnProperty("data")){
+					savePreference(settingName, filesData[0]);
+
+					if(outputNode!==null){
+						outputNode.textContent =  filesData[0].name;
+					}
+				} else {
+					const error = filesData[0].error;
+
+					if(error==="WrongFileType" || error==="FileTooBig"){
+						const errorMsg = document.createElement("span");
+						errorMsg.classList.add("error");
+						errorMsg.textContent = i18ex._(error);
+						outputNode.appendChild(errorMsg);
+
+						setTimeout(()=>{
+							errorMsg.remove();
+						}, 2000);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 *
+	 * @param {String} appName
+	 * @param {Boolean} mergePreferences
+	 * @param {HTMLDocument} doc
+	 */
+	async importPrefsFromFile(appName, mergePreferences, doc=document){
+		let files = await this.importDataFormFiles(doc, {
+			"readType": "text"
+		});
+
+		if(files.length === 0 || files.length > 1){
+			throw `[Input error] ${node.files.length} file(s) loaded`;
+		} else {
+			let file_JSONData = null;
+			try{
+				file_JSONData = JSON.parse(files[0].data);
+			} catch(error){
+				if(error.message && error.message.indexOf("SyntaxError") !== -1){
+					throw `An error occurred when trying to parse file (Check the file you have used)`;
+				} else {
+					throw `An error occurred when trying to parse file (${error})`;
+				}
+			}
+			if(file_JSONData !== null){
+				if(file_JSONData.hasOwnProperty(`${appName}_version`) && file_JSONData.hasOwnProperty("preferences") && typeof file_JSONData.preferences === "object"){
+					this.importFromJSON(file_JSONData.preferences, (typeof mergePreferences==="boolean")? mergePreferences : false);
+					return true;
+				} else {
+					throw `An error occurred when trying to parse file (Check the file you have used)`;
+				}
+			}
+		}
 	}
 }

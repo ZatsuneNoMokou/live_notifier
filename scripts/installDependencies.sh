@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 
-moduleList="perfect-scrollbar mustache perfect-scrollbar webextension-polyfill i18next i18next-xhr-backend dom-delegate"
-npm install $moduleList
-npm update $moduleList
-npm update lodash-cli -g
+cd $(dirname $0)/..
+echo "Current dir: $(pwd)"
 
 cssLib='./webextension/data/css/lib'
 jsLib='./webextension/data/js/lib'
@@ -32,5 +30,5 @@ cp ./node_modules/i18next-xhr-backend/i18nextXHRBackend.js $jsLib
 
 echo No automatic update for Opentip, manually modified files...
 
-echo Copying dom-delegate...
-cp ./node_modules/dom-delegate/build/dom-delegate.js $jsLib
+echo Downloading/Copying dom-delegate...
+curl -L -# -o $jsLib/dom-delegate.js http://wzrd.in/standalone/dom-delegate@latest

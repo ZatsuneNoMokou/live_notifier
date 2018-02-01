@@ -1,8 +1,8 @@
 #!/bin/bash
-cd $(dirname $0)
+cd $(dirname $0)/..
 echo "Current dir: $(pwd)"
 
-read -p "Appuyer sur enter pour continuer ..."
+#read -p "Appuyer sur enter pour continuer ..."
 
 rm -rf tmp
 mkdir tmp
@@ -17,4 +17,4 @@ web-ext build --artifacts-dir ./ --source-dir ./tmp
 
 rm -rf tmp
 
-read -p "Appuyer sur enter pour continuer ..."
+#read -p "Appuyer sur enter pour continuer ..."

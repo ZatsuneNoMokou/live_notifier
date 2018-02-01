@@ -995,6 +995,8 @@ window.onresize = _.debounce(()=>{
 		scrollbar_update("streamEditor");
 		scrollbar_update("settings_container");
 		scrollbar_update("debugSection");
+
+		applyPanelSize();
 	}, 100, {
 		maxWait: 200
 	})

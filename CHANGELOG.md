@@ -8,6 +8,17 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 11.10.4
+* i: ZDK update
+	* +: \[ZDK] loadBlob can now read as text with a second argument
+	* +: \[ChromePreferences] Core to import/export from/to file
+	* +: \[ZDK] Simulate click, now needed by ChromePreferences
+	* +: \[ChromePreferences] New setting type: File
+	* +: \[ChromeNotificationControler] Sound support on notifications, using [notifications.onShown](https://developer.mozilla.org//Add-ons/WebExtensions/API/notifications/onShown) to begin it, when supported
+	* +: \[ZDK] Promise base setTimeout
+	* +: \[ZDK] getPageSize to get the page actuel size
+* Fix: Special height/width on the toolbar menu, on Firefox 57+
+
 # 11.10.3
 * Fix: Use uncompressed libs to avoid review rejections (Firefox)
 * Fix: Use [Promise.prototype.finally()](https://developer.mozilla.org//docs/Web/JavaScript/Reference/Global_Objects/Promise/finally) instead of creating a "complete" method, as a polyfill
