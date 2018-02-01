@@ -216,16 +216,22 @@ class ZDK{
 	/**
 	 *
 	 * @param {Blob} blob
+	 * @param {Boolean} readType
 	 * @return {Promise}
 	 */
-	loadBlob(blob){
+	loadBlob(blob, readType=null){
 		return new Promise((resolve, reject)=>{
 			const reader = new FileReader();
-			reader.readAsDataURL(blob);
 			reader.addEventListener("loadend", function() {
 				resolve(reader.result);
 			});
 			reader.addEventListener("error", reject);
+
+			if(readType==="text"){
+				reader.readAsText(blob);
+			} else {
+				reader.readAsDataURL(blob);
+			}
 		})
 	}
 	async getBase64Image(pictureNode, settings={}){
@@ -346,6 +352,40 @@ class ZDK{
 			"top": y,
 			"left": x,
 		};
+	}
+
+	static simulateClick(node) {
+		let evt = new MouseEvent("click", {
+			bubbles: true,
+			cancelable: true,
+			view: window,
+		});
+		// Return true is the event haven't been canceled
+		return node.dispatchEvent(evt);
+	}
+
+	/**
+	 *
+	 * @param {Number} millisecond
+	 * @return {Promise<void>}
+	 */
+	static setTimeout(millisecond) {
+		return new Promise(resolve=>{
+			setTimeout(resolve, millisecond);
+		})
+	}
+
+	/**
+	 *
+	 * @param {Window=window} win
+	 * @return {{height: number, width: number}}
+	 */
+	static getPageSize(win=window) {
+		const doc = win.document;
+		return {
+			'height': win.innerHeight || doc.documentElement.clientHeight || doc.body.clientHeight,
+			'width': win.innerWidth || doc.documentElement.clientWidth || doc.body.clientWidth
+		}
 	}
 }
 

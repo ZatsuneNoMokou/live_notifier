@@ -3,14 +3,34 @@
 let backgroundPage = chrome.extension.getBackgroundPage();
 // var getPreference = backgroundPage.getPreference;
 
-const applyPanelSize = ()=>{
-	const html = document.querySelector("html"),
-		body = document.querySelector("body");
-	html.style.height = backgroundPage.getPreference("panel_height");
+const applyPanelSize = async ()=>{
+	const appGlobal = backgroundPage.appGlobal,
+		body = document.body
+	;
+
+	body.style.height = backgroundPage.getPreference("panel_height");
 
 	const panelWidth = backgroundPage.getPreference("panel_width");
 	body.style.width = panelWidth;
 	document.documentElement.style.setProperty('--opentip-maxwidth', `${((panelWidth/2<300)? (panelWidth/2) : panelWidth)}px`);
+
+	let size = null;
+	for(let maxWaitTime=0;maxWaitTime<=1000;maxWaitTime+=100){
+		if(maxWaitTime>0){
+			await appGlobal.setTimeout(100);
+		}
+		size = appGlobal.getPageSize(window);
+		if(size.height>0 && size.width>0){
+			break;
+		}
+	}
+
+	if(size.height > 0 && size.height > backgroundPage.getPreference("panel_height")){
+		body.style.height = "auto";
+	}
+	if(size.width > 0 && size.width > backgroundPage.getPreference("panel_width")){
+		body.style.width = "auto";
+	}
 };
 applyPanelSize();
 

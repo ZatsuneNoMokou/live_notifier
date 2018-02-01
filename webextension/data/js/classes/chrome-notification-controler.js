@@ -15,6 +15,15 @@ class ChromeNotificationControler{
 				}
 			});
 		}
+		this.onShownSupported = browser.notifications.hasOwnProperty("onShown");
+		if(this.onShownSupported===true){
+			browser.notifications.onShown.addListener(notificationId=>{
+				consoleMsg("info", `Notification "${notificationId}" shown.`);
+				if(this.chromeNotifications.has(notificationId) && typeof this.chromeNotifications.get(notificationId).fnOnShown === "function"){
+					this.chromeNotifications.get(notificationId).fnOnShown();
+				}
+			})
+		}
 		browser.notifications.onClosed.addListener((notificationId, byUser=false)=>{
 			if(byUser===true && this.chromeNotifications.has(notificationId)){
 				this.chromeNotifications.get(notificationId).isClosed = true;
@@ -38,7 +47,16 @@ class ChromeNotificationControler{
 		}, 10 * 1000);
 	}
 
-	send(options=null){
+	/**
+	 *
+	 * @param options Options from chrome.notifications.NotificationOptions
+	 * @param {Object=null} customOption
+	 * @param {Object} customOption.soundObject
+	 * @param {String} customOption.soundObject.data
+	 * @param {Number} customOption.soundObjectVolume
+	 * @return {Promise<Object>}
+	 */
+	send(options=null, customOption=null){
 		const sendNotification = (options)=>{
 			return new Promise((resolve, reject)=>{
 				const onError = (error)=>{
@@ -52,6 +70,7 @@ class ChromeNotificationControler{
 						browser.notifications.create(options)
 							.then(resolve)
 							.catch(onError)
+						;
 					} else {
 						reject(error);
 					}
@@ -60,8 +79,8 @@ class ChromeNotificationControler{
 					browser.notifications.create(options)
 						.then(resolve)
 						.catch(onError)
-				}
-				catch(err){
+					;
+				} catch(err){
 					onError(err);
 				}
 			})
@@ -83,12 +102,27 @@ class ChromeNotificationControler{
 				delete options.buttons;
 			}
 
+			let sound = null;
 			sendNotification(options)
 				.then(notificationId=>{
+					consoleMsg("info", `Notification "${notificationId}" created.`);
+					if(customOption!==null && typeof customOption.soundObject==="object" && customOption.soundObject!==null && typeof customOption.soundObject.data==="string"){
+						sound = new Audio(customOption.soundObject.data);
+						sound.volume = customOption.soundObjectVolume / 100;
+						if(this.onShownSupported===false){
+							sound.play();
+						}
+					}
+
 					this.chromeNotifications.set(notificationId, {
 						"isClosed": false,
 						"fn": (triggeredType, buttonIndex = null)=>{
 							this.clear(notificationId);
+
+							if(sound!==null){
+								sound.currentTime = 0;
+								sound.pause();
+							}
 
 							if (
 								triggeredType === "timeout"
@@ -114,10 +148,21 @@ class ChromeNotificationControler{
 									"buttonIndex": buttonIndex
 								});
 							}
+						},
+						"fnOnShown": ()=>{
+							if(sound!==null && this.onShownSupported===true){
+								sound.play();
+							}
 						}
 					});
 				})
-				.catch(reject)
+				.catch(error=>{
+					if(sound!==null){
+						sound.currentTime = 0;
+						sound.pause();
+					}
+					reject(error);
+				})
 			;
 		});
 	};

@@ -274,70 +274,29 @@ if(browser.extension.getBackgroundPage()!==null && typeof Delegate!=="undefined"
 }
 
 /*		---- Import/Export preferences from file ----		*/
-function simulateClick(node) {
-	let evt = new MouseEvent("click", {
-		bubbles: true,
-		cancelable: true,
-		view: window,
-	});
-	// Return true is the event haven't been canceled
-	return node.dispatchEvent(evt);
-}
 function exportPrefsToFile(){
-	let appGlobal = (browser.extension.getBackgroundPage() !== null)? browser.extension.getBackgroundPage().appGlobal : appGlobal;
-
-	let exportData = {
-		"live_notifier_version": appGlobal["version"],
-		"preferences": chromeSettings.getSyncPreferences()
-	};
-
-	let link = document.createElement("a");
-	link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData));
-	link.download = "live_notifier_preferences.json";
-
-	simulateClick(link);
+	let backgroundPage = browser.extension.getBackgroundPage();
+	backgroundPage.chromeSettings.exportPrefsToFile("live_notifier", document);
 }
-function importPrefsFromFile(event){
+async function importPrefsFromFile(event){
+	const backgroundPage = browser.extension.getBackgroundPage();
 	let mergePreferences = (typeof event === "object" && typeof event.shiftKey === "boolean")? event.shiftKey : false;
 
 	console.warn("Merge: " + mergePreferences);
-	let node = document.createElement("input");
-	node.type = "file";
-	node.className = "hide";
-	node.addEventListener("change", function(){
-		node.remove();
-		let fileLoader=new FileReader();
-		if(node.files.length === 0 || node.files.length > 1){
-			console.warn(`[Input error] ${node.files.length} file(s) selected `);
-		} else {
-			fileLoader.readAsText(node.files[0]);
-			fileLoader.onloadend = function(event){
-				let rawFileData = event.target.result;
-				let file_JSONData = null;
-				try{
-					file_JSONData = JSON.parse(rawFileData);
-				}
-				catch(error){
-					if(error.message && error.message.indexOf("SyntaxError") !== -1){
-						console.warn(`An error occurred when trying to parse file (Check the file you have used)`);
-					} else {
-						console.warn(`An error occurred when trying to parse file (${error})`);
-					}
-				}
-				if(file_JSONData !== null){
-					if(file_JSONData.hasOwnProperty("live_notifier_version") && file_JSONData.hasOwnProperty("preferences") && typeof file_JSONData.preferences === "object"){
-						chromeSettings.importFromJSON(file_JSONData.preferences, (typeof mergePreferences==="boolean")? mergePreferences : false);
 
-						if(typeof refreshStreamsFromPanel === "function"){
-							refreshStreamsFromPanel();
-						} else {
-							sendDataToMain("refreshStreams","");
-						}
-					}
-				}
-			}
+	let error = false;
+	try {
+		await backgroundPage.chromeSettings.importPrefsFromFile("live_notifier", mergePreferences, document);
+	} catch (e){
+		error=true;
+		console.warn(e);
+	}
+
+	if(error===false){
+		if(typeof refreshStreamsFromPanel === "function"){
+			refreshStreamsFromPanel();
+		} else {
+			sendDataToMain("refreshStreams","");
 		}
-	});
-	document.querySelector("head").appendChild(node);
-	simulateClick(node);
+	}
 }
