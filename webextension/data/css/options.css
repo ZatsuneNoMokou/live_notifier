@@ -1,7 +1,8 @@
-html, body{
+html,
+body {
 	/*overflow:hidden;
-	margin-right:0px;*/
-	min-width:777px;
+	margin-right: 0px;*/
+	min-width: 777px;
 	font-family: Ubuntu, Tahoma, sans-serif;
 }
 /*html{
@@ -11,103 +12,103 @@ html, body{
 body{
 	height: 100%;
 }*/
-#contentContainer{
-	height:100%;
-	overflow:hidden;
-	position:relative;
+#contentContainer {
+	height: 100%;
+	overflow: hidden;
+	position: relative;
 	
-	padding:0 8px;
+	padding: 0 8px;
 }
 
-*{
-	font-size:14px;
+* {
+	font-size: 14px;
 	box-sizing: border-box;
 }
 
-input[type='range']{
-	width:300px;
+input[type='range'] {
+	width: 300px;
 }
 
 
-button{
-	padding:0 8px;
-	border:0 none;
-	border-radius:1px;
-	margin:2px 5px 2px 0;
-	font-weight:700;
-	height:25px;
+button {
+	padding: 0 8px;
+	border: 0 none;
+	border-radius: 1px;
+	margin: 2px 5px 2px 0;
+	font-weight: 700;
+	height: 25px;
 }
-.ps__rail_x, .ps__rail-y{
-	background-color:transparent !important;
+.ps__rail_x,
+.ps__rail-y {
+	background-color: transparent !important;
 }
-.ps__thumb-x{
-	border-radius:6px !important;
-	height:6px !important;
+.ps__thumb-x {
+	border-radius: 6px !important;
+	height: 6px !important;
 }
-.ps__thumb-y{
-	border-radius:6px !important;
-	width:6px !important;
+.ps__thumb-y {
+	border-radius: 6px !important;
+	width: 6px !important;
 }
 
-.pref_group, .website_pref{
-	display:block;
-	margin-top:14px;
-	margin-bottom:14px;
+.pref_group,
+.website_pref {
+	display: block;
+	margin-top: 14px;
+	margin-bottom: 14px;
 }
-body:not(.showAdvanced) .preferenceContainer.experimented, body:not(.showAdvanced) .preferenceContainer.advanced{
-	display:none;
-	visibility:hidden;
+body:not(.showAdvanced) .preferenceContainer.experimented,
+body:not(.showAdvanced) .preferenceContainer.advanced {
+	display: none;
+	visibility: hidden;
 }
-body:not(.showAdvanced) #sync_control_container{
-	display:none;
-	visibility:hidden;
+body:not(.showAdvanced) #sync_control_container {
+	display: none;
+	visibility: hidden;
 }
-body:not(.showExperimented) .preferenceContainer.experimented{
-	display:none;
-	visibility:hidden;
+body:not(.showExperimented) .preferenceContainer.experimented {
+	display: none;
+	visibility: hidden;
 }
-.preferenceContainer:not(.flex_input_text){
-	display:flex;
-	align-items:center;
-	justify-content:flex-start;
+.preferenceContainer:not(.flex_input_text) {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
 }
-.preferenceContainer.flex_input_text{
-	display:flex;
-	width:100%;
-	margin-top:3px;
-	margin-bottom:3px;
+.preferenceContainer.flex_input_text {
+	display: flex;
+	width: 100%;
+	margin-top: 3px;
+	margin-bottom: 3px;
 }
-.preferenceContainer.flex_input_text .preferenceInput{
-	display:flex;
-	flex-grow:5;
-	max-width:90%;
+.preferenceContainer.flex_input_text .preferenceInput {
+	display: flex;
+	flex-grow: 5;
+	max-width: 90%;
 }
-.preference{
-	display:inline;
-	margin-top:3px;
-	margin-bottom:3px;
+.preference {
+	display: inline;
+	margin-top: 3px;
+	margin-bottom: 3px;
 }
-.preference > span:after{
-	content:": ";
+.preference > span:after {
+	content: ": ";
 }
-input[type='checkbox'] + label.preference > span::after{
+input[type='checkbox'] + label.preference > span::after {
 	content: none;
 }
-label:not(.flex_input_text){
-	display:inline;
-	padding-right:3px;
-	/*flex:2;*/
+label:not(.flex_input_text) {
+	display: inline;
+	padding-right: 3px;
+	/*flex: 2;*/
 }
-label.flex_input_text{
-	display:inline-flex;
-	padding-right:3px;
+label.flex_input_text {
+	display: inline-flex;
+	padding-right: 3px;
 }
-.import_container .label{
-	display:block;
+.import_container .label {
+	display: block;
 }
-.import_container .label{
-	display:block;
-}
-.pref_container{
-	padding-left:10px;
+.pref_container {
+	padding-left: 10px;
 }

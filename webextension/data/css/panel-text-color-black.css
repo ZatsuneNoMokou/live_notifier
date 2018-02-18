@@ -1,34 +1,57 @@
 /*			---- Primary text / Icons ----			*/
-body, header button, button, input[type='number'], input[type='checkbox'], input[type='radio'], select, #streamOnlineCountLabel, #streamOfflineCountLabel, #deleteStreamTooltip, #searchInputContainer, #searchInput{
+body,
+header button,
+button,
+input[type='number'],
+input[type='checkbox'],
+input[type='radio'],
+select,
+#streamOnlineCountLabel,
+#streamOfflineCountLabel,
+#deleteStreamTooltip,
+#searchInputContainer,
+#searchInput {
 	color: #FFFFFF;
 	color: rgba(0, 0, 0, 0.8);
 }
-select:hover{
-	color:unset !important;
+select:hover {
+	color: unset !important;
 }
+
 /*		--- Secondary text / Base Color ----		*/
-.item-stream, .item-stream .streamTitle, .item-stream .streamStatus, .item-stream .streamCurrentViewers/*, #current_version*/,
-input[type='text'], input[type='number'], input[type='url'], textarea,
+.item-stream,
+.item-stream .streamTitle,
+.item-stream .streamStatus,
+.item-stream .streamCurrentViewers/*, #current_version*/,
+
+input[type='text'],
+input[type='number'],
+input[type='url'],
+
+textarea,
 #tooltip {
 	color: #FFFFFF;
 	color: rgba(0, 0, 0, 0.5);
 }
-#deleteStream.active{
+#deleteStream.active {
 	text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
+
 /*			---- Disabled / Hint text ----			*/
-footer{
+footer {
 	color: #FFFFFF;
 	color: rgba(0, 0, 0, 0.4);
 }
+
 /*			---- Stream Title / Links ----			*/
-a{
+a {
 	color: #0062BD;
 	color: rgba(50, 159, 255, 0.8);
 }
 
 
-input,textarea {
+input,
+textarea {
 	color: #151515;
 	color: rgba(21, 21, 21, 0.8);
 }
@@ -39,6 +62,6 @@ input:invalid {
 	font-weight: 700;
 }
 
-#patreonlogo{
+#patreonlogo {
 	background-image: url("/data/images/Patreon_Logo_Black.png");
 }
