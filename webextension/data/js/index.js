@@ -14,6 +14,7 @@ const consoleDir = appGlobal["consoleDir"] = ZDK.consoleDir;
 const mapToObj = appGlobal["mapToObj"] = ZDK.mapToObj;
 appGlobal["setTimeout"] = ZDK.setTimeout;
 appGlobal["getPageSize"] = ZDK.getPageSize;
+appGlobal["hasTouch"] = ZDK.hasTouch;
 
 let streamListFromSetting_cache = null;
 class streamListFromSetting{

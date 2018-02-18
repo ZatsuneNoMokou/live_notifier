@@ -1,6 +1,6 @@
 {
 	"name": "live_notifier",
-	"version": "11.10.6",
+	"version": "11.10.7",
 	"description": "Be notified of streams from Dailymotion, Mixer, Smashcast, Twitch and Youtube.",
 	"dependencies": {
 		"dom-delegate": "^2.0.3",
@@ -11,12 +11,14 @@
 		"perfect-scrollbar": "^1.3.0",
 		"webextension-polyfill": "^0.2.1"
 	},
-	"devDependencies": {},
+	"devDependencies": {
+		"stylelint-config-recommended": "^2.1.0"
+	},
 	"scripts": {
 		"install": "bash scripts/installDependencies.sh",
 		"release:dev": "bash scripts/make_web-ext_dev_build.sh",
 		"release": "bash scripts/make_web-ext_build.sh",
-		"test": "echo \"Error: no test specified\" && exit 1",
+		"test": "bash scripts/test.sh",
 		"update": "npm run install"
 	},
 	"repository": {

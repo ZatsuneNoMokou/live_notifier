@@ -387,6 +387,15 @@ class ZDK{
 			'width': win.innerWidth || doc.documentElement.clientWidth || doc.body.clientWidth
 		}
 	}
+
+	/**
+	 *
+	 * @param {Window=window} win
+	 * @return {boolean} Return true if window have ontouchstart event
+	 */
+	static hasTouch(win=window) {
+		return win.hasOwnProperty('ontouchstart');
+	}
 }
 
 var consoleMsg = ZDK.consoleMsg;

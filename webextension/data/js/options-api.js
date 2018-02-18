@@ -34,6 +34,21 @@ if(typeof Opentip!=="undefined"){
 		background: "#212121",
 		borderColor: "#212121"
 	};
+	if(browser.extension.getBackgroundPage() !== null) {
+		const {appGlobal} = browser.extension.getBackgroundPage();
+		if(appGlobal.hasTouch(window)){
+			const delegate = new Delegate(document.body);
+			delegate.on("touchstart", "[data-opentip-id]", function () {
+				const i = this.dataset.opentipId;
+				if(Opentip.tips[i-1]){
+					const openTip = Opentip.tips[i-1];
+					setTimeout(function () {
+						openTip.hide();
+					}, 3000);
+				}
+			});
+		}
+	}
 	Opentip.defaultStyle = "myDark"; // The default is "standard"
 }
 

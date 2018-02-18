@@ -8,6 +8,8 @@ const applyPanelSize = async ()=>{
 		body = document.body
 	;
 
+	body.classList.toggle("hasTouch", appGlobal.hasTouch(window));
+
 	body.style.height = backgroundPage.getPreference("panel_height");
 
 	const panelWidth = backgroundPage.getPreference("panel_width");
