@@ -26,10 +26,10 @@ const applyPanelSize = async ()=>{
 	}
 
 	if(size.height > 0 && size.height > backgroundPage.getPreference("panel_height")){
-		body.style.height = "auto";
+		body.style.height = "100vh";
 	}
 	if(size.width > 0 && size.width > backgroundPage.getPreference("panel_width")){
-		body.style.width = "auto";
+		body.style.width = "100vw";
 	}
 };
 applyPanelSize();
