@@ -43,6 +43,9 @@ const
 		return;
 	}
 
+	result = null;
+	result_error = null;
+
 	info(`\n${SUCCESS_CHAR} No errors`);
 	process.exit(0);
 })();
