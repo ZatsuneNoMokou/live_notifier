@@ -4,7 +4,8 @@ const
 	path = require("path"),
 	pwd = path.join(__dirname, ".."),
 
-	{ exec:_exec } = require('child_process'),
+	{ exec:_exec, execSync:_execSync } = require('child_process'),
+	// exec = require('util').promisify(_exec),
 
 	{fsReadFile} = require("./file-operations"),
 	echo = console.log,
@@ -13,19 +14,21 @@ const
 
 /**
  *
- * @param {String} cmd
- * @return {Promise<String>}
+ * @param {String} command
+ * @param {Boolean} outputInConsole
+ * @return {Buffer | String} Stdout from the command
  */
-function exec(cmd) {
-	return new Promise((resolve, reject)=>{
-		_exec(cmd, (err, stdout, stderr) => {
-			if(err) {
-				reject(err);
-			} else {
-				resolve(stdout);
-			}
-		});
-	})
+function execSync(command, outputInConsole=false) {
+	let options = {
+		"cwd": pwd,
+		"timeout": 20 * 1000 // 10s
+	};
+
+	if(outputInConsole===true){
+		options.stdio = [process.stdin, process.stdout, process.stderr];
+	}
+
+	return _execSync(command, options);
 }
 
 /**
@@ -84,9 +87,17 @@ async function init() {
 	await errorHandler(fs.mkdir(tmpPath));
 
 	echo("Copying into tmp folder");
-	await errorHandler(exec("cd " + pwd + " && cp -rt tmp ./webextension/data ./webextension/_locales ./webextension/icon*.png ./webextension/init.js ./webextension/LICENSE ./webextension/manifest.json"));
+	try{
+		execSync("cp -rt tmp ./webextension/data ./webextension/_locales ./webextension/icon*.png ./webextension/init.js ./webextension/LICENSE ./webextension/manifest.json", true);
+	} catch (e){
+		error(e);
+	}
 
-	await errorHandler(exec("cd " + pwd + " && web-ext build --artifacts-dir ./ --source-dir ./tmp"));
+	try{
+		execSync("web-ext build --artifacts-dir ./ --source-dir ./tmp", true);
+	} catch (e){
+		error(e);
+	}
 
 	await errorHandler(fs.remove(tmpPath));
 }
