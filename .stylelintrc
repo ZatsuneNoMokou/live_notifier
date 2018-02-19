@@ -2,6 +2,7 @@
 	"extends": "stylelint-config-recommended",
 	"block-opening-brace-space-before": "always",
 	"rules": {
+		"indentation": "tab",
 		"block-opening-brace-space-before": "always",
 		"no-descending-specificity": null,
 		"declaration-colon-space-after": "always",
