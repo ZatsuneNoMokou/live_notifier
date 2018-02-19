@@ -1,5 +1,13 @@
 'use strict';
 
+const offline_badgeData = browser.runtime.getManifest().browser_action.default_icon,
+	online_badgeData = {
+		"16": "/data/images/live_online_16.png",
+		"48": "/data/images/live_online_48.png",
+		"96": "/data/images/live_online_96.png",
+		"128": "/data/images/live_online_128.png"
+	}
+;
 let myIconURL = "/data/live_offline.svg";
 
 let websites = new Map();
@@ -1094,7 +1102,7 @@ function setIcon(){
 	let badgeImage = (badgeOnlineCount > 0)? online_badgeData : offline_badgeData;
 	if(badgeImage !== null){
 		browser.browserAction.setIcon({
-			imageData: badgeImage
+			path: badgeImage
 		});
 	} else {
 		consoleMsg("warn", "Icon(s) is/are not loaded");
@@ -1756,61 +1764,6 @@ function importStreamsEnd(website, id){
 }
 
 //				------ Load / Unload Event(s) ------				//
-
-// Load online/offline badges
-let online_badgeData = null;
-let offline_badgeData = null;
-
-async function loadSVGAsCanvas(id, src, width, height){
-	let old_node = document.querySelector(`canvas#id`);
-	if(old_node !== null){
-		old_node.parentNode.removeChild(old_node);
-	}
-
-	let canvasNode = document.createElement('canvas');
-	canvasNode.id = id;
-	canvasNode.width = width;
-	canvasNode.height = height;
-	document.querySelector("body").appendChild(canvasNode);
-
-	// Get drawing context for the Canvas
-	let canvasContext = canvasNode.getContext('2d');
-
-	// Load up our image.
-	let mySVG = await zDK.loadImage({
-		"src": src,
-		"height": height,
-		"width": width
-	});
-
-	// Render our SVG image to the canvas once it loads.
-	canvasContext.drawImage(mySVG, 0, 0, width, height);
-	return canvasContext.getImageData(0, 0, width, height);
-}
-async function loadBadges(){
-	let canvasPromises = new Map();
-
-	canvasPromises.set("live_online", loadSVGAsCanvas("live_online", "/data/live_online.svg", 19, 19));
-	canvasPromises.get("live_online").then((data) => {
-		if(data instanceof ImageData){
-			online_badgeData = data;
-		}
-	});
-	canvasPromises.set("live_offline", loadSVGAsCanvas("live_offline", "/data/live_offline.svg", 19, 19));
-	canvasPromises.get("live_offline").then((data) => {
-		if(data instanceof ImageData){
-			offline_badgeData = data;
-		}
-	});
-
-	return await PromiseWaitAll(canvasPromises);
-}
-loadBadges()
-	.catch(err=>{
-		consoleMsg("warn", err);
-	})
-;
-
 
 async function getRedirectedURL(URL, maxRedirect){
 	const data = await Request({
