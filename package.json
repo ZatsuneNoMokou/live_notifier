@@ -13,11 +13,12 @@
 	},
 	"devDependencies": {
 		"chalk": "^2.3.1",
+		"fs-extra": "^5.0.0",
 		"stylelint": "^9.0.0",
 		"stylelint-config-recommended": "^2.1.0"
 	},
 	"scripts": {
-		"install": "bash scripts/installDependencies.sh",
+		"install": "node scripts/installDependencies.js",
 		"release:dev": "bash scripts/make_web-ext_dev_build.sh",
 		"release": "bash scripts/make_web-ext_build.sh",
 		"test": "node scripts/test.js",
