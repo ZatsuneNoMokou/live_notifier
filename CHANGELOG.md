@@ -8,6 +8,9 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 11.10.9
+* Fix: Panel - Online stream - Profile picture padding
+
 # 11.10.8
 * Fix: browserIcon - Now use png to prevent being blocked by Firefox's fingerprinting protection
 * Fix: Panel - Online stream picture - Max width
