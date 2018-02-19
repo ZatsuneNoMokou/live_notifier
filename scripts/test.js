@@ -18,7 +18,8 @@ const
  */
 function execSync(command, outputInConsole=false) {
 	let options = {
-		"cwd": pwd
+		"cwd": pwd,
+		"timeout": 20 * 1000 // 10s
 	};
 
 	if(outputInConsole===true){
