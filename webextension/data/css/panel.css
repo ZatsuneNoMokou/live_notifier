@@ -235,6 +235,7 @@ body.hasTouch .item-stream.onlineItem > div > .stream_control {
 
 .item-stream.onlineItem figure.streamPicture {
 	left: 4px;
+	max-width: 52px;
 	position: absolute;
 	-webkit-transform: translateY(-50%);
 	-moz-transform: translateY(-50%);

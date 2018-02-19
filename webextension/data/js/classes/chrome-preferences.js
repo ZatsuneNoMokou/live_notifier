@@ -693,7 +693,7 @@ ${err}`);
 
 		let link = doc.createElement("a");
 		link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData));
-		link.download = "ztoolbox_preferences.json";
+		link.download = `${appName}_preferences.json`;
 
 		ZDK.simulateClick(link);
 	}
