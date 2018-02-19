@@ -5,10 +5,13 @@ const
 	path = require('path'),
 	pwd = path.join(__dirname, ".."),
 
-	{ exec:_exec } = require('child_process'),
+	{ exec, execSync } = require('./custom-child-process')(pwd),
 
-	cssLib = path.join(pwd, './webextension/data/css/lib/'),
-	jsLib = path.join(pwd, './webextension/data/js/lib/')
+	relativeCssLib = './webextension/data/css/lib/',
+	relativeJsLib = './webextension/data/js/lib/',
+
+	cssLib = path.join(pwd, relativeCssLib),
+	jsLib = path.join(pwd, relativeJsLib)
 ;
 
 const {cp} = require("./file-operations");
@@ -34,23 +37,6 @@ async function exceptionHandler(promise) {
 	return result;
 }
 
-
-/**
- *
- * @param {String} cmd
- * @return {Promise<String>}
- */
-function exec(cmd) {
-	return new Promise((resolve, reject)=>{
-		_exec(cmd, (err, stdout, stderr) => {
-			if(err===null) {
-				reject(err);
-			} else {
-				resolve(stdout);
-			}
-		});
-	})
-}
 
 
 
@@ -85,16 +71,12 @@ async function init() {
 		echo("Copying/Building Lodash Debounce - Custom Build..."); // https://lodash.com/custom-builds
 		let stdout = null;
 		try {
-			stdout = await exec(`cd ${jsLib} && lodash exports=global include=debounce --development --source-map`);
+			stdout = execSync(`cd ${relativeJsLib} && lodash exports=global include=debounce --development --source-map`);
 		} catch(err){
 			if(err){
 				error(err);
 				process.exit(1);
 			}
-		}
-
-		if(stdout!==null){
-			info(stdout);
 		}
 
 		echo("Copying i18next...");

@@ -4,31 +4,11 @@ const
 	{error, warning, info, success} = require('./custom-console'),
 	stylelint = require('stylelint'),
 
-	{ exec:_exec, execSync:_execSync } = require('child_process'),
-	// exec = require('util').promisify(_exec),
-
 	path = require('path'),
-	pwd = path.join(__dirname, "..")
+	pwd = path.join(__dirname, ".."),
+
+	{ exec, execSync } = require('./custom-child-process')(pwd)
 ;
-
-/**
- *
- * @param {String} command
- * @param {Boolean} outputInConsole
- * @return {Buffer | String} Stdout from the command
- */
-function execSync(command, outputInConsole=false) {
-	let options = {
-		"cwd": pwd,
-		"timeout": 20 * 1000 // 10s
-	};
-
-	if(outputInConsole===true){
-		options.stdio = [process.stdin, process.stdout, process.stderr];
-	}
-
-	return _execSync(command, options);
-}
 
 
 (async function () {
