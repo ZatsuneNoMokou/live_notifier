@@ -1,7 +1,7 @@
 const
 	WARNING_CHAR="⚠",
 	SUCCESS_CHAR="✅",
-	{error, warning, info} = require('./custom-console'),
+	{error, warning, info, success} = require('./custom-console'),
 	stylelint = require('stylelint'),
 
 	path = require('path'),
@@ -46,6 +46,6 @@ const
 	result = null;
 	result_error = null;
 
-	info(`\n${SUCCESS_CHAR} No errors`);
+	success(`\n${SUCCESS_CHAR} No errors`);
 	process.exit(0);
 })();
