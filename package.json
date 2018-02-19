@@ -12,13 +12,15 @@
 		"webextension-polyfill": "^0.2.1"
 	},
 	"devDependencies": {
+		"chalk": "^2.3.1",
+		"stylelint": "^9.0.0",
 		"stylelint-config-recommended": "^2.1.0"
 	},
 	"scripts": {
 		"install": "bash scripts/installDependencies.sh",
 		"release:dev": "bash scripts/make_web-ext_dev_build.sh",
 		"release": "bash scripts/make_web-ext_build.sh",
-		"test": "bash scripts/test.sh",
+		"test": "node scripts/test.js",
 		"update": "npm run install"
 	},
 	"repository": {
