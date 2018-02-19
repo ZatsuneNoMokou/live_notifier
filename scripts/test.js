@@ -4,7 +4,8 @@ const
 	{error, warning, info, success} = require('./custom-console'),
 	stylelint = require('stylelint'),
 
-	{ execSync:_execSync } = require('child_process'),
+	{ exec:_exec, execSync:_execSync } = require('child_process'),
+	// exec = require('util').promisify(_exec),
 
 	path = require('path'),
 	pwd = path.join(__dirname, "..")
@@ -33,7 +34,7 @@ function execSync(command, outputInConsole=false) {
 (async function () {
 	info(`Current dir: ${pwd}\n`);
 
-	warning(`${WARNING_CHAR} Test only cover CSS with Stylelint for now ${WARNING_CHAR}\n`);
+	warning(`${WARNING_CHAR} Test only cover linting with CSS (with Stylelint), and web-ext for now ${WARNING_CHAR}\n`);
 
 	info(`Testing CSS...`);
 
