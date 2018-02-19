@@ -4,9 +4,30 @@ const
 	{error, warning, info, success} = require('./custom-console'),
 	stylelint = require('stylelint'),
 
+	{ execSync:_execSync } = require('child_process'),
+
 	path = require('path'),
 	pwd = path.join(__dirname, "..")
 ;
+
+/**
+ *
+ * @param {String} command
+ * @param {Boolean} outputInConsole
+ * @return {Buffer | String} Stdout from the command
+ */
+function execSync(command, outputInConsole=false) {
+	let options = {
+		"cwd": pwd
+	};
+
+	if(outputInConsole===true){
+		options.stdio = [process.stdin, process.stdout, process.stderr];
+	}
+
+	return _execSync(command, options);
+}
+
 
 (async function () {
 	info(`Current dir: ${pwd}\n`);
@@ -39,6 +60,25 @@ const
 		return;
 	} else if(result.errored){
 		error(result.output);
+		process.exit(1);
+		return;
+	}
+
+	result = null;
+	result_error = null;
+
+
+	info(`Testing web-ext lint...`);
+
+	try {
+		result = execSync("web-ext lint --self-hosted --source-dir ./webextension", true);
+	} catch (err) {
+		result_error = err;
+	}
+
+	if(result_error){
+		error("Error thrown :");
+		error(result_error);
 		process.exit(1);
 		return;
 	}
