@@ -136,14 +136,16 @@ async function init() {
 				data = stripDebug(data).toString();
 			} catch (err){
 				console.trace();
-				console.error(err);
+				info(filePath);
+				error(err);
 				process.exit(1);
 			}
 			return data;
 		}, excludeDirAndJsFilter)
 			.catch(err=>{
 				console.trace();
-				console.error(err);
+				info(filePath);
+				error(err);
 				process.exit(1);
 			})
 		;
