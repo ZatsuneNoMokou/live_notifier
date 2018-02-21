@@ -6,7 +6,7 @@ const
 
 	{ exec, execSync } = require('./common/custom-child-process')(pwd),
 
-	{fsReadFile, getFilesRecursively, modifyFiles} = require("./common/file-operations"),
+	{fsReadFile, getFilesRecursively, modifyFile, modifyFiles} = require("./common/file-operations"),
 	echo = console.log,
 	{error, warning, info, success} = require("./common/custom-console"),
 
@@ -161,4 +161,4 @@ async function init() {
 	await errorHandler(fs.remove(tmpPath));
 }
 
-init();
+errorHandler(init());
