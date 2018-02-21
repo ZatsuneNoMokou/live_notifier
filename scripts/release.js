@@ -12,7 +12,7 @@ const
 
 	through2 = require('through2'),
 	{getFilesRecursively, modifyFiles} = require('./modify-file'),
-	stripDebug = require('strip-debug'),
+	stripDebug = require('strip-debug'), //TODO /!\ Using my rocambole fork hoping update https://github.com/millermedeiros/rocambole/issues/32
 
 	yargs = require('yargs')
 		.usage('Usage: $0 [options]')
@@ -133,17 +133,18 @@ async function init() {
 
 		await modifyFiles(tmpPath, function (data, filePath) {
 			try {
-				// TODO WIP Wait https://github.com/sindresorhus/strip-debug/issues/18
 				data = stripDebug(data).toString();
 			} catch (err){
-				console.log(err);
 				console.trace();
+				console.error(err);
+				process.exit(1);
 			}
 			return data;
 		}, excludeDirAndJsFilter)
 			.catch(err=>{
 				console.trace();
-				throw err
+				console.error(err);
+				process.exit(1);
 			})
 		;
 	}
