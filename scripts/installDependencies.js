@@ -5,7 +5,7 @@ const
 	path = require('path'),
 	pwd = path.join(__dirname, ".."),
 
-	{ exec, execSync } = require('./custom-child-process')(pwd),
+	{ exec, execSync } = require('./common/custom-child-process')(pwd),
 
 	relativeCssLib = './webextension/data/css/lib/',
 	relativeJsLib = './webextension/data/js/lib/',
@@ -14,8 +14,8 @@ const
 	jsLib = path.join(pwd, relativeJsLib)
 ;
 
-const {cp} = require("./file-operations");
-const {error, warning, info, success} = require("./custom-console");
+const {cp} = require("./common/file-operations");
+const {error, warning, info, success} = require("./common/custom-console");
 
 
 /**

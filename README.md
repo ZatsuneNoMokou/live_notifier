@@ -11,6 +11,8 @@ More information on the [Mozilla add-on page](https://addons.mozilla.org/fr/fire
 
 To **install the dev version**, look inside the [dist folder](/dist) and consider reading the message there before installing it.
 
+Version 11.10.1 and newer: No setting migration from the versions before 8.0.0
+
 Sources:
 - perfect-scrollbar, from https://github.com/noraesae/perfect-scrollbar (License MIT).
 - Debounce (from Lodash), from https://github.com/lodash/lodash (License MIT).

@@ -14,13 +14,18 @@
 	"devDependencies": {
 		"chalk": "^2.3.1",
 		"fs-extra": "^5.0.0",
+		"klaw": "^2.1.1",
+		"rocambole": "github:zatsunenomokou/rocambole",
+		"strip-debug": "^2.0.0",
 		"stylelint": "^9.0.0",
-		"stylelint-config-recommended": "^2.1.0"
+		"stylelint-config-recommended": "^2.1.0",
+		"through2": "^2.0.3",
+		"yargs": "^11.0.0"
 	},
 	"scripts": {
 		"install": "node scripts/installDependencies.js",
 		"release:dev": "node scripts/release-dev.js",
-		"release": "bash scripts/make_web-ext_build.sh",
+		"release": "node scripts/release-dev.js --prod",
 		"test": "node scripts/test.js",
 		"update": "npm run install"
 	},
