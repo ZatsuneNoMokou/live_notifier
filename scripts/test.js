@@ -1,13 +1,13 @@
 const
 	WARNING_CHAR="⚠",
 	SUCCESS_CHAR="✅",
-	{error, warning, info, success} = require('./custom-console'),
+	{error, warning, info, success} = require('./common/custom-console'),
 	stylelint = require('stylelint'),
 
 	path = require('path'),
 	pwd = path.join(__dirname, ".."),
 
-	{ exec, execSync } = require('./custom-child-process')(pwd)
+	{ exec, execSync } = require('./common/custom-child-process')(pwd)
 ;
 
 
