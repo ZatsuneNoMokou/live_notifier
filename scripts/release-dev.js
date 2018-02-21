@@ -4,31 +4,22 @@ const
 	path = require("path"),
 	pwd = path.join(__dirname, ".."),
 
-	{ exec, execSync } = require('./custom-child-process')(pwd),
+	{ exec, execSync } = require('./common/custom-child-process')(pwd),
 
-	{fsReadFile} = require("./file-operations"),
+	{fsReadFile, getFilesRecursively, modifyFiles} = require("./common/file-operations"),
 	echo = console.log,
-	{error, warning, info, success} = require("./custom-console"),
+	{error, warning, info, success} = require("./common/custom-console"),
 
 	through2 = require('through2'),
-	{getFilesRecursively, modifyFiles} = require('./modify-file'),
 	stripDebug = require('strip-debug'), //TODO /!\ Using my rocambole fork hoping update https://github.com/millermedeiros/rocambole/issues/32
 
 	yargs = require('yargs')
 		.usage('Usage: $0 [options]')
 
-		.option('d', {
-			"alias": "dev",
-			"description": 'Do "dev" release [num].[num].[num]',
-			"type": "string",
-			"coerce": arg=>{
-				const versionReg = /\d+\.\d+\.\d+/;
-				if(arg==='' || versionReg.test(arg)===true){
-					return arg
-				} else {
-					throw "Invalid version pattern";
-				}
-			}
+		.option('p', {
+			"alias": ['prod','production'],
+			"description": 'Do stable release',
+			"type": "boolean"
 		})
 		.fail(function (msg, err, yargs) {
 			if(msg==="yargs error"){
@@ -70,14 +61,14 @@ function _setTimeout(millisecond) {
  */
 function errorHandler(promise) {
 	promise.catch(err=>{
-		throwException(err);
+		throwException.call(this, err);
 	});
 	return promise;
 }
 
 
 async function init() {
-	if(await fs.pathExists(path.join(pwd, `./live_notifier_dev_-${pjson.version}.zip`))){
+	if(await fs.pathExists(path.join(pwd, `./live_notifier${yargs.prod===true? '' : '_dev'}_-${pjson.version}.zip`))){
 		throwException(`Zip package already exist for version ${pjson.version}!`);
 	}
 
@@ -116,7 +107,7 @@ async function init() {
 		error(e);
 	}
 
-	if(!yargs.hasOwnProperty("dev")){
+	if(yargs.prod===true){
 		echo("Ready to clean files!");
 
 		let excludeDirString = "data/js/lib";
@@ -149,6 +140,16 @@ async function init() {
 				process.exit(1);
 			})
 		;
+
+		await errorHandler(modifyFile(path.join(tmpPath, './manifest.json'), function (data) {
+			data.applications.gecko.id = 'livenotifier@zatsunenomokou.eu';
+			delete data.applications.gecko.update_url;
+
+			data.name = "Live Notifier";
+			data.short_name = "LiveNotifier";
+
+			return data;
+		}, "json"));
 	}
 
 	try{

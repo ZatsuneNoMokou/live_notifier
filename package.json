@@ -24,8 +24,8 @@
 	},
 	"scripts": {
 		"install": "node scripts/installDependencies.js",
-		"release:dev": "node scripts/release.js --dev",
-		"release": "bash scripts/make_web-ext_build.sh",
+		"release:dev": "node scripts/release-dev.js",
+		"release": "node scripts/release-dev.js --prod",
 		"test": "node scripts/test.js",
 		"update": "npm run install"
 	},
