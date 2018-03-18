@@ -94,12 +94,12 @@ const options = {
 		"group": "youtube",
 		"prefLevel": "experimented"
 	},
-	/*"youtube_patreon_password": {
+	"youtube_patreon_password": {
 		"type": "string",
 		"value": "",
 		"group": "youtube",
-		"prefLevel": "experimented"
-	},*/
+		"prefLevel": "basic"
+	},
 	/*			Check delay			*/
 	"check_delay": {
 		"title": "Streams status delay",
