@@ -122,8 +122,8 @@
 	"youtube_api_referrer_title": "Your Youtube API Referrer (Optional)",
 	"youtube_api_referrer_description": "",
 
-	"youtube_patreon_password_title": "Patreon password (Optional, for my Patreon only)",
-	"youtube_patreon_password_description": "Fully use Youtube API, on my server",
+	"youtube_patreon_password_title": "Patreon password (Optional, for my Patreon only, to see all lives)",
+	"youtube_patreon_password_description": "Fully use Youtube API, not limited one",
 
 	"An_error_occurred_when_importing_check_your_id_or_the_website_availability": "An error occurred when importing, check your id or the website availability",
 
