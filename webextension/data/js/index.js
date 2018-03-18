@@ -697,7 +697,11 @@ appGlobal.sendDataToMain = function(sender, id, data){
 				deleteStreamFromPanel(data);
 				break;
 			case "openTab":
-				openTabIfNotExist(data);
+				ZDK.openTabIfNotExist(data)
+					.catch(err=>{
+						consoleMsg("warn", err);
+					})
+				;
 				break;
 			case "panel_onload":
 				handleChange(data);
@@ -736,26 +740,6 @@ function updatePanelData(doUpdateTheme=true){
 function handleChange() {
 	setIcon();
 	updatePanelData();
-}
-
-function openTabIfNotExist(url){
-	consoleMsg("log", url);
-	browser.tabs.query({})
-		.then(tabs=>{
-			let custom_url = url.toLowerCase().replace(/http(?:s)?:\/\/(?:www\.)?/i,"");
-			for(let tab of tabs){
-				if(tab.url.toLowerCase().indexOf(custom_url) !== -1){ // Mean the url was already opened in a tab
-					browser.tabs.highlight({tabs: tab.index}); // Show the already opened tab
-					return true; // Return true to stop the function as the tab is already opened
-				}
-			}
-			// If the function is still running, it mean that the url isn't detected to be opened, so, we can open it
-			browser.tabs.create({ "url": url });
-			return false; // Return false because the url wasn't already in a tab
-		})
-		.catch(err=>{
-			if(err) consoleMsg("warn", err);
-		});
 }
 
 const chromeNotifications = new ChromeNotificationControler(),
@@ -973,7 +957,11 @@ function doStreamNotif(website, id, contentId, streamSetting){
 
 				doNotif(notifOptions)
 					.then(()=>{
-						openTabIfNotExist(getStreamURL(website, id, contentId, true));
+						ZDK.openTabIfNotExist(getStreamURL(website, id, contentId, true))
+							.catch(err=>{
+								consoleMsg("warn", err);
+							})
+						;
 					})
 					.catch(err=>{
 						consoleMsg("warn", err);
