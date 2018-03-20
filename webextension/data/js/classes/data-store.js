@@ -13,8 +13,8 @@ class DataStore {
 	/**
 	 *
 	 * @param {String} key
-	 * @param {function} fnCompression
-	 * @param {function} fnDecompression
+	 * @param {Function} fnCompression
+	 * @param {Function} fnDecompression
 	 */
 	setCompression(key, fnCompression, fnDecompression){
 		if(typeof key!=="string" || typeof fnCompression!=="function" || typeof fnDecompression!=="function"){
@@ -61,9 +61,9 @@ class DataStore {
 
 	/**
 	 *
-	 * @param {string} key
-	 * @param {string} id
-	 * @return {string} storageId
+	 * @param {String} key
+	 * @param {String} id
+	 * @return {String} storageId
 	 */
 	static generateStorageId(key, id){
 		return `${key}/${id}`;
@@ -71,9 +71,31 @@ class DataStore {
 
 	/**
 	 *
-	 * @param {string} key
-	 * @param {string} id
-	 * @param {boolean|string|number|JSON} data
+	 * @param {String} string
+	 * @return {Object} storage
+	 * @return {String} storage.key
+	 * @return {String} storage.id
+	 */
+	static extractStorageId(string){
+		const extractReg = /^([^\/]*)\/(.*)$/,
+			result = extractReg.exec(string)
+		;
+
+		if(result!==null){
+			return {
+				"key": result[1],
+				"id": result[2]
+			};
+		} else {
+			throw "Could not extract key and id";
+		}
+	}
+
+	/**
+	 *
+	 * @param {String} key
+	 * @param {String} id
+	 * @param {Boolean|String|Number|JSON} data
 	 */
 	set(key, id, data){
 		data = this.compressData(key, data);
@@ -106,9 +128,9 @@ class DataStore {
 
 	/**
 	 *
-	 * @param {string} key
-	 * @param {string} id
-	 * @return {boolean|string|number|JSON} data
+	 * @param {String} key
+	 * @param {String} id
+	 * @return {Boolean|String|Number|JSON} data
 	 */
 	get(key, id){
 		if(typeof key==="string" && typeof id==="string"){
@@ -120,9 +142,9 @@ class DataStore {
 
 	/**
 	 *
-	 * @param {string} key
-	 * @param {string} id
-	 * @return {boolean}
+	 * @param {String} key
+	 * @param {String} id
+	 * @return {Boolean}
 	 */
 	has(key, id){
 		if(typeof key==="string" && typeof id==="string") {
@@ -134,14 +156,34 @@ class DataStore {
 
 	/**
 	 *
-	 * @param {string} key
-	 * @param {string} id
+	 * @param {String} key
+	 * @param {String} id
 	 */
 	remove(key, id){
 		if(typeof key==="string" && typeof id==="string"){
 			return this.storage.removeItem(DataStore.generateStorageId(key, id));
 		} else {
 			throw "Wrong argument";
+		}
+	}
+
+	/**
+	 *
+	 * @param {String} key
+	 * @param {Function} fn
+	 */
+	forEach(key, fn){
+		for(let i in this.storage){
+			if(this.storage.hasOwnProperty(i)){
+				let storageIds=null;
+				try{
+					storageIds = DataStore.extractStorageId(i);
+				} catch (e){}
+
+				if(storageIds!==null && storageIds.key===key){
+					fn(storageIds.key, storageIds.id, this.get(key, id));
+				}
+			}
 		}
 	}
 }
