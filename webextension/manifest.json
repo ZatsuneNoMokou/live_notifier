@@ -32,6 +32,7 @@
 			"/data/js/classes/i18extended.js",
 			"/data/js/classes/PromiseWaitAll.js",
 			"/data/js/classes/queue.js",
+			"/data/js/classes/data-store.js",
 
 
 			"/data/js/classes/ZDK.js",

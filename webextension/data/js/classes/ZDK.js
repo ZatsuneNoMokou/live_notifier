@@ -43,6 +43,15 @@ class ZDK{
 		} else {
 			console.warn(`"Queue" not found.`)
 		}
+		if(typeof DataStore==="function"){
+			Object.defineProperty(this, "DataStore", {
+				value: DataStore,
+				configurable: false,
+				writable: false
+			});
+		} else {
+			console.warn(`"DataStore" not found.`)
+		}
 	}
 
 
