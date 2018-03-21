@@ -7,10 +7,10 @@ class DataStore {
 		this.storage = win.localStorage;
 
 		this.types = {
-			"object": "o",
-			"boolean": "b",
-			"number": "n",
-			"string": "s"
+			"object": 0,
+			"boolean": 1,
+			"number": 2,
+			"string": 3
 		};
 
 		this.compressions = new Map();
@@ -107,7 +107,7 @@ class DataStore {
 	set(key, id, data){
 		data = this.compressData(key, data);
 
-		const dataToStore = {};
+		const dataToStore = [];
 
 		if(typeof key!=="string" && typeof id!=="string"){
 			throw "Wrong argument";
@@ -118,8 +118,6 @@ class DataStore {
 		}
 
 		if(typeof data==="object"){
-			dataToStore.t = this.types[typeof data];
-
 			let jsonString = null;
 			try{
 				jsonString = JSON.stringify(data);
@@ -128,17 +126,18 @@ class DataStore {
 			if(jsonString===null){
 				throw "Error with JSON.stringify()";
 			} else {
-				dataToStore.d = data;
+				dataToStore.push(this.types[typeof data]); // Type
+				dataToStore.push(data); // Data
 			}
 		} else if(typeof data!=="string" && typeof data!=="boolean" && typeof data!=="number"){
 			throw "Data type error";
 		} else {
-			dataToStore.t = this.types[typeof data];
+			dataToStore.push(this.types[typeof data]); // Type
 
 			if(typeof data==="boolean"){
-				dataToStore.d = (data===true)? 1 : 0
+				dataToStore.push((data===true)? 1 : 0); // Data
 			} else {
-				dataToStore.d = data;
+				dataToStore.push(data); // Data
 			}
 		}
 
@@ -156,24 +155,24 @@ class DataStore {
 			const rawData = JSON.parse(this.storage.getItem(DataStore.generateStorageId(key, id)));
 
 			let data = null;
-			switch (rawData.t){
+			switch (rawData[0]){
 				case this.types.object:
-					data = rawData.d;
+					data = rawData[1];
 					break;
 				case this.types.boolean:
-					if(typeof rawData.d==="string"){
-						rawData.d = Number.parseInt(rawData.d);
+					if(typeof rawData[1]==="string"){
+						rawData[1] = Number.parseInt(rawData[1]);
 					}
-					data = rawData.d===1;
+					data = rawData[1]===1;
 					break;
 				case this.types.number:
-					data = Number.parseFloat(rawData.d);
+					data = Number.parseFloat(rawData[1]);
 					break;
 				case this.types.string:
-					data = rawData.d;
+					data = rawData[1];
 					break;
 				default:
-					throws `Unexpected type "${data.t}"`;
+					throws `Unexpected type "${rawData[0]}"`;
 			}
 
 			return this.decompressData(key, data);
