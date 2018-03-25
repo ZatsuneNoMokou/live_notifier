@@ -68,12 +68,18 @@ class DataStore {
 
 	/**
 	 *
-	 * @param {String} key
+	 * @param {String|String[]} key
 	 * @param {String} id
 	 * @return {String} storageId
 	 */
 	static generateStorageId(key, id){
-		return `${key}/${id}`;
+		if(typeof key==="string"){
+			return `${key}/${id}`;
+		} else if(Array.isArray(key)){
+			return `${key.join("/")}/${id}`;
+		} else {
+			throw "Wrong argument type";
+		}
 	}
 
 	/**
@@ -81,35 +87,40 @@ class DataStore {
 	 * @param {String} string
 	 * @return {Object} storage
 	 * @return {String} storage.key
+	 * @return {String[]} storage.keys
 	 * @return {String} storage.id
 	 */
 	static extractStorageId(string){
-		const extractReg = /^([^\/]*)\/(.*)$/,
-			result = extractReg.exec(string)
+		const array = string.split("/"),
+			keys = array.slice(0, array.length - 1),
+			id = array[array.length - 1]
 		;
 
-		if(result!==null){
+		if(keys.length===1){
 			return {
-				"key": result[1],
-				"id": result[2]
+				"key": keys[0],
+				"id": id
 			};
 		} else {
-			throw "Could not extract key and id";
+			return {
+				"keys": keys,
+				"id": id
+			};
 		}
 	}
 
 	/**
 	 *
-	 * @param {String} key
+	 * @param {String|String[]} keys
 	 * @param {String} id
 	 * @param {Boolean|String|Number|JSON} data
 	 */
-	set(key, id, data){
-		data = this.compressData(key, data);
+	set(keys, id, data){
+		data = this.compressData(keys, data);
 
 		const dataToStore = [];
 
-		if(typeof key!=="string" && typeof id!=="string"){
+		if((typeof keys!=="string" || Array.isArray(keys)) && typeof id!=="string"){
 			throw "Wrong argument";
 		}
 
@@ -141,18 +152,18 @@ class DataStore {
 			}
 		}
 
-		return this.storage.setItem(DataStore.generateStorageId(key, id), JSON.stringify(dataToStore));
+		return this.storage.setItem(DataStore.generateStorageId(keys, id), JSON.stringify(dataToStore));
 	}
 
 	/**
 	 *
-	 * @param {String} key
+	 * @param {String|String[]} keys
 	 * @param {String} id
 	 * @return {Boolean|String|Number|JSON} data
 	 */
-	get(key, id){
-		if(typeof key==="string" && typeof id==="string"){
-			const rawData = JSON.parse(this.storage.getItem(DataStore.generateStorageId(key, id)));
+	get(keys, id){
+		if((typeof keys!=="string" || Array.isArray(keys)) && typeof id==="string"){
+			const rawData = JSON.parse(this.storage.getItem(DataStore.generateStorageId(keys, id)));
 
 			let data = null;
 			switch (rawData[0]){
@@ -175,7 +186,7 @@ class DataStore {
 					throws `Unexpected type "${rawData[0]}"`;
 			}
 
-			return this.decompressData(key, data);
+			return this.decompressData(keys, data);
 		} else {
 			throw "Wrong argument";
 		}
@@ -183,13 +194,13 @@ class DataStore {
 
 	/**
 	 *
-	 * @param {String} key
+	 * @param {String|String[]} keys
 	 * @param {String} id
 	 * @return {Boolean}
 	 */
-	has(key, id){
-		if(typeof key==="string" && typeof id==="string") {
-			return this.storage.getItem(DataStore.generateStorageId(key, id)) !== null;
+	has(keys, id){
+		if((typeof keys!=="string" || Array.isArray(keys)) && typeof id==="string") {
+			return this.storage.getItem(DataStore.generateStorageId(keys, id)) !== null;
 		} else {
 			throw "Wrong argument";
 		}
@@ -197,12 +208,12 @@ class DataStore {
 
 	/**
 	 *
-	 * @param {String} key
+	 * @param {String|String[]} keys
 	 * @param {String} id
 	 */
-	remove(key, id){
-		if(typeof key==="string" && typeof id==="string"){
-			return this.storage.removeItem(DataStore.generateStorageId(key, id));
+	remove(keys, id){
+		if((typeof keys!=="string" || Array.isArray(keys)) && typeof id==="string"){
+			return this.storage.removeItem(DataStore.generateStorageId(keys, id));
 		} else {
 			throw "Wrong argument";
 		}
@@ -210,10 +221,10 @@ class DataStore {
 
 	/**
 	 *
-	 * @param {String} key
+	 * @param {String} keys
 	 * @param {Function} fn
 	 */
-	forEach(key, fn){
+	forEach(keys, fn){
 		for(let i in this.storage){
 			if(this.storage.hasOwnProperty(i)){
 				let storageIds=null;
@@ -221,8 +232,25 @@ class DataStore {
 					storageIds = DataStore.extractStorageId(i);
 				} catch (e){}
 
-				if(storageIds!==null && storageIds.key===key){
-					fn(storageIds.key, storageIds.id, this.get(storageIds.key, storageIds.id));
+				if(storageIds!==null){
+					if(storageIds.hasOwnProperty("key") && storageIds.key===keys){
+						fn(storageIds.key, storageIds.id, this.get(storageIds.key, storageIds.id));
+					} else if(storageIds.hasOwnProperty("keys")){
+						if(storageIds.keys.length >= keys.length){
+							let equals = true;
+
+							for(let i=0;i<keys.length;i++){
+								if(keys[i]!==storageIds.keys[i]){
+									equals = false;
+									break;
+								}
+							}
+
+							if(equals===true){
+								fn(storageIds.keys, storageIds.id, this.get(storageIds.keys, storageIds.id));
+							}
+						}
+					}
 				}
 			}
 		}
