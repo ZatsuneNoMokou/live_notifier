@@ -8,6 +8,16 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 11.11.*
+* Fix: Option page - unused function;
+
+# 11.11.0
+* Fix: YouTube Patreon password, because of the quotas limits getting too close.
+
+# 11.10.10
+* i: Moved function to open tab if not already exist to ZDK
+* Fix: Trying to open a tab without any Window opened
+
 # 11.10.9
 * Fix: Panel - Online stream - Profile picture padding
 

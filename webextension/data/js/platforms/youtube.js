@@ -2,17 +2,17 @@ const youtube = {
 	"title": "YouTube",
 	"addStream_URLpatterns": new Map([
 		["channel::youtube", [
-			/(?:http|https):\/\/(?:www\.|gaming\.)?youtube\.com\/channel\/([^\/\?\&\#]+)*.*/
+			/(?:http|https):\/\/(?:www\.|gaming\.)?youtube\.com\/channel\/([^\/?&#]+)*.*/
 		]],
 		["user::youtube", [
-			/(?:http|https):\/\/(?:www\.|gaming\.)?youtube\.com\/user\/([^\/\?\&\#]+)*.*/
+			/(?:http|https):\/\/(?:www\.|gaming\.)?youtube\.com\/user\/([^\/?&#]+)*.*/
 		]],
 		["video::youtube", [
-			/(?:http|https):\/\/(?:www\.|gaming\.)?youtube\.com\/watch\?v\=([^\/\?\&\#]+)*.*/,
-			/(?:http|https):\/\/(?:www\.|gaming\.)?youtu\.be\/([^\/\?\&\#]+)*.*/
+			/(?:http|https):\/\/(?:www\.|gaming\.)?youtube\.com\/watch\?v=([^\/?&#]+)*.*/,
+			/(?:http|https):\/\/(?:www\.|gaming\.)?youtu\.be\/([^\/?&#]+)*.*/
 		]],
 		["c::youtube", [
-			/(?:http|https):\/\/(?:www\.|gaming\.)?youtube\.com\/c\/([^\/\?\&\#]+)*.*/
+			/(?:http|https):\/\/(?:www\.|gaming\.)?youtube\.com\/c\/([^\/?&#]+)*.*/
 		]]
 	]),
 	"Request_documentParseToJSON":
@@ -103,7 +103,9 @@ const youtube = {
 	"API":
 		function(id, nextPageToken){
 			const apiKey = getPreference("youtube_api_key").replace(/\s/,""),
-				referrer = getPreference("youtube_api_referrer");
+				referrer = getPreference("youtube_api_referrer"),
+				youtube_patreon_password = getPreference("youtube_patreon_password").replace(/\s/,"")
+			;
 
 			let obj = {};
 			
@@ -141,7 +143,6 @@ const youtube = {
 					}
 				}
 			} else {
-				//if(youtube_patreon_password != ""){
 				if(website_channel_id.test(id)){
 					obj = {
 						"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLives.php",
@@ -150,7 +151,13 @@ const youtube = {
 							["id", website_channel_id.exec(id)[1]]
 						]
 					};
-					if(typeof nextPageToken === "string"){obj.content.push(["pageToken", nextPageToken]);}
+					if(youtube_patreon_password !== ""){
+						obj.content.push(["password", youtube_patreon_password]);
+					} else {
+						if(typeof nextPageToken === "string"){
+							obj.content.push(["pageToken", nextPageToken]);
+						}
+					}
 				} else {
 					obj = {
 						"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLiveInfo.php",
