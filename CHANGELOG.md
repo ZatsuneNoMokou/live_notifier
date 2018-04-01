@@ -8,7 +8,8 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
-# 11.11.*
+# 11.12.0
+* +: Panel - experimented level - Show icon on streams with error(s)
 * Fix: Option page - unused function;
 
 # 11.11.0

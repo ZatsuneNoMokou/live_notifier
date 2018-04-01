@@ -1131,6 +1131,10 @@ function checkResponseValidity(website, response){
 			consoleMsg("warn", `[${website}] Unable to get stream state (error detected).`);
 			return "error";
 			break;
+		case "error-unavailable":
+			consoleMsg("warn", `[${website}] Unable to get stream state (unavailable).`);
+			return "error-unavailable";
+			break;
 		case "vod":
 			consoleMsg("warn", `[${website}] Unable to get stream state (vod detected).`);
 			return "vod";
@@ -1527,6 +1531,7 @@ async function processPrimary(id, contentId, website, streamSetting, response){
 						return "StreamChecked";
 					}
 				} else {
+					liveStatus.get(website).get(id).get(contentId).liveStatus.lastCheckStatus = responseValidity;
 					return responseValidity;
 				}
 				//doStreamNotif(website, id, contentId, streamSetting);
