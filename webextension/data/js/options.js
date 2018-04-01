@@ -28,7 +28,6 @@ function sendDataToMain(id, data){
 
 loadPreferences("section#preferences");
 
-let loadJS = browser.extension.getBackgroundPage().loadJS;
 function init(){
 	loadTranslations();
 }

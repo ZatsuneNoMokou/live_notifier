@@ -29,31 +29,31 @@ function copyToClipboard(string){
 		copy_form.textContent = string;
 		copy_form.class = "hide";
 		document.body.appendChild(copy_form);
-		
+
 		copy_form.focus();
 		copy_form.select();
 		let clipboard_success = document.execCommand('Copy');
 		if(clipboard_success){
 			appGlobal.doNotif({
-				"message": i18ex._("clipboard_success")
-			})
+					"message": i18ex._("clipboard_success")
+				})
 				.catch(err=>{
 					console.warn(err);
 				});
 			console.info(`Copied: ${string}`);
 		} else {
 			appGlobal.doNotif({
-				"message": i18ex._("clipboard_failed")
-			})
+					"message": i18ex._("clipboard_failed")
+				})
 				.catch(err=>{
 					console.warn(err);
 				})
 			;
 		}
-		
+
 		copy_form.remove();
 	};
-	
+
 	if(typeof chrome.permissions !== "undefined"){
 		chrome.permissions.contains({
 			permissions: ['clipboardWrite'],
@@ -149,10 +149,10 @@ function drag(event) {
 }
 function drop(event) {
 	event.preventDefault();
-	
+
 	let dropDiv = document.querySelector("#deleteStream");
 	dropDiv.classList.remove("active");
-	
+
 	sendDataToMain("deleteStream", dragData);
 
 	dragData = null;
@@ -193,7 +193,7 @@ function deleteStreamButtonClick(){
 			}
 		}
 	}
-	
+
 	let ignoreStreamButtons = document.querySelectorAll(".item-stream .ignoreStreamButton");
 	let streamListSettings = new streamListFromSetting();
 	for(let node of ignoreStreamButtons){
@@ -203,7 +203,7 @@ function deleteStreamButtonClick(){
 			node.classList.toggle("active", streamListSettings.mapDataAll.get(website).get(id).ignore);
 		}
 	}
-	
+
 	streamChangeMode = !streamChangeMode;
 	document.querySelector("#deleteModeControles").classList.toggle("hide",!streamChangeMode);
 	document.querySelector("#streamList").classList.toggle("deleteButtonMode");
@@ -265,22 +265,22 @@ let toggle_search_button = document.querySelector("button#searchStream");
 let searchInput_onInput_Loaded = false;
 function searchContainer_Toggle(){
 	let searchInputContainer = document.querySelector("#searchInputContainer");
-	
+
 	let searchInput = document.querySelector("input#searchInput");
 	if(!searchInput_onInput_Loaded){
 		searchInput.addEventListener("input", searchInput_onInput);
-		
+
 		let searchLabel = document.querySelector("#searchInputContainer label");
 		searchLabel.addEventListener("click", searchInput_onInput);
 	}
-	
+
 	searchInputContainer.classList.toggle("hide");
 	searchInput.value = "";
 	searchInput_onInput();
 	if(!searchInput.classList.contains("hide")){
 		searchInput.focus();
 	}
-	
+
 	scrollbar_update("streamList");
 }
 toggle_search_button.addEventListener("click", searchContainer_Toggle);
@@ -288,7 +288,7 @@ toggle_search_button.addEventListener("click", searchContainer_Toggle);
 
 function searchInput_onInput(){
 	let searchInput = document.querySelector("input#searchInput");
-	
+
 	let somethingElseThanSpaces = /[^\s]+/;
 	let search = searchInput.value.toLowerCase();
 	let searchCSS_Node = document.querySelector("#search-cssSelector");
@@ -321,10 +321,10 @@ function selectSection(sectionNodeId){
 	let streamEditor = document.querySelector("#streamEditor");
 	let settings_node = document.querySelector("#settings_container");
 	let debugSection = document.querySelector("section#debugSection");
-	
+
 	if(typeof sectionNodeId === "string" && sectionNodeId !== ""){
 		let sectionList = [streamList, streamEditor, settings_node, debugSection];
-		
+
 		let sectionEnabled = false;
 		for(let i in sectionList){
 			if(sectionList.hasOwnProperty(i)){
@@ -371,10 +371,10 @@ liveEvent("click", "#ignoreHideIgnore", ()=>{ignoreHideIgnore = true;});
 
 if(typeof browser.storage.sync === "object"){
 	document.querySelector("#syncContainer").classList.remove("hide");
-	
+
 	let restaure_sync_button = document.querySelector("#restaure_sync");
 	restaure_sync_button.addEventListener("click", function(event){restaureOptionsFromSync(event);});
-	
+
 	let save_sync_button = document.querySelector("#save_sync");
 	save_sync_button.addEventListener("click", function(event){saveOptionsInSync(event);});
 }
@@ -454,16 +454,16 @@ liveEvent("click", "#saveEditedStream", function(){
 let ignoreHideIgnore = false;
 function updatePanelData(doUpdateTheme=true){
 	console.log("Updating panel data");
-	
+
 	if(doUpdateTheme === true){
 		theme_update();
 	}
-	
+
 	//Clear stream list in the panel
 	initList({"group_streams_by_websites": getPreference("group_streams_by_websites"), "show_offline_in_panel": getPreference("show_offline_in_panel")});
-	
+
 	let show_offline_in_panel = getPreference("show_offline_in_panel");
-	
+
 	let streamListSettings = new streamListFromSetting().mapDataAll;
 	streamListSettings.forEach((streamList, website) => {
 		streamList.forEach((value, id) => {
@@ -477,14 +477,14 @@ function updatePanelData(doUpdateTheme=true){
 					return;
 				}
 			}
-			
+
 			if(liveStatus.has(website) && liveStatus.get(website).has(id) && liveStatus.get(website).get(id).size > 0){
 				liveStatus.get(website).get(id).forEach((streamData, contentId) => {
 					getCleanedStreamStatus(website, id, contentId, streamList.get(id), streamData.liveStatus.API_Status);
-					
+
 					if(streamData.liveStatus.filteredStatus || (show_offline_in_panel && !streamData.liveStatus.filteredStatus)){
 						doStreamNotif(website, id, contentId, streamList.get(id), streamData.liveStatus.API_Status);
-						
+
 						listener(website, id, contentId, "live", streamList.get(id), streamData);
 					}
 				})
@@ -492,9 +492,9 @@ function updatePanelData(doUpdateTheme=true){
 				if(channelInfos.has(website) && channelInfos.get(website).has(id)){
 					//let streamData = channelInfos.get(website).get(id);
 					//let contentId = id;
-					
+
 					//console.info(`Using channel infos for ${id} (${website})`);
-					
+
 					listener(website, id, /* contentId */ id, "channel", streamList.get(id), channelInfos.get(website).get(id));
 				} else if(websites.has(website)){
 					console.info(`Currrently no data for ${id} (${website})`);
@@ -517,7 +517,7 @@ function updatePanelData(doUpdateTheme=true){
 		});
 	});
 	scrollbar_update("streamList");
-	
+
 	liveStatus.forEach((website_liveStatus, website) => {
 		website_liveStatus.forEach((id_liveStatus, id) => {
 			// Clean the streams already deleted but status still exist
@@ -532,23 +532,23 @@ function updatePanelData(doUpdateTheme=true){
 	});
 
 	lazyLoading.updateStore();
-	
+
 	checkMissing();
-	
+
 	//Update online steam count in the panel
 	let onlineCount = appGlobal["onlineCount"];
 	listenerOnlineCount((onlineCount === 0)? i18ex._("No_stream_online") :  i18ex._("count_stream_online", {count: onlineCount}));
-	
+
 	if(show_offline_in_panel){
 		let offlineCount = getOfflineCount();
 		listenerOfflineCount((offlineCount === 0)? i18ex._("No_stream_offline") :  i18ex._("count_stream_offline", {count: offlineCount}));
 	} else {
 		listenerOfflineCount("");
 	}
-	
+
 	let debug_checkingLivesState_node = document.querySelector("#debug_checkingLivesState");
 	debug_checkingLivesState_node.className = appGlobal["checkingLivesFinished"];
-	
+
 	//Update Live notifier version displayed in the panel preferences
 	if(typeof appGlobal["version"] === "string"){
 		current_version(appGlobal["version"]);
@@ -651,10 +651,10 @@ function initList(data){
 			}
 		}
 	}
-	
+
 	unhideClassNode(document.querySelector("#noErrorToShow"));
 	removeAllChildren(document.querySelector("#debugData"));
-	
+
 	document.querySelector("#streamListOffline").classList.toggle("hide", !showOffline)
 }
 
@@ -672,28 +672,28 @@ function listenerOfflineCount(data){
 
 function newDeleteStreamButton_onClick(event){
 	event.stopPropagation();
-	
+
 	let node = this;
 	// let id = node.dataset.id;
 	// let website = node.dataset.website;
-	
+
 	node.classList.toggle("active");
 	//sendDataToMain("deleteStream", {id: id, website: website});
 	return false;
 }
 function newIgnoreStreamButton_onClick(event){
 	event.stopPropagation();
-	
+
 	let node = this;
 	// let id = node.dataset.id;
 	// let website = node.dataset.website;
-	
+
 	node.classList.toggle("active");
 	return false;
 }
 function newShareStreamButton_onClick(event){
 	event.stopPropagation();
-	
+
 	let node = this;
 	sendDataToMain("shareStream", {
 		website: node.dataset.website,
@@ -704,30 +704,30 @@ function newShareStreamButton_onClick(event){
 }
 function newEditStreamButton_onClick(event){
 	event.stopPropagation();
-	
+
 	let node = this;
 	let id = node.dataset.id;
 	let contentId = node.dataset.contentId;
 	let website = node.dataset.website;
 	let title = node.dataset.title;
-	
+
 	let streamSettings = JSON.parse(node.dataset.streamSettings);
-	
+
 	let streamList = document.querySelector("#streamList");
 	let streamEditor = document.querySelector("#streamEditor");
 	let settings_node = document.querySelector("#settings_container");
-	
+
 	hideClassNode(streamList);
 	hideClassNode(settings_node);
-	
+
 	let titleNode = document.querySelector("#editedStreamTitle");
 	titleNode.textContent = title;
-	
+
 	let saveEditedStream = document.querySelector("#saveEditedStream");
 	saveEditedStream.dataset.id = id;
 	saveEditedStream.dataset.contentId = contentId;
 	saveEditedStream.dataset.website = website;
-	
+
 	document.querySelector("#streamEditor #customURL").value = streamSettings.streamURL;
 	document.querySelector("#streamEditor #status_blacklist").value = (streamSettings.statusBlacklist)? streamSettings.statusBlacklist.join("\n") : "";
 	document.querySelector("#streamEditor #status_whitelist").value = (streamSettings.statusWhitelist)? streamSettings.statusWhitelist.join("\n") : "";
@@ -742,19 +742,19 @@ function newEditStreamButton_onClick(event){
 	document.querySelector("#streamEditor #notifyVocalOnline").checked = (typeof streamSettings.notifyVocalOnline === "boolean")? streamSettings.notifyVocalOnline : true;
 	document.querySelector("#streamEditor #notifyOffline").checked = (typeof streamSettings.notifyOffline === "boolean")? streamSettings.notifyOffline : false;
 	document.querySelector("#streamEditor #notifyVocalOffline").checked = (typeof streamSettings.notifyVocalOffline === "boolean")? streamSettings.notifyVocalOffline : false;
-	
+
 	unhideClassNode(streamEditor);
 	scrollbar_update("streamEditor");
 	return false;
 }
 function newCopyStreamURLButton_onClick(event){
 	event.stopPropagation();
-	
+
 	let node = this;
 	let id = node.dataset.id;
 	let contentId = node.dataset.contentId;
 	let website = node.dataset.website;
-	
+
 	copyToClipboard(getStreamURL(website, id, contentId, false));
 	return false;
 }
@@ -817,6 +817,7 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 		"streamId": id,
 		"contentId": contentId,
 		"online": online,
+		"withError": false,
 		"streamName": streamData.streamName,
 		"streamNameLowercase": streamData.streamName.toLowerCase(),
 		"streamWebsite": website,
@@ -828,7 +829,7 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 
 		"usePictureLazyLoading": true
 	};
-	
+
 	if(online){
 		streamRenderData.streamStatus = streamData.streamStatus;
 		streamRenderData.streamStatusLowercase = streamData.streamStatus.toLowerCase();
@@ -861,37 +862,41 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	} else if(typeof streamData.streamOwnerLogo === "string" && streamData.streamOwnerLogo !== ""){
 		streamLogo  = streamData.streamOwnerLogo;
 	}
-	
+
 	if(typeof streamLogo === "string" && streamLogo !== ""){
 		streamRenderData.streamLogo = streamLogo;
 	}
 	/*if(typeof backgroundPage.zDK.isFirefox==="boolean"&&backgroundPage.zDK.isFirefox===false){
 		streamRenderData.usePictureLazyLoading = false;
 	}*/
-	const $newNode = insertStreamNode(Mustache.render(streamTemplate, streamRenderData), website, id, contentId, type, streamData, online);
 
 	if(typeof liveStatus.lastCheckStatus === "string" && liveStatus.lastCheckStatus !== "" && liveStatus.lastCheckStatus !== "success"){
+		streamRenderData.withError = true;
+
+
 		let debugDataNode = document.querySelector("#debugData");
 		let newDebugItem = document.createElement('div');
 		newDebugItem.classList.add("debugItem");
 		newDebugItem.dataset.streamWebsite = website;
-		
+
 		let newDebugItem_title = document.createElement('span');
 		newDebugItem_title.classList.add("debugTitle");
 		newDebugItem_title.textContent = streamData.streamName;
 		newDebugItem.appendChild(newDebugItem_title);
-		
+
 		let newDebugItem_status = document.createElement('span');
 		newDebugItem_status.textContent = `${liveStatus.lastCheckStatus}`;
 		newDebugItem.appendChild(newDebugItem_status);
-		
+
 		debugDataNode.appendChild(newDebugItem);
-		
+
 		let noErrorToShow = document.querySelector("#noErrorToShow");
 		hideClassNode(noErrorToShow);
-		
+
 		scrollbar_update("debugSection");
 	}
+
+	const $newNode = insertStreamNode(Mustache.render(streamTemplate, streamRenderData), website, id, contentId, type, streamData, online);
 
 	if(streamRenderData.usePictureLazyLoading===false && typeof streamRenderData.streamLogo==="string" && streamRenderData.streamLogo!==""){
 		appGlobal.loadImage(streamRenderData.streamLogo)
@@ -926,7 +931,7 @@ function streamItemClick(){
 	let contentId = node.dataset.contentId;
 	//let online = node.dataset.online;
 	let website = node.dataset.streamWebsite;
-	
+
 	let streamUrl = getStreamURL(website, id, contentId, true);
 	if(streamChangeMode === false && streamUrl !==null && streamUrl !== ""){
 		sendDataToMain("openTab", streamUrl);
@@ -940,10 +945,10 @@ function current_version(version){
 
 function theme_update(){
 	let panelColorStylesheet = theme_cache_update(document.querySelector("#generated-color-stylesheet"));
-	
+
 	if(typeof panelColorStylesheet === "object" && panelColorStylesheet !== null){
 		console.info("Theme update");
-		
+
 		let currentThemeNode = document.querySelector("#generated-color-stylesheet");
 		currentThemeNode.remove();
 
@@ -991,14 +996,14 @@ load_scrollbar("settings_container");
 load_scrollbar("debugSection");
 
 window.onresize = _.debounce(()=>{
-		scrollbar_update("streamList");
-		scrollbar_update("streamEditor");
-		scrollbar_update("settings_container");
-		scrollbar_update("debugSection");
+	scrollbar_update("streamList");
+	scrollbar_update("streamEditor");
+	scrollbar_update("settings_container");
+	scrollbar_update("debugSection");
 
-		applyPanelSize();
-	}, 100, {
-		maxWait: 200
-	})
+	applyPanelSize();
+}, 100, {
+	maxWait: 200
+})
 ;
 
