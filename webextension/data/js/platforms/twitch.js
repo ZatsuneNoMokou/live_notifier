@@ -42,7 +42,9 @@ const twitch = {
 	"checkResponseValidity":
 		function(data){
 			if(data.hasOwnProperty("error")){
-				if(typeof data.message === "string"){
+				if(typeof data.status === "number" && /^4\d*$/.test(data.status) === true){
+					return "error-unavailable";
+				} else if(typeof data.message === "string"){
 					return data.message;
 				} else if(typeof data.error === "string"){
 					return data.error;

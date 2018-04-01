@@ -382,6 +382,20 @@ body[data-theme='light'] .debugItem[data-stream-website="hitbox"] .debugTitle::b
 	background-image: url("../offline-stream.svg");
 }
 
+
+.item-stream .erroredItem-icon {
+	display: none;
+}
+
+body.showAdvanced.showExperimented .item-stream .erroredItem-icon {
+	content: url('/data/images/warning-34621.svg');
+	display: inline-block;
+	height: 1.5em;
+	margin-right: 0.3em;
+	vertical-align: middle;
+	width: 1.5em;
+}
+
 .item-stream.offline > span {
 	display: block;
 }
