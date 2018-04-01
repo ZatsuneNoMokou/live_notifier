@@ -1,4 +1,4 @@
-<div id="{{streamWebsite}}/{{streamId}}/{{contentId}}" class="item-stream cursor{{#online}} onlineItem{{/online}}{{^online}} offlineItem{{/online}}"
+<div id="{{streamWebsite}}/{{streamId}}/{{contentId}}" class="item-stream cursor{{#online}} onlineItem{{/online}}{{^online}} offlineItem{{/online}}{{#withError}} erroredItem{{/withError}}"
 	{{#streamStatus}}
 		data-stream-status='{{streamStatus}}' data-stream-status-lowercase='{{streamStatusLowercase}}'
 	{{/streamStatus}}
@@ -13,7 +13,7 @@
 	<figure class="streamPicture hide" {{#usePictureLazyLoading}}data-src="{{streamLogo}}"{{/usePictureLazyLoading}}></figure>
 	{{#online}}
 	<div>
-		{{/online}}<span class="streamTitle">{{streamName}}</span>{{#online}}
+		{{/online}}<span class="streamTitle">{{#withError}}<span class="erroredItem-icon"></span>{{/withError}}{{streamName}}</span>{{#online}}
 {{#streamCurrentViewers}}<span class="streamCurrentViewers" data-stream-current-viewers="{{streamCurrentViewers}}"></span>{{/streamCurrentViewers}}
 	</div>
 	<div>
