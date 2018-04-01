@@ -183,18 +183,10 @@ function refreshSettings(event){
 			}
 			let body = document.querySelector("body");
 			if(prefId === "showAdvanced"){
-				if(getPreference("showAdvanced")){
-					body.classList.add("showAdvanced");
-				} else {
-					body.classList.remove("showAdvanced");
-				}
+				body.classList.toggle("showAdvanced", getPreference("showAdvanced"));
 			}
 			if(prefId === "showExperimented"){
-				if(getPreference("showExperimented")){
-					body.classList.add("showExperimented");
-				} else {
-					body.classList.remove("showExperimented");
-				}
+				body.classList.toggle("showExperimented", getPreference("showExperimented"));
 			}
 			if(prefId === "panel_theme" || prefId === "background_color" && typeof theme_update === "function"){
 				theme_update();
