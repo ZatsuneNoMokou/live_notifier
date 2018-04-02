@@ -36,6 +36,7 @@
 
 
 			"/data/js/classes/ZDK.js",
+			"/data/js/live-store.js",
 			"init.js"
 		]
 	},

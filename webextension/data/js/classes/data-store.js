@@ -68,6 +68,83 @@ class DataStore {
 
 	/**
 	 *
+	 * @param {Object} sourceData
+	 * @param {Object} patternObj
+	 * @return {Object}
+	 */
+	static compressWithPattern(sourceData, patternObj){
+		let data = Object.assign({}, sourceData);
+		if(typeof data==="object" && data!==null){
+			for(let i in patternObj){
+				if(!patternObj.hasOwnProperty(i)){
+					continue;
+				}
+
+				switch (typeof patternObj[i]){
+					case "string":
+						DataStore.renameProperty(data, i, patternObj[i]);
+						break;
+					case "object":
+						if(data.hasOwnProperty(i)){
+							data[i] = DataStore.compressWithPattern(data[i], patternObj[i]);
+						}
+						break;
+					default:
+						throw "Unsupported type in compression data.";
+				}
+			}
+		}
+		return data;
+	}
+
+	/**
+	 *
+	 * @param {Object} sourceData
+	 * @param {Object} patternObj
+	 * @return {Object}
+	 */
+	static decompressWithPattern(sourceData, patternObj){
+		let data = Object.assign({}, sourceData);
+		if(typeof data==="object" && data!==null){
+			for(let i in patternObj){
+				if(!patternObj.hasOwnProperty(i)){
+					continue;
+				}
+
+				switch (typeof patternObj[i]){
+					case "string":
+						DataStore.renameProperty(data, patternObj[i], i);
+						break;
+					case "object":
+						if(data.hasOwnProperty(i)){
+							data[i] = DataStore.decompressWithPattern(data[i], patternObj[i]);
+						}
+						break;
+					default:
+						throw "Unsupported type in compression data.";
+				}
+			}
+		}
+		return data;
+	}
+
+	/**
+	 *
+	 * @param {Object} object
+	 * @param {String} oldName
+	 * @param {String} newName
+	 * @return {Object}
+	 */
+	static renameProperty(object, oldName, newName){
+		if(object.hasOwnProperty(oldName)) {
+			object[newName] = this[oldName];
+			delete object[oldName];
+		}
+		return object;
+	}
+
+	/**
+	 *
 	 * @param {String|String[]} key
 	 * @param {String} id
 	 * @return {String} storageId

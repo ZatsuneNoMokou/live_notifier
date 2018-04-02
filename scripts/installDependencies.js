@@ -99,6 +99,9 @@ async function init() {
 		echo("Copying dom-delegate...");
 		await _cp("./node_modules/dom-delegate/build/dom-delegate.js", jsLib);
 
+		echo("Copying lz-string...");
+		await _cp("./node_modules/lz-string/libs/lz-string.js", jsLib);
+
 		success("\n✅ Done");
 		process.exit(0);
 	}
