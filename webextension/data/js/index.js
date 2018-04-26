@@ -1486,7 +1486,16 @@ async function processPrimary(id, contentId, website, streamSetting, response){
 	if(responseValidity === "success"){
 		let liveState = websites.get(website).checkLiveStatus(id, contentId, data, liveStatus.get(website).get(id).get(contentId), (channelInfos.has(website) && channelInfos.get(website).has(id))? channelInfos.get(website).get(id) : null);
 		if(liveState !== null){
-			liveStatus.get(website).get(id).set(contentId, liveState);
+			if(typeof liveState==="string"){
+				if(websites.get(website).hasOwnProperty("website_ignore") && liveState===websites.get(website).website_ignore){
+					liveStatus.get(website).get(id).delete(contentId);
+					return "StreamChecked";
+				} else {
+					return "liveState is unexpected";
+				}
+			} else {
+				liveStatus.get(website).get(id).set(contentId, liveState);
+			}
 
 			if(websites.get(website).hasOwnProperty("API_second") === true){
 				let second_API = websites.get(website).API_second(contentId);
