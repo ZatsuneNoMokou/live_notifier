@@ -9,7 +9,7 @@
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
 # WIP
-* +: YouTube - Use channel "/live" for non-patreon
+* \+ : YouTube - Use channel "/live" for non-patreon
 
 # 11.12.0
 * \+ : Panel - experimented level - Show icon on streams with error(s)
