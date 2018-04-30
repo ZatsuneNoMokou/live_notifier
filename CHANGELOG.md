@@ -10,6 +10,7 @@
 
 # WIP
 * \+ : YouTube - Use channel "/live" for non-patreon
+* Fix : Mixer - Use Client-ID in header
 
 # 11.12.0
 * \+ : Panel - experimented level - Show icon on streams with error(s)
