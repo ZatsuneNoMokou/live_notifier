@@ -53,15 +53,13 @@
 	"permissions": [
 		"tabs",
 		"activeTab",
+		"clipboardWrite",
 		"contextMenus",
 		"notifications",
 		"storage",
 		"unlimitedStorage",
 		"http://*/*",
 		"https://*/*"
-	],
-	"optional_permissions": [
-		"clipboardWrite"
 	],
 	"options_ui": {
 		"page": "data/options.html",

@@ -8,9 +8,10 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
-# WIP
+# 11.13.0
 * \+ : YouTube - Use channel "/live" for non-patreon
 * Fix : Mixer - Use Client-ID in header
+* Fix : Move clipboard writing permission to non-optionnal to avoid problems
 
 # 11.12.0
 * \+ : Panel - experimented level - Show icon on streams with error(s)
