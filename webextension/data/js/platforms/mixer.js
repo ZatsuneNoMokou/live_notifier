@@ -2,7 +2,7 @@ const mixer = {
 	"title": "Mixer",
 	"addStream_URLpatterns": new Map([
 		["mixer", [
-			/^(?:http|https):\/\/mixer\.com\/([^\/\?\&]+)/
+			/^(?:http|https):\/\/mixer\.com\/([^\/?&]+)/
 		]]
 	]),
 	"API_addStream":
@@ -12,22 +12,31 @@ const mixer = {
 	"API":
 		function(id){
 			return {
-				url: `https://mixer.com/api/v1/channels/${id}`,
-				overrideMimeType: "text/plain; charset=utf-8"
+				"url": `https://mixer.com/api/v1/channels/${id}`,
+				"overrideMimeType": "text/plain; charset=utf-8",
+				"headers": {
+					"Client-ID": "e220beaa5f0096f0dca8b0f488bea8e820084a713494ccfd"
+				}
 			};
 		},
 	"importAPIGetUserId":
 		function(id){
 			return {
-				url: `https://mixer.com/api/v1/channels/${id}`,
-				overrideMimeType: "text/plain; charset=utf-8"
+				"url": `https://mixer.com/api/v1/channels/${id}`,
+				"overrideMimeType": "text/plain; charset=utf-8",
+				"headers": {
+					"Client-ID": "e220beaa5f0096f0dca8b0f488bea8e820084a713494ccfd"
+				}
 			};
 		},
 	"importAPI":
 		function(id){
 			return {
-				url: `https://mixer.com/api/v1/users/${id}/follows?fields=id,token`,
-				overrideMimeType: "text/plain; charset=utf-8"
+				"url": `https://mixer.com/api/v1/users/${id}/follows?fields=id,token`,
+				"overrideMimeType": "text/plain; charset=utf-8",
+				"headers": {
+					"Client-ID": "e220beaa5f0096f0dca8b0f488bea8e820084a713494ccfd"
+				}
 			};
 		},
 	"checkResponseValidity":

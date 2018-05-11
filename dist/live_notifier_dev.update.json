@@ -2,7 +2,7 @@
 	"addons": {
 		"livenotifier_dev@zatsunenomokou.eu": {
 			"updates": [
-				{ "version": "11.12.0",
+				{ "version": "11.13.0",
 					"update_link": "https://gitlab.com/ZatsuneNoMokou/live_notifier/raw/master/dist/live_notifier_dev.xpi",
 					"applications": {
 						"gecko": { "strict_min_version": "52" } } }
