@@ -1,5 +1,6 @@
 const youtube = {
 	"title": "YouTube",
+	"website_ignore": "ignore",
 	"addStream_URLpatterns": new Map([
 		["channel::youtube", [
 			/(?:http|https):\/\/(?:www\.|gaming\.)?youtube\.com\/channel\/([^\/?&#]+)*.*/
@@ -75,6 +76,34 @@ const youtube = {
 			}
 			return jsonDATA;
 		},
+	"Request_documentParseToJSON_get_VID":
+		function (xhrResponse) {
+			const responseDoc = xhrResponse.response,
+				ogImage = responseDoc.querySelector("meta[property='og:image']")
+			;
+
+			if(ogImage!==null){
+				const ogImageUrl = ogImage.getAttribute("content"),
+					extraction = /^https?:\/\/i\.ytimg\.com\/vi\/([^\/]+)\/[\w_]+\.jpg$/i.exec(ogImageUrl),
+					result = {
+						"items": []
+					}
+				;
+
+				if(extraction!==null){
+					result.items.push({
+						"id": {
+							"kind": "youtube#video",
+							"videoId": extraction[1]
+						}
+					})
+				}
+
+				return result;
+			}
+
+			return null;
+		},
 	"API_addStream":
 		function(source_website, id){
 			const apiKey = getPreference("youtube_api_key").replace(/\s/,""),
@@ -144,20 +173,30 @@ const youtube = {
 				}
 			} else {
 				if(website_channel_id.test(id)){
-					obj = {
-						"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLives.php",
-						"overrideMimeType":"text/plain; charset=utf-8",
-						"content": [
-							["id", website_channel_id.exec(id)[1]]
-						]
-					};
 					if(youtube_patreon_password !== ""){
-						obj.content.push(["password", youtube_patreon_password]);
-					} else {
-						if(typeof nextPageToken === "string"){
-							obj.content.push(["pageToken", nextPageToken]);
+						obj = {
+							"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLives.php",
+							"overrideMimeType":"text/plain; charset=utf-8",
+							"content": [
+								["id", website_channel_id.exec(id)[1]]
+							]
+						};
+						if(youtube_patreon_password !== ""){
+							obj.content.push(["password", youtube_patreon_password]);
+						} else {
+							if(typeof nextPageToken === "string"){
+								obj.content.push(["pageToken", nextPageToken]);
+							}
 						}
+					} else {
+						obj = {
+							"url": `https://www.youtube.com/channel/${website_channel_id.exec(id)[1]}/live`,
+							"contentType": "document",
+							"overrideMimeType":"text/html; charset=utf-8",
+							"Request_documentParseToJSON": youtube.Request_documentParseToJSON_get_VID
+						};
 					}
+
 				} else {
 					obj = {
 						"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLiveInfo.php",
@@ -311,7 +350,7 @@ const youtube = {
 					streamData.liveStatus.API_Status = false;
 				}
 				return streamData;
-			} else */ if(data.hasOwnProperty("items") === true && typeof data.items.length === "number" && data.items.length == 1){
+			} else */ if(data.hasOwnProperty("items") === true && typeof data.items.length === "number" && data.items.length === 1){
 				streamData.streamURL = "https://www.youtube.com/watch?v=" + contentId;
 				
 				data = data.items[0];
@@ -337,18 +376,26 @@ const youtube = {
 				}
 				
 				streamData.streamCurrentViewers = "";
-				if(data.hasOwnProperty("liveStreamingDetails") === true && data.liveStreamingDetails.hasOwnProperty("concurrentViewers") === true && typeof data.liveStreamingDetails.concurrentViewers !== "undefined"){
-					switch(typeof data.liveStreamingDetails.concurrentViewers){
-						case "string":
-							streamData.streamCurrentViewers = parseInt(data.liveStreamingDetails.concurrentViewers);
-							break;
-						case "number":
-							streamData.streamCurrentViewers = data.liveStreamingDetails.concurrentViewers;
-							break;
+				if(data.hasOwnProperty("liveStreamingDetails") === true){
+					if(data.liveStreamingDetails.hasOwnProperty("concurrentViewers") === true && typeof data.liveStreamingDetails.concurrentViewers !== "undefined"){
+						switch(typeof data.liveStreamingDetails.concurrentViewers){
+							case "string":
+								streamData.streamCurrentViewers = parseInt(data.liveStreamingDetails.concurrentViewers);
+								break;
+							case "number":
+								streamData.streamCurrentViewers = data.liveStreamingDetails.concurrentViewers;
+								break;
+						}
 					}
+
+					streamData.liveStatus.API_Status = data.liveStreamingDetails.hasOwnProperty("actualStartTime")===true && data.liveStreamingDetails.hasOwnProperty("actualEndTime") === false;
+				} else {
+					streamData.liveStatus.API_Status = false;
 				}
-				
-				streamData.liveStatus.API_Status = true;
+
+				if(streamData.liveStatus.API_Status===false){
+					return youtube.website_ignore;
+				}
 				return streamData;
 			} else if(data.hasOwnProperty("streamOwnerLogo")){
 				if(currentChannelInfo.streamName !== ""){
