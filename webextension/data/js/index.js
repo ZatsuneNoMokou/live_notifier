@@ -1825,7 +1825,7 @@ function initAddon(){
 		}
 	});
 
-	let localToRemove = ["livestreamer_cmd_to_clipboard","livestreamer_cmd_quality","youtube_patreon_password"];
+	let localToRemove = ["livestreamer_cmd_to_clipboard","livestreamer_cmd_quality"];
 	/* 		----- Importation/Removal of old preferences -----		*/
 	if(getPreference("stream_keys_list") === ""){
 		let importSreamsFromOldVersion = function(){
