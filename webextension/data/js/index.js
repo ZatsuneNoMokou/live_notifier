@@ -1023,10 +1023,12 @@ function doStreamNotif(website, id, contentId, streamSetting){
 	}
 	streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
 
-	liveStore.updateChannel(website, id, function (website, id, data) {
-		data = channelData;
-		return data;
-	});
+	if(channelData!==null){
+		liveStore.updateChannel(website, id, function (website, id, data) {
+			data = channelData;
+			return data;
+		});
+	}
 	liveStore.updateLive(website, id, function (website, id, liveMap) {
 		liveMap.set(contentId, streamData);
 		return liveMap;
@@ -1069,22 +1071,24 @@ function setIcon(){
 	let badgeOnlineCount = 0;
 
 	let streamSettings = new streamListFromSetting();
-	liveStore.forEachLive(websites, (website, id, liveMap)=>{
+	websites.forEach((websiteData, website)=>{
 		let streamList = streamSettings.mapDataAll.get(website);
-		if(streamList.has(id) && (typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true)){
-			// Ignoring stream with ignore set to true from online count
-			//consoleMsg("log", `[Live notifier - setIcon] ${id} of ${website} is ignored`);
-			//return;
-		} else {
-			liveMap.forEach((streamData, contentId) => {
-				if(streamData.liveStatus.filteredStatus && streamList.has(id)){
-					appGlobal["onlineCount"] = appGlobal["onlineCount"] + 1;
-					if(streamList.has(id) && !(typeof streamList.get(id).iconIgnore === "boolean" && streamList.get(id).iconIgnore === true)){
-						badgeOnlineCount++;
+		liveStore.forEachLive(website, (website, id, liveMap)=>{
+			if(streamList.has(id) && (typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true)){
+				// Ignoring stream with ignore set to true from online count
+				//consoleMsg("log", `[Live notifier - setIcon] ${id} of ${website} is ignored`);
+				//return;
+			} else {
+				liveMap.forEach((streamData, contentId) => {
+					if(streamData.liveStatus.filteredStatus && streamList.has(id)){
+						appGlobal["onlineCount"] = appGlobal["onlineCount"] + 1;
+						if(streamList.has(id) && !(typeof streamList.get(id).iconIgnore === "boolean" && streamList.get(id).iconIgnore === true)){
+							badgeOnlineCount++;
+						}
 					}
-				}
-			})
-		}
+				})
+			}
+		});
 	});
 
 	if(badgeOnlineCount > 0){
@@ -1136,19 +1140,15 @@ function checkResponseValidity(website, response){
 		case "error":
 			consoleMsg("warn", `[${website}] Unable to get stream state (error detected).`);
 			return "error";
-			break;
 		case "error-unavailable":
 			consoleMsg("warn", `[${website}] Unable to get stream state (unavailable).`);
 			return "error-unavailable";
-			break;
 		case "vod":
 			consoleMsg("warn", `[${website}] Unable to get stream state (vod detected).`);
 			return "vod";
-			break;
 		case "notstream":
 			consoleMsg("warn", `[${website}] Unable to get stream state (not a stream).`);
 			return "notstream";
-			break;
 		case "":
 		case "success":
 			return "success";
@@ -1156,7 +1156,6 @@ function checkResponseValidity(website, response){
 			consoleMsg("warn", `[${website}] Unable to get stream state (${state}).`);
 			console.log(response.url);
 			return state;
-			break;
 	}
 }
 
@@ -1384,7 +1383,10 @@ function getPrimary(id, contentId, website, streamSetting, nextPageToken){
 									.then(resolve)
 									.catch(reject)
 							})
-							.catch(reject)
+							.catch(err=>{
+								console.error(err);
+								reject(err)
+							})
 					}
 				} else {
 					if(!(typeof contentId === "string" && contentId !== "")){
@@ -1448,6 +1450,7 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 		} else {
 			streamListData.streamList.forEach((value, contentId) => {
 				liveStore.updateChannel(website, id, function (website, id, data) {
+					console.dir(data);
 					data.liveStatus.liveList.set(contentId, "");
 					return data;
 				});
@@ -1456,14 +1459,11 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 					promises.set(contentId, processPrimary(id, contentId, website, streamSetting, {"json": value}));
 				} else {
 					if(value !== null){
-						if(!liveStore.getLive(website, id).has(contentId)){
-							liveStore.updateLive(website, id, function (website, id, liveMap) {
-								liveMap.set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
-								return liveMap;
-							});
-						}
-
 						liveStore.updateLive(website, id, function (website, id, liveMap) {
+							if(!liveMap.has(contentId)){
+								liveMap.set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+							}
+
 							for(let infoId in value){
 								if(value.hasOwnProperty(infoId)){
 									liveMap.get(contentId)[infoId] = value[infoId];
@@ -1624,7 +1624,7 @@ async function getChannelInfo(website, id){
 	let channelInfos_API = websites.get(website).API_channelInfos(id);
 
 	if(!liveStore.hasChannel(website, id)){
-		liveStore.set(website, id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) === true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+		liveStore.setChannel(website, id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) === true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
 	}
 
 	if(websites.get(website).hasOwnProperty("API_channelInfos") === true){

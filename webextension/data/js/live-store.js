@@ -12,6 +12,16 @@ class LiveStore {
 			"smashcast": "s",
 			"twitch": "t",
 			"youtube": "y",
+
+			"c": "channel",
+			"l": "live",
+
+			"d": "dailymotion",
+			"m": "mixer",
+			"p": "picarto_tv",
+			"s": "smashcast",
+			"t": "twitch",
+			"y": "youtube",
 		};
 
 		this.COMPRESSION_DATA = {
@@ -33,12 +43,13 @@ class LiveStore {
 			"twitterID": "t"
 		};
 
-		this.store.setCompression(this.CONSTANTS.channel, this.compression, this.decompression);
-		this.store.setCompression(this.CONSTANTS.live, this.compression, this.decompression);
+		this.store.setCompression(this.CONSTANTS.channel, this.compression, this.decompression, this);
+		this.store.setCompression(this.CONSTANTS.live, this.compression, this.decompression, this);
 	}
 
 	compression(key, data){
 		const result = DataStore.compressWithPattern(data, this.COMPRESSION_DATA);
+		console.dir(result)
 		DataStore.renameProperty(result, "liveStatus", "l");
 
 		if(result.hasOwnProperty("l") && result.l.hasOwnProperty(this.COMPRESSION_DATA.liveStatus.liveList)){
@@ -86,13 +97,13 @@ class LiveStore {
 	updateChannel(website, id, fn){
 		let data = this.getChannel(website, id);
 		data = fn(website, id, data);
-		return this.store.set([this.CONSTANTS.channel, this.CONSTANTS[website]], id, data);
+		return this.setChannel(website, id, data);
 	}
 
 	updateLive(website, id, fn){
 		let data = this.getLive(website, id);
 		data = fn(website, id, data);
-		return this.store.set([this.CONSTANTS.live, this.CONSTANTS[website]], id, data);
+		return this.setLive(website, id, data);
 	}
 
 	removeChannel(website, id){
@@ -103,9 +114,12 @@ class LiveStore {
 		return this.store.set([this.CONSTANTS.live, this.CONSTANTS[website]], id);
 	}
 
-	forEachFnWrapper(keys, id, data, fn){
-		const [,website] = keys;
-		fn(this.CONSTANTS[website], id, data);
+	forEachFnWrapper(fn){
+		const _this = this;
+		return function (keys, id, data) {
+			const [,website] = keys;
+			fn(_this.CONSTANTS[website], id, data);
+		}
 	}
 
 	/**
@@ -119,9 +133,9 @@ class LiveStore {
 	forEachChannel(arg1, arg2){
 		if(arguments.length===2 && typeof arg1==="string" && typeof arg2==="function"){
 			const [website, fn] = arguments;
-			this.store.forEach([this.CONSTANTS.channel, this.CONSTANTS[website]], forEachFnWrapper(fn));
+			this.store.forEach([this.CONSTANTS.channel, this.CONSTANTS[website]], this.forEachFnWrapper(fn));
 		} else if(arguments.length===1 && typeof arg1==="function"){
-			this.store.forEach([this.CONSTANTS.channel], forEachFnWrapper(arg1));
+			this.store.forEach([this.CONSTANTS.channel], this.forEachFnWrapper(arg1));
 		} else {
 			throw "Wrong arguments";
 		}
@@ -139,9 +153,9 @@ class LiveStore {
 	forEachLive(arg1, arg2){
 		if(arguments.length===2 && typeof arg1==="string" && typeof arg2==="function"){
 			const [website, fn] = arguments;
-			this.store.forEach([this.CONSTANTS.live, this.CONSTANTS[website]], forEachFnWrapper(fn));
+			this.store.forEach([this.CONSTANTS.live, this.CONSTANTS[website]], this.forEachFnWrapper(fn));
 		} else if(arguments.length===1 && typeof arg1==="function"){
-			this.store.forEach([this.CONSTANTS.live], forEachFnWrapper(arg1));
+			this.store.forEach([this.CONSTANTS.live], this.forEachFnWrapper(arg1));
 		} else {
 			throw "Wrong arguments";
 		}

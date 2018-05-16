@@ -23,14 +23,15 @@ class DataStore {
 	 * @param {String} key
 	 * @param {Function} fnCompression
 	 * @param {Function} fnDecompression
+	 * @param {*} context
 	 */
-	setCompression(key, fnCompression, fnDecompression){
+	setCompression(key, fnCompression, fnDecompression, context=null){
 		if(typeof key!=="string" || typeof fnCompression!=="function" || typeof fnDecompression!=="function"){
 			throw "Wrong argument type";
 		}
 
-		this.compressions.set(key, fnCompression);
-		this.decompressions.set(key, fnDecompression);
+		this.compressions.set(key, [context, fnCompression]);
+		this.decompressions.set(key, [context, fnDecompression]);
 	}
 
 	/**
@@ -39,12 +40,32 @@ class DataStore {
 	 * @param {*} data
 	 */
 	compressData(key, data){
-		let result;
+		let result,
+			fn = null
+		;
 
 		if(this.compressions.has(key)){
-			result = this.compressions.get(key)(data);
-		} else {
+			fn = this.compressions.get(key);
+		} else if(Array.isArray(key) && key.length>0){
+			if(this.compressions.has(key[0])){
+				fn = this.compressions.get(key[0]);
+			}
+			if(key.length>1){
+				for(let i=1;i<key.length;i++){
+					const keySlice = key.slice(0, i);
+					if(this.compressions.has(keySlice)){
+						fn = this.compressions.get(keySlice);
+					}
+				}
+			}
+		}
+
+		if(fn===null){
 			result = data;
+		} else if(fn[0]!==null){
+			result = fn[1].call(fn[0], key, data);
+		} else {
+			result = fn[1](key, data);
 		}
 
 		return result;
@@ -56,12 +77,32 @@ class DataStore {
 	 * @param {*} data
 	 */
 	decompressData(key, data){
-		let result;
+		let result,
+			fn = null
+		;
 
 		if(this.decompressions.has(key)){
-			result = this.decompressions.get(key)(data);
-		} else {
+			fn = this.decompressions.get(key);
+		} else if(Array.isArray(key) && key.length>0){
+			if(this.decompressions.has(key[0])){
+				fn = this.decompressions.get(key[0]);
+			}
+			if(key.length>1){
+				for(let i=1;i<key.length;i++){
+					const keySlice = key.slice(0, i);
+					if(this.decompressions.has(keySlice)){
+						fn = this.decompressions.get(keySlice);
+					}
+				}
+			}
+		}
+
+		if(fn===null){
 			result = data;
+		} else if(fn[0]!==null){
+			result = fn[1].call(fn[0], key, data);
+		} else {
+			result = fn[1](key, data);
 		}
 
 		return result;
@@ -74,7 +115,7 @@ class DataStore {
 	 * @return {Object}
 	 */
 	static compressWithPattern(sourceData, patternObj){
-		let data = Object.assign({}, sourceData);
+		let data = DataStore.cloneVariable(sourceData);
 		if(typeof data==="object" && data!==null){
 			for(let i in patternObj){
 				if(!patternObj.hasOwnProperty(i)){
@@ -105,7 +146,7 @@ class DataStore {
 	 * @return {Object}
 	 */
 	static decompressWithPattern(sourceData, patternObj){
-		let data = Object.assign({}, sourceData);
+		let data = DataStore.cloneVariable(sourceData);
 		if(typeof data==="object" && data!==null){
 			for(let i in patternObj){
 				if(!patternObj.hasOwnProperty(i)){
@@ -138,10 +179,24 @@ class DataStore {
 	 */
 	static renameProperty(object, oldName, newName){
 		if(object.hasOwnProperty(oldName)) {
-			object[newName] = this[oldName];
+			object[newName] = DataStore.cloneVariable(object[oldName]);
 			delete object[oldName];
 		}
 		return object;
+	}
+
+	static cloneVariable(object){
+		if(object instanceof Map){
+			return new Map(object);
+		} else if(Array.isArray(object)){
+			return object.slice(0);
+		} else if(object===null){
+			return null;
+		} else if(typeof object==="object"){
+			return Object.assign({}, object);
+		} else {
+			return object;
+		}
 	}
 
 	/**
@@ -166,7 +221,7 @@ class DataStore {
 	 * @return {Object} storage
 	 * @return {String} storage.key
 	 * @return {String[]} storage.keys
-	 * @return {String} storage.id
+	 * @return {String|Object} storage.id
 	 */
 	static extractStorageId(string){
 		const array = string.split("/"),
@@ -267,7 +322,7 @@ class DataStore {
 					data = new Map(rawData[1]);
 					break;
 				default:
-					throws `Unexpected type "${rawData[0]}"`;
+					throw `Unexpected type "${rawData[0]}"`;
 			}
 
 			return this.decompressData(keys, data);
