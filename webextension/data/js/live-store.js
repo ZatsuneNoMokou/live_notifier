@@ -40,12 +40,22 @@ class LiveStore {
 	compression(key, data){
 		const result = DataStore.compressWithPattern(data, this.COMPRESSION_DATA);
 		DataStore.renameProperty(result, "liveStatus", "l");
+
+		if(result.hasOwnProperty("l") && result.l.hasOwnProperty(this.COMPRESSION_DATA.liveStatus.liveList)){
+			result.l[this.COMPRESSION_DATA.liveStatus.liveList] = Array.from(result.l[this.COMPRESSION_DATA.liveStatus.liveList]);
+		}
+
 		return result;
 	}
 
 	decompression(key, data){
 		let result = DataStore.decompressWithPattern(data, this.COMPRESSION_DATA);
 		DataStore.renameProperty(result, "l", "liveStatus");
+
+		if(result.hasOwnProperty("liveStatus") && result.liveStatus.hasOwnProperty("liveList")){
+			result.liveStatus.liveList = new Map(result.liveStatus.liveList);
+		}
+
 		return result;
 	}
 
@@ -71,6 +81,26 @@ class LiveStore {
 
 	setLive(website, id, data){
 		return this.store.set([this.CONSTANTS.live, this.CONSTANTS[website]], id, data);
+	}
+
+	updateChannel(website, id, fn){
+		let data = this.getChannel(website, id);
+		data = fn(website, id, data);
+		return this.store.set([this.CONSTANTS.channel, this.CONSTANTS[website]], id, data);
+	}
+
+	updateLive(website, id, fn){
+		let data = this.getLive(website, id);
+		data = fn(website, id, data);
+		return this.store.set([this.CONSTANTS.live, this.CONSTANTS[website]], id, data);
+	}
+
+	removeChannel(website, id){
+		return this.store.remove([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
+	}
+
+	removeLive(website, id){
+		return this.store.set([this.CONSTANTS.live, this.CONSTANTS[website]], id);
 	}
 
 	forEachFnWrapper(keys, id, data, fn){

@@ -12,10 +12,8 @@ let myIconURL = "/data/live_offline.svg";
 
 let websites = new Map();
 appGlobal["websites"] = websites;
-let liveStatus = new Map();
-appGlobal["liveStatus"] = liveStatus;
-let channelInfos = new Map();
-appGlobal["channelInfos"] = channelInfos;
+let liveStore = new LiveStore();
+appGlobal["liveStore"] = liveStore;
 
 appGlobal["consoleMsg"] = ZDK.consoleMsg;
 const consoleDir = appGlobal["consoleDir"] = ZDK.consoleDir;
@@ -210,8 +208,11 @@ class streamListFromSetting{
 			if(typeof this.mapData !== "undefined"){
 				this.mapData.delete(id);
 			}
-			if(liveStatus.has(website) && liveStatus.get(website).has(id)){
-				liveStatus.get(website).delete(id);
+			if(liveStore.hasChannel(website, id)){
+				liveStore.removeChannel(website, id);
+			}
+			if(liveStore.hasLive(website, id)){
+				liveStore.removeLive(website, id);
 			}
 			consoleMsg("log", `${id} has been deleted`);
 		}
@@ -288,30 +289,28 @@ function getStreamURL(website, id, contentId, usePrefUrl){
 		if(streamList.get(id).streamURL !== "" && usePrefUrl === true){
 			return streamList.get(id).streamURL;
 		} else {
-			if(liveStatus.get(website).has(id) && liveStatus.get(website).get(id).has(contentId)){
-				let streamData = liveStatus.get(website).get(id).get(contentId);
+			if(liveStore.hasLive(website, id) && liveStore.getLive(website, id).has(contentId)){
+				let streamData = liveStore.getLive(website, id).get(contentId);
 				if(typeof streamData.streamURL === "string" && streamData.streamURL !== ""){
 					return streamData.streamURL;
 				}
 			}
-			if(channelInfos.get(website).has(id)){
-				if(typeof channelInfos.get(website).get(id).streamURL === "string" && channelInfos.get(website).get(id).streamURL !== ""){
-						return channelInfos.get(website).get(id).streamURL
+			if(liveStore.hasChannel(website, id)){
+				let data = liveStore.getChannel(website, id);
+
+				if(typeof data.streamURL === "string" && data.streamURL !== ""){
+					return data.streamURL
 				}
 			}
 			switch(website){
 				case "dailymotion":
 					return `http://www.dailymotion.com/video/${id}`;
-					break;
 				case "smashcast":
 					return `http://www.smashcast.tv/${id}`;
-					break;
 				case "twitch":
 					return `http://www.twitch.tv/${id}`;
-					break;
 				case "mixer":
 					return `https://mixer.com/${id}`;
-					break;
 				case "youtube":
 					if(website_channel_id.test(contentId)){
 						return `https://youtube.com/channel/${website_channel_id.exec(id)[1]}`;
@@ -319,7 +318,6 @@ function getStreamURL(website, id, contentId, usePrefUrl){
 						return `https://www.youtube.com/watch?v=${contentId}`;
 						//return `https://youtu.be/${contentId}`;
 					}
-					break;
 				default:
 					return null;
 			}
@@ -623,7 +621,7 @@ function shareStream(data){
 	
 	let streamList = (new streamListFromSetting(website)).mapData;
 	
-	let streamData = liveStatus.get(website).get(id).get(contentId);
+	let streamData = liveStore.getLive(website, id).get(contentId);
 	let streamName = streamData.streamName;
 	let streamURL = getStreamURL(website, id, contentId, true);
 	let streamStatus = streamData.streamStatus;
@@ -807,7 +805,7 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 		}
 		return count;
 	};
-	let streamData = liveStatus.get(website).get(id).get(contentId);
+	let streamData = liveStore.getLive(website, id).get(contentId);
 	if(streamData.streamStatus !== ""){
 		let lowerCase_status = (streamData.streamStatus).toLowerCase();
 		if(isStreamOnline){
@@ -921,9 +919,9 @@ appGlobal["getCleanedStreamStatus"] = getCleanedStreamStatus;
 appGlobal["notificationGlobalyDisabled"] = false;
 function doStreamNotif(website, id, contentId, streamSetting){
 	let streamList = (new streamListFromSetting(website)).mapData;
-	let streamData = liveStatus.get(website).get(id).get(contentId);
-	
-	let channelData = (channelInfos.has(website) && channelInfos.get(website).has(id))? channelInfos.get(website).get(id) : null;
+	let streamData = liveStore.getLive(website, id).get(contentId);
+
+	let channelData = (liveStore.hasChannel(website, id))? liveStore.getChannel(website, id) : null;
 
 	let online = streamData.liveStatus.API_Status;
 	
@@ -1024,6 +1022,15 @@ function doStreamNotif(website, id, contentId, streamSetting){
 		}
 	}
 	streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
+
+	liveStore.updateChannel(website, id, function (website, id, data) {
+		data = channelData;
+		return data;
+	});
+	liveStore.updateLive(website, id, function (website, id, liveMap) {
+		liveMap.set(contentId, streamData);
+		return liveMap;
+	});
 }
 appGlobal["doStreamNotif"] = doStreamNotif;
 
@@ -1038,12 +1045,12 @@ function getOfflineCount(){
 				//consoleMsg("log", `[Live notifier - getOfflineCount] ${id} of ${website} is ignored`);
 				return;
 			}
-			
-			if(liveStatus.get(website).has(id)){
-				if(liveStatus.get(website).get(id).size === 0){
+
+			if(liveStore.hasLive(website, id)){
+				if(liveStore.getLive(website, id).size === 0){
 					offlineCount++;
 				} else {
-					liveStatus.get(website).get(id).forEach(streamData=>{
+					liveStore.getLive(website, id).forEach(streamData=>{
 						if(!streamData.liveStatus.filteredStatus){
 							offlineCount++;
 						}
@@ -1060,27 +1067,26 @@ appGlobal["getOfflineCount"] = getOfflineCount;
 function setIcon(){
 	appGlobal["onlineCount"] = 0;
 	let badgeOnlineCount = 0;
-	
-	liveStatus.forEach((website_liveStatus, website) => {
-		let streamList = (new streamListFromSetting(website)).mapData;
-		website_liveStatus.forEach((id_liveStatus, id) => {
-			if(streamList.has(id) && (typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true)){
-				// Ignoring stream with ignore set to true from online count
-				//consoleMsg("log", `[Live notifier - setIcon] ${id} of ${website} is ignored`);
-				//return;
-			} else {
-				id_liveStatus.forEach((streamData, contentId) => {
-					if(streamData.liveStatus.filteredStatus && streamList.has(id)){
-						appGlobal["onlineCount"] = appGlobal["onlineCount"] + 1;
-						if(streamList.has(id) && !(typeof streamList.get(id).iconIgnore === "boolean" && streamList.get(id).iconIgnore === true)){
-							badgeOnlineCount++;
-						}
+
+	let streamSettings = new streamListFromSetting();
+	liveStore.forEachLive(websites, (website, id, liveMap)=>{
+		let streamList = streamSettings.mapDataAll.get(website);
+		if(streamList.has(id) && (typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true)){
+			// Ignoring stream with ignore set to true from online count
+			//consoleMsg("log", `[Live notifier - setIcon] ${id} of ${website} is ignored`);
+			//return;
+		} else {
+			liveMap.forEach((streamData, contentId) => {
+				if(streamData.liveStatus.filteredStatus && streamList.has(id)){
+					appGlobal["onlineCount"] = appGlobal["onlineCount"] + 1;
+					if(streamList.has(id) && !(typeof streamList.get(id).iconIgnore === "boolean" && streamList.get(id).iconIgnore === true)){
+						badgeOnlineCount++;
 					}
-				})
-			}
-		})
+				}
+			})
+		}
 	});
-	
+
 	if(badgeOnlineCount > 0){
 		browser.browserAction.setTitle({title: i18ex._("count_stream_online", {"count": badgeOnlineCount})});
 	} else {
@@ -1240,7 +1246,7 @@ async function checkLives(idArray){
 					streamsTimings.set(`${website}::${id}`, timingEnd(`${website}::${id}`).timing);
 					if((typeof promiseResult === "string" && promiseResult.indexOf("StreamChecked") !== -1) || (typeof promiseResult === "object" && JSON.stringify(promiseResult).indexOf("StreamChecked") !== -1)){
 						const imgArrayPreload = [];
-						liveStatus.get(website).get(id).forEach((streamData, contentId) => {
+						liveStore.getLive(website, id).forEach((streamData, contentId) => {
 							if((typeof promiseResult === "string" && promiseResult.indexOf("StreamChecked") !== -1) || (typeof promiseResult === "object" && typeof promiseResult[contentId] === "string" && promiseResult[contentId].indexOf("StreamChecked") !== -1)){
 								doStreamNotif(website, id, contentId, streamList);
 
@@ -1258,7 +1264,7 @@ async function checkLives(idArray){
 							}
 						})
 					}
-					if(channelInfos.has(website) && channelInfos.get(website).has(id)){
+					if(liveStore.hasChannel(website, id)){
 						channelListEnd(website, id, streamListSetting.mapDataAll.get(website).get(id));
 					}
 					setIcon();
@@ -1312,12 +1318,13 @@ function checkMissing(){
 				if(typeof streamList.ignore === "boolean" && streamList.ignore === true){
 					return;
 				}
-				if(liveStatus.has(website) && !(liveStatus.get(website).has(id))){
+				if(!liveStore.hasLive(website, id)){
 					consoleMsg("info", `${id} from ${website} is not checked yet`);
-					
+
 					if(!listToCheck.has(website)){
 						listToCheck.set(website, new Map())
 					}
+
 					listToCheck.get(website).set(id, streamList);
 				}
 			})
@@ -1360,11 +1367,11 @@ function getPrimary(id, contentId, website, streamSetting, nextPageToken){
 				} else {
 					DATAs.get(`${website}/${id}`).set("getPrimary", {"url": response.url, "data": data});
 				}
-				
-				if(!liveStatus.get(website).has(id)){
-					liveStatus.get(website).set(id, new Map());
+
+				if(!liveStore.hasLive(website, id)){
+					liveStore.setLive(website, id, new Map());
 				}
-				
+
 				if(!(typeof contentId === "string" && contentId !== "") && website_channel_id.test(id) === true){
 					if(typeof nextPageToken !== "undefined" && nextPageToken !== null){
 						processChannelList(id, website, streamSetting, response, nextPageToken)
@@ -1417,8 +1424,8 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 
 	let data = response.json;
 
-	if(!channelInfos.get(website).has(id)){
-		channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": "", "liveList": new Map()}, "streamName": (website_channel_id.test(id) === true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+	if(!liveStore.hasChannel(website, id)){
+		liveStore.setChannel(website, id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": "", "liveList": new Map()}, "streamName": (website_channel_id.test(id) === true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
 	}
 
 	let responseValidity = checkResponseValidity(website, response);
@@ -1426,7 +1433,10 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 		let streamListData;
 		if(typeof nextPageToken === "undefined" || nextPageToken === null){
 			// First loop
-			channelInfos.get(website).get(id).liveStatus.liveList = new Map();
+			liveStore.updateChannel(website, id, function (website, id, data) {
+				data.liveStatus.liveList = new Map();
+				return data;
+			});
 
 			streamListData = websites.get(website).channelList(id, website, data);
 		} else {
@@ -1437,20 +1447,31 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 			return ((isMap(streamListData.streamList))? "EmptyList" : "InvalidList");
 		} else {
 			streamListData.streamList.forEach((value, contentId) => {
-				channelInfos.get(website).get(id).liveStatus.liveList.set(contentId, "");
+				liveStore.updateChannel(website, id, function (website, id, data) {
+					data.liveStatus.liveList.set(contentId, "");
+					return data;
+				});
 
 				if(streamListData.hasOwnProperty("primaryRequest") && typeof streamListData.primaryRequest === "boolean" && !streamListData.primaryRequest){
 					promises.set(contentId, processPrimary(id, contentId, website, streamSetting, {"json": value}));
 				} else {
 					if(value !== null){
-						if(!liveStatus.get(website).get(id).has(contentId)){
-							liveStatus.get(website).get(id).set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+						if(!liveStore.getLive(website, id).has(contentId)){
+							liveStore.updateLive(website, id, function (website, id, liveMap) {
+								liveMap.set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+								return liveMap;
+							});
 						}
-						for(let infoId in value){
-							if(value.hasOwnProperty(infoId)){
-								liveStatus.get(website).get(id).get(contentId)[infoId] = value[infoId];
+
+						liveStore.updateLive(website, id, function (website, id, liveMap) {
+							for(let infoId in value){
+								if(value.hasOwnProperty(infoId)){
+									liveMap.get(contentId)[infoId] = value[infoId];
+									return liveMap;
+								}
 							}
-						}
+							return liveMap;
+						});
 					}
 					promises.set(contentId, getPrimary(id, contentId, website, streamSetting));
 				}
@@ -1467,34 +1488,66 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 	}
 }
 function channelListEnd(website, id, streamSetting){
-	liveStatus.get(website).get(id).forEach((value, contentId) => {
-		if(channelInfos.get(website).get(id).liveStatus.liveList.has(contentId) === false){
-			liveStatus.get(website).get(id).get(contentId).liveStatus.API_Status = false;
-			doStreamNotif(website, id, contentId, streamSetting);
-			liveStatus.get(website).get(id).delete(contentId);
+	liveStore.getLive(website, id).forEach((value, contentId) => {
+		if(liveStore.getChannel(website, id).liveStatus.liveList.has(contentId) === false){
+			liveStore.updateLive(website, id, function (website, id, liveMap) {
+				liveMap.get(contentId).liveStatus.API_Status = false;
+				doStreamNotif(website, id, contentId, streamSetting);
+				liveMap.delete(contentId);
+				return liveMap;
+			});
 		}
 	})
 }
 
 async function processPrimary(id, contentId, website, streamSetting, response){
 	let data = response.json;
-	if(!liveStatus.get(website).get(id).has(contentId)){
-		liveStatus.get(website).get(id).set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+	if(!liveStore.getLive(website, id).has(contentId)){
+		liveStore.updateLive(website, id, function (website, id, liveMap) {
+			liveMap.set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+			return liveMap;
+		})
 	}
 
-	let responseValidity = liveStatus.get(website).get(id).get(contentId).liveStatus.lastCheckStatus = checkResponseValidity(website, response);
+	let responseValidity = checkResponseValidity(website, response);
+	liveStore.updateLive(website, id, function (website, id, liveMap) {
+		liveMap.get(contentId).liveStatus.lastCheckStatus = responseValidity;
+		return liveMap;
+	});
 	if(responseValidity === "success"){
-		let liveState = websites.get(website).checkLiveStatus(id, contentId, data, liveStatus.get(website).get(id).get(contentId), (channelInfos.has(website) && channelInfos.get(website).has(id))? channelInfos.get(website).get(id) : null);
+		let streamData = liveStore.getLive(website, id).get(contentId),
+			channelData = liveStore.hasChannel(website, id)? liveStore.getChannel(website, id) : null
+		;
+
+		let liveState = websites.get(website).checkLiveStatus(id, contentId, data, streamData, channelData);
+
+		liveStore.updateLive(website, id, function (website, id, liveMap) {
+			liveMap.set(contentId, streamData);
+			return liveMap;
+		});
+		if(channelData!==null){
+			liveStore.updateChannel(website, id, function (website, id, data) {
+				data = channelData;
+				return data;
+			});
+		}
+
 		if(liveState !== null){
 			if(typeof liveState==="string"){
 				if(websites.get(website).hasOwnProperty("website_ignore") && liveState===websites.get(website).website_ignore){
-					liveStatus.get(website).get(id).delete(contentId);
+					liveStore.updateLive(website, id, function (website, id, liveMap) {
+						liveMap.delete(contentId);
+						return liveMap;
+					});
 					return "StreamChecked";
 				} else {
 					return "liveState is unexpected";
 				}
 			} else {
-				liveStatus.get(website).get(id).set(contentId, liveState);
+				liveStore.updateLive(website, id, function (website, id, liveMap) {
+					liveMap.set(contentId, liveState);
+					return liveMap;
+				});
 			}
 
 			if(websites.get(website).hasOwnProperty("API_second") === true){
@@ -1531,20 +1584,30 @@ async function processPrimary(id, contentId, website, streamSetting, response){
 				DATAs.get(`${website}/${id}`).get(contentId).set("getSecond", {"url": response.url, "data": data_second});
 
 				let responseValidity = checkResponseValidity(website, response);
+
+
+				let currentLiveStatus = liveStore.getLive(website, id).get(contentId),
+					returnString
+				;
+
 				if(responseValidity === "success"){
-					let newLiveStatus = websites.get(website).seconderyInfo(id, contentId, data_second, liveStatus.get(website).get(id).get(contentId));
+					let newLiveStatus = websites.get(website).seconderyInfo(id, contentId, data_second, currentLiveStatus);
 					if(typeof newLiveStatus === "object" && newLiveStatus !== null){
-						liveStatus.get(website).get(id).set(contentId, newLiveStatus);
-						return "StreamChecked_With2ndAPI";
+						currentLiveStatus = newLiveStatus;
+						returnString = "StreamChecked_With2ndAPI";
 					} else {
-						return "StreamChecked";
+						returnString = "StreamChecked";
 					}
 				} else {
-					liveStatus.get(website).get(id).get(contentId).liveStatus.lastCheckStatus = responseValidity;
-					return responseValidity;
+					currentLiveStatus.liveStatus.lastCheckStatus = responseValidity;
+					returnString = responseValidity;
 				}
-				//doStreamNotif(website, id, contentId, streamSetting);
-				//setIcon();
+
+				liveStore.updateLive(website, id, function (website, id, liveMap) {
+					liveMap.set(contentId, currentLiveStatus);
+					return liveMap;
+				});
+				return returnString;
 			} else {
 				return "StreamChecked";
 				//doStreamNotif(website, id, contentId, streamSetting);
@@ -1560,8 +1623,8 @@ async function processPrimary(id, contentId, website, streamSetting, response){
 async function getChannelInfo(website, id){
 	let channelInfos_API = websites.get(website).API_channelInfos(id);
 
-	if(!channelInfos.get(website).has(id)){
-		channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) === true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+	if(!liveStore.hasChannel(website, id)){
+		liveStore.set(website, id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) === true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
 	}
 
 	if(websites.get(website).hasOwnProperty("API_channelInfos") === true){
@@ -1595,11 +1658,15 @@ async function getChannelInfo(website, id){
 		}
 		DATAs.get(`${website}/${id}`).set("getChannelInfo", {"url": response.url, "data": data_channelInfos});
 
-		let responseValidity = channelInfos.get(website).get(id).liveStatus.lastCheckStatus = checkResponseValidity(website, response);
+		let responseValidity = checkResponseValidity(website, response);
+		liveStore.updateChannel(website, id, function (website, id, data) {
+			data.liveStatus.lastCheckStatus = responseValidity;
+			return data;
+		});
 		if(responseValidity === "success"){
-			let newChannelInfos = websites.get(website).channelInfosProcess(id, data_channelInfos, channelInfos.get(website).get(id));
+			let newChannelInfos = websites.get(website).channelInfosProcess(id, data_channelInfos, liveStore.getChannel(website, id));
 			if(typeof newChannelInfos === "object" && newChannelInfos !== null){
-				channelInfos.get(website).set(id, newChannelInfos);
+				liveStore.setChannel(website, id, newChannelInfos);
 			}
 		}
 
@@ -1896,11 +1963,6 @@ function initAddon(){
 	}
 
 	/* 		----- Fin Importation/Removal des vieux paramères -----		*/
-
-	websites.forEach((websiteAPI, website) => {
-		liveStatus.set(website, new Map());
-		channelInfos.set(website, new Map());
-	});
 
 	checkLives()
 		.catch(err=>{

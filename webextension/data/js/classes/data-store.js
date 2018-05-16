@@ -10,7 +10,8 @@ class DataStore {
 			"object": 0,
 			"boolean": 1,
 			"number": 2,
-			"string": 3
+			"string": 3,
+			"map": 4
 		};
 
 		this.compressions = new Map();
@@ -205,7 +206,10 @@ class DataStore {
 			throw "Error in data format";
 		}
 
-		if(typeof data==="object"){
+		if(data instanceof Map){
+			dataToStore.push(this.types["map"]); // Type
+			dataToStore.push(Array.from(data)); // Data
+		} else if(typeof data==="object"){
 			let jsonString = null;
 			try{
 				jsonString = JSON.stringify(data);
@@ -258,6 +262,9 @@ class DataStore {
 					break;
 				case this.types.string:
 					data = rawData[1];
+					break;
+				case this.types.map:
+					data = new Map(rawData[1]);
 					break;
 				default:
 					throws `Unexpected type "${rawData[0]}"`;
