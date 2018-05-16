@@ -49,7 +49,6 @@ class LiveStore {
 
 	compression(key, data){
 		const result = DataStore.compressWithPattern(data, this.COMPRESSION_DATA);
-		console.dir(result)
 		DataStore.renameProperty(result, "liveStatus", "l");
 
 		if(result.hasOwnProperty("l") && result.l.hasOwnProperty(this.COMPRESSION_DATA.liveStatus.liveList)){
@@ -140,7 +139,6 @@ class LiveStore {
 			throw "Wrong arguments";
 		}
 	}
-
 
 	/**
 	 *
