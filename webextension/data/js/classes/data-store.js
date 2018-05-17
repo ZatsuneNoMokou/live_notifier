@@ -338,8 +338,27 @@ class DataStore {
 	 * @return {Boolean}
 	 */
 	has(keys, id){
-		if((typeof keys!=="string" || Array.isArray(keys)) && typeof id==="string") {
+		if(typeof id!=="string"){
+			throw "Wrong argument";
+		}
+
+		if(typeof keys==="string"){
 			return this.storage.getItem(DataStore.generateStorageId(keys, id)) !== null;
+		} else if(Array.isArray(keys)){
+			if(this.storage.getItem(DataStore.generateStorageId(keys, id)) !== null){
+				return true;
+			}
+
+			const arrayToTest = DataStore.cloneVariable(keys);
+			arrayToTest.push(id);
+
+			let result = false;
+			this.forEach(arrayToTest, ()=>{
+				result = true;
+				return true;
+			}, false);
+
+			return result;
 		} else {
 			throw "Wrong argument";
 		}
@@ -351,8 +370,23 @@ class DataStore {
 	 * @param {String} id
 	 */
 	remove(keys, id){
-		if((typeof keys!=="string" || Array.isArray(keys)) && typeof id==="string"){
-			return this.storage.removeItem(DataStore.generateStorageId(keys, id));
+		if(typeof id!=="string"){
+			throw "Wrong argument";
+		}
+
+		if(typeof keys==="string"){
+			return this.storage.getItem(DataStore.generateStorageId(keys, id)) !== null;
+		} else if(Array.isArray(keys)){
+			if(this.storage.getItem(DataStore.generateStorageId(keys, id)) !== null){
+				return this.storage.removeItem(DataStore.generateStorageId(keys, id));
+			}
+
+			const arrayToTest = DataStore.cloneVariable(keys);
+			arrayToTest.push(id);
+
+			this.forEach(arrayToTest, (_keys, _id)=>{
+				this.storage.removeItem(DataStore.generateStorageId(_keys, _id));
+			}, false);
 		} else {
 			throw "Wrong argument";
 		}
@@ -360,10 +394,11 @@ class DataStore {
 
 	/**
 	 *
-	 * @param {String} keys
-	 * @param {Function} fn
+	 * @param {String|String[]} keys
+	 * @param {Function} fn Return true to break loop
+	 * @param {Boolean=true} withData
 	 */
-	forEach(keys, fn){
+	forEach(keys, fn, withData=true){
 		for(let i in this.storage){
 			if(this.storage.hasOwnProperty(i)){
 				let storageIds=null;
@@ -386,7 +421,16 @@ class DataStore {
 							}
 
 							if(equals===true){
-								fn(storageIds.keys, storageIds.id, this.get(storageIds.keys, storageIds.id));
+								let breakLoop = false;
+								if(withData===true){
+									breakLoop = fn(storageIds.keys, storageIds.id, this.get(storageIds.keys, storageIds.id));
+								} else {
+									breakLoop = fn(storageIds.keys, storageIds.id);
+								}
+
+								if(breakLoop===true){
+									break;
+								}
 							}
 						}
 					}
