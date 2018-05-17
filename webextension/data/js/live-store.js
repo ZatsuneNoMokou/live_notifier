@@ -27,6 +27,7 @@ class LiveStore {
 		this.COMPRESSION_DATA = {
 			"liveStatus": {
 				"API_Status": "A",
+				"filteredStatus": "FS",
 				"notifiedStatus": "N",
 				"notifiedStatus_Vocal": "NV",
 				"lastCheckStatus": "CS",
