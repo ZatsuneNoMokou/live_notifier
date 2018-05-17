@@ -1326,7 +1326,7 @@ function checkMissing(){
 		if(listToCheck.size > 0){
 			checkLives(listToCheck)
 				.finally(result=>{
-					consoleMsg("info", result);
+					consoleMsg("info", (result!==undefined)? result : "Nothing");
 					if(typeof panelUpdateData === "function"){
 						panelUpdateData();
 					}

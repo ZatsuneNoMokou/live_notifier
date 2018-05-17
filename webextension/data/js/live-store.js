@@ -185,7 +185,7 @@ class LiveStore {
 	 */
 	forEachLive(arg1, arg2, arg3){
 		if(arguments.length===1 && typeof arg1==="function"){
-			this.store.forEach([this.CONSTANTS.live], this.forEachFnWrapper(arg1));
+			this.store.forEach([this.CONSTANTS.live], this.forEachLiveWrapper(arg1));
 		} else if(arguments.length===2 && typeof arg1==="string" && typeof arg2==="function") {
 			const [website, fn] = arguments;
 			this.store.forEach([this.CONSTANTS.live, this.CONSTANTS[website]], this.forEachLiveWrapper(fn));
