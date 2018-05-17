@@ -1067,13 +1067,13 @@ function setIcon(){
 	let streamSettings = new streamListFromSetting();
 	websites.forEach((websiteData, website)=>{
 		let streamList = streamSettings.mapDataAll.get(website);
-		liveStore.forEachLive(website, (website, id, liveMap)=>{
+		streamList.forEach((streamList_Website, id)=>{
 			if(streamList.has(id) && (typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true)){
 				// Ignoring stream with ignore set to true from online count
 				//consoleMsg("log", `[Live notifier - setIcon] ${id} of ${website} is ignored`);
 				//return;
 			} else {
-				liveMap.forEach((streamData, contentId) => {
+				liveStore.forEachLive(website, id, (website, id, contentId, streamData) => {
 					if(streamData.liveStatus.filteredStatus && streamList.has(id)){
 						appGlobal["onlineCount"] = appGlobal["onlineCount"] + 1;
 						if(streamList.has(id) && !(typeof streamList.get(id).iconIgnore === "boolean" && streamList.get(id).iconIgnore === true)){

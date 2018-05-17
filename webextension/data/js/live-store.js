@@ -174,14 +174,15 @@ class LiveStore {
 
 	/**
 	 *
-	 * @param {String=} arg1
-	 * @param {Function} arg2
+	 * @param {String|Function} arg1
+	 * @param {String|Function=} arg2
+	 * @param {String|Function=} arg3
 	 * @param {String} arg2.website
 	 * @param {String} arg2.id
 	 * @param {String} arg2.contentId
 	 * @param {Object} arg2.data
 	 */
-	forEachLive(arg1, arg2){
+	forEachLive(arg1, arg2, arg3){
 		if(arguments.length===1 && typeof arg1==="function"){
 			this.store.forEach([this.CONSTANTS.live], this.forEachFnWrapper(arg1));
 		} else if(arguments.length===2 && typeof arg1==="string" && typeof arg2==="function") {
@@ -191,7 +192,7 @@ class LiveStore {
 			const [website, id, fn] = arguments;
 			this.store.forEach([this.CONSTANTS.live, this.CONSTANTS[website], id], this.forEachLiveWrapper(fn));
 		} else {
-			throw "Wrong arguments";
+			throw "[forEachLive] Wrong arguments";
 		}
 	}
 }
