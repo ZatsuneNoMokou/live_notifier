@@ -59,8 +59,9 @@ class LiveStore {
 	}
 
 	decompression(key, data){
+		DataStore.renameProperty(data, "l", "liveStatus");
+
 		let result = DataStore.decompressWithPattern(data, this.COMPRESSION_DATA);
-		DataStore.renameProperty(result, "l", "liveStatus");
 
 		if(result.hasOwnProperty("liveStatus") && result.liveStatus.hasOwnProperty("liveList")){
 			result.liveStatus.liveList = new Map(result.liveStatus.liveList);
