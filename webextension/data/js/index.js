@@ -1440,7 +1440,6 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 		} else {
 			streamListData.streamList.forEach((value, contentId) => {
 				liveStore.updateChannel(website, id, function (website, id, data) {
-					console.dir(data);
 					data.liveStatus.liveList.set(contentId, "");
 					return data;
 				});
