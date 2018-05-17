@@ -84,13 +84,7 @@ class LiveStore {
 
 			return result;
 		} else {
-			let keys = [this.CONSTANTS.live, this.CONSTANTS[website]];
-
-			if(id!==contentId){
-				keys.push(id);
-			}
-
-			return this.store.get(keys, contentId);
+			return this.store.get([this.CONSTANTS.live, this.CONSTANTS[website], id], (((id!==contentId))? contentId : ""));
 		}
 	}
 
@@ -111,11 +105,7 @@ class LiveStore {
 	}
 
 	setLive(website, id, contentId, data){
-		if(id===contentId){
-			return this.store.set([this.CONSTANTS.live, this.CONSTANTS[website]], id, data);
-		} else {
-			return this.store.set([this.CONSTANTS.live, this.CONSTANTS[website], id], contentId, data);
-		}
+		return this.store.set([this.CONSTANTS.live, this.CONSTANTS[website], id], ((id!==contentId)? contentId : ""), data);
 	}
 
 	updateChannel(website, id, fn){
@@ -169,7 +159,7 @@ class LiveStore {
 		const _this = this;
 		return function (keys, contentId, data) {
 			const [,website, id] = keys;
-			fn(_this.CONSTANTS[website], (keys.length===3)? id : contentId, contentId, data);
+			fn(_this.CONSTANTS[website], id, (contentId!=="")? contentId : id, data);
 		}
 	}
 
