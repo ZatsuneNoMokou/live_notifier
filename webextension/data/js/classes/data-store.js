@@ -16,6 +16,17 @@ class DataStore {
 
 		this.compressions = new Map();
 		this.decompressions = new Map();
+
+
+
+		this.DATA_STORE_VERSION = "11.3";
+
+		if(!this.has("_", "DataStore_version") || this.get("_", "DataStore_version")!==this.DATA_STORE_VERSION){
+			consoleMsg("warn", "New version of DataStore, clearing old data.");
+			this.storage.clear();
+		}
+
+		this.set("_", "DataStore_version", "11.3");
 	}
 
 	/**
@@ -298,7 +309,7 @@ class DataStore {
 	 * @return {Boolean|String|Number|JSON} data
 	 */
 	get(keys, id){
-		if((typeof keys!=="string" || Array.isArray(keys)) && typeof id==="string"){
+		if((typeof keys==="string" || Array.isArray(keys)) && typeof id==="string"){
 			const rawData = JSON.parse(this.storage.getItem(DataStore.generateStorageId(keys, id)));
 
 			let data = null;
@@ -385,6 +396,20 @@ class DataStore {
 			arrayToTest.push(id);
 
 			this.forEach(arrayToTest, (_keys, _id)=>{
+				this.storage.removeItem(DataStore.generateStorageId(_keys, _id));
+			}, false);
+		} else {
+			throw "Wrong argument";
+		}
+	}
+
+	/**
+	 *
+	 * @param {String|String[]} keys
+	 */
+	clear(keys){
+		if(typeof keys==="string" ||Array.isArray(keys)){
+			this.forEach(keys, (_keys, _id)=>{
 				this.storage.removeItem(DataStore.generateStorageId(_keys, _id));
 			}, false);
 		} else {

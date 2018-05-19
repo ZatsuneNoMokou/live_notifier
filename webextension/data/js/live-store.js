@@ -2,6 +2,8 @@ class LiveStore {
 	constructor(){
 		this.store = new zDK.DataStore();
 
+
+
 		this.CONSTANTS = {
 			"channel": "c",
 			"live": "l",
@@ -44,8 +46,22 @@ class LiveStore {
 			"twitterID": "t"
 		};
 
+
+
 		this.store.setCompression(this.CONSTANTS.channel, this.compression, this.decompression, this);
 		this.store.setCompression(this.CONSTANTS.live, this.compression, this.decompression, this);
+
+
+
+		this.LIVE_STORE_VERSION = "11.3";
+
+		if(!this.store.has("_", "LiveStore_version") || this.store.get("_", "LiveStore_version")!==this.LIVE_STORE_VERSION){
+			consoleMsg("warn", "New version of LiveStore, clearing old data.");
+			this.store.clear(this.CONSTANTS.channel);
+			this.store.clear(this.CONSTANTS.live);
+		}
+
+		this.store.set("_", "LiveStore_version", "11.3");
 	}
 
 	compression(key, data){
