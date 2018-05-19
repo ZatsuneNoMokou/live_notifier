@@ -9,6 +9,7 @@
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
 # 11.13.2
+* i : Cleaning old preferences migrations
 * Fix : \[ZDK] \[ChromePreferences] - Exporting file on Vivaldi
 
 # 11.13.1
