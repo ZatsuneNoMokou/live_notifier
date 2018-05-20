@@ -481,6 +481,7 @@ ${err}`);
 
 		let node = document.createElement("div");
 		node.classList.add("preferenceContainer");
+		node.classList.add("preferenceContainer--" + id);
 		if(typeof prefObj.prefLevel === "string"){
 			node.classList.add(prefObj.prefLevel);
 		}
