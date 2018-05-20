@@ -8,8 +8,9 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
-# 11.13.2
+# 11.14.0
 * i : Cleaning old preferences migrations
+* \+ : Use CSS scrollbar on Chrome instead of javascript one
 * Fix : \[ZDK] \[ChromePreferences] - Exporting file on Vivaldi
 
 # 11.13.1
