@@ -990,20 +990,21 @@ loadTranslations();
 
 sendDataToMain("panel_onload");
 
-load_scrollbar("streamList");
-load_scrollbar("streamEditor");
-load_scrollbar("settings_container");
-load_scrollbar("debugSection");
+if(typeof PerfectScrollbar!=="undefined"){
+	load_scrollbar("streamList");
+	load_scrollbar("streamEditor");
+	load_scrollbar("settings_container");
+	load_scrollbar("debugSection");
 
-window.onresize = _.debounce(()=>{
-	scrollbar_update("streamList");
-	scrollbar_update("streamEditor");
-	scrollbar_update("settings_container");
-	scrollbar_update("debugSection");
+	window.onresize = _.debounce(()=>{
+		scrollbar_update("streamList");
+		scrollbar_update("streamEditor");
+		scrollbar_update("settings_container");
+		scrollbar_update("debugSection");
 
-	applyPanelSize();
-}, 100, {
-	maxWait: 200
-})
-;
+		applyPanelSize();
+	}, 100, {
+		maxWait: 200
+	});
+}
 

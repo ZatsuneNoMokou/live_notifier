@@ -3,8 +3,6 @@
 var backgroundPage = browser.extension.getBackgroundPage();
 let options = backgroundPage.options;
 
-let _ = browser.i18n.getMessage;
-
 var theme_cache_update = backgroundPage.backgroundTheme.theme_cache_update;
 
 function theme_update(){
@@ -30,8 +28,49 @@ loadPreferences("section#preferences");
 
 function init(){
 	loadTranslations();
+
+
+
+	if(location.hash==="#news"){
+		document.querySelector("section#news").classList.remove("hide");
+		document.querySelector(`section#news #news-${browser.i18n.getMessage("language")}`).classList.remove("hide");
+	}
+
+
+
+	if(backgroundPage.zDK.isFirefox===true){
+		const
+			contentContainer = document.querySelector("#contentContainer"),
+			ps = new PerfectScrollbar(contentContainer, {
+				// theme: "slimScrollbar",
+				suppressScrollX: true
+			})
+		;
+
+		const resizeScroll = _.debounce(function(e){
+			if((e.target.id==="showAdvanced" || e.target.id==="showExperimented") && e.target.checked===false){
+				contentContainer.scrollTop = 0;
+			}
+
+			ps.update();
+		}, 100, {
+			maxWait: 200
+		});
+
+		const showAdvanced = document.querySelector("#showAdvanced");
+		showAdvanced.addEventListener("change", resizeScroll);
+
+		const showExperimented = document.querySelector("#showExperimented");
+		showExperimented.addEventListener("change", resizeScroll);
+
+		window.onresize = resizeScroll;
+	}
 }
 document.addEventListener('DOMContentLoaded',		init);
+
+document.body.classList.toggle("isChrome", backgroundPage.appGlobal.hasTouch(window)===true);
+document.body.classList.toggle("isChrome", backgroundPage.zDK.isFirefox===false);
+document.body.classList.toggle("isFirefox", backgroundPage.zDK.isFirefox===true);
 
 if(typeof browser.storage.sync === "object"){
 	document.querySelector("#syncContainer").classList.remove("hide");
@@ -42,12 +81,3 @@ if(typeof browser.storage.sync === "object"){
 	let save_sync_button = document.querySelector("#save_sync");
 	save_sync_button.addEventListener("click", function(event){saveOptionsInSync(event);});
 }
-
-
-/*const ps = new PerfectScrollbar("#contentContainer", {
-	includePadding: true,
-	suppressScrollX: true
-});
-window.onresize = function(){
-	ps.update();
-};*/

@@ -17,6 +17,8 @@
 	"GloballyDisabledNotifications": "All notifications are disabled",
 	"GloballyDisableNotifications": "Temporarly disable notifications",
 
+	"News": "News",
+
 	"Settings": "Settings",
 	"confirm_all_changes": "Confirm changes",
 	"cancelChanges": "Cancel changes",

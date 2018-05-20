@@ -1825,7 +1825,7 @@ function initAddon(){
 		}
 	});
 
-	let localToRemove = ["livestreamer_cmd_to_clipboard","livestreamer_cmd_quality"];
+	let localToRemove = [];
 	/* 		----- Importation/Removal of old preferences -----		*/
 	if(getPreference("stream_keys_list") === ""){
 		let importSreamsFromOldVersion = function(){
@@ -1862,18 +1862,6 @@ function initAddon(){
 		localToRemove.push("beam_user_id");
 	}
 
-	/*if(typeof browser.runtime.onInstalled !== "undefined" && typeof getPreference("livenotifier_version") === "string"){
-		localToRemove.push("livenotifier_version");
-		/*if(appGlobal.currentPreferences.hasOwnProperty("livenotifier_version")){
-			delete appGlobal.currentPreferences.livenotifier_version;
-		}
-	}*/
-	if(typeof getPreference("notification_type") === "string"){
-		localToRemove.push("notification_type");
-		if(chromeSettings.has("notification_type")){
-			chromeSettings.delete("notification_type");
-		}
-	}
 	if(localToRemove.length > 0){
 		browser.storage.local.remove(localToRemove)
 			.catch(err=>{
@@ -1882,7 +1870,7 @@ function initAddon(){
 		;
 	}
 
-	let toRemove = ["livenotifier_version","notification_type","livestreamer_cmd_to_clipboard","livestreamer_cmd_quality"];
+	let toRemove = ["livenotifier_version"];
 	websites.forEach((websiteAPI, website) => {
 		toRemove.push(`${website}_keys_list`);
 	});
@@ -1917,9 +1905,10 @@ function checkIfUpdated(details){
 	
 	let installReason = details.reason;
 	consoleMsg("info", `Runtime onInstalled reason: ${installReason}`);
-	
+
+
 	// Checking if updated
-	//if(installReason == "update" || installReason == "unknown"){
+	if(installReason === "update" || installReason === "unknown"){
 		previousVersion = details.previousVersion;
 		let previousVersion_numbers = getVersionNumbers.exec(previousVersion);
 		let current_version_numbers = getVersionNumbers.exec(current_version);
@@ -1939,40 +1928,47 @@ function checkIfUpdated(details){
 							consoleMsg("warn", err);
 						})
 					;
+
+					if(installReason==="install" || (previousVersion_numbers[1] <= 11 && previousVersion_numbers[2]<=14)){
+						ZDK.openTabIfNotExist(chrome.extension.getURL("/data/options.html#news"))
+							.catch(console.error)
+						;
+					}
 				}
 			}
 		}
-	/*}
-	if(typeof browser.runtime.onInstalled == "object" && typeof browser.runtime.onInstalled.removeListener == "function"){
-		browser.runtime.onInstalled.removeListener(checkIfUpdated);
-	} else {*/
-		savePreference("livenotifier_version", current_version);
-	//}
+	}
+
+	if(typeof chrome.runtime.onInstalled !== "undefined" && typeof chrome.runtime.onInstalled.addListener === "function" && typeof chrome.runtime.onInstalled.removeListener === "function"){
+		chrome.runtime.onInstalled.removeListener(checkIfUpdated);
+	}
+
+	savePreference("livenotifier_version", current_version);
 }
 
 (async ()=>{
 	appGlobal.chromeSettings = chromeSettings;
 	consoleDir(chromeSettings,"Current preferences in the local storage:");
 
-	/*if(typeof browser.runtime.onInstalled == "object" && typeof browser.runtime.onInstalled.removeListener == "function"){
-		browser.runtime.onInstalled.addListener(checkIfUpdated);
+	/*if(typeof chrome.runtime.onInstalled !== "undefined" && typeof chrome.runtime.onInstalled.addListener === "function" && typeof chrome.runtime.onInstalled.removeListener === "function"){
+		chrome.runtime.onInstalled.addListener(checkIfUpdated);
 	} else {*/
-	//consoleMsg("warn", "browser.runtime.onInstalled is not available");
-	let details;
-	if(typeof getPreference("livenotifier_version") === "string" && getPreference("livenotifier_version") !== ""){
-		details = {
-			"reason": "unknown",
-			"previousVersion": getPreference("livenotifier_version")
+		consoleMsg("warn", "browser.runtime.onInstalled is not available");
+		let details;
+		if(typeof getPreference("livenotifier_version") === "string" && getPreference("livenotifier_version") !== ""){
+			details = {
+				"reason": "unknown",
+				"previousVersion": getPreference("livenotifier_version")
+			}
+		} else {
+			details = {
+				"reason": "install",
+				"previousVersion": "0.0.0"
+			}
 		}
-	} else {
-		details = {
-			"reason": "install",
-			"previousVersion": "0.0.0"
-		}
-	}
 
-	checkIfUpdated(details);
-	//}
+		checkIfUpdated(details);
+	// }
 
 	let platformsLoad_result;
 	try{
