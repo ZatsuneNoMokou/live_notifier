@@ -57,11 +57,15 @@ document.querySelector("#disableNotifications").dataset.translateTitle = (backgr
 
 window.onload = async function () {
 	window.onload = null;
-	let jsFiles = ["lib/dom-delegate.js", "lib/perfect-scrollbar.js", "lib/opentip-native_modified.js"];
-	if(typeof browser==="undefined"||browser===null){
-		backgroundPage.zDK.isFirefox = false;
+	let jsFiles = ["lib/dom-delegate.js", "lib/opentip-native_modified.js"];
+	if(backgroundPage.zDK.isFirefox===true){
+		jsFiles.push("lib/perfect-scrollbar.js");
+	} else {
 		jsFiles.push("/lib/browser-polyfill.js");
 	}
+	document.body.classList.toggle("isChrome", backgroundPage.appGlobal.hasTouch(window)===true);
+	document.body.classList.toggle("isChrome", backgroundPage.zDK.isFirefox===false);
+	document.body.classList.toggle("isFirefox", backgroundPage.zDK.isFirefox===true);
 	jsFiles = jsFiles.concat(["options-api.js", "lib/lodash.custom.js",  "panel/panel.js"]);
 
 	backgroundPage.zDK.loadJS(document, jsFiles);

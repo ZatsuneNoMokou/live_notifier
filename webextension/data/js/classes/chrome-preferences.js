@@ -481,6 +481,7 @@ ${err}`);
 
 		let node = document.createElement("div");
 		node.classList.add("preferenceContainer");
+		node.classList.add("preferenceContainer--" + id);
 		if(typeof prefObj.prefLevel === "string"){
 			node.classList.add(prefObj.prefLevel);
 		}
@@ -684,18 +685,38 @@ ${err}`);
 	 * @param {String} appName
 	 * @param {HTMLDocument} doc
 	 */
-	exportPrefsToFile(appName, doc=document){
+	async exportPrefsToFile(appName, doc=document){
 		let exportData = {
 			"preferences": this.getSyncPreferences()
 		};
 
 		exportData[`${appName}_version`] = browser.runtime.getManifest().version;
 
-		let link = doc.createElement("a");
-		link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData));
-		link.download = `${appName}_preferences.json`;
 
-		ZDK.simulateClick(link);
+
+		const iframe = doc.body.appendChild(doc.createElement('iframe'));
+		iframe.classList.add("hidden");
+
+		let link = doc.createElement("a");
+		link.setAttribute("download", `${appName}_preferences.json`);
+
+		const url = URL.createObjectURL(new Blob([
+				JSON.stringify(exportData, null, '\t')
+			], {type: 'application/json'}))
+		;
+
+		link.href = url;
+
+		await ZDK.setTimeout();
+		link = iframe.contentDocument.importNode(link, true);
+		iframe.contentDocument.body.appendChild(link);
+
+		await ZDK.setTimeout();
+		link.dispatchEvent(new MouseEvent('click'));
+
+		await ZDK.setTimeout(1000);
+		URL.revokeObjectURL(url);
+		iframe.remove();
 	}
 
 	/**

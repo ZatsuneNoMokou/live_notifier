@@ -1,0 +1,34 @@
+:root {
+	--webkitScrollbar: rgba(170,170,170,0.5);
+	--webkitScrollbarHidden: transparent;
+}
+
+body.isChrome.scroll,
+body.isChrome .scroll {
+	overflow-x: hidden !important;
+	overflow-y: auto !important;
+}
+
+body.isChrome::-webkit-scrollbar,
+body.isChrome .scroll::-webkit-scrollbar {
+	background: transparent;
+	width: 6px;
+}
+
+body.isChrome.scroll::-webkit-scrollbar-thumb,
+body.isChrome .scroll::-webkit-scrollbar-thumb {
+	background-color: var(--webkitScrollbarHidden, transparent);
+	border-radius: 6px;
+	transition: background-color .2s linear;
+}
+
+body.isChrome.hasTouch.scroll::-webkit-scrollbar-thumb,
+body.isChrome.hasTouch .scroll::-webkit-scrollbar-thumb,
+
+body.isChrome.scroll-visible::-webkit-scrollbar-thumb,
+body.isChrome .scroll-visible::-webkit-scrollbar-thumb,
+
+body.isChrome.scroll:hover::-webkit-scrollbar-thumb,
+body.isChrome .scroll:hover::-webkit-scrollbar-thumb {
+	background-color: var(--webkitScrollbar, rgba(170,170,170,0.5));
+}
