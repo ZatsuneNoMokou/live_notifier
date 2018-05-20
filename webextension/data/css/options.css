@@ -35,6 +35,7 @@ input[type='range'] {
 }
 
 
+.button,
 button {
 	padding: 0 8px;
 	border: 0 none;

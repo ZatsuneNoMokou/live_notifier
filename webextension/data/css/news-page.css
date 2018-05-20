@@ -1,0 +1,33 @@
+section#news {
+	background: rgba(200,200,200,0.8);
+	border-radius: 1px;
+	margin-bottom: 5em;
+	padding: 8px;
+}
+
+section#news.hide,
+section#news .hide {
+	display: none;
+}
+
+section#news .closeButton {
+	display: inline-block;
+	height: 30px;
+	line-height: 30px;
+	text-align: center;
+	text-decoration: none;
+	vertical-align: middle;
+	width: 30px;
+}
+
+section#news span {
+	font-size: inherit;
+}
+
+.italic {
+	font-style: italic;
+}
+
+.bold {
+	font-weight: bold;
+}

@@ -1928,13 +1928,19 @@ function checkIfUpdated(details){
 							consoleMsg("warn", err);
 						})
 					;
+
+					if(installReason==="install" || (previousVersion_numbers[1] <= 11 && previousVersion_numbers[2]<=14)){
+						ZDK.openTabIfNotExist(chrome.extension.getURL("/data/options.html#news"))
+							.catch(console.error)
+						;
+					}
 				}
 			}
 		}
 	}
 
-	if(typeof browser.runtime.onInstalled === "object" && typeof browser.runtime.onInstalled.removeListener === "function"){
-		browser.runtime.onInstalled.removeListener(checkIfUpdated);
+	if(typeof chrome.runtime.onInstalled !== "undefined" && typeof chrome.runtime.onInstalled.addListener === "function" && typeof chrome.runtime.onInstalled.removeListener === "function"){
+		chrome.runtime.onInstalled.removeListener(checkIfUpdated);
 	}
 
 	savePreference("livenotifier_version", current_version);
@@ -1944,9 +1950,9 @@ function checkIfUpdated(details){
 	appGlobal.chromeSettings = chromeSettings;
 	consoleDir(chromeSettings,"Current preferences in the local storage:");
 
-	if(typeof browser.runtime.onInstalled === "object" && typeof browser.runtime.onInstalled.removeListener === "function"){
-		browser.runtime.onInstalled.addListener(checkIfUpdated);
-	} else {
+	/*if(typeof chrome.runtime.onInstalled !== "undefined" && typeof chrome.runtime.onInstalled.addListener === "function" && typeof chrome.runtime.onInstalled.removeListener === "function"){
+		chrome.runtime.onInstalled.addListener(checkIfUpdated);
+	} else {*/
 		consoleMsg("warn", "browser.runtime.onInstalled is not available");
 		let details;
 		if(typeof getPreference("livenotifier_version") === "string" && getPreference("livenotifier_version") !== ""){
@@ -1962,7 +1968,7 @@ function checkIfUpdated(details){
 		}
 
 		checkIfUpdated(details);
-	}
+	// }
 
 	let platformsLoad_result;
 	try{
