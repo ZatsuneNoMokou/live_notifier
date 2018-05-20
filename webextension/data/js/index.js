@@ -1939,9 +1939,9 @@ function checkIfUpdated(details){
 		}
 	}
 
-	if(typeof chrome.runtime.onInstalled !== "undefined" && typeof chrome.runtime.onInstalled.addListener === "function" && typeof chrome.runtime.onInstalled.removeListener === "function"){
+	/*if(typeof chrome.runtime.onInstalled !== "undefined" && typeof chrome.runtime.onInstalled.addListener === "function" && typeof chrome.runtime.onInstalled.removeListener === "function"){
 		chrome.runtime.onInstalled.removeListener(checkIfUpdated);
-	}
+	}*/
 
 	savePreference("livenotifier_version", current_version);
 }
