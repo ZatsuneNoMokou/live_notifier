@@ -4,6 +4,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 	<link rel="stylesheet" type="text/css" media="all" href="css/inputs.css" />
+	<link rel="stylesheet" type="text/css" media="all" href="css/css_scrollbar.css" />
 	<link rel="stylesheet" type="text/css" media="all" href="css/panel.css" />
 	<style id="search-cssSelector"></style>
 	<link id="generated-color-stylesheet" rel="stylesheet" type="text/css" media="all" data-theme="dark" data-background_color="#000000" href="css/panel-theme-dark.css" />
@@ -24,14 +25,14 @@
 		<button id="refreshStreams" data-translate-title="Refresh"><i class="material-icons">refresh</i></button>
 		<button id="settings" data-translate-title="Settings"><i class="material-icons">settings</i></button>
 	</header>
-	<section id="deleteModeControles" class="hide">
+	<section id="deleteModeControles" class="scroll hide">
 		<button id="confirmChanges" data-translate-id="confirm_all_changes">Changes changes</button>
 		<button id="cancelChanges" data-translate-id="cancelChanges">Cancel changes</button>
 	</section>
-	<section id="streamList">
+	<section id="streamList" class="scroll">
 		<div id="searchInputContainer" class="hide"><label for="searchInput"><i class="material-icons">search</i></label><input id="searchInput" type="text"></div>
 	</section>
-	<section id="streamEditor" class="hide">
+	<section id="streamEditor" class="scroll hide">
 		<div id="streamEditor-firstLine"><span id="editedStreamTitle"></span><span class="vide"></span><button id="closeEditor">X</button></div>
 		<div class="flex_input_text"><label for="customURL"><span data-translate-id="customURL_title">Custom url</span></label><input id="customURL" pattern="(?:http|https):\/\/.+" type="url"></div>
 		<div class="flex_input_text"><label for="twitter" data-translate-id="twitter_title">Twitter</label><input id="twitter" type="text"></div>
@@ -55,7 +56,7 @@
 		</div>
 		<div><button id="saveEditedStream" data-translate-id="save">Save</button></div>
 	</section>
-	<section id="settings_container" class="hide">
+	<section id="settings_container" class="scroll hide">
 		<div id="settings_topContainer">
 			<button id="open_optionpage" data-translate-title="open_optionpage"></button>
 			<button id="ignoreHideIgnore" data-translate-id="ignoreHideIgnore">Temporarily disable Ignore/Hide</button>
@@ -69,7 +70,7 @@
 			</div>
 		</div>
 	</section>
-	<section id="debugSection" class="hide">
+	<section id="debugSection" class="scroll hide">
 		<span><button id="close_debugSection">X</button></span>
 		<div id="debugInfo" data-translate-id="debugInfo"></div>
 		<div id="debug_checkingLivesState" data-translate-id="debug_checkingLivesState"></div>

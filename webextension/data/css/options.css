@@ -1,28 +1,33 @@
 html,
 body {
-	/*overflow:hidden;
-	margin-right: 0px;*/
+	height: 100vh;
+	/*margin-right: 0px;*/
 	min-width: 777px;
 	font-family: Ubuntu, Tahoma, sans-serif;
+	margin: 0;
 }
-/*html{
-	min-height: 666px;
-	height: 100vh;
-}
-body{
-	height: 100%;
-}*/
+
 #contentContainer {
 	height: 100%;
-	overflow: hidden;
+	padding: 8px 10%;
 	position: relative;
-	
-	padding: 0 8px;
+	overflow: hidden;
 }
+
+body.isChrome #contentContainer {
+	overflow-x: hidden;
+	overflow-y: scroll;
+}
+
 
 * {
 	font-size: 14px;
 	box-sizing: border-box;
+}
+
+h1 {
+	font-size: 26px;
+	margin: 0.7em 0 1em;
 }
 
 input[type='range'] {
@@ -30,6 +35,7 @@ input[type='range'] {
 }
 
 
+.button,
 button {
 	padding: 0 8px;
 	border: 0 none;

@@ -605,6 +605,11 @@ body .preferenceContainer.experimented {
 	visibility: hidden;
 }
 
+.preferenceContainer--youtube_patreon_password {
+	align-items: flex-start;
+	flex-direction: column;
+}
+
 .preferenceContainer:not(.stringList) label {
 	flex: 4;
 }
