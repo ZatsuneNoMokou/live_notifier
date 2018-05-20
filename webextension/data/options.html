@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Live notifier - Preferences</title>
+	<title>Live Notifier</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 	<link rel="stylesheet" type="text/css" media="all" href="css/inputs.css" />
 	<link rel="stylesheet" type="text/css" media="all" href="css/css_scrollbar.css" />
+	<link rel="stylesheet" type="text/css" media="all" href="css/news-page.css" />
 	<link rel="stylesheet" type="text/css" media="all" href="css/options.css" />
 	<link id="generated-color-stylesheet" rel="stylesheet" type="text/css" media="all" data-theme="dark" data-background_color="#000000" href="css/panel-theme-dark.css" />
 
@@ -27,6 +28,34 @@
 </head>
 <body>
 	<div id="contentContainer" class="scroll">
+		<section id="news" class="hide">
+			<h1>
+				<span data-translate-id="News">News</span>
+				<a class="button closeButton" href="">X</a>
+			</h1>
+
+			<div id="news-en" class="hide">
+				<ul>
+					<li>
+						<span class="italic">11.4.0&nbsp:</span><br />
+						The YouTube support will only show one live per channel, the quotas being too close, it is the only alternative for now <span class="italic">(except for Patreons)</span>.
+					</li>
+				</ul>
+				<br />
+				For more information, you can go on the Firefox page for <a href="https://addons.mozilla.org/fr/firefox/addon/live-notifier/">Live Notifier</a>, or for the more advanced users, the <a href="https://gitlab.com/ZatsuneNoMokou/live_notifier" target="_blank">GitLab</a>.
+			</div>
+			<div id="news-fr" class="hide">
+				<ul>
+					<li>
+						<span class="italic">11.4.0&nbsp:</span><br />
+						Le support YouTube ne montre désormais qu'un seul live par chaîne, le quota étant trop proche, c'est la seule alternative viable pour le moment <span class="italic">(sauf pour les Patreons)</span>.
+					</li>
+				</ul>
+				<br >
+				Pour plus d'informations, visitez la page Firefox pour <a href="https://addons.mozilla.org/fr/firefox/addon/live-notifier/">Live Notifier</a>, ou pour les utilisateurs plus avancés, le <a href="https://gitlab.com/ZatsuneNoMokou/live_notifier" target="_blank">GitLab</a>.
+			</div>
+		</section>
+
 		<h1 data-translate-id="Settings">Options</h1>
 
 		<section id="preferences">

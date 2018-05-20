@@ -29,6 +29,15 @@ loadPreferences("section#preferences");
 function init(){
 	loadTranslations();
 
+
+
+	if(location.hash==="#news"){
+		document.querySelector("section#news").classList.remove("hide");
+		document.querySelector(`section#news #news-${browser.i18n.getMessage("language")}`).classList.remove("hide");
+	}
+
+
+
 	if(backgroundPage.zDK.isFirefox===true){
 		const
 			contentContainer = document.querySelector("#contentContainer"),
