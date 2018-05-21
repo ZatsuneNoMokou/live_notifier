@@ -1253,7 +1253,6 @@ async function checkLives(idArray){
 
 								if(streamLogo!=="" && imgArrayPreload.indexOf(streamLogo)===-1){
 									imgArrayPreload.push(streamLogo);
-									loadImage(streamLogo);
 								}
 							}
 						})
@@ -1606,16 +1605,6 @@ async function getChannelInfo(website, id){
 		return responseValidity;
 	}
 }
-const loadImage = appGlobal["loadImage"] = ZDK.memoize(async function (imageUrl){
-	const xhr = await Request({
-			"url": imageUrl,
-			"contentType": "blob"
-		}).get(),
-		base64data = await zDK.loadBlob(xhr.response)
-	;
-
-	return await zDK.getBase64Image(await zDK.loadImage(base64data), {"height": 86, "width": 48});
-}, ((getPreference('check_delay') * 60000>5)? getPreference('check_delay') : 5) + 1);
 
 function importButton(website){
 	let importationPromiseEnd = (reason) => {
