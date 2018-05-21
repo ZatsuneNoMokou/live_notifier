@@ -247,9 +247,9 @@ body.hasTouch .item-stream.onlineItem > div > .stream_control {
 }
 
 .item-stream.offlineItem.streamLogo {
+	/*background-size:auto 28px;*/
 	/*padding-left: 42px;*/
 	padding-left: 4px;
-	/*background-size:auto 28px;*/
 }
 
 .item-stream.offlineItem.streamLogo .streamTitle {
@@ -260,6 +260,12 @@ body.hasTouch .item-stream.onlineItem > div > .stream_control {
 .item-stream.offlineItem figure.streamPicture {
 	max-height: 30px;
 	max-width: 30px;
+}
+
+.item-stream.offlineItem figure.streamPicture.hide {
+	display: inline-block !important;
+	order: 2;
+	visibility: visible !important;
 }
 
 .item-stream .streamTitle::before {
@@ -325,6 +331,7 @@ body[data-theme='light'] .debugItem[data-stream-website="hitbox"] .debugTitle::b
 }
 
 .item-stream.offlineItem .streamTitle {
+	order: 1;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
@@ -436,6 +443,10 @@ body.groupedStreams #streamListOffline > div.group {
 	display: none;
 	visibility: hidden;
 	font-weight: normal;
+}
+
+.item-stream.offlineItem .stream_control {
+	order: 3;
 }
 
 .item-stream.onlineItem .stream_control .ignoreStreamButton,

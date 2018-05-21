@@ -339,7 +339,8 @@ class ZDK{
 		}
 
 		const nodes = (typeof html==="object")? [html] : new DOMParser().parseFromString(html, 'text/html').body.childNodes,
-			target = (typeof selector==="object")? selector : doc.querySelector(selector)
+			target = (typeof selector==="object")? selector : doc.querySelector(selector),
+			output = []
 		;
 		if(target!==null){
 			for(let i in nodes){
@@ -347,15 +348,15 @@ class ZDK{
 					const node = nodes[i];
 					switch(action){
 						case "appendTo":
-							target.appendChild(node);
+							output[i] = target.appendChild(node);
 							break;
 						case "insertBefore":
-							target.parentNode.insertBefore(node, target);
+							output[i] = target.parentNode.insertBefore(node, target);
 							break;
 					}
 				}
 			}
-			return nodes;
+			return output;
 		} else {
 			return null;
 		}
