@@ -368,10 +368,10 @@ const youtube = {
 				}
 				
 				if(snippetData.hasOwnProperty("thumbnails") === true){
-					if(snippetData.thumbnails.hasOwnProperty("high") === true && snippetData.thumbnails.high.hasOwnProperty("url") === true && typeof snippetData.thumbnails.high.url === "string"){
-						streamData.streamOwnerLogo = snippetData.thumbnails.high.url;
-					} else if(snippetData.thumbnails.hasOwnProperty("default") === true && snippetData.thumbnails["default"].hasOwnProperty("url") === true && typeof snippetData.thumbnails.high.url === "string"){
+					if(snippetData.thumbnails.hasOwnProperty("default") === true && snippetData.thumbnails["default"].hasOwnProperty("url") === true && typeof snippetData.thumbnails.high.url === "string"){
 						streamData.streamOwnerLogo = snippetData.thumbnails["default"].url;
+					} else if(snippetData.thumbnails.hasOwnProperty("high") === true && snippetData.thumbnails.high.hasOwnProperty("url") === true && typeof snippetData.thumbnails.high.url === "string"){
+						streamData.streamOwnerLogo = snippetData.thumbnails.high.url;
 					}
 				}
 				
@@ -495,10 +495,10 @@ const youtube = {
 				}
 				
 				if(data.hasOwnProperty("thumbnails") === true){
-					if(data.thumbnails.hasOwnProperty("high") === true && data.thumbnails.high.hasOwnProperty("url") === true && typeof data.thumbnails.high.url === "string"){
-						streamData.streamOwnerLogo = data.thumbnails.high.url;
-					} else if(data.thumbnails.hasOwnProperty("default") === true && data.thumbnails["default"].hasOwnProperty("url") === true && typeof data.thumbnails.high.url === "string"){
+					if(data.thumbnails.hasOwnProperty("default") === true && data.thumbnails["default"].hasOwnProperty("url") === true && typeof data.thumbnails.high.url === "string"){
 						streamData.streamOwnerLogo = data.thumbnails["default"].url;
+					} else if(data.thumbnails.hasOwnProperty("high") === true && data.thumbnails.high.hasOwnProperty("url") === true && typeof data.thumbnails.high.url === "string"){
+						streamData.streamOwnerLogo = data.thumbnails.high.url;
 					}
 				}
 			}

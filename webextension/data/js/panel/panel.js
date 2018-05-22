@@ -597,33 +597,19 @@ class LazyLoading {
 		this.store.forEach((src,node)=>{
 			const coords = node.getBoundingClientRect();
 			if((coords.top >= 0 && coords.left >= 0 && coords.top) <= 50 + (window.innerHeight || document.documentElement.clientHeight)){
-				this.loadImg(node, src);
+				backgroundPage.zDK.loadImage(src)
+					.then(img=>{
+						node.appendChild(img);
+						node.classList.remove("hide");
+						node.parentNode.classList.add("streamLogo");
+					})
+					.catch((err)=>{
+						appGlobal.consoleMsg("error", err);
+					})
+				;
 				this.store.delete(node);
 			}
 		});
-	}
-	loadImg(node, src){
-		appGlobal.loadImage(src)
-			.then(oldCanvas=>{
-				const newCanvas = document.createElement('canvas'),
-					context = newCanvas.getContext('2d');
-
-				//set dimensions
-				newCanvas.width = oldCanvas.width;
-				newCanvas.height = oldCanvas.height;
-
-				//apply the old canvas to the new one
-				context.drawImage(oldCanvas, 0, 0);
-
-				node.appendChild(newCanvas);
-
-				node.classList.remove("hide");
-				node.parentNode.classList.add("streamLogo");
-			})
-			.catch(err=>{
-				console.warn(err);
-			})
-		;
 	}
 }
 
@@ -899,30 +885,8 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	const $newNode = insertStreamNode(Mustache.render(streamTemplate, streamRenderData), website, id, contentId, type, streamData, online);
 
 	if(streamRenderData.usePictureLazyLoading===false && typeof streamRenderData.streamLogo==="string" && streamRenderData.streamLogo!==""){
-		appGlobal.loadImage(streamRenderData.streamLogo)
-			.then(oldCanvas=>{
-				const streamPicture = $newNode[0].querySelector(".streamPicture");
-				streamPicture.classList.remove("hide");
-
-				if(streamPicture.hasChildNodes()){
-					streamPicture.innerHTML="";
-				}
-
-				const newCanvas = document.createElement('canvas'),
-					context = newCanvas.getContext('2d');
-
-				//set dimensions
-				newCanvas.width = oldCanvas.width;
-				newCanvas.height = oldCanvas.height;
-
-				//apply the old canvas to the new one
-				context.drawImage(oldCanvas, 0, 0);
-
-				streamPicture.appendChild(newCanvas);
-
-				$newNode.addClass("streamLogo");
-			})
-		;
+		const streamPicture = $newNode[0].querySelector(".streamPicture");
+		LazyLoading.loadImg(streamPicture, streamRenderData.streamLogo);
 	}
 }
 function streamItemClick(){
