@@ -10,6 +10,8 @@
 
 # 11.15.0
 * \- : Panel - Not resizing images anymore, but still using lazy loading
+* Fix : Panel - Better condition to load browser polyfill
+* Fix : Forgotten console code
 
 # 11.14.1
 * Fix : Forgotten code to comment
