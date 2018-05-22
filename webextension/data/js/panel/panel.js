@@ -599,8 +599,6 @@ class LazyLoading {
 			if((coords.top >= 0 && coords.left >= 0 && coords.top) <= 50 + (window.innerHeight || document.documentElement.clientHeight)){
 				backgroundPage.zDK.loadImage(src)
 					.then(img=>{
-						console.dir(img);
-
 						node.appendChild(img);
 						node.classList.remove("hide");
 						node.parentNode.classList.add("streamLogo");
