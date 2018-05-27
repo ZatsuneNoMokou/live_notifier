@@ -628,6 +628,15 @@ function Request(options){
 							default:
 								consoleMsg("warn", `[Request] Unknown custom JSON parse ${options.customJSONParse}`);
 						}
+					} else if(typeof options.customJSONParse === "function"){
+						let data = null;
+						try {
+							data = options.customJSONParse(xhr);
+						} catch (e) {
+							consoleMsg("error", e);
+						}
+
+						response.json = data;
 					} else if(xhr.responseType === "document" && typeof options.Request_documentParseToJSON === "function"){
 						let result = options.Request_documentParseToJSON(xhr);
 						if(result instanceof Map){
