@@ -8,6 +8,9 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 11.16.0
+* \+ : YouTube data with less YouTube API, serveur can not handle load
+
 # 11.15.0
 * \- : Panel - Not resizing images anymore, but still using lazy loading
 * Fix : Panel - Better condition to load browser polyfill
