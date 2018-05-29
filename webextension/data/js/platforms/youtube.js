@@ -76,28 +76,82 @@ const youtube = {
 			}
 			return jsonDATA;
 		},
-	"Request_documentParseToJSON_get_VID":
-		function (xhrResponse) {
+	"Request_documentParseToJSON_get_LiveInfo":
+		function (xhrResponse, isChannel=true) {
 			const responseDoc = xhrResponse.response,
-				ogImage = responseDoc.querySelector("meta[property='og:image']")
+				ogImage = responseDoc.querySelector("meta[property='og:image']"),
+				title = responseDoc.querySelector("meta[property='og:title']")
 			;
 
 			if(ogImage!==null){
 				const ogImageUrl = ogImage.getAttribute("content"),
 					extraction = /^https?:\/\/i\.ytimg\.com\/vi\/([^\/]+)\/[\w_]+\.jpg$/i.exec(ogImageUrl),
+					result = {"list": {}};
+
+				if(extraction!==null){
+					let data = {
+						"streamName": title.getAttribute("content").replace(/\s+-\s+youtube$/i, ""),
+						"streamOwnerLogo": ogImageUrl
+					};
+
+					const extractConfigReg = /ytplayer.config\s*=\s*(.*);ytplayer.load/i;
+					let configData = null;
+
+					for(let script of responseDoc.scripts){
+						if(extractConfigReg.test(script.outerHTML)){
+							try {
+								configData = JSON.parse(extractConfigReg.exec(script.outerHTML)[1]);
+							} catch (e) {
+								consoleMsg("error", e);
+							}
+							break;
+						}
+					}
+
+					if(configData!==null){
+						if(configData.hasOwnProperty("args")){
+							if(configData.args.hasOwnProperty("player_response") && configData.args.player_response.indexOf('LIVE_STREAM_OFFLINE')===-1){ // Live is online
+								if(configData.args.hasOwnProperty("view_count")){
+									data.streamCurrentViewers = parseInt(configData.args.view_count);
+								}
+
+								result.list[extraction[1]] = data;
+							}
+						}
+					}
+				}
+
+				if(isChannel===false){
+					console.dir(result);
+				}
+
+				return result;
+			}
+
+			return null;
+		},
+	"Request_documentParseToJSON_get_Channel":
+		function (xhrResponse) {
+			const responseDoc = xhrResponse.response,
+				ogImage = responseDoc.querySelector("meta[property='og:image']"),
+				title = responseDoc.querySelector("meta[property='og:title']")
+			;
+
+			if(ogImage!==null && title!==null){
+				const ogImageUrl = ogImage.getAttribute("content"),
 					result = {
 						"items": []
 					}
 				;
 
-				if(extraction!==null){
-					result.items.push({
-						"id": {
-							"kind": "youtube#video",
-							"videoId": extraction[1]
-						}
-					})
-				}
+				let data = {
+					"title": title.getAttribute("content").replace(/\s+-\s+youtube$/i, ""),
+					"streamOwnerLogo": ogImageUrl
+				};
+
+				result.items.push({
+					"snippet": data
+				});
 
 				return result;
 			}
@@ -137,7 +191,7 @@ const youtube = {
 			;
 
 			let obj = {};
-			
+
 			if(typeof apiKey === "string" && apiKey !== ""){
 				if(website_channel_id.test(id)){
 					obj = {
@@ -193,10 +247,9 @@ const youtube = {
 							"url": `https://www.youtube.com/channel/${website_channel_id.exec(id)[1]}/live`,
 							"contentType": "document",
 							"overrideMimeType":"text/html; charset=utf-8",
-							"Request_documentParseToJSON": youtube.Request_documentParseToJSON_get_VID
+							"Request_documentParseToJSON": youtube.Request_documentParseToJSON_get_LiveInfo
 						};
 					}
-
 				} else {
 					obj = {
 						"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLiveInfo.php",
@@ -227,6 +280,7 @@ const youtube = {
 						["key", apiKey]
 					]
 				};
+
 				if(typeof referrer === "string" && referrer !== ""){
 					obj.headers = {
 						"referrer": referrer
@@ -234,12 +288,18 @@ const youtube = {
 				}
 			} else {
 				obj = {
+					"url": `https://www.youtube.com/channel/${website_channel_id.exec(id)[1]}`,
+					"contentType": "document",
+					"overrideMimeType":"text/html; charset=utf-8",
+					"Request_documentParseToJSON": youtube.Request_documentParseToJSON_get_Channel
+				};
+				/*obj = {
 					"url": "https://livenotifier.zatsunenomokou.eu/youtube_getChannel.php",
 					"overrideMimeType": "text/plain; charset=utf-8",
 					"content": [
 						["id", website_channel_id.exec(id)[1]]
 					]
-				}
+				}*/
 			}
 			return obj;
 		},
@@ -368,10 +428,10 @@ const youtube = {
 				}
 				
 				if(snippetData.hasOwnProperty("thumbnails") === true){
-					if(snippetData.thumbnails.hasOwnProperty("high") === true && snippetData.thumbnails.high.hasOwnProperty("url") === true && typeof snippetData.thumbnails.high.url === "string"){
-						streamData.streamOwnerLogo = snippetData.thumbnails.high.url;
-					} else if(snippetData.thumbnails.hasOwnProperty("default") === true && snippetData.thumbnails["default"].hasOwnProperty("url") === true && typeof snippetData.thumbnails.high.url === "string"){
+					if(snippetData.thumbnails.hasOwnProperty("default") === true && snippetData.thumbnails["default"].hasOwnProperty("url") === true && typeof snippetData.thumbnails.high.url === "string"){
 						streamData.streamOwnerLogo = snippetData.thumbnails["default"].url;
+					} else if(snippetData.thumbnails.hasOwnProperty("high") === true && snippetData.thumbnails.high.hasOwnProperty("url") === true && typeof snippetData.thumbnails.high.url === "string"){
+						streamData.streamOwnerLogo = snippetData.thumbnails.high.url;
 					}
 				}
 				
@@ -495,11 +555,13 @@ const youtube = {
 				}
 				
 				if(data.hasOwnProperty("thumbnails") === true){
-					if(data.thumbnails.hasOwnProperty("high") === true && data.thumbnails.high.hasOwnProperty("url") === true && typeof data.thumbnails.high.url === "string"){
-						streamData.streamOwnerLogo = data.thumbnails.high.url;
-					} else if(data.thumbnails.hasOwnProperty("default") === true && data.thumbnails["default"].hasOwnProperty("url") === true && typeof data.thumbnails.high.url === "string"){
+					if(data.thumbnails.hasOwnProperty("default") === true && data.thumbnails["default"].hasOwnProperty("url") === true && typeof data.thumbnails.high.url === "string"){
 						streamData.streamOwnerLogo = data.thumbnails["default"].url;
+					} else if(data.thumbnails.hasOwnProperty("high") === true && data.thumbnails.high.hasOwnProperty("url") === true && typeof data.thumbnails.high.url === "string"){
+						streamData.streamOwnerLogo = data.thumbnails.high.url;
 					}
+				} else if(data.hasOwnProperty("streamOwnerLogo")===true){
+					streamData.streamOwnerLogo = data.streamOwnerLogo;
 				}
 			}
 			return streamData;

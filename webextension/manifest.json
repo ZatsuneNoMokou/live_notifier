@@ -3,7 +3,7 @@
 		"gecko": {
 			"id": "livenotifier_dev@zatsunenomokou.eu",
 			"update_url": "https://gitlab.com/ZatsuneNoMokou/live_notifier/raw/master/dist/live_notifier_dev.update.json",
-			"strict_min_version": "52.0"
+			"strict_min_version": "54.0"
 		}
 	},
 	"manifest_version": 2,
@@ -11,7 +11,7 @@
 	"short_name": "LiveNotifierDev",
 	"description": "__MSG_extShortDesc__",
 	"author": "Zatsune No Mokou",
-	"version": "11.14.0",
+	"version": "11.16.0",
 	"icons": {
 		"96": "/icon_96.png",
 		"128": "/icon_128.png"
@@ -68,5 +68,5 @@
 		"page": "data/options.html",
 		"open_in_tab": true
 	},
-	"minimum_chrome_version": "55.0"
+	"minimum_chrome_version": "58.0"
 }

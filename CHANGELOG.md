@@ -8,6 +8,21 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# WIP
+* \+ : Minimum version - Chrome 58 and Firefox 54
+* \+ : Panel - Use of [CSS Grid layout](https://developer.mozilla.org/fr/docs/Web/CSS/CSS_Grid_Layout)
+
+# 11.16.0
+* \+ : YouTube data with less YouTube API, serveur can not handle load
+
+# 11.15.0
+* \- : Panel - Not resizing images anymore, but still using lazy loading
+* Fix : Panel - Better condition to load browser polyfill
+* Fix : Forgotten console code
+
+# 11.14.1
+* Fix : Forgotten code to comment
+
 # 11.14.0
 * i : Cleaning old preferences migrations
 * \+ : Use CSS scrollbar on Chrome instead of javascript one
