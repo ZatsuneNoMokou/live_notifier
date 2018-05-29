@@ -5,13 +5,13 @@ html {
 	overflow: hidden;
 }
 body {
-	display: flex;
-	flex-direction: column;
+	display: grid;
 	font-family: Ubuntu, Tahoma, sans-serif;
+	grid-template-rows: minmax(36px, 46px) 1fr 32px;
 	margin: 0;
+	overflow: hidden;
 	height: 350px;
 	width: 290px;
-	overflow: hidden;
 }
 
 
@@ -58,8 +58,9 @@ header {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
+	grid-column: 1;
+	grid-row: 1;
 	padding: 5px 2px;
-	min-height: 36px;
 }
 
 header button {
@@ -114,8 +115,15 @@ header button:last-of-type {
 
 #deleteModeControles {
 	display: flex;
-	margin-bottom: 13px;
-	z-index: 999999;
+	flex-direction: row;
+	grid-column: 1;
+	grid-row: 2;
+	max-height: 42px;
+	z-index: 3;
+}
+
+#deleteModeControles:not(.hide) + #streamList {
+	margin-top: 42px;
 }
 
 #deleteModeControles button {
@@ -131,9 +139,10 @@ header button:last-of-type {
 #settings_container,
 #streamEditor,
 #debugSection {
+	grid-column: 1;
+	grid-row: 2;
 	overflow: hidden;
 	position: relative;
-	height: 100%;
 	padding: 0 10px 3px 4px;
 }
 
@@ -825,7 +834,8 @@ input[type='number'] {
 footer {
 	display: flex;
 	flex-direction: row;
-	min-height: 32px;
+	grid-column: 1;
+	grid-row: 3;
 }
 
 footer,
