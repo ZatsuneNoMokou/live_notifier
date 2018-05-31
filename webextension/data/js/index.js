@@ -410,7 +410,7 @@ function streamSetting_Update(data){
 
 	streamListFromSetting.refresh();
 
-	let streamList = streamListFromSetting.get(website);
+	let streamList = streamListFromSetting.getWebsiteList(website);
 	
 	for(let i in streamSettingsData){
 		if(streamSettingsData.hasOwnProperty(i)){ // Make sure to not loop constructors

@@ -11,6 +11,8 @@
 # WIP
 * \+ : Minimum version - Chrome 58 and Firefox 54
 * \+ : Panel - Use of [CSS Grid layout](https://developer.mozilla.org/fr/docs/Web/CSS/CSS_Grid_Layout)
+* \+ : \[ZDK] \[ChromePreferences] - New type : JSON
+* \+ : Reworked StreamListFromSetting class, to use less space in preferences
 
 # 11.16.0
 * \+ : YouTube data with less YouTube API, serveur can not handle load

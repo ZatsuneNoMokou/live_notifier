@@ -64,7 +64,15 @@ function getFilterListFromPreference(string){
 function getValueFromNode(node){
 	const tagName = node.tagName.toLowerCase();
 	if(tagName === "textarea"){
-		if(node.dataset.stringTextarea === "true"){
+		if(node.datset.settingType==="json"){
+			let json;
+			try {
+				json = JSON.parse(node.value());
+			} catch (e) {
+				consoleMsg("error", error);
+			}
+			return json;
+		} else if(node.dataset.stringTextarea === "true"){
 			return node.value.replace(/\n/g, "");
 		} else if(node.dataset.stringList === "true"){
 			// Split as list, encode item, then make it back a string
@@ -254,6 +262,7 @@ ${err}`);
 			if(this.options.has(prefId)) {
 				switch (this.options.get(prefId).type) {
 					case "string":
+					case "json":
 					case "color":
 					case "menulist":
 						return current_pref;
@@ -500,6 +509,11 @@ ${err}`);
 			afterInputNode = null,
 			output;
 		switch(prefObj.type){
+			case "json":
+				prefNode = document.createElement("textarea");
+				prefNode.dataset.stringTextarea = true;
+				prefNode.value = JSON.stringify(this.get(id));
+				break;
 			case "string":
 				if(typeof prefObj.stringTextArea === "boolean" && prefObj.stringTextArea === true){
 					prefNode = document.createElement("textarea");
