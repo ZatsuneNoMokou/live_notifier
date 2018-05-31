@@ -94,7 +94,7 @@ const insertBefore = function (sel, html, doc=document) {
 	return backgroundPage.zDK.insertBefore(sel, html, doc);
 };
 
-let { streamListFromSetting,
+let { StreamListFromSetting,
 	websites,
 	liveStatus,
 	channelInfos,
@@ -195,7 +195,7 @@ function deleteStreamButtonClick(){
 	}
 
 	let ignoreStreamButtons = document.querySelectorAll(".item-stream .ignoreStreamButton");
-	let streamListSettings = new streamListFromSetting();
+	let streamListSettings = new StreamListFromSetting();
 	for(let node of ignoreStreamButtons){
 		let website = node.dataset.website;
 		let id = node.dataset.id;
@@ -224,7 +224,7 @@ function cancelChanges(){
 cancelChanges_Node.addEventListener("click", cancelChanges, false);
 function confirmChanges(){
 	if(streamChangeMode){
-		let streamListSettings = new streamListFromSetting(),
+		let streamListSettings = new StreamListFromSetting(),
 			toDelete = document.querySelectorAll(".item-stream .deleteStreamButton.active");
 		if(toDelete !== null){
 			for(let node of toDelete){
@@ -464,7 +464,7 @@ function updatePanelData(doUpdateTheme=true){
 
 	let show_offline_in_panel = getPreference("show_offline_in_panel");
 
-	let streamListSettings = new streamListFromSetting().mapDataAll;
+	let streamListSettings = new StreamListFromSetting().mapDataAll;
 	streamListSettings.forEach((streamList, website) => {
 		streamList.forEach((value, id) => {
 			if(!ignoreHideIgnore){

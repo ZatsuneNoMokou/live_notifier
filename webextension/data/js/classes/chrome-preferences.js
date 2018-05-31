@@ -6,7 +6,7 @@ function encodeString(string){
 	} else {
 		// Using a regexp with g flag, in a replace method let it replace all
 		string = string.replace(/%/g,"%25");
-		string = string.replace(/\:/g,"%3A");
+		string = string.replace(/:/g,"%3A");
 		string = string.replace(/,/g,"%2C");
 	}
 	return string;
@@ -28,7 +28,6 @@ function getBooleanFromVar(string){
 	switch(typeof string){
 		case "boolean":
 			return string;
-			break;
 		case "number":
 		case "string":
 			if(string === "true" || string === "on" || string === 1){
@@ -39,7 +38,6 @@ function getBooleanFromVar(string){
 				console.warn(`getBooleanFromVar: Unkown boolean (${string})`);
 				return string;
 			}
-			break;
 		default:
 			console.warn(`getBooleanFromVar: Unknown type to make boolean (${typeof string})`);
 	}
@@ -259,7 +257,6 @@ ${err}`);
 					case "color":
 					case "menulist":
 						return current_pref;
-						break;
 					case "integer":
 						if (isNaN(parseInt(current_pref))) {
 							console.warn(`${prefId} is not a number (${current_pref})`);
@@ -271,14 +268,10 @@ ${err}`);
 						} else {
 							return parseInt(current_pref);
 						}
-						break;
 					case "bool":
 						return getBooleanFromVar(current_pref);
-						break;
-						break;
 					case "file":
 						return current_pref;
-						break;
 				}
 			} else {
 				console.warn(`Unknown preference "${prefId}"`);
@@ -335,7 +328,7 @@ ${err}`);
 								newPrefArray = oldPrefArray.concat(newPrefArray);
 
 								this.set(prefId, newPrefArray.join());
-								let streamListSetting = new appGlobal.streamListFromSetting("", true);
+								let streamListSetting = new appGlobal.StreamListFromSetting(true);
 								streamListSetting.update();
 								break;
 							case "statusBlacklist":
@@ -383,7 +376,7 @@ ${err}`);
 							newPrefArray = oldPrefArray.concat(newPrefArray);
 
 							this.set(prefId, newPrefArray.join());
-							let streamListSetting = new appGlobal.streamListFromSetting("", true);
+							let streamListSetting = new appGlobal.StreamListFromSetting(true);
 							streamListSetting.update();
 							break;
 						case "statusBlacklist":
