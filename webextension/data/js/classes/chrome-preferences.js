@@ -6,7 +6,7 @@ function encodeString(string){
 	} else {
 		// Using a regexp with g flag, in a replace method let it replace all
 		string = string.replace(/%/g,"%25");
-		string = string.replace(/\:/g,"%3A");
+		string = string.replace(/:/g,"%3A");
 		string = string.replace(/,/g,"%2C");
 	}
 	return string;
@@ -28,7 +28,6 @@ function getBooleanFromVar(string){
 	switch(typeof string){
 		case "boolean":
 			return string;
-			break;
 		case "number":
 		case "string":
 			if(string === "true" || string === "on" || string === 1){
@@ -39,7 +38,6 @@ function getBooleanFromVar(string){
 				console.warn(`getBooleanFromVar: Unkown boolean (${string})`);
 				return string;
 			}
-			break;
 		default:
 			console.warn(`getBooleanFromVar: Unknown type to make boolean (${typeof string})`);
 	}
@@ -66,7 +64,15 @@ function getFilterListFromPreference(string){
 function getValueFromNode(node){
 	const tagName = node.tagName.toLowerCase();
 	if(tagName === "textarea"){
-		if(node.dataset.stringTextarea === "true"){
+		if(node.datset.settingType==="json"){
+			let json;
+			try {
+				json = JSON.parse(node.value());
+			} catch (e) {
+				consoleMsg("error", error);
+			}
+			return json;
+		} else if(node.dataset.stringTextarea === "true"){
 			return node.value.replace(/\n/g, "");
 		} else if(node.dataset.stringList === "true"){
 			// Split as list, encode item, then make it back a string
@@ -256,10 +262,10 @@ ${err}`);
 			if(this.options.has(prefId)) {
 				switch (this.options.get(prefId).type) {
 					case "string":
+					case "json":
 					case "color":
 					case "menulist":
 						return current_pref;
-						break;
 					case "integer":
 						if (isNaN(parseInt(current_pref))) {
 							console.warn(`${prefId} is not a number (${current_pref})`);
@@ -271,14 +277,10 @@ ${err}`);
 						} else {
 							return parseInt(current_pref);
 						}
-						break;
 					case "bool":
 						return getBooleanFromVar(current_pref);
-						break;
-						break;
 					case "file":
 						return current_pref;
-						break;
 				}
 			} else {
 				console.warn(`Unknown preference "${prefId}"`);
@@ -335,7 +337,7 @@ ${err}`);
 								newPrefArray = oldPrefArray.concat(newPrefArray);
 
 								this.set(prefId, newPrefArray.join());
-								let streamListSetting = new appGlobal.streamListFromSetting("", true);
+								let streamListSetting = new appGlobal.StreamListFromSetting(true);
 								streamListSetting.update();
 								break;
 							case "statusBlacklist":
@@ -383,7 +385,7 @@ ${err}`);
 							newPrefArray = oldPrefArray.concat(newPrefArray);
 
 							this.set(prefId, newPrefArray.join());
-							let streamListSetting = new appGlobal.streamListFromSetting("", true);
+							let streamListSetting = new appGlobal.StreamListFromSetting(true);
 							streamListSetting.update();
 							break;
 						case "statusBlacklist":
@@ -507,6 +509,11 @@ ${err}`);
 			afterInputNode = null,
 			output;
 		switch(prefObj.type){
+			case "json":
+				prefNode = document.createElement("textarea");
+				prefNode.dataset.stringTextarea = true;
+				prefNode.value = JSON.stringify(this.get(id));
+				break;
 			case "string":
 				if(typeof prefObj.stringTextArea === "boolean" && prefObj.stringTextArea === true){
 					prefNode = document.createElement("textarea");

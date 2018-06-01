@@ -127,7 +127,16 @@ function settingNode_onChange(event){
 		settingName = (node.tagName.toLowerCase()==="input"&&typeof node.type==="string"&&node.type.toLowerCase()==="radio")? node.name : node.id;
 
 	if(node.validity.valid){
-		savePreference(settingName, backgroundPage.getValueFromNode(node));
+		if(node.datset.settingType){
+			const data = backgroundPage.getValueFromNode(node);
+			if(data!==undefined){
+				savePreference(settingName, data);
+			} else {
+				consoleMsg("error", `${settingName} value was incorrect.`)
+			}
+		} else {
+			savePreference(settingName, backgroundPage.getValueFromNode(node));
+		}
 	}
 }
 function refreshSettings(event){

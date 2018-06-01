@@ -4,8 +4,7 @@ const options = {
 	"stream_keys_list": {
 		"title": "Stream keys to notify",
 		"description": "Stream list in a comma separated list.",
-		"type": "string",
-		"stringTextArea": true,
+		"type": "json",
 		"value": "",
 		"showPrefInPanel": false,
 		"prefLevel": "experimented"
