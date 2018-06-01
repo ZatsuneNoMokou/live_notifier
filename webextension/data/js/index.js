@@ -836,27 +836,6 @@ function setIcon(){
 		}
 	});
 
-	liveStatus.forEach((website_liveStatus, website) => {
-		streamListFromSetting.refresh();
-		let streamList = streamListFromSetting.getWebsiteList(website);
-		website_liveStatus.forEach((id_liveStatus, id) => {
-			if(streamList.has(id) && (typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true)){
-				// Ignoring stream with ignore set to true from online count
-				//consoleMsg("log", `[Live notifier - setIcon] ${id} of ${website} is ignored`);
-				//return;
-			} else {
-				liveStore.forEachLive(website, id, (website, id, contentId, streamData) => {
-					if(streamData.liveStatus.filteredStatus && streamList.has(id)){
-						appGlobal["onlineCount"] = appGlobal["onlineCount"] + 1;
-						if(streamList.has(id) && !(typeof streamList.get(id).iconIgnore === "boolean" && streamList.get(id).iconIgnore === true)){
-							badgeOnlineCount++;
-						}
-					}
-				})
-			}
-		});
-	});
-
 	if(badgeOnlineCount > 0){
 		browser.browserAction.setTitle({title: i18ex._("count_stream_online", {"count": badgeOnlineCount})});
 	} else {
