@@ -818,7 +818,24 @@ appGlobal["getOfflineCount"] = getOfflineCount;
 function setIcon(){
 	appGlobal["onlineCount"] = 0;
 	let badgeOnlineCount = 0;
-	
+
+	streamListFromSetting.refresh();
+	liveStore.forEachLive((website, id, contentId, streamData)=>{
+		let streamList = streamListFromSetting.getWebsiteList(website);
+		if(streamList.has(id) && (typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true)){
+			// Ignoring stream with ignore set to true from online count
+			//consoleMsg("log", `[Live notifier - setIcon] ${id} of ${website} is ignored`);
+			//return;
+		} else {
+			if(streamData.liveStatus.filteredStatus && streamList.has(id)){
+				appGlobal["onlineCount"] = appGlobal["onlineCount"] + 1;
+				if(typeof streamList.get(id).iconIgnore !== "boolean" || streamList.get(id).iconIgnore !== true) {
+					badgeOnlineCount++;
+				}
+			}
+		}
+	});
+
 	liveStatus.forEach((website_liveStatus, website) => {
 		streamListFromSetting.refresh();
 		let streamList = streamListFromSetting.getWebsiteList(website);

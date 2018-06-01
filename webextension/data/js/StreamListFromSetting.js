@@ -342,8 +342,11 @@ class StreamListFromSetting {
 			if(typeof this.mapData !== "undefined"){
 				this.mapData.delete(id);
 			}
-			if(liveStatus.has(website) && liveStatus.get(website).has(id)){
-				liveStatus.get(website).delete(id);
+			if(liveStore.hasChannel(website, id)){
+				liveStore.removeChannel(website, id);
+			}
+			if(liveStore.hasLive(website, id)){
+				liveStore.removeLive(website, id);
 			}
 			consoleMsg("log", `${id} has been deleted`);
 		}
