@@ -33,7 +33,8 @@ class LiveStore {
 				"notifiedStatus": "N",
 				"notifiedStatus_Vocal": "NV",
 				"lastCheckStatus": "CS",
-				"liveList": "LL"
+				"liveList": "LL",
+				"startedAt": "SA"
 			},
 			"streamName": "n",
 			"streamStatus": "s",
@@ -62,6 +63,50 @@ class LiveStore {
 		}
 
 		this.store.set("_", "LiveStore_version", "11.3");
+	}
+
+	static getDefaultChannel(website, id){
+		const WEBSITE_CHANNEL_ID = /channel::(.*)/;
+		return {
+			"liveStatus": {
+				"API_Status": false,
+				"notifiedStatus": false,
+				"notifiedStatus_Vocal": false,
+				"lastCheckStatus": "",
+				"liveList": new Map()
+			},
+			"streamName": (WEBSITE_CHANNEL_ID.test(id) === true)? WEBSITE_CHANNEL_ID.exec(id)[1] : id,
+			"streamStatus": "",
+			"streamGame": "",
+			"streamOwnerLogo": "",
+			"streamCategoryLogo": "",
+			"streamCurrentViewers": null,
+			"streamURL": "",
+			"facebookID": "",
+			"twitterID": ""
+		}
+	}
+
+	static getDefaultLive(website, id, contentId){
+		return {
+			"liveStatus": {
+				"API_Status": false,
+				"filteredStatus": false,
+				"notifiedStatus": false,
+				"notifiedStatus_Vocal": false,
+				"lastCheckStatus": "",
+				"startedAt": null
+			},
+			"streamName": contentId,
+			"streamStatus": "",
+			"streamGame": "",
+			"streamOwnerLogo": "",
+			"streamCategoryLogo": "",
+			"streamCurrentViewers": null,
+			"streamURL": "",
+			"facebookID": "",
+			"twitterID": ""
+		}
 	}
 
 	compression(key, data){

@@ -1168,7 +1168,7 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 	let data = response.json;
 
 	if(!liveStore.hasChannel(website, id)){
-		liveStore.setChannel(website, id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": "", "liveList": new Map()}, "streamName": (website_channel_id.test(id) === true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+		liveStore.setChannel(website, id, LiveStore.getDefaultChannel(website, id));
 	}
 
 	let responseValidity = checkResponseValidity(website, response);
@@ -1200,7 +1200,7 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 				} else {
 					if(value !== null){
 						if(!liveStore.hasLive(website, id, contentId)){
-							liveStore.setLive(website, id, contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+							liveStore.setLive(website, id, contentId, LiveStore.getDefaultLive(website, id, contentId));
 						}
 
 						liveStore.updateLive(website, id, contentId, function (website, id, contentId, liveData) {
@@ -1231,7 +1231,7 @@ function channelListEnd(website, id, streamSetting){
 		if(liveStore.getChannel(website, id).liveStatus.liveList.has(contentId) === false){
 			liveStore.updateLive(website, id, contentId, function (website, id, contentId, liveData) {
 				liveData.liveStatus.API_Status = false;
-				return liveMap;
+				return liveData;
 			});
 
 			doStreamNotif(website, id, contentId, streamSetting);
@@ -1350,7 +1350,7 @@ async function getChannelInfo(website, id){
 	let channelInfos_API = websites.get(website).API_channelInfos(id);
 
 	if(!liveStore.hasChannel(website, id)){
-		liveStore.setChannel(website, id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) === true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+		liveStore.setChannel(website, id, LiveStore.getDefaultChannel(website, id));
 	}
 
 	if(websites.get(website).hasOwnProperty("API_channelInfos") === true){
