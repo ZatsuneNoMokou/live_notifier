@@ -112,6 +112,8 @@
 	"smashcast_import_title": "Import the Smashcast stream(s) you follow",
 	"smashcast_import": "Import",
 
+	"twitch_include_rerun_title": "Include Twitch rediffusions",
+	"twitch_include_rerun_description": "Included with lives when checked",
 	"twitch_user_id_title": "Your Twitch id",
 	"twitch_user_id_description": "Enter to be able to import the stream(s) you follow",
 	"twitch_import_title": "Import the Twitch stream(s) you follow",

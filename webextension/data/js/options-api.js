@@ -127,7 +127,7 @@ function settingNode_onChange(event){
 		settingName = (node.tagName.toLowerCase()==="input"&&typeof node.type==="string"&&node.type.toLowerCase()==="radio")? node.name : node.id;
 
 	if(node.validity.valid){
-		if(node.datset.settingType){
+		if(node.dataset.settingType){
 			const data = backgroundPage.getValueFromNode(node);
 			if(data!==undefined){
 				savePreference(settingName, data);

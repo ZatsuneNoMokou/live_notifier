@@ -68,11 +68,18 @@ const twitch = {
 		},
 	"checkLiveStatus":
 		function(id, contentId, data, currentLiveStatus, currentChannelInfo){
+			const include_rerun = getPreference("twitch_include_rerun");
+
 			let streamData = currentLiveStatus;
 			if(data.hasOwnProperty("stream")){
 				data = data["stream"];
 				streamData.liveStatus.API_Status = (data !== null);
-				if(data !== null){
+
+				if(data!==null && data["stream_type"]==="rerun" && include_rerun===false){
+					streamData.liveStatus.API_Status = false;
+				}
+
+				if(streamData.liveStatus.API_Status===true){
 					streamData.streamName = data["channel"]["display_name"];
 					streamData.streamStatus = (data["channel"]["status"] !== null)? data["channel"]["status"] : "";
 					streamData.streamGame = (data["game"] !== null && typeof data["game"] === "string")? data["game"] : "";

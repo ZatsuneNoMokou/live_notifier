@@ -42,6 +42,14 @@ const options = {
 		"prefLevel": "advanced"
 	},
 	/*			Twitch			*/
+	"twitch_include_rerun": {
+		"title": "Include Twitch rediffusions",
+		"description": "Included with lives when checked",
+		"type": "bool",
+		"value": true,
+		"group": "twitch",
+		"prefLevel": "advanced"
+	},
 	"twitch_user_id": {
 		"title": "Your Twitch id",
 		"description": "Enter your Twitch id to be able to import the stream(s) you follow.",
