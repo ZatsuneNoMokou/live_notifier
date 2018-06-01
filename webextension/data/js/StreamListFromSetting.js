@@ -237,8 +237,8 @@ class StreamListFromSetting {
 		if(streamListFromSetting_cache === null || !streamListFromSetting_cache.hasOwnProperty("stringData") || streamListFromSetting_cache.stringData !== this.stringData){
 			let mapDataAll;
 			if(typeof this.stringData==="string"){
-				mapDataAll = parseOldSettings(this.stringData, checkDuplicates);
-				this.update();
+				this.mapDataAll = mapDataAll = parseOldSettings(this.stringData, checkDuplicates);
+				this.update(false);
 			} else {
 				mapDataAll = new Map();
 
@@ -349,7 +349,7 @@ class StreamListFromSetting {
 		}
 	}
 
-	update(){
+	update(checkMissing=true){
 		const defaultValues = StreamListFromSetting.getDefault();
 
 		let newStreamPref = {};
@@ -405,6 +405,8 @@ class StreamListFromSetting {
 
 		setIcon();
 		consoleDir(getPreference(`stream_keys_list`), "Stream key list update");
-		checkMissing();
+		if(checkMissing===true){
+			checkMissing();
+		}
 	}
 }
