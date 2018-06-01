@@ -34,10 +34,11 @@ class LiveStore {
 				"notifiedStatus_Vocal": "NV",
 				"lastCheckStatus": "CS",
 				"liveList": "LL",
-				"startedAt": "SA"
+				"startedAt": "NSA"
 			},
 			"streamName": "n",
 			"streamStatus": "s",
+			"startedAt": "sa",
 			"streamGame": "g",
 			"streamOwnerLogo": "ol",
 			"streamCategoryLogo": "cl",
@@ -99,6 +100,7 @@ class LiveStore {
 			},
 			"streamName": contentId,
 			"streamStatus": "",
+			"startedAt": null,
 			"streamGame": "",
 			"streamOwnerLogo": "",
 			"streamCategoryLogo": "",

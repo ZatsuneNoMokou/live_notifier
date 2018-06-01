@@ -558,6 +558,9 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 		}
 		return count;
 	};
+
+
+
 	let streamData = liveStore.getLive(website, id, contentId);
 	if(streamData.streamStatus !== ""){
 		let lowerCase_status = (streamData.streamStatus).toLowerCase();
@@ -612,6 +615,9 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 			}
 		}
 	}
+
+
+
 	if(typeof streamData.streamGame === "string" && streamData.streamGame !== ""){
 		let lowerCase_streamGame = (streamData.streamGame).toLowerCase();
 		if(isStreamOnline){
@@ -662,7 +668,6 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 				consoleMsg("info", `${id} current game contain blacklist element(s)`);
 			}
 		}
-		
 	}
 	streamData.liveStatus.filteredStatus = isStreamOnline;
 	liveStore.setLive(website, id, contentId, streamData);
@@ -696,7 +701,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 	}
 
 	if(isStreamOnline_filtered){
-		if(streamData.liveStatus.notifiedStatus === false){
+		if(streamData.liveStatus.notifiedStatus === false || streamData.startedAt!==streamData.liveStatus.startedAt){
 			if((typeof streamList.get(id).notifyOnline === "boolean")? streamList.get(id).notifyOnline : getPreference("notify_online") === true){
 				let streamStatus = ((streamData.streamStatus !== "")? ": " + streamData.streamStatus : "") + ((streamData.streamGame !== "")? (" (" + streamData.streamGame + ")") : "");
 				let notifOptions = {
@@ -777,6 +782,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 		}
 	}
 	streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
+	streamData.liveStatus.startedAt = streamData.startedAt;
 
 	if(channelData!==null){
 		liveStore.setChannel(website, id, channelData);

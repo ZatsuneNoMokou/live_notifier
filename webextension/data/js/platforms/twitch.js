@@ -2,7 +2,7 @@ const twitch = {
 	"title": "Twitch",
 	"addStream_URLpatterns": new Map([
 		["twitch", [
-			/^(?:http|https):\/\/(?:www|go|m)\.twitch\.tv\/([^\/\?\&]+).*$/,/^(?:http|https):\/\/player\.twitch\.tv\/\?channel\=([\w\-]+).*$/
+			/^(?:http|https):\/\/(?:www|go|m)\.twitch\.tv\/([^\/?&]+).*$/,/^(?:http|https):\/\/player\.twitch\.tv\/\?channel=([\w\-]+).*$/
 		]]
 	]),
 	"API_addStream":
@@ -74,6 +74,7 @@ const twitch = {
 				streamData.liveStatus.API_Status = (data !== null);
 				if(data !== null){
 					streamData.streamName = data["channel"]["display_name"];
+					streamData.startedAt = data["created_at"];
 					streamData.streamStatus = (data["channel"]["status"] !== null)? data["channel"]["status"] : "";
 					streamData.streamGame = (data["game"] !== null && typeof data["game"] === "string")? data["game"] : "";
 					if(typeof data.channel["logo"] === "string" && data.channel["logo"] !== "") {
