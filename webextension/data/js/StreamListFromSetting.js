@@ -148,9 +148,14 @@ function parseOldSettings(settingsStr, checkDuplicates=true){
 	return mapData;
 }
 
+
 class StreamListFromSetting {
-	constructor(checkDuplicates=false){
-		this.stringData = getPreference("stream_keys_list");
+	/**
+	 *
+	 * @param {Boolean=false} checkDuplicates Does not change anything if doLoadOnInit is false
+	 * @param {Boolean=true} doLoadOnInit
+	 */
+	constructor(checkDuplicates=false, doLoadOnInit=true){
 
 		this.REG_EXPS = {
 			URL: /((?:http|https):\/\/.*)\s*$/,
@@ -180,7 +185,10 @@ class StreamListFromSetting {
 			]
 		};
 
-		this.refresh(checkDuplicates);
+		if(doLoadOnInit===true){
+			this.stringData = getPreference("stream_keys_list");
+			this.refresh(checkDuplicates);
+		}
 	}
 
 
@@ -235,8 +243,11 @@ class StreamListFromSetting {
 
 	refresh(checkDuplicates=false){
 		if(streamListFromSetting_cache === null || !streamListFromSetting_cache.hasOwnProperty("stringData") || streamListFromSetting_cache.stringData !== this.stringData){
+			this.stringData = getPreference("stream_keys_list");
+
 			let mapDataAll;
 			if(typeof this.stringData==="string"){
+				consoleMsg("warn", "Migrating stream list format");
 				this.mapDataAll = mapDataAll = parseOldSettings(this.stringData, checkDuplicates);
 				this.update(false);
 			} else {

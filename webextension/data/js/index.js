@@ -24,7 +24,7 @@ appGlobal["setTimeout"] = ZDK.setTimeout;
 appGlobal["getPageSize"] = ZDK.getPageSize;
 appGlobal["hasTouch"] = ZDK.hasTouch;
 
-const streamListFromSetting = new StreamListFromSetting(true);
+const streamListFromSetting = new StreamListFromSetting(true, false);
 appGlobal["StreamListFromSetting"] = StreamListFromSetting;
 
 function getStreamURL(website, id, contentId, usePrefUrl){
@@ -1628,6 +1628,8 @@ function initAddon(){
 		liveStatus.set(website, new Map());
 		channelInfos.set(website, new Map());
 	});
+
+	streamListFromSetting.refresh(true);
 
 	checkLives()
 		.catch(err=>{
