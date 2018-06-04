@@ -326,7 +326,7 @@ class StreamListFromSetting {
 			// Update cache
 			streamListFromSetting_cache = {
 				"prefData": JSON.stringify(this.prefData),
-				"mapDataAll": mapDataAll
+				"mapDataAll": this.mapDataAll
 			};
 		} else {
 			//consoleMsg("log", "[Live notifier] streamListFromSetting: Using cache");
