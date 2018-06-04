@@ -186,7 +186,7 @@ class StreamListFromSetting {
 		};
 
 		if(doLoadOnInit===true){
-			this.stringData = getPreference("stream_keys_list");
+			this.prefData = getPreference("stream_keys_list");
 			this.refresh(checkDuplicates);
 		}
 	}
@@ -241,80 +241,91 @@ class StreamListFromSetting {
 		}
 	}
 
-	refresh(checkDuplicates=false){
-		if(streamListFromSetting_cache === null || !streamListFromSetting_cache.hasOwnProperty("stringData") || streamListFromSetting_cache.stringData !== this.stringData){
-			this.stringData = getPreference("stream_keys_list");
+	/**
+	 *
+	 * @param {JSON} streamListObj
+	 * @return {Map<String, Map<String, JSON>>} Map<Website, Map<StreamId, Settings>>
+	 */
+	parseSetting(streamListObj){
+		const mapDataAll = new Map();
 
-			let mapDataAll;
-			if(typeof this.stringData==="string"){
-				consoleMsg("warn", "Migrating stream list format");
-				this.mapDataAll = mapDataAll = parseOldSettings(this.stringData, checkDuplicates);
-				this.update(false);
-			} else {
-				mapDataAll = new Map();
-
-				const streamListObj = this.stringData;
-				for(let website in streamListObj){
-					if(!streamListObj.hasOwnProperty(website)){
-						continue;
-					}
-
-					if(!mapDataAll.has(website)){
-						mapDataAll.set(website, new Map());
-					}
-
-					let websiteStreams = streamListObj[website];
-					for(let id in websiteStreams){
-						if(websiteStreams.hasOwnProperty(id)){
-							let outputData;
-							if(!mapDataAll.get(website).has(id)){
-								outputData = StreamListFromSetting.getDefault();
-							} else {
-								outputData = mapDataAll.get(website).get(id);
-							}
-
-							let data = websiteStreams[id];
-
-							if(this.REG_EXPS.URL.test(data)){
-								let [,newData,url] = this.REG_EXPS.URL.exec(data);
-								outputData.streamURL = url;
-								data = newData;
-							}
-
-							data = this.extractSettings(data);
-							data.forEach(item=>{
-								const [prefId , data] = item;
-
-								if(this.PREF_TYPES.boolean.indexOf(prefId) !== -1){
-									let parsedData = getBooleanFromVar(data);
-
-									if (typeof parsedData !== "boolean") {
-										consoleMsg("warn", `${prefId} of ${id} should be a boolean`);
-										parsedData = data;
-									}
-
-									outputData[prefId] = parsedData;
-								} else if(this.PREF_TYPES.string.indexOf(prefId) !== -1){
-									outputData[prefId] = decodeString(data);
-								} else if(this.PREF_TYPES.list.indexOf(prefId) !== -1){
-									outputData[prefId].push(data);
-								} else {
-									consoleMsg("warn", `Unknown type ${prefId}`);
-									outputData[prefId] = decodeString(data);
-								}
-							});
-
-							mapDataAll.get(website).set(id, outputData);
-						}
-					}
-				}
+		for(let website in streamListObj){
+			if(!streamListObj.hasOwnProperty(website)){
+				continue;
 			}
 
-			this.mapDataAll = mapDataAll;
+			if(!mapDataAll.has(website)){
+				mapDataAll.set(website, new Map());
+			}
+
+			let websiteStreams = streamListObj[website];
+			for(let id in websiteStreams){
+				if(websiteStreams.hasOwnProperty(id)){
+					let outputData;
+					if(!mapDataAll.get(website).has(id)){
+						outputData = StreamListFromSetting.getDefault();
+					} else {
+						outputData = mapDataAll.get(website).get(id);
+					}
+
+					let data = websiteStreams[id];
+
+					if(this.REG_EXPS.URL.test(data)){
+						let [,newData,url] = this.REG_EXPS.URL.exec(data);
+						outputData.streamURL = url;
+						data = newData;
+					}
+
+					data = this.extractSettings(data);
+					data.forEach(item=>{
+						const [prefId , data] = item;
+
+						if(this.PREF_TYPES.boolean.indexOf(prefId) !== -1){
+							let parsedData = getBooleanFromVar(data);
+
+							if (typeof parsedData !== "boolean") {
+								consoleMsg("warn", `${prefId} of ${id} should be a boolean`);
+								parsedData = data;
+							}
+
+							outputData[prefId] = parsedData;
+						} else if(this.PREF_TYPES.string.indexOf(prefId) !== -1){
+							outputData[prefId] = decodeString(data);
+						} else if(this.PREF_TYPES.list.indexOf(prefId) !== -1){
+							outputData[prefId].push(data);
+						} else {
+							consoleMsg("warn", `Unknown type ${prefId}`);
+							outputData[prefId] = decodeString(data);
+						}
+					});
+
+					mapDataAll.get(website).set(id, outputData);
+				}
+			}
+		}
+
+		return mapDataAll;
+	}
+
+	refresh(checkDuplicates=false){
+		if(streamListFromSetting_cache === null || !streamListFromSetting_cache.hasOwnProperty("prefData") || streamListFromSetting_cache.prefData !== JSON.stringify(this.prefData)){
+			this.prefData = getPreference("stream_keys_list");
+
+
+
+			if(typeof this.prefData==="string"){
+				consoleMsg("warn", "Migrating stream list format");
+				this.mapDataAll = parseOldSettings(this.prefData, checkDuplicates);
+				this.update(false);
+			} else {
+				this.mapDataAll = this.parseSetting(this.prefData);
+			}
+
+
 
 			// Update cache
 			streamListFromSetting_cache = {
-				"stringData": this.stringData,
+				"prefData": JSON.stringify(this.prefData),
 				"mapDataAll": mapDataAll
 			};
 		} else {

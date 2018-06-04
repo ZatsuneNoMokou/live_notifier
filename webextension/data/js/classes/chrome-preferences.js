@@ -313,25 +313,52 @@ ${err}`);
 		});
 		return keysArray;
 	}
+
+	/**
+	 *
+	 * @param {JSON} preferences
+	 * @param {Boolean=false} mergePreferences
+	 */
 	importFromJSON(preferences, mergePreferences=false){
 		for(let prefId in preferences){
-			if(preferences.hasOwnProperty(prefId)){
-				if(prefId==="hitbox_user_id"){
-					preferences["smashcast_user_id"] = preferences["hitbox_user_id"];
-					delete preferences["hitbox_user_id"];
-					prefId="smashcast_user_id";
-				}
-				if(prefId==="beam_user_id"){
-					preferences["mixer_user_id"] = preferences["beam_user_id"];
-					delete preferences["beam_user_id"];
-					prefId="mixer_user_id";
-				}
-				if(this.options.has(prefId) && typeof this.options.get(prefId).type !== "undefined" && this.options.get(prefId).type !== "control" && this.options.get(prefId).type !== "file" && typeof preferences[prefId] === typeof this.defaultSettingsSync.get(prefId)){
-					if(mergePreferences){
-						let oldPref = this.get(prefId);
-						let newPrefArray;
-						switch(prefId){
-							case "stream_keys_list":
+			if(!preferences.hasOwnProperty(prefId)){
+				continue;
+			}
+
+
+
+			if(prefId==="hitbox_user_id"){
+				preferences["smashcast_user_id"] = preferences["hitbox_user_id"];
+				delete preferences["hitbox_user_id"];
+				prefId="smashcast_user_id";
+			}
+			if(prefId==="beam_user_id"){
+				preferences["mixer_user_id"] = preferences["beam_user_id"];
+				delete preferences["beam_user_id"];
+				prefId="mixer_user_id";
+			}
+
+			if(this.options.has(prefId) && typeof this.options.get(prefId).type !== "undefined" && this.options.get(prefId).type !== "control" && this.options.get(prefId).type !== "file" && typeof preferences[prefId] === typeof this.defaultSettingsSync.get(prefId)){
+				if(mergePreferences){
+					let oldPref = this.get(prefId),
+						newPrefArray
+					;
+
+					switch(prefId){
+						case "stream_keys_list":
+							let prefData = null;
+							try {
+								prefData = JSON.stringify(oldPref);
+							} catch (e) {
+								consoleMsg('error', e);
+							}
+
+
+							if(prefData===null){
+								prefData = oldPref;
+							}
+
+							if(typeof prefData==="string"){
 								let oldPrefArray = oldPref.split(",");
 								newPrefArray = preferences[prefId].split(/,\s*/);
 								newPrefArray = oldPrefArray.concat(newPrefArray);
@@ -339,30 +366,34 @@ ${err}`);
 								this.set(prefId, newPrefArray.join());
 								let streamListSetting = new appGlobal.StreamListFromSetting(true);
 								streamListSetting.update();
-								break;
-							case "statusBlacklist":
-							case "statusWhitelist":
-							case "gameBlacklist":
-							case "gameWhitelist":
-								let toLowerCase = (str)=>{return str.toLowerCase()};
-								let oldPrefArrayLowerCase = oldPref.split(/,\s*/).map(toLowerCase);
-								newPrefArray = oldPref.split(/,\s*/);
-								preferences[prefId].split(/,\s*/).forEach(value=>{
-									if(oldPrefArrayLowerCase.indexOf(value.toLowerCase()) === -1){
-										newPrefArray.push(value);
-									}
-								});
-								this.set(prefId, newPrefArray.join(","));
-								break;
-							default:
-								this.set(prefId, preferences[prefId]);
-						}
-					} else {
-						this.set(prefId, preferences[prefId]);
+							} else if(typeof prefData==="object"){
+								let streamListSetting = new appGlobal.StreamListFromSetting(false);
+								// TODO
+							}
+
+							break;
+						case "statusBlacklist":
+						case "statusWhitelist":
+						case "gameBlacklist":
+						case "gameWhitelist":
+							let toLowerCase = (str)=>{return str.toLowerCase()};
+							let oldPrefArrayLowerCase = oldPref.split(/,\s*/).map(toLowerCase);
+							newPrefArray = oldPref.split(/,\s*/);
+							preferences[prefId].split(/,\s*/).forEach(value=>{
+								if(oldPrefArrayLowerCase.indexOf(value.toLowerCase()) === -1){
+									newPrefArray.push(value);
+								}
+							});
+							this.set(prefId, newPrefArray.join(","));
+							break;
+						default:
+							this.set(prefId, preferences[prefId]);
 					}
 				} else {
-					console.warn(`Error trying to import ${prefId}`);
+					this.set(prefId, preferences[prefId]);
 				}
+			} else {
+				console.warn(`Error trying to import ${prefId}`);
 			}
 		}
 	}
