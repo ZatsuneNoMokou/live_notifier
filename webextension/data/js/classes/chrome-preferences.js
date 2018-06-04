@@ -348,28 +348,35 @@ ${err}`);
 						case "stream_keys_list":
 							let prefData = null;
 							try {
-								prefData = JSON.stringify(oldPref);
+								prefData = JSON.parse(oldPref);
 							} catch (e) {
 								consoleMsg('error', e);
 							}
-
 
 							if(prefData===null){
 								prefData = oldPref;
 							}
 
-							if(typeof prefData==="string"){
-								let oldPrefArray = oldPref.split(",");
-								newPrefArray = preferences[prefId].split(/,\s*/);
-								newPrefArray = oldPrefArray.concat(newPrefArray);
+							let streamListSetting = new appGlobal.StreamListFromSetting(false);
 
-								this.set(prefId, newPrefArray.join());
-								let streamListSetting = new appGlobal.StreamListFromSetting(true);
-								streamListSetting.update();
-							} else if(typeof prefData==="object"){
-								let streamListSetting = new appGlobal.StreamListFromSetting(false);
-								// TODO
-							}
+							streamListSetting.parseSetting(prefData).forEach((website, websiteMap)=>{
+								websiteMap.forEach((id, streamSetting)=>{
+									let newStreamSettings;
+									if(streamListSetting.streamExist(website, id)){
+										newStreamSettings = streamListSetting.streamExist(website, id);
+									} else {
+										newStreamSettings = StreamListFromSetting.getDefault();
+									}
+
+									for(let settingName in streamSetting){
+										if(streamSetting.hasOwnProperty(settingName)){
+											newStreamSettings[settingName] = streamSetting[settingName];
+										}
+									}
+								});
+							});
+
+							streamListSetting.update();
 
 							break;
 						case "statusBlacklist":

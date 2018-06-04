@@ -247,6 +247,11 @@ class StreamListFromSetting {
 	 * @return {Map<String, Map<String, JSON>>} Map<Website, Map<StreamId, Settings>>
 	 */
 	parseSetting(streamListObj){
+		if(typeof streamListObj==="string"){
+			consoleMsg("warn", "Using old stream list format");
+			return parseOldSettings(streamListObj, true);
+		}
+
 		const mapDataAll = new Map();
 
 		for(let website in streamListObj){
@@ -313,12 +318,10 @@ class StreamListFromSetting {
 
 
 
+			this.mapDataAll = this.parseSetting(this.prefData);
 			if(typeof this.prefData==="string"){
 				consoleMsg("warn", "Migrating stream list format");
-				this.mapDataAll = parseOldSettings(this.prefData, checkDuplicates);
 				this.update(false);
-			} else {
-				this.mapDataAll = this.parseSetting(this.prefData);
 			}
 
 
