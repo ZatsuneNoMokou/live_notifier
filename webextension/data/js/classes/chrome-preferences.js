@@ -373,6 +373,8 @@ ${err}`);
 											newStreamSettings[settingName] = streamSetting[settingName];
 										}
 									}
+
+									streamListSetting.mapDataAll.get(website).set(id, newStreamSettings);
 								});
 							});
 
