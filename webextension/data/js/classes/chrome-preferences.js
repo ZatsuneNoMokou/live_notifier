@@ -64,12 +64,12 @@ function getFilterListFromPreference(string){
 function getValueFromNode(node){
 	const tagName = node.tagName.toLowerCase();
 	if(tagName === "textarea"){
-		if(node.datset.settingType==="json"){
+		if(node.dataset.settingType==="json"){
 			let json;
 			try {
-				json = JSON.parse(node.value());
-			} catch (e) {
-				consoleMsg("error", error);
+				json = JSON.parse(node.value);
+			} catch (err) {
+				console.error(err);
 			}
 			return json;
 		} else if(node.dataset.stringTextarea === "true"){

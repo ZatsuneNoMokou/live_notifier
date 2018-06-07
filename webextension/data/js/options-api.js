@@ -132,7 +132,7 @@ function settingNode_onChange(event){
 			if(data!==undefined){
 				savePreference(settingName, data);
 			} else {
-				consoleMsg("error", `${settingName} value was incorrect.`)
+				console.error(`${settingName} value was incorrect.`);
 			}
 		} else {
 			savePreference(settingName, backgroundPage.getValueFromNode(node));
