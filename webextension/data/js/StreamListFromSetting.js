@@ -254,13 +254,15 @@ class StreamListFromSetting {
 
 		const mapDataAll = new Map();
 
+		websites.forEach((value, website)=>{
+			if(!mapDataAll.has(website)){
+				mapDataAll.set(website, new Map());
+			}
+		});
+
 		for(let website in streamListObj){
 			if(!streamListObj.hasOwnProperty(website)){
 				continue;
-			}
-
-			if(!mapDataAll.has(website)){
-				mapDataAll.set(website, new Map());
 			}
 
 			let websiteStreams = streamListObj[website];
@@ -431,7 +433,7 @@ class StreamListFromSetting {
 		setIcon();
 		consoleDir(getPreference(`stream_keys_list`), "Stream key list update");
 		if(checkMissing===true){
-			checkMissing();
+			appGlobal["checkMissing"]();
 		}
 	}
 }
