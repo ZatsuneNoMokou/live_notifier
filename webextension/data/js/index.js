@@ -1182,6 +1182,16 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 			streamListData = websites.get(website).channelList(id, website, data, nextPageToken);
 		}
 
+		if(streamListData.hasOwnProperty("channelInfos")){
+			const streamChannelInfos = channelInfos.get(website).get(id);
+
+			for(let name in streamListData.channelInfos){
+				if(streamListData.channelInfos.hasOwnProperty(name)){
+					streamChannelInfos[name] = streamListData.channelInfos[name];
+				}
+			}
+		}
+
 		if(!isMap(streamListData.streamList) || streamListData.streamList.size === 0){
 			return ((isMap(streamListData.streamList))? "EmptyList" : "InvalidList");
 		} else {
@@ -1307,6 +1317,10 @@ async function processPrimary(id, contentId, website, streamSetting, response){
 	}
 }
 async function getChannelInfo(website, id){
+	if(!websites.get(website).hasOwnProperty("API_channelInfos")){
+		return "NoAPI";
+	}
+
 	let channelInfos_API = websites.get(website).API_channelInfos(id);
 
 	if(!channelInfos.get(website).has(id)){
