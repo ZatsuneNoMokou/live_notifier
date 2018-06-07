@@ -279,7 +279,7 @@ if(browser.extension.getBackgroundPage()!==null && typeof Delegate!=="undefined"
 		}
 		return false;
 	});
-	liveEvent("input", "[data-setting-type='string']", settingNode_onChange);
+	liveEvent("input", "[data-setting-type='string'],[data-setting-type='json']", settingNode_onChange);
 	liveEvent("change", "[data-setting-type='integer'],[data-setting-type='bool'],[data-setting-type='color'],input[data-setting-type='menulist'],[data-setting-type='menulist'] input[type='radio']", settingNode_onChange);
 	liveEvent("click", "#export_preferences", exportPrefsToFile);
 	liveEvent("click", "#import_preferences", importPrefsFromFile);
