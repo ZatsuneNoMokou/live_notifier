@@ -1727,7 +1727,7 @@ function checkIfUpdated(details){
 
 	let platformsLoad_result;
 	try{
-		platformsLoad_result = await zDK.loadJS(document, ["dailymotion.js", "mixer.js", "picarto_tv.js", "smashcast.js", "twitch.js", "youtube.js"], "/data/js/platforms/");
+		platformsLoad_result = await zDK.loadJS(document, ["dailymotion.js", "mixer.js", "openrec_tv.js", "picarto_tv.js", "smashcast.js", "twitch.js", "youtube.js"], "/data/js/platforms/");
 	} catch(err){
 		platformsLoad_result = err;
 	}
