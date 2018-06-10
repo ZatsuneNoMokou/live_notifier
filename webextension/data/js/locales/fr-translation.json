@@ -112,6 +112,8 @@
 	"smashcast_import_title": "Importez les streameurs Smashcast que vous suivez",
 	"smashcast_import": "Importer",
 
+	"twitch_include_rerun_title": "Inclure les rediffusions Twitch",
+	"twitch_include_rerun_description": "Incluses avec les lives quand coché",
 	"twitch_user_id_title": "Votre id Twitch",
 	"twitch_user_id_description": "Saisir pour pouvoir importer les streameurs que vous suivez",
 	"twitch_import_title": "Importez les streameurs Twitch que vous suivez",

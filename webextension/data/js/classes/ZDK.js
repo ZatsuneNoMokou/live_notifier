@@ -136,7 +136,7 @@ class ZDK{
 
 
 	static consoleMsg(level,str){
-		let msg = (typeof str.toString === "function")? str.toString() : str;
+		let msg = (str && str.toString && typeof str.toString === "function")? str.toString() : str;
 		if(getPreference("showAdvanced") && getPreference("showExperimented")){
 			if(typeof console[level] === "function"){
 				console[level](str);

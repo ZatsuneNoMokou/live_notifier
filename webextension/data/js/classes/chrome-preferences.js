@@ -64,12 +64,12 @@ function getFilterListFromPreference(string){
 function getValueFromNode(node){
 	const tagName = node.tagName.toLowerCase();
 	if(tagName === "textarea"){
-		if(node.datset.settingType==="json"){
+		if(node.dataset.settingType==="json"){
 			let json;
 			try {
-				json = JSON.parse(node.value());
-			} catch (e) {
-				consoleMsg("error", error);
+				json = JSON.parse(node.value);
+			} catch (err) {
+				console.error(err);
 			}
 			return json;
 		} else if(node.dataset.stringTextarea === "true"){
@@ -313,56 +313,96 @@ ${err}`);
 		});
 		return keysArray;
 	}
+
+	/**
+	 *
+	 * @param {JSON} preferences
+	 * @param {Boolean=false} mergePreferences
+	 */
 	importFromJSON(preferences, mergePreferences=false){
 		for(let prefId in preferences){
-			if(preferences.hasOwnProperty(prefId)){
-				if(prefId==="hitbox_user_id"){
-					preferences["smashcast_user_id"] = preferences["hitbox_user_id"];
-					delete preferences["hitbox_user_id"];
-					prefId="smashcast_user_id";
-				}
-				if(prefId==="beam_user_id"){
-					preferences["mixer_user_id"] = preferences["beam_user_id"];
-					delete preferences["beam_user_id"];
-					prefId="mixer_user_id";
-				}
-				if(this.options.has(prefId) && typeof this.options.get(prefId).type !== "undefined" && this.options.get(prefId).type !== "control" && this.options.get(prefId).type !== "file" && typeof preferences[prefId] === typeof this.defaultSettingsSync.get(prefId)){
-					if(mergePreferences){
-						let oldPref = this.get(prefId);
-						let newPrefArray;
-						switch(prefId){
-							case "stream_keys_list":
-								let oldPrefArray = oldPref.split(",");
-								newPrefArray = preferences[prefId].split(/,\s*/);
-								newPrefArray = oldPrefArray.concat(newPrefArray);
+			if(!preferences.hasOwnProperty(prefId)){
+				continue;
+			}
 
-								this.set(prefId, newPrefArray.join());
-								let streamListSetting = new appGlobal.StreamListFromSetting(true);
-								streamListSetting.update();
-								break;
-							case "statusBlacklist":
-							case "statusWhitelist":
-							case "gameBlacklist":
-							case "gameWhitelist":
-								let toLowerCase = (str)=>{return str.toLowerCase()};
-								let oldPrefArrayLowerCase = oldPref.split(/,\s*/).map(toLowerCase);
-								newPrefArray = oldPref.split(/,\s*/);
-								preferences[prefId].split(/,\s*/).forEach(value=>{
-									if(oldPrefArrayLowerCase.indexOf(value.toLowerCase()) === -1){
-										newPrefArray.push(value);
+
+
+			if(prefId==="hitbox_user_id"){
+				preferences["smashcast_user_id"] = preferences["hitbox_user_id"];
+				delete preferences["hitbox_user_id"];
+				prefId="smashcast_user_id";
+			}
+			if(prefId==="beam_user_id"){
+				preferences["mixer_user_id"] = preferences["beam_user_id"];
+				delete preferences["beam_user_id"];
+				prefId="mixer_user_id";
+			}
+
+			if(this.options.has(prefId) && typeof this.options.get(prefId).type !== "undefined" && this.options.get(prefId).type !== "control" && this.options.get(prefId).type !== "file" && typeof preferences[prefId] === typeof this.defaultSettingsSync.get(prefId)){
+				if(mergePreferences){
+					let oldPref = this.get(prefId),
+						newPrefArray
+					;
+
+					switch(prefId){
+						case "stream_keys_list":
+							let prefData = null;
+							try {
+								prefData = JSON.parse(oldPref);
+							} catch (e) {
+								consoleMsg('error', e);
+							}
+
+							if(prefData===null){
+								prefData = oldPref;
+							}
+
+							let streamListSetting = new appGlobal.StreamListFromSetting(false);
+
+							streamListSetting.parseSetting(prefData).forEach((website, websiteMap)=>{
+								websiteMap.forEach((id, streamSetting)=>{
+									let newStreamSettings;
+									if(streamListSetting.streamExist(website, id)){
+										newStreamSettings = streamListSetting.streamExist(website, id);
+									} else {
+										newStreamSettings = StreamListFromSetting.getDefault();
 									}
+
+									for(let settingName in streamSetting){
+										if(streamSetting.hasOwnProperty(settingName)){
+											newStreamSettings[settingName] = streamSetting[settingName];
+										}
+									}
+
+									streamListSetting.mapDataAll.get(website).set(id, newStreamSettings);
 								});
-								this.set(prefId, newPrefArray.join(","));
-								break;
-							default:
-								this.set(prefId, preferences[prefId]);
-						}
-					} else {
-						this.set(prefId, preferences[prefId]);
+							});
+
+							streamListSetting.update();
+
+							break;
+						case "statusBlacklist":
+						case "statusWhitelist":
+						case "gameBlacklist":
+						case "gameWhitelist":
+							let toLowerCase = (str)=>{return str.toLowerCase()};
+							let oldPrefArrayLowerCase = oldPref.split(/,\s*/).map(toLowerCase);
+							newPrefArray = oldPref.split(/,\s*/);
+							preferences[prefId].split(/,\s*/).forEach(value=>{
+								if(oldPrefArrayLowerCase.indexOf(value.toLowerCase()) === -1){
+									newPrefArray.push(value);
+								}
+							});
+							this.set(prefId, newPrefArray.join(","));
+							break;
+						default:
+							this.set(prefId, preferences[prefId]);
 					}
 				} else {
-					console.warn(`Error trying to import ${prefId}`);
+					this.set(prefId, preferences[prefId]);
 				}
+			} else {
+				console.warn(`Error trying to import ${prefId}`);
 			}
 		}
 	}

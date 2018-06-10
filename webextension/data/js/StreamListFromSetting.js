@@ -148,9 +148,14 @@ function parseOldSettings(settingsStr, checkDuplicates=true){
 	return mapData;
 }
 
+
 class StreamListFromSetting {
-	constructor(checkDuplicates=false){
-		this.stringData = getPreference("stream_keys_list");
+	/**
+	 *
+	 * @param {Boolean=false} checkDuplicates Does not change anything if doLoadOnInit is false
+	 * @param {Boolean=true} doLoadOnInit
+	 */
+	constructor(checkDuplicates=false, doLoadOnInit=true){
 
 		this.REG_EXPS = {
 			URL: /((?:http|https):\/\/.*)\s*$/,
@@ -180,7 +185,10 @@ class StreamListFromSetting {
 			]
 		};
 
-		this.refresh(checkDuplicates);
+		if(doLoadOnInit===true){
+			this.prefData = getPreference("stream_keys_list");
+			this.refresh(checkDuplicates);
+		}
 	}
 
 
@@ -233,78 +241,97 @@ class StreamListFromSetting {
 		}
 	}
 
-	refresh(checkDuplicates=false){
-		if(streamListFromSetting_cache === null || !streamListFromSetting_cache.hasOwnProperty("stringData") || streamListFromSetting_cache.stringData !== this.stringData){
-			let mapDataAll;
-			if(typeof this.stringData==="string"){
-				mapDataAll = parseOldSettings(this.stringData, checkDuplicates);
-				this.update();
-			} else {
-				mapDataAll = new Map();
+	/**
+	 *
+	 * @param {JSON} streamListObj
+	 * @return {Map<String, Map<String, JSON>>} Map<Website, Map<StreamId, Settings>>
+	 */
+	parseSetting(streamListObj){
+		if(typeof streamListObj==="string"){
+			consoleMsg("warn", "Using old stream list format");
+			return parseOldSettings(streamListObj, true);
+		}
 
-				const streamListObj = this.stringData;
-				for(let website in streamListObj){
-					if(!streamListObj.hasOwnProperty(website)){
-						continue;
-					}
+		const mapDataAll = new Map();
 
-					if(!mapDataAll.has(website)){
-						mapDataAll.set(website, new Map());
-					}
+		websites.forEach((value, website)=>{
+			if(!mapDataAll.has(website)){
+				mapDataAll.set(website, new Map());
+			}
+		});
 
-					let websiteStreams = streamListObj[website];
-					for(let id in websiteStreams){
-						if(websiteStreams.hasOwnProperty(id)){
-							let outputData;
-							if(!mapDataAll.get(website).has(id)){
-								outputData = StreamListFromSetting.getDefault();
-							} else {
-								outputData = mapDataAll.get(website).get(id);
-							}
-
-							let data = websiteStreams[id];
-
-							if(this.REG_EXPS.URL.test(data)){
-								let [,newData,url] = this.REG_EXPS.URL.exec(data);
-								outputData.streamURL = url;
-								data = newData;
-							}
-
-							data = this.extractSettings(data);
-							data.forEach(item=>{
-								const [prefId , data] = item;
-
-								if(this.PREF_TYPES.boolean.indexOf(prefId) !== -1){
-									let parsedData = getBooleanFromVar(data);
-
-									if (typeof parsedData !== "boolean") {
-										consoleMsg("warn", `${prefId} of ${id} should be a boolean`);
-										parsedData = data;
-									}
-
-									outputData[prefId] = parsedData;
-								} else if(this.PREF_TYPES.string.indexOf(prefId) !== -1){
-									outputData[prefId] = decodeString(data);
-								} else if(this.PREF_TYPES.list.indexOf(prefId) !== -1){
-									outputData[prefId].push(data);
-								} else {
-									consoleMsg("warn", `Unknown type ${prefId}`);
-									outputData[prefId] = decodeString(data);
-								}
-							});
-
-							mapDataAll.get(website).set(id, outputData);
-						}
-					}
-				}
+		for(let website in streamListObj){
+			if(!streamListObj.hasOwnProperty(website)){
+				continue;
 			}
 
-			this.mapDataAll = mapDataAll;
+			let websiteStreams = streamListObj[website];
+			for(let id in websiteStreams){
+				if(websiteStreams.hasOwnProperty(id)){
+					let outputData;
+					if(!mapDataAll.get(website).has(id)){
+						outputData = StreamListFromSetting.getDefault();
+					} else {
+						outputData = mapDataAll.get(website).get(id);
+					}
+
+					let data = websiteStreams[id];
+
+					if(this.REG_EXPS.URL.test(data)){
+						let [,newData,url] = this.REG_EXPS.URL.exec(data);
+						outputData.streamURL = url;
+						data = newData;
+					}
+
+					data = this.extractSettings(data);
+					data.forEach(item=>{
+						const [prefId , data] = item;
+
+						if(this.PREF_TYPES.boolean.indexOf(prefId) !== -1){
+							let parsedData = getBooleanFromVar(data);
+
+							if (typeof parsedData !== "boolean") {
+								consoleMsg("warn", `${prefId} of ${id} should be a boolean`);
+								parsedData = data;
+							}
+
+							outputData[prefId] = parsedData;
+						} else if(this.PREF_TYPES.string.indexOf(prefId) !== -1){
+							outputData[prefId] = decodeString(data);
+						} else if(this.PREF_TYPES.list.indexOf(prefId) !== -1){
+							outputData[prefId].push(data);
+						} else {
+							consoleMsg("warn", `Unknown type ${prefId}`);
+							outputData[prefId] = decodeString(data);
+						}
+					});
+
+					mapDataAll.get(website).set(id, outputData);
+				}
+			}
+		}
+
+		return mapDataAll;
+	}
+
+	refresh(checkDuplicates=false){
+		if(streamListFromSetting_cache === null || !streamListFromSetting_cache.hasOwnProperty("prefData") || streamListFromSetting_cache.prefData !== JSON.stringify(this.prefData)){
+			this.prefData = getPreference("stream_keys_list");
+
+
+
+			this.mapDataAll = this.parseSetting(this.prefData);
+			if(typeof this.prefData==="string"){
+				consoleMsg("warn", "Migrating stream list format");
+				this.update(false);
+			}
+
+
 
 			// Update cache
 			streamListFromSetting_cache = {
-				"stringData": this.stringData,
-				"mapDataAll": mapDataAll
+				"prefData": JSON.stringify(this.prefData),
+				"mapDataAll": this.mapDataAll
 			};
 		} else {
 			//consoleMsg("log", "[Live notifier] streamListFromSetting: Using cache");
@@ -352,7 +379,7 @@ class StreamListFromSetting {
 		}
 	}
 
-	update(){
+	update(checkMissing=true){
 		const defaultValues = StreamListFromSetting.getDefault();
 
 		let newStreamPref = {};
@@ -408,6 +435,8 @@ class StreamListFromSetting {
 
 		setIcon();
 		consoleDir(getPreference(`stream_keys_list`), "Stream key list update");
-		checkMissing();
+		if(checkMissing===true){
+			appGlobal["checkMissing"]();
+		}
 	}
 }

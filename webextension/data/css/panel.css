@@ -299,7 +299,7 @@ body.hasTouch .item-stream.onlineItem > div > .stream_control {
 	background-image: url("/data/images/dailymotion-icon.png");
 }
 .item-stream[data-stream-website="smashcast"] .streamTitle::before,
-.debugItem[data-stream-website="hitbox"] .debugTitle::before {
+.debugItem[data-stream-website="smashcast"] .debugTitle::before {
 	background-image: url("/data/images/smashcast-icon-White.png");
 	background-size: 15px 15px;
 }
@@ -320,6 +320,11 @@ body.hasTouch .item-stream.onlineItem > div > .stream_control {
 .debugItem[data-stream-website="picarto_tv"] .debugTitle::before {
 	background-image: url("/data/images/picarto-tv_Logo_black.svg");
 }
+
+.item-stream[data-stream-website="openrec_tv"] .streamTitle::before,
+.debugItem[data-stream-website="openrec_tv"] .debugTitle::before {
+	/* TODO background-image: url("/data/images/"); */
+}
 .item-stream[data-stream-type='unsupported'] .streamTitle::before,
 .debugItem[data-stream-type='unsupported'] .debugTitle::before {
 	background-image: url("/data/images/warning-34621.svg");
@@ -330,7 +335,7 @@ body[data-theme='light'] .item-stream[data-stream-website="picarto_tv"] .streamT
 	background-image: url("/data/images/picarto-tv_Logo_white.svg");
 }
 body[data-theme='light'] .item-stream[data-stream-website="smashcast"] .streamTitle::before,
-body[data-theme='light'] .debugItem[data-stream-website="hitbox"] .debugTitle::before {
+body[data-theme='light'] .debugItem[data-stream-website="smashcast"] .debugTitle::before {
 	background-image: url("/data/images/smashcast-icon.png");
 	background-size: 15px 15px;
 }

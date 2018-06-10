@@ -13,6 +13,7 @@
 * \+ : Panel - Use of [CSS Grid layout](https://developer.mozilla.org/fr/docs/Web/CSS/CSS_Grid_Layout)
 * \+ : \[ZDK] \[ChromePreferences] - New type : JSON
 * \+ : Reworked StreamListFromSetting class, to use less space in preferences
+* \+ : Twitch - Setting to choose to include Twitch's rediffusions (included by default)
 
 # 11.16.0
 * \+ : YouTube data with less YouTube API, serveur can not handle load

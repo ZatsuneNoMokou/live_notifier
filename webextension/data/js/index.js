@@ -22,7 +22,7 @@ appGlobal["setTimeout"] = ZDK.setTimeout;
 appGlobal["getPageSize"] = ZDK.getPageSize;
 appGlobal["hasTouch"] = ZDK.hasTouch;
 
-const streamListFromSetting = new StreamListFromSetting(true);
+const streamListFromSetting = new StreamListFromSetting(true, false);
 appGlobal["StreamListFromSetting"] = StreamListFromSetting;
 
 function getStreamURL(website, id, contentId, usePrefUrl){
@@ -1192,6 +1192,16 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 			streamListData = websites.get(website).channelList(id, website, data, nextPageToken);
 		}
 
+		if(streamListData.hasOwnProperty("channelInfos")){
+			const streamChannelInfos = channelInfos.get(website).get(id);
+
+			for(let name in streamListData.channelInfos){
+				if(streamListData.channelInfos.hasOwnProperty(name)){
+					streamChannelInfos[name] = streamListData.channelInfos[name];
+				}
+			}
+		}
+
 		if(!isMap(streamListData.streamList) || streamListData.streamList.size === 0){
 			return ((isMap(streamListData.streamList))? "EmptyList" : "InvalidList");
 		} else {
@@ -1353,6 +1363,10 @@ async function processPrimary(id, contentId, website, streamSetting, response){
 	}
 }
 async function getChannelInfo(website, id){
+	if(!websites.get(website).hasOwnProperty("API_channelInfos")){
+		return "NoAPI";
+	}
+
 	let channelInfos_API = websites.get(website).API_channelInfos(id);
 
 	if(!liveStore.hasChannel(website, id)){
@@ -1674,6 +1688,8 @@ function initAddon(){
 
 	/* 		----- Fin Importation/Removal des vieux paramères -----		*/
 
+	streamListFromSetting.refresh(true);
+
 	checkLives()
 		.catch(err=>{
 			consoleMsg("warn", err);
@@ -1756,7 +1772,7 @@ function checkIfUpdated(details){
 
 	let platformsLoad_result;
 	try{
-		platformsLoad_result = await zDK.loadJS(document, ["dailymotion.js", "mixer.js", "picarto_tv.js", "smashcast.js", "twitch.js", "youtube.js"], "/data/js/platforms/");
+		platformsLoad_result = await zDK.loadJS(document, ["dailymotion.js", "mixer.js", "openrec_tv.js", "picarto_tv.js", "smashcast.js", "twitch.js", "youtube.js"], "/data/js/platforms/");
 	} catch(err){
 		platformsLoad_result = err;
 	}
