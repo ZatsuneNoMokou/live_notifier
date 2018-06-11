@@ -71,7 +71,7 @@ async function init() {
 		echo("Copying/Building Lodash Debounce - Custom Build..."); // https://lodash.com/custom-builds
 		let stdout = null;
 		try {
-			stdout = execSync(`cd ${relativeJsLib} && lodash exports=global include=debounce --development --source-map`);
+			stdout = execSync(`cd ${relativeJsLib} && lodash exports=global include=debounce,defaultsDeep --development --source-map`);
 		} catch(err){
 			if(err){
 				error(err);

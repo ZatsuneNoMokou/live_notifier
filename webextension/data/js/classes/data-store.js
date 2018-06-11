@@ -211,6 +211,36 @@ class DataStore {
 	}
 
 	/**
+	 * @param {Object} defaultData The destination object.
+	 * @param {Object} data The source objects.
+	 * @returns {Object} Returns `object`.
+	 * @see _.defaults
+	 */
+	static extendsWithDefault(defaultData, data){
+		return _.defaultsDeep(defaultData, data);
+	}
+
+	/**
+	 * @param {Object} defaultData
+	 * @param {Object} data to modify
+	 * @returns {Object} dat without the defaultData
+	 */
+	static removeDefault(defaultData, data){
+		for(let name in data){
+			if(!data.hasOwnProperty(name) || !defaultData.hasOwnProperty(name)){ // If prototype element or nothing to compare
+				continue;
+			}
+
+			if(typeof data[name]==="object" && data[name]!==null){
+				// Recursive call to compare non-null object
+				data[name] = DataStore.removeDefault(defaultData[name], data[name]);
+			} else if(data[name]===defaultData[name]){
+				delete data[name];
+			}
+		}
+	}
+
+	/**
 	 *
 	 * @param {String|String[]} key
 	 * @param {String} id
