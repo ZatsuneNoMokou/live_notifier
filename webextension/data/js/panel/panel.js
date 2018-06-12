@@ -547,7 +547,7 @@ function updatePanelData(doUpdateTheme=true){
 	debug_checkingLivesState_node.className = appGlobal["checkingLivesFinished"];
 
 	//Update Live notifier version displayed in the panel preferences
-	if(typeof appGlobal["version"] === "string"){
+	if(typeof appGlobal["version"] === "string" || Array.isArray(appGlobal["version"])===true){
 		current_version(appGlobal["version"]);
 	}
 }
@@ -901,7 +901,11 @@ function streamItemClick(){
 
 function current_version(version){
 	let current_version_node = document.querySelector("#current_version");
-	current_version_node.dataset.currentVersion = version;
+	if(typeof version==="string"){
+		current_version_node.dataset.currentVersion = version;
+	} else if(Array.isArray(version)){
+		current_version_node.dataset.currentVersion = `${version[1]}.${version[2]}.${version[3]}${(version.length>4 && version[4]!==undefined)? ` beta ${version[4]}` : ''}`;
+	}
 }
 
 function theme_update(){

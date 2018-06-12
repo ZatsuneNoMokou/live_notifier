@@ -1698,10 +1698,13 @@ function initAddon(){
 }
 
 // Checking if updated
-let previousVersion = "";
-let current_version = appGlobal["version"] = browser.runtime.getManifest().version;
+let previousVersion = "",
+	current_versionStr = appGlobal["versionStr"] = browser.runtime.getManifest().version,
+	current_version = appGlobal["version"] = browser.runtime.getManifest().version
+;
+
 function checkIfUpdated(details){
-	let getVersionNumbers =  /^(\d*)\.(\d*)\.(\d*)$/;
+	let getVersionNumbers =  /^(\d+)\.(\d+)\.(\d+)(?:\.(\d+))?$/;
 	
 	let installReason = details.reason;
 	consoleMsg("info", `Runtime onInstalled reason: ${installReason}`);
@@ -1711,9 +1714,9 @@ function checkIfUpdated(details){
 	if(installReason === "update" || installReason === "unknown"){
 		previousVersion = details.previousVersion;
 		let previousVersion_numbers = getVersionNumbers.exec(previousVersion);
-		let current_version_numbers = getVersionNumbers.exec(current_version);
+		let current_version_numbers = appGlobal["version"] = getVersionNumbers.exec(current_versionStr);
 		
-		if(previousVersion !== current_version){
+		if(previousVersion !== current_versionStr){
 			if(current_version_numbers.length === 4 && previousVersion_numbers.length === 4){
 				if((current_version_numbers[1] > previousVersion_numbers[1])
 					||
@@ -1722,7 +1725,7 @@ function checkIfUpdated(details){
 					((current_version_numbers[1] === previousVersion_numbers[1]) && (current_version_numbers[2] === previousVersion_numbers[2]) && (current_version_numbers[3] > previousVersion_numbers[3]))
 				){
 					doNotif({
-						"message": i18ex._("Addon_have_been_updated", {"version": current_version})
+						"message": i18ex._("Addon_have_been_updated", {"version": current_versionStr})
 					})
 						.catch(err=>{
 							consoleMsg("warn", err);
@@ -1743,7 +1746,7 @@ function checkIfUpdated(details){
 		chrome.runtime.onInstalled.removeListener(checkIfUpdated);
 	}*/
 
-	savePreference("livenotifier_version", current_version);
+	savePreference("livenotifier_version", current_versionStr);
 }
 
 (async ()=>{
