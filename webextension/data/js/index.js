@@ -1193,13 +1193,14 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 		}
 
 		if(streamListData.hasOwnProperty("channelInfos")){
-			const streamChannelInfos = channelInfos.get(website).get(id);
-
-			for(let name in streamListData.channelInfos){
-				if(streamListData.channelInfos.hasOwnProperty(name)){
-					streamChannelInfos[name] = streamListData.channelInfos[name];
+			liveStore.updateChannel(website, id, function (website, id, data) {
+				for(let name in streamListData.channelInfos){
+					if(streamListData.channelInfos.hasOwnProperty(name)){
+						data[name] = streamListData.channelInfos[name];
+					}
 				}
-			}
+				return data;
+			});
 		}
 
 		if(!isMap(streamListData.streamList) || streamListData.streamList.size === 0){
