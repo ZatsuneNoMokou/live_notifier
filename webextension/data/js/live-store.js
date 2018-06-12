@@ -113,7 +113,32 @@ class LiveStore {
 		}
 	}
 
-	compression(key, data){
+	compression(key, id, data){
+		let type;
+		if(key[0]===this.CONSTANTS["channel"]){
+			type = "channel";
+		} else if(key[0]===this.CONSTANTS["live"]){
+			type = "live";
+		}
+
+		if(type!==undefined){
+			const website = this.CONSTANTS[key[1]];
+
+			data = DataStore.cloneVariable(data);
+
+			let defaultData;
+
+			if(type==="channel"){
+				defaultData = LiveStore.getDefaultChannel(website, id)
+			} else if(type==="live"){
+				defaultData = LiveStore.getDefaultLive(website, id, (id===""? key[2] : id));
+			}
+
+			if(defaultData!==undefined){
+				data = DataStore.removeDefault(defaultData, data);
+			}
+		}
+
 		const result = DataStore.compressWithPattern(data, this.COMPRESSION_DATA);
 		DataStore.renameProperty(result, "liveStatus", "l");
 
@@ -124,13 +149,37 @@ class LiveStore {
 		return result;
 	}
 
-	decompression(key, data){
+	decompression(key, id, data){
+		let type;
+		if(key[0]===this.CONSTANTS["channel"]){
+			type = "channel";
+		} else if(key[0]===this.CONSTANTS["live"]){
+			type = "live";
+		}
+
 		DataStore.renameProperty(data, "l", "liveStatus");
 
 		let result = DataStore.decompressWithPattern(data, this.COMPRESSION_DATA);
 
 		if(result.hasOwnProperty("liveStatus") && result.liveStatus.hasOwnProperty("liveList")){
 			result.liveStatus.liveList = new Map(result.liveStatus.liveList);
+		}
+
+
+		if(type!==undefined){
+			const website = this.CONSTANTS[key[1]];
+
+			let defaultData;
+
+			if(type==="channel"){
+				defaultData = LiveStore.getDefaultChannel(website, id)
+			} else if(type==="live"){
+				defaultData = LiveStore.getDefaultLive(website, id, (id===""? key[2] : id));
+			}
+
+			if(defaultData!==undefined){
+				result = DataStore.extendsWithDefault(defaultData, result);
+			}
 		}
 
 		return result;
