@@ -23,6 +23,7 @@
 			"/data/js/lib/i18next.js",
 			"/data/js/lib/i18nextXHRBackend.js",
 			"/data/js/lib/mustache.js",
+			"/data/js/lib/lodash.custom.js",
 
 			"/data/js/lib/xml2jsobj.js",
 
