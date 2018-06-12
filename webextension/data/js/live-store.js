@@ -10,6 +10,7 @@ class LiveStore {
 
 			"dailymotion": "d",
 			"mixer": "m",
+			"openrec_tv": "o",
 			"picarto_tv": "p",
 			"smashcast": "s",
 			"twitch": "t",
@@ -20,6 +21,7 @@ class LiveStore {
 
 			"d": "dailymotion",
 			"m": "mixer",
+			"o": "openrec_tv",
 			"p": "picarto_tv",
 			"s": "smashcast",
 			"t": "twitch",
