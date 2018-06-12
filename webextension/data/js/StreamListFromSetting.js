@@ -342,6 +342,10 @@ class StreamListFromSetting {
 	}
 
 	getWebsiteList(website){
+		if(this.mapDataAll.has(website)===false){
+			consoleMsg("warn", `[StreamListFromSetting] getWebsiteList - Unknown website "${website}"`);
+			return new Map();
+		}
 		return this.mapDataAll.get(website);
 	}
 
