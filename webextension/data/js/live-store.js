@@ -143,12 +143,14 @@ class LiveStore {
 	 */
 	checkValidWebsite(website){
 		if(typeof this.CONSTANTS[website]!=="string"){
+			consoleMsg("warn", website);
+
 			throw "UnknownWebsite";
 		}
 	}
 
 	getChannel(website, id){
-		this.checkValidWebsite();
+		this.checkValidWebsite(website);
 		return this.store.get([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
 	}
 
@@ -168,7 +170,7 @@ class LiveStore {
 	}
 
 	hasChannel(website, id){
-		this.checkValidWebsite();
+		this.checkValidWebsite(website);
 
 		return this.store.has([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
 	}
