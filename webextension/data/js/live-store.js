@@ -229,6 +229,8 @@ class LiveStore {
 
 		if(contentId === undefined){
 			return this.store.has([this.CONSTANTS.live, this.CONSTANTS[website]], id);
+		} else if(id === contentId){
+			return this.store.has([this.CONSTANTS.live, this.CONSTANTS[website], id], "");
 		} else {
 			return this.store.has([this.CONSTANTS.live, this.CONSTANTS[website], id], contentId);
 		}
