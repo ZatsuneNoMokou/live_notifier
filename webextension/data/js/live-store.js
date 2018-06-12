@@ -136,11 +136,25 @@ class LiveStore {
 		return result;
 	}
 
+	/**
+	 *
+	 * @param {String} website
+	 * @throws Website not in this.constants
+	 */
+	checkValidWebsite(website){
+		if(typeof this.CONSTANTS[website]!=="string"){
+			throw "UnknownWebsite";
+		}
+	}
+
 	getChannel(website, id){
+		this.checkValidWebsite();
 		return this.store.get([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
 	}
 
 	getLive(website, id, contentId=null){
+		this.checkValidWebsite(website);
+
 		if(contentId===null){
 			const result = new Map();
 			this.forEachLive(website, id, function(website, id, contentId, data){
@@ -154,10 +168,14 @@ class LiveStore {
 	}
 
 	hasChannel(website, id){
+		this.checkValidWebsite();
+
 		return this.store.has([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
 	}
 
 	hasLive(website, id, contentId){
+		this.checkValidWebsite(website);
+
 		if(contentId === undefined){
 			return this.store.has([this.CONSTANTS.live, this.CONSTANTS[website]], id);
 		} else {
@@ -166,30 +184,42 @@ class LiveStore {
 	}
 
 	setChannel(website, id, data){
+		this.checkValidWebsite(website);
+
 		return this.store.set([this.CONSTANTS.channel, this.CONSTANTS[website]], id, data);
 	}
 
 	setLive(website, id, contentId, data){
+		this.checkValidWebsite(website);
+
 		return this.store.set([this.CONSTANTS.live, this.CONSTANTS[website], id], ((id!==contentId)? contentId : ""), data);
 	}
 
 	updateChannel(website, id, fn){
+		this.checkValidWebsite(website);
+
 		let data = this.getChannel(website, id);
 		data = fn(website, id, data);
 		return this.setChannel(website, id, data);
 	}
 
 	updateLive(website, id, contentId, fn){
+		this.checkValidWebsite(website);
+
 		let data = this.getLive(website, id, contentId);
 		data = fn(website, id, contentId, data);
 		return this.setLive(website, id, contentId, data);
 	}
 
 	removeChannel(website, id){
+		this.checkValidWebsite(website);
+
 		return this.store.remove([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
 	}
 
 	removeLive(website, id){
+		this.checkValidWebsite(website);
+
 		return this.store.remove([this.CONSTANTS.live, this.CONSTANTS[website]], id);
 	}
 
@@ -212,6 +242,8 @@ class LiveStore {
 	forEachChannel(arg1, arg2){
 		if(arguments.length===2 && typeof arg1==="string" && typeof arg2==="function"){
 			const [website, fn] = arguments;
+			this.checkValidWebsite(website);
+
 			this.store.forEach([this.CONSTANTS.channel, this.CONSTANTS[website]], this.forEachChannelWrapper(fn));
 		} else if(arguments.length===1 && typeof arg1==="function"){
 			this.store.forEach([this.CONSTANTS.channel], this.forEachChannelWrapper(arg1));
@@ -243,9 +275,13 @@ class LiveStore {
 			this.store.forEach([this.CONSTANTS.live], this.forEachLiveWrapper(arg1));
 		} else if(arguments.length===2 && typeof arg1==="string" && typeof arg2==="function") {
 			const [website, fn] = arguments;
+			this.checkValidWebsite(website);
+
 			this.store.forEach([this.CONSTANTS.live, this.CONSTANTS[website]], this.forEachLiveWrapper(fn));
 		} else if(arguments.length===3 && typeof arg1==="string" && typeof arg2==="string" && typeof arg3==="function"){
 			const [website, id, fn] = arguments;
+			this.checkValidWebsite(website);
+
 			this.store.forEach([this.CONSTANTS.live, this.CONSTANTS[website], id], this.forEachLiveWrapper(fn));
 		} else {
 			throw "[forEachLive] Wrong arguments";
