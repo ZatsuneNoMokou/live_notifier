@@ -213,13 +213,13 @@ class DataStore {
 	}
 
 	/**
-	 * @param {Object} defaultData The destination object.
-	 * @param {Object} data The source objects.
+	 * @param {Object} defaultData
+	 * @param {Object} data
 	 * @returns {Object} Returns `object`.
 	 * @see _.defaults
 	 */
 	static extendsWithDefault(defaultData, data){
-		return _.defaultsDeep(defaultData, data);
+		return _.defaultsDeep(data, defaultData);
 	}
 
 	/**
@@ -240,6 +240,8 @@ class DataStore {
 				delete data[name];
 			}
 		}
+
+		return data;
 	}
 
 	/**
