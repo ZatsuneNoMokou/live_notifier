@@ -48,9 +48,10 @@ class DataStore {
 	/**
 	 *
 	 * @param {String} key
+	 * @param {String} id
 	 * @param {*} data
 	 */
-	compressData(key, data){
+	compressData(key, id, data){
 		let result,
 			fn = null
 		;
@@ -74,9 +75,9 @@ class DataStore {
 		if(fn===null){
 			result = data;
 		} else if(fn[0]!==null){
-			result = fn[1].call(fn[0], key, data);
+			result = fn[1].call(fn[0], key, id, data);
 		} else {
-			result = fn[1](key, data);
+			result = fn[1](key, id, data);
 		}
 
 		return result;
@@ -85,9 +86,10 @@ class DataStore {
 	/**
 	 *
 	 * @param {String} key
+	 * @param {String} id
 	 * @param {*} data
 	 */
-	decompressData(key, data){
+	decompressData(key, id, data){
 		let result,
 			fn = null
 		;
@@ -111,9 +113,9 @@ class DataStore {
 		if(fn===null){
 			result = data;
 		} else if(fn[0]!==null){
-			result = fn[1].call(fn[0], key, data);
+			result = fn[1].call(fn[0], key, id, data);
 		} else {
-			result = fn[1](key, data);
+			result = fn[1](key, id, data);
 		}
 
 		return result;
@@ -290,7 +292,7 @@ class DataStore {
 	 * @param {Boolean|String|Number|JSON} data
 	 */
 	set(keys, id, data){
-		data = this.compressData(keys, data);
+		data = this.compressData(keys, id, data);
 
 		const dataToStore = [];
 
@@ -366,7 +368,7 @@ class DataStore {
 					throw `Unexpected type "${rawData[0]}"`;
 			}
 
-			return this.decompressData(keys, data);
+			return this.decompressData(keys, id, data);
 		} else {
 			throw "Wrong argument";
 		}
