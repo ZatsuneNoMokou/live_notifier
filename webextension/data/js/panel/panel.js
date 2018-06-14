@@ -519,12 +519,20 @@ function updatePanelData(doUpdateTheme=true){
 
 	liveStore.forEachLive((website, id, contentId, streamData)=>{
 		// Clean the streams already deleted but status still exist
-		if(!streamListSettings.get(website).has(id) && liveStore.hasLive(website, id, contentId)===true){
+		if(streamListSettings.has(website)===false || streamListSettings.get(website).has(id)===false){
 			console.info(`${id} from ${website} was already deleted but not from liveStatus ${(liveStore.hasChannel(website, id))? "and channelInfos" : ""}`);
 			liveStore.removeLive(website, id);
 			if(liveStore.hasChannel(website, id)){
 				liveStore.removeChannel(website, id);
 			}
+		}
+	});
+
+	liveStore.forEachChannel((website, id, data)=>{
+		// Clean the streams already deleted but status still exist
+		if(streamListSettings.has(website)===false || streamListSettings.get(website).has(id)===false){
+			console.info(`${id} from ${website} was already deleted but not from channelInfos`);
+			liveStore.removeChannel(website, id);
 		}
 	});
 
