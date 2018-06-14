@@ -1068,7 +1068,7 @@ function checkMissing(){
 				if(typeof streamList.ignore === "boolean" && streamList.ignore === true){
 					return;
 				}
-				if(!liveStore.hasLive(website, id)){
+				if(!liveStore.hasLive(website, id) && !liveStore.hasChannel(website, id)){
 					consoleMsg("info", `${id} from ${website} is not checked yet`);
 
 					if(!listToCheck.has(website)){
