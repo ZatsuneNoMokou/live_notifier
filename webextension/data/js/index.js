@@ -1096,75 +1096,64 @@ function checkMissing(){
 }
 appGlobal["checkMissing"] = checkMissing;
 
-function getPrimary(id, contentId, website, streamSetting, nextPageToken){
-	return new Promise(function(resolve, reject){
-		let current_API = websites.get(website).API((typeof contentId === "string" && contentId !== "")? contentId :  id, (typeof nextPageToken === "undefined" || nextPageToken === null)? null : nextPageToken);
-		
-		let getPrimary_RequestOptions = {
-			url: current_API.url,
-			overrideMimeType: current_API.overrideMimeType,
-			onComplete: function (response) {
-				let data = response.json;
-				
-				if(!DATAs.has(`${website}/${id}`)){
-					DATAs.set(`${website}/${id}`, new Map());
-				}
-				if(typeof contentId === "string" && contentId !== ""){
-					if(!DATAs.get(`${website}/${id}`).has(contentId)){
-						DATAs.get(`${website}/${id}`).set(contentId, new Map());
-					}
-					DATAs.get(`${website}/${id}`).get(contentId).set("getPrimary", {"url": response.url, "data": data});
-				} else {
-					DATAs.get(`${website}/${id}`).set("getPrimary", {"url": response.url, "data": data});
-				}
+async function getPrimary(id, contentId, website, streamSetting, nextPageToken){
+	let current_API = websites.get(website).API((typeof contentId === "string" && contentId !== "")? contentId :  id, (typeof nextPageToken === "undefined" || nextPageToken === null)? null : nextPageToken);
 
-				if(!(typeof contentId === "string" && contentId !== "") && website_channel_id.test(id) === true){
-					if(typeof nextPageToken !== "undefined" && nextPageToken !== null){
-						processChannelList(id, website, streamSetting, response, nextPageToken)
-							.then(resolve)
-							.catch(reject)
-					} else {
-						getChannelInfo(website, id)
-							.then(function(){
-								processChannelList(id, website, streamSetting, response)
-									.then(resolve)
-									.catch(reject)
-							})
-							.catch(err=>{
-								console.error(err);
-								reject(err)
-							})
-					}
-				} else {
-					if(!(typeof contentId === "string" && contentId !== "")){
-						contentId = id;
-					}
-					
-					processPrimary(id, contentId, website, streamSetting, response)
-						.then(resolve)
-						.catch(reject)
-				}
-			}
-		};
-		
-		if(current_API.hasOwnProperty("headers") === true){
-			getPrimary_RequestOptions.headers = current_API.headers;
+	let getPrimary_RequestOptions = {
+		url: current_API.url,
+		overrideMimeType: current_API.overrideMimeType
+	};
+
+	if(current_API.hasOwnProperty("headers") === true){
+		getPrimary_RequestOptions.headers = current_API.headers;
+	}
+	if(current_API.hasOwnProperty("content") === true){
+		getPrimary_RequestOptions.content = current_API.content;
+	}
+	if(current_API.hasOwnProperty("contentType") === true){
+		getPrimary_RequestOptions.contentType = current_API.contentType;
+	}
+	if(current_API.hasOwnProperty("Request_documentParseToJSON") === true){
+		getPrimary_RequestOptions.Request_documentParseToJSON = current_API.Request_documentParseToJSON;
+	}
+	if(current_API.hasOwnProperty("customJSONParse") === true){
+		getPrimary_RequestOptions.customJSONParse = current_API.customJSONParse;
+	}
+
+
+	const response = await Request(getPrimary_RequestOptions).get(),
+		data = response.json
+	;
+
+
+	if(!DATAs.has(`${website}/${id}`)){
+		DATAs.set(`${website}/${id}`, new Map());
+	}
+
+	if(typeof contentId === "string" && contentId !== ""){
+		if(!DATAs.get(`${website}/${id}`).has(contentId)){
+			DATAs.get(`${website}/${id}`).set(contentId, new Map());
 		}
-		if(current_API.hasOwnProperty("content") === true){
-			getPrimary_RequestOptions.content = current_API.content;
+		DATAs.get(`${website}/${id}`).get(contentId).set("getPrimary", {"url": response.url, "data": data});
+	} else {
+		DATAs.get(`${website}/${id}`).set("getPrimary", {"url": response.url, "data": data});
+	}
+
+	if(!(typeof contentId === "string" && contentId !== "") && website_channel_id.test(id) === true){
+		if(typeof nextPageToken !== "undefined" && nextPageToken !== null){
+			return await processChannelList(id, website, streamSetting, response, nextPageToken);
+		} else {
+			await getChannelInfo(website, id);
+
+			return await processChannelList(id, website, streamSetting, response);
 		}
-		if(current_API.hasOwnProperty("contentType") === true){
-			getPrimary_RequestOptions.contentType = current_API.contentType;
+	} else {
+		if(!(typeof contentId === "string" && contentId !== "")){
+			contentId = id;
 		}
-		if(current_API.hasOwnProperty("Request_documentParseToJSON") === true){
-			getPrimary_RequestOptions.Request_documentParseToJSON = current_API.Request_documentParseToJSON;
-		}
-		if(current_API.hasOwnProperty("customJSONParse") === true){
-			getPrimary_RequestOptions.customJSONParse = current_API.customJSONParse;
-		}
-		
-		Request(getPrimary_RequestOptions).get();
-	});
+
+		return await processPrimary(id, contentId, website, streamSetting, response);
+	}
 }
 appGlobal["getPrimary"] = getPrimary;
 
