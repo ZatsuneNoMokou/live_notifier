@@ -14,6 +14,7 @@
 * \+ : \[ZDK] \[ChromePreferences] - New type : JSON
 * \+ : Reworked StreamListFromSetting class, to use less space in preferences
 * \+ : Twitch - Setting to choose to include Twitch's rediffusions (included by default)
+* \+ : YouTube - support gettings all lives wihtout YouTube API 
 
 # 11.16.0
 * \+ : YouTube data with less YouTube API, serveur can not handle load
