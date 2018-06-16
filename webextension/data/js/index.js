@@ -676,9 +676,17 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 appGlobal["getCleanedStreamStatus"] = getCleanedStreamStatus;
 
 appGlobal["notificationGlobalyDisabled"] = false;
-function doStreamNotif(website, id, contentId, streamSetting){
+function doStreamNotif(website, id, contentId){
 	streamListFromSetting.refresh();
-	let streamList = streamListFromSetting.getWebsiteList(website);
+
+	if(streamListFromSetting.mapDataAll.has(website)===false || streamListFromSetting.mapDataAll.get(website).has(id)===false){
+		consoleMsg("warn", "Notification attempt of a stream not present in stream list.");
+		return null;
+	}
+	const streamSettings = streamListFromSetting.mapDataAll.get(website).get(id);
+
+
+
 	let streamData = liveStore.getLive(website, id, contentId);
 
 	let channelData = (liveStore.hasChannel(website, id))? liveStore.getChannel(website, id) : null;
@@ -694,15 +702,15 @@ function doStreamNotif(website, id, contentId, streamSetting){
 		streamLogo  = streamOwnerLogo;
 	}
 
-	let isStreamOnline_filtered = getCleanedStreamStatus(website, id, contentId, streamSetting, online);
-	
+	let isStreamOnline_filtered = getCleanedStreamStatus(website, id, contentId, streamSettings, online);
+
 	if(appGlobal["notificationGlobalyDisabled"] === true){
 		return null;
 	}
 
 	if(isStreamOnline_filtered){
 		if(streamData.liveStatus.notifiedStatus === false || streamData.startedAt!==streamData.liveStatus.startedAt){
-			if((typeof streamList.get(id).notifyOnline === "boolean")? streamList.get(id).notifyOnline : getPreference("notify_online") === true){
+			if((typeof streamSettings.notifyOnline === "boolean")? streamSettings.notifyOnline : getPreference("notify_online") === true){
 				let streamStatus = ((streamData.streamStatus !== "")? ": " + streamData.streamStatus : "") + ((streamData.streamGame !== "")? (" (" + streamData.streamGame + ")") : "");
 				let notifOptions = {
 					"title": i18ex._("Stream_online"),
@@ -731,9 +739,9 @@ function doStreamNotif(website, id, contentId, streamSetting){
 			if(typeof speechSynthesis === "object"
 				&& ((channelData===null && streamData.liveStatus.notifiedStatus_Vocal === false)
 					|| (channelData!==null && channelData.liveStatus.notifiedStatus_Vocal === false)
-				) && ((typeof streamList.get(id).notifyVocalOnline === "boolean")? streamList.get(id).notifyVocalOnline : getPreference("notify_vocal_online")) === true
+				) && ((typeof streamSettings.notifyVocalOnline === "boolean")? streamSettings.notifyVocalOnline : getPreference("notify_vocal_online")) === true
 			){
-				voiceReadMessage(i18ex._("language"), `${(typeof streamList.get(id).vocalStreamName === "string")? streamList.get(id).vocalStreamName : streamName} ${i18ex._("is_online")}`);
+				voiceReadMessage(i18ex._("language"), `${(typeof streamSettings.vocalStreamName === "string")? streamSettings.vocalStreamName : streamName} ${i18ex._("is_online")}`);
 				if(channelData!==null){
 					channelData.liveStatus.notifiedStatus_Vocal = isStreamOnline_filtered;
 				} else {
@@ -743,7 +751,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 		}
 	} else {
 		if(streamData.liveStatus.notifiedStatus === true){
-			if((typeof streamList.get(id).notifyOffline === "boolean")? streamList.get(id).notifyOffline : getPreference("notify_offline") === true){
+			if((typeof streamSettings.notifyOffline === "boolean")? streamSettings.notifyOffline : getPreference("notify_offline") === true){
 				if(streamLogo !== ""){
 					doNotif({
 						"title": i18ex._("Stream_offline"),
@@ -770,9 +778,9 @@ function doStreamNotif(website, id, contentId, streamSetting){
 			if(typeof speechSynthesis === "object"
 				&& ((channelData===null && streamData.liveStatus.notifiedStatus_Vocal===true)
 					|| (channelData!==null && channelData.liveStatus.notifiedStatus_Vocal===true)
-				) && ((typeof streamList.get(id).notifyVocalOffline === "boolean")? streamList.get(id).notifyVocalOffline : getPreference("notify_vocal_offline")) === true
+				) && ((typeof streamSettings.notifyVocalOffline === "boolean")? streamSettings.notifyVocalOffline : getPreference("notify_vocal_offline")) === true
 			){
-				voiceReadMessage(i18ex._("language"), `${(typeof streamList.get(id).vocalStreamName === "string")? streamList.get(id).vocalStreamName : streamName} ${i18ex._("is_offline")}`);
+				voiceReadMessage(i18ex._("language"), `${(typeof streamSettings.vocalStreamName === "string")? streamSettings.vocalStreamName : streamName} ${i18ex._("is_offline")}`);
 				if(channelData!==null){
 					channelData.liveStatus.notifiedStatus_Vocal = isStreamOnline_filtered;
 				} else {
@@ -998,7 +1006,7 @@ async function checkLives(idArray){
 						const imgArrayPreload = [];
 						liveStore.forEachLive(website, id, (website, id, contentId, streamData) => {
 							if((typeof promiseResult === "string" && promiseResult.indexOf("StreamChecked") !== -1) || (typeof promiseResult === "object" && typeof promiseResult[contentId] === "string" && promiseResult[contentId].indexOf("StreamChecked") !== -1)){
-								doStreamNotif(website, id, contentId, streamList);
+								doStreamNotif(website, id, contentId);
 
 								let streamLogo = "";
 								if(streamData.online && typeof streamData.streamCategoryLogo === "string" && streamData.streamCategoryLogo !== ""){
@@ -1014,7 +1022,7 @@ async function checkLives(idArray){
 						})
 					}
 					if(liveStore.hasChannel(website, id)){
-						channelListEnd(website, id, streamListFromSetting.mapDataAll.get(website).get(id));
+						channelListEnd(website, id);
 					}
 					setIcon();
 				}
@@ -1232,7 +1240,7 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 		return responseValidity;
 	}
 }
-function channelListEnd(website, id, streamSetting){
+function channelListEnd(website, id){
 	liveStore.forEachLive(website, id, (website, id, contentId)=>{
 		if(liveStore.getChannel(website, id).liveStatus.liveList.has(contentId) === false){
 			liveStore.updateLive(website, id, contentId, function (website, id, contentId, liveData) {
@@ -1240,7 +1248,7 @@ function channelListEnd(website, id, streamSetting){
 				return liveData;
 			});
 
-			doStreamNotif(website, id, contentId, streamSetting);
+			doStreamNotif(website, id, contentId);
 			liveStore.removeLive(website, id, contentId);
 		}
 	});
