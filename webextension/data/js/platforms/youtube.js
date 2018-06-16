@@ -215,24 +215,28 @@ const youtube = {
 					let livesItems = null;
 					try {
 						livesItems = contentRender.contents["0"].itemSectionRenderer.contents["0"].gridRenderer.items
-					} catch (e) {}
+					} catch (e) {
+						consoleMsg("error", e);
+					}
 
-					for(let item of livesItems){
-						if(item.hasOwnProperty("gridVideoRenderer")===true && item.gridVideoRenderer.hasOwnProperty("publishedTimeText")===false){
-							const streamData = item.gridVideoRenderer;
-							// console.dir(streamData);
+					if(livesItems!==null){
+						for(let item of livesItems){
+							if(item.hasOwnProperty("gridVideoRenderer")===true && item.gridVideoRenderer.hasOwnProperty("publishedTimeText")===false){
+								const streamData = item.gridVideoRenderer;
+								// console.dir(streamData);
 
 
-							const data = {
-								"streamName": streamData.title.simpleText,
-								"streamOwnerLogo": `https://i.ytimg.com/vi/${streamData.videoId}/hqdefault_live.jpg`
-							};
+								const data = {
+									"streamName": streamData.title.simpleText,
+									"streamOwnerLogo": `https://i.ytimg.com/vi/${streamData.videoId}/hqdefault_live.jpg`
+								};
 
-							if(streamData.hasOwnProperty("viewCountText") && viewCountReg.test(streamData.viewCountText.simpleText)){
-								data.streamCurrentViewers = parseInt(viewCountReg.exec(streamData.viewCountText.simpleText)[1]);
+								if(streamData.hasOwnProperty("viewCountText") && viewCountReg.test(streamData.viewCountText.simpleText)){
+									data.streamCurrentViewers = parseInt(viewCountReg.exec(streamData.viewCountText.simpleText)[1]);
+								}
+
+								result.list[streamData.videoId] = data;
 							}
-
-							result.list[streamData.videoId] = data;
 						}
 					}
 				}
