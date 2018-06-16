@@ -277,6 +277,9 @@ class StreamListFromSetting {
 
 			for(let id in websiteStreams){
 				if(websiteStreams.hasOwnProperty(id)){
+					let data = websiteStreams[id];
+
+					// Add channel:: to id AFTER using the websiteStreams
 					id = idPrefix + id;
 
 					let outputData;
@@ -285,8 +288,6 @@ class StreamListFromSetting {
 					} else {
 						outputData = mapDataAll.get(website).get(id);
 					}
-
-					let data = websiteStreams[id];
 
 					if(this.REG_EXPS.URL.test(data)){
 						let [,newData,url] = this.REG_EXPS.URL.exec(data);
