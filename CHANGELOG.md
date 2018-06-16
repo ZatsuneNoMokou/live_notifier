@@ -15,6 +15,7 @@
 * \+ : Reworked StreamListFromSetting class, to use less space in preferences
 * \+ : Twitch - Setting to choose to include Twitch's rediffusions (included by default)
 * \+ : YouTube - support gettings all lives wihtout YouTube API 
+* Fix : Stream notification of stream that are not in the list anymore
 
 # 11.16.0
 * \+ : YouTube data with less YouTube API, serveur can not handle load
