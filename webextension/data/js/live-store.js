@@ -1,6 +1,6 @@
-class LiveStore {
+class LiveStore extends DataStore {
 	constructor(){
-		this.store = new zDK.DataStore();
+		super();
 
 
 
@@ -52,20 +52,20 @@ class LiveStore {
 
 
 
-		this.store.setCompression(this.CONSTANTS.channel, this.compression, this.decompression, this);
-		this.store.setCompression(this.CONSTANTS.live, this.compression, this.decompression, this);
+		this.setCompression(this.CONSTANTS.channel, this.compression, this.decompression, this);
+		this.setCompression(this.CONSTANTS.live, this.compression, this.decompression, this);
 
 
 
 		this.LIVE_STORE_VERSION = "11.3";
 
-		if(!this.store.has("_", "LiveStore_version") || this.store.get("_", "LiveStore_version")!==this.LIVE_STORE_VERSION){
+		if(!this.has("_", "LiveStore_version") || this.get("_", "LiveStore_version")!==this.LIVE_STORE_VERSION){
 			consoleMsg("warn", "New version of LiveStore, clearing old data.");
-			this.store.clear(this.CONSTANTS.channel);
-			this.store.clear(this.CONSTANTS.live);
+			this.clear(this.CONSTANTS.channel);
+			this.clear(this.CONSTANTS.live);
 		}
 
-		this.store.set("_", "LiveStore_version", "11.3");
+		this.set("_", "LiveStore_version", "11.3");
 	}
 
 	static getDefaultChannel(website, id){
@@ -200,7 +200,7 @@ class LiveStore {
 
 	getChannel(website, id){
 		this.checkValidWebsite(website);
-		return this.store.get([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
+		return this.get([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
 	}
 
 	getLive(website, id, contentId=null){
@@ -214,38 +214,38 @@ class LiveStore {
 
 			return result;
 		} else {
-			return this.store.get([this.CONSTANTS.live, this.CONSTANTS[website], id], (((id!==contentId))? contentId : ""));
+			return this.get([this.CONSTANTS.live, this.CONSTANTS[website], id], (((id!==contentId))? contentId : ""));
 		}
 	}
 
 	hasChannel(website, id){
 		this.checkValidWebsite(website);
 
-		return this.store.has([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
+		return this.has([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
 	}
 
 	hasLive(website, id, contentId){
 		this.checkValidWebsite(website);
 
 		if(contentId === undefined){
-			return this.store.has([this.CONSTANTS.live, this.CONSTANTS[website]], id);
+			return this.has([this.CONSTANTS.live, this.CONSTANTS[website]], id);
 		} else if(id === contentId){
-			return this.store.has([this.CONSTANTS.live, this.CONSTANTS[website], id], "");
+			return this.has([this.CONSTANTS.live, this.CONSTANTS[website], id], "");
 		} else {
-			return this.store.has([this.CONSTANTS.live, this.CONSTANTS[website], id], contentId);
+			return this.has([this.CONSTANTS.live, this.CONSTANTS[website], id], contentId);
 		}
 	}
 
 	setChannel(website, id, data){
 		this.checkValidWebsite(website);
 
-		return this.store.set([this.CONSTANTS.channel, this.CONSTANTS[website]], id, data);
+		return this.set([this.CONSTANTS.channel, this.CONSTANTS[website]], id, data);
 	}
 
 	setLive(website, id, contentId, data){
 		this.checkValidWebsite(website);
 
-		return this.store.set([this.CONSTANTS.live, this.CONSTANTS[website], id], ((id!==contentId)? contentId : ""), data);
+		return this.set([this.CONSTANTS.live, this.CONSTANTS[website], id], ((id!==contentId)? contentId : ""), data);
 	}
 
 	updateChannel(website, id, fn){
@@ -267,13 +267,13 @@ class LiveStore {
 	removeChannel(website, id){
 		this.checkValidWebsite(website);
 
-		return this.store.remove([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
+		return this.remove([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
 	}
 
 	removeLive(website, id){
 		this.checkValidWebsite(website);
 
-		return this.store.remove([this.CONSTANTS.live, this.CONSTANTS[website]], id);
+		return this.remove([this.CONSTANTS.live, this.CONSTANTS[website]], id);
 	}
 
 	forEachChannelWrapper(fn){
@@ -297,9 +297,9 @@ class LiveStore {
 			const [website, fn] = arguments;
 			this.checkValidWebsite(website);
 
-			this.store.forEach([this.CONSTANTS.channel, this.CONSTANTS[website]], this.forEachChannelWrapper(fn));
+			this.forEach([this.CONSTANTS.channel, this.CONSTANTS[website]], this.forEachChannelWrapper(fn));
 		} else if(arguments.length===1 && typeof arg1==="function"){
-			this.store.forEach([this.CONSTANTS.channel], this.forEachChannelWrapper(arg1));
+			this.forEach([this.CONSTANTS.channel], this.forEachChannelWrapper(arg1));
 		} else {
 			throw "Wrong arguments";
 		}
@@ -325,17 +325,17 @@ class LiveStore {
 	 */
 	forEachLive(arg1, arg2, arg3){
 		if(arguments.length===1 && typeof arg1==="function"){
-			this.store.forEach([this.CONSTANTS.live], this.forEachLiveWrapper(arg1));
+			this.forEach([this.CONSTANTS.live], this.forEachLiveWrapper(arg1));
 		} else if(arguments.length===2 && typeof arg1==="string" && typeof arg2==="function") {
 			const [website, fn] = arguments;
 			this.checkValidWebsite(website);
 
-			this.store.forEach([this.CONSTANTS.live, this.CONSTANTS[website]], this.forEachLiveWrapper(fn));
+			this.forEach([this.CONSTANTS.live, this.CONSTANTS[website]], this.forEachLiveWrapper(fn));
 		} else if(arguments.length===3 && typeof arg1==="string" && typeof arg2==="string" && typeof arg3==="function"){
 			const [website, id, fn] = arguments;
 			this.checkValidWebsite(website);
 
-			this.store.forEach([this.CONSTANTS.live, this.CONSTANTS[website], id], this.forEachLiveWrapper(fn));
+			this.forEach([this.CONSTANTS.live, this.CONSTANTS[website], id], this.forEachLiveWrapper(fn));
 		} else {
 			throw "[forEachLive] Wrong arguments";
 		}
