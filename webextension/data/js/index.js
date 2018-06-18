@@ -1091,7 +1091,12 @@ appGlobal["checkMissing"] = checkMissing;
 function getPrimary(id, contentId, website, streamSetting, nextPageToken){
 	return new Promise(function(resolve, reject){
 		let current_API = websites.get(website).API((typeof contentId === "string" && contentId !== "")? contentId :  id, (typeof nextPageToken === "undefined" || nextPageToken === null)? null : nextPageToken);
-		
+
+		if(current_API===null){
+			resolve(null);
+			return null;
+		}
+
 		let getPrimary_RequestOptions = {
 			url: current_API.url,
 			overrideMimeType: current_API.overrideMimeType,
@@ -1684,7 +1689,7 @@ function checkIfUpdated(details){
 						})
 					;
 
-					if(installReason==="install" || (previousVersion_numbers[1] <= 11 && previousVersion_numbers[2]<=14)){
+					if(installReason==="install" || (previousVersion_numbers[1] <= 11 && previousVersion_numbers[2]<=16)){
 						ZDK.openTabIfNotExist(chrome.extension.getURL("/data/options.html#news"))
 							.catch(console.error)
 						;
