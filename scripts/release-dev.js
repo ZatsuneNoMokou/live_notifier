@@ -115,6 +115,18 @@ async function init() {
 			excludeDirString = "data\\js\\lib";
 		}
 
+
+
+		echo("YouTube - Light version");
+		try{
+			fs.unlinkSync(path.join(tmpPath, "./data/js/platforms/youtube.js"));
+			fs.moveSync(path.join(tmpPath, "./data/js/platforms/youtube_stable.js"), path.join(tmpPath, "./data/js/platforms/youtube.js"));
+		} catch (e){
+			error(e);
+		}
+
+
+
 		const excludeDirAndJsFilter = through2.obj(function (item, enc, next) {
 			if(item.path.indexOf(excludeDirString)===-1 && item.stats.isFile() && path.extname(item.path) === `.js`){
 				this.push(item)
@@ -150,6 +162,9 @@ async function init() {
 
 			return data;
 		}, "json"));
+	} else {
+		echo("YouTube - Full version");
+		fs.unlinkSync(path.join(tmpPath, "./data/js/platforms/youtube_stable.js"));
 	}
 
 	try{
