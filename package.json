@@ -1,6 +1,6 @@
 {
 	"name": "live_notifier",
-	"version": "11.16.1",
+	"version": "11.16.2",
 	"description": "Be notified of streams from Dailymotion, Mixer, Smashcast, Twitch and Youtube.",
 	"dependencies": {
 		"dom-delegate": "^2.0.3",

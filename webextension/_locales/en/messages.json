@@ -4,7 +4,7 @@
 		"description": ""
 	},
 	"extShortDesc": {
-		"message": "Be notified of streams from Dailymotion, Mixer, Smashcast, Twitch and Youtube.",
+		"message": "Be notified of streams from Dailymotion, Mixer, Smashcast, and Twitch.",
 		"description": "this will be used as short description in web stores: MUST BE 132 characters OR LESS"
 	},
 	"language": {
