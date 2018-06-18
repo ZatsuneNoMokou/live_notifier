@@ -12,10 +12,8 @@ let myIconURL = "/data/live_offline.svg";
 
 let websites = new Map();
 appGlobal["websites"] = websites;
-let liveStatus = new Map();
-appGlobal["liveStatus"] = liveStatus;
-let channelInfos = new Map();
-appGlobal["channelInfos"] = channelInfos;
+let liveStore = new LiveStore();
+appGlobal["liveStore"] = liveStore;
 
 appGlobal["consoleMsg"] = ZDK.consoleMsg;
 const consoleDir = appGlobal["consoleDir"] = ZDK.consoleDir;
@@ -35,15 +33,17 @@ function getStreamURL(website, id, contentId, usePrefUrl){
 		if(streamList.get(id).streamURL !== "" && usePrefUrl === true){
 			return streamList.get(id).streamURL;
 		} else {
-			if(liveStatus.get(website).has(id) && liveStatus.get(website).get(id).has(contentId)){
-				let streamData = liveStatus.get(website).get(id).get(contentId);
+			if(liveStore.hasLive(website, id, contentId)){
+				let streamData = liveStore.getLive(website, id, contentId);
 				if(typeof streamData.streamURL === "string" && streamData.streamURL !== ""){
 					return streamData.streamURL;
 				}
 			}
-			if(channelInfos.get(website).has(id)){
-				if(typeof channelInfos.get(website).get(id).streamURL === "string" && channelInfos.get(website).get(id).streamURL !== ""){
-						return channelInfos.get(website).get(id).streamURL
+			if(liveStore.hasChannel(website, id)){
+				let data = liveStore.getChannel(website, id);
+
+				if(typeof data.streamURL === "string" && data.streamURL !== ""){
+					return data.streamURL
 				}
 			}
 			switch(website){
@@ -372,7 +372,7 @@ function shareStream(data){
 	streamListFromSetting.refresh();
 	let streamList = streamListFromSetting.getWebsiteList(website);
 	
-	let streamData = liveStatus.get(website).get(id).get(contentId);
+	let streamData = liveStore.getLive(website, id, contentId);
 	let streamName = streamData.streamName;
 	let streamURL = getStreamURL(website, id, contentId, true);
 	let streamStatus = streamData.streamStatus;
@@ -558,7 +558,10 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 		}
 		return count;
 	};
-	let streamData = liveStatus.get(website).get(id).get(contentId);
+
+
+
+	let streamData = liveStore.getLive(website, id, contentId);
 	if(streamData.streamStatus !== ""){
 		let lowerCase_status = (streamData.streamStatus).toLowerCase();
 		if(isStreamOnline){
@@ -612,6 +615,9 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 			}
 		}
 	}
+
+
+
 	if(typeof streamData.streamGame === "string" && streamData.streamGame !== ""){
 		let lowerCase_streamGame = (streamData.streamGame).toLowerCase();
 		if(isStreamOnline){
@@ -662,20 +668,28 @@ function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamO
 				consoleMsg("info", `${id} current game contain blacklist element(s)`);
 			}
 		}
-		
 	}
 	streamData.liveStatus.filteredStatus = isStreamOnline;
+	liveStore.setLive(website, id, contentId, streamData);
 	return isStreamOnline;
 }
 appGlobal["getCleanedStreamStatus"] = getCleanedStreamStatus;
 
 appGlobal["notificationGlobalyDisabled"] = false;
-function doStreamNotif(website, id, contentId, streamSetting){
+function doStreamNotif(website, id, contentId){
 	streamListFromSetting.refresh();
-	let streamList = streamListFromSetting.getWebsiteList(website);
-	let streamData = liveStatus.get(website).get(id).get(contentId);
-	
-	let channelData = (channelInfos.has(website) && channelInfos.get(website).has(id))? channelInfos.get(website).get(id) : null;
+
+	if(streamListFromSetting.mapDataAll.has(website)===false || streamListFromSetting.mapDataAll.get(website).has(id)===false){
+		consoleMsg("warn", "Notification attempt of a stream not present in stream list.");
+		return null;
+	}
+	const streamSettings = streamListFromSetting.mapDataAll.get(website).get(id);
+
+
+
+	let streamData = liveStore.getLive(website, id, contentId);
+
+	let channelData = (liveStore.hasChannel(website, id))? liveStore.getChannel(website, id) : null;
 
 	let online = streamData.liveStatus.API_Status;
 	
@@ -688,15 +702,15 @@ function doStreamNotif(website, id, contentId, streamSetting){
 		streamLogo  = streamOwnerLogo;
 	}
 
-	let isStreamOnline_filtered = getCleanedStreamStatus(website, id, contentId, streamSetting, online);
-	
+	let isStreamOnline_filtered = getCleanedStreamStatus(website, id, contentId, streamSettings, online);
+
 	if(appGlobal["notificationGlobalyDisabled"] === true){
 		return null;
 	}
 
 	if(isStreamOnline_filtered){
-		if(streamData.liveStatus.notifiedStatus === false){
-			if((typeof streamList.get(id).notifyOnline === "boolean")? streamList.get(id).notifyOnline : getPreference("notify_online") === true){
+		if(streamData.liveStatus.notifiedStatus === false || streamData.startedAt!==streamData.liveStatus.startedAt){
+			if((typeof streamSettings.notifyOnline === "boolean")? streamSettings.notifyOnline : getPreference("notify_online") === true){
 				let streamStatus = ((streamData.streamStatus !== "")? ": " + streamData.streamStatus : "") + ((streamData.streamGame !== "")? (" (" + streamData.streamGame + ")") : "");
 				let notifOptions = {
 					"title": i18ex._("Stream_online"),
@@ -725,9 +739,9 @@ function doStreamNotif(website, id, contentId, streamSetting){
 			if(typeof speechSynthesis === "object"
 				&& ((channelData===null && streamData.liveStatus.notifiedStatus_Vocal === false)
 					|| (channelData!==null && channelData.liveStatus.notifiedStatus_Vocal === false)
-				) && ((typeof streamList.get(id).notifyVocalOnline === "boolean")? streamList.get(id).notifyVocalOnline : getPreference("notify_vocal_online")) === true
+				) && ((typeof streamSettings.notifyVocalOnline === "boolean")? streamSettings.notifyVocalOnline : getPreference("notify_vocal_online")) === true
 			){
-				voiceReadMessage(i18ex._("language"), `${(typeof streamList.get(id).vocalStreamName === "string")? streamList.get(id).vocalStreamName : streamName} ${i18ex._("is_online")}`);
+				voiceReadMessage(i18ex._("language"), `${(typeof streamSettings.vocalStreamName === "string")? streamSettings.vocalStreamName : streamName} ${i18ex._("is_online")}`);
 				if(channelData!==null){
 					channelData.liveStatus.notifiedStatus_Vocal = isStreamOnline_filtered;
 				} else {
@@ -737,7 +751,7 @@ function doStreamNotif(website, id, contentId, streamSetting){
 		}
 	} else {
 		if(streamData.liveStatus.notifiedStatus === true){
-			if((typeof streamList.get(id).notifyOffline === "boolean")? streamList.get(id).notifyOffline : getPreference("notify_offline") === true){
+			if((typeof streamSettings.notifyOffline === "boolean")? streamSettings.notifyOffline : getPreference("notify_offline") === true){
 				if(streamLogo !== ""){
 					doNotif({
 						"title": i18ex._("Stream_offline"),
@@ -764,9 +778,9 @@ function doStreamNotif(website, id, contentId, streamSetting){
 			if(typeof speechSynthesis === "object"
 				&& ((channelData===null && streamData.liveStatus.notifiedStatus_Vocal===true)
 					|| (channelData!==null && channelData.liveStatus.notifiedStatus_Vocal===true)
-				) && ((typeof streamList.get(id).notifyVocalOffline === "boolean")? streamList.get(id).notifyVocalOffline : getPreference("notify_vocal_offline")) === true
+				) && ((typeof streamSettings.notifyVocalOffline === "boolean")? streamSettings.notifyVocalOffline : getPreference("notify_vocal_offline")) === true
 			){
-				voiceReadMessage(i18ex._("language"), `${(typeof streamList.get(id).vocalStreamName === "string")? streamList.get(id).vocalStreamName : streamName} ${i18ex._("is_offline")}`);
+				voiceReadMessage(i18ex._("language"), `${(typeof streamSettings.vocalStreamName === "string")? streamSettings.vocalStreamName : streamName} ${i18ex._("is_offline")}`);
 				if(channelData!==null){
 					channelData.liveStatus.notifiedStatus_Vocal = isStreamOnline_filtered;
 				} else {
@@ -776,6 +790,12 @@ function doStreamNotif(website, id, contentId, streamSetting){
 		}
 	}
 	streamData.liveStatus.notifiedStatus = isStreamOnline_filtered;
+	streamData.liveStatus.startedAt = streamData.startedAt;
+
+	if(channelData!==null){
+		liveStore.setChannel(website, id, channelData);
+	}
+	liveStore.setLive(website, id, contentId, streamData);
 }
 appGlobal["doStreamNotif"] = doStreamNotif;
 
@@ -791,17 +811,16 @@ function getOfflineCount(){
 				//consoleMsg("log", `[Live notifier - getOfflineCount] ${id} of ${website} is ignored`);
 				return;
 			}
-			
-			if(liveStatus.get(website).has(id)){
-				if(liveStatus.get(website).get(id).size === 0){
-					offlineCount++;
-				} else {
-					liveStatus.get(website).get(id).forEach(streamData=>{
-						if(!streamData.liveStatus.filteredStatus){
-							offlineCount++;
-						}
-					})
-				}
+
+			let liveContents = liveStore.getLive(website, id);
+			if(liveStore.getLive(website, id).size === 0){
+				offlineCount++;
+			} else {
+				liveContents.forEach(streamData=>{
+					if(!streamData.liveStatus.filteredStatus){
+						offlineCount++;
+					}
+				})
 			}
 		})
 	});
@@ -813,28 +832,24 @@ appGlobal["getOfflineCount"] = getOfflineCount;
 function setIcon(){
 	appGlobal["onlineCount"] = 0;
 	let badgeOnlineCount = 0;
-	
-	liveStatus.forEach((website_liveStatus, website) => {
-		streamListFromSetting.refresh();
+
+	streamListFromSetting.refresh();
+	liveStore.forEachLive((website, id, contentId, streamData)=>{
 		let streamList = streamListFromSetting.getWebsiteList(website);
-		website_liveStatus.forEach((id_liveStatus, id) => {
-			if(streamList.has(id) && (typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true)){
-				// Ignoring stream with ignore set to true from online count
-				//consoleMsg("log", `[Live notifier - setIcon] ${id} of ${website} is ignored`);
-				//return;
-			} else {
-				id_liveStatus.forEach((streamData, contentId) => {
-					if(streamData.liveStatus.filteredStatus && streamList.has(id)){
-						appGlobal["onlineCount"] = appGlobal["onlineCount"] + 1;
-						if(streamList.has(id) && !(typeof streamList.get(id).iconIgnore === "boolean" && streamList.get(id).iconIgnore === true)){
-							badgeOnlineCount++;
-						}
-					}
-				})
+		if(streamList.has(id) && (typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true)){
+			// Ignoring stream with ignore set to true from online count
+			//consoleMsg("log", `[Live notifier - setIcon] ${id} of ${website} is ignored`);
+			//return;
+		} else {
+			if(streamData.liveStatus.filteredStatus && streamList.has(id)){
+				appGlobal["onlineCount"] = appGlobal["onlineCount"] + 1;
+				if(typeof streamList.get(id).iconIgnore !== "boolean" || streamList.get(id).iconIgnore !== true) {
+					badgeOnlineCount++;
+				}
 			}
-		})
+		}
 	});
-	
+
 	if(badgeOnlineCount > 0){
 		browser.browserAction.setTitle({title: i18ex._("count_stream_online", {"count": badgeOnlineCount})});
 	} else {
@@ -989,9 +1004,9 @@ async function checkLives(idArray){
 					streamsTimings.set(`${website}::${id}`, timingEnd(`${website}::${id}`).timing);
 					if((typeof promiseResult === "string" && promiseResult.indexOf("StreamChecked") !== -1) || (typeof promiseResult === "object" && JSON.stringify(promiseResult).indexOf("StreamChecked") !== -1)){
 						const imgArrayPreload = [];
-						liveStatus.get(website).get(id).forEach((streamData, contentId) => {
+						liveStore.forEachLive(website, id, (website, id, contentId, streamData) => {
 							if((typeof promiseResult === "string" && promiseResult.indexOf("StreamChecked") !== -1) || (typeof promiseResult === "object" && typeof promiseResult[contentId] === "string" && promiseResult[contentId].indexOf("StreamChecked") !== -1)){
-								doStreamNotif(website, id, contentId, streamList);
+								doStreamNotif(website, id, contentId);
 
 								let streamLogo = "";
 								if(streamData.online && typeof streamData.streamCategoryLogo === "string" && streamData.streamCategoryLogo !== ""){
@@ -1006,8 +1021,8 @@ async function checkLives(idArray){
 							}
 						})
 					}
-					if(channelInfos.has(website) && channelInfos.get(website).has(id)){
-						channelListEnd(website, id, streamListFromSetting.mapDataAll.get(website).get(id));
+					if(liveStore.hasChannel(website, id)){
+						channelListEnd(website, id);
 					}
 					setIcon();
 				}
@@ -1061,12 +1076,13 @@ function checkMissing(){
 				if(typeof streamList.ignore === "boolean" && streamList.ignore === true){
 					return;
 				}
-				if(liveStatus.has(website) && !(liveStatus.get(website).has(id))){
+				if(!liveStore.hasLive(website, id) && !liveStore.hasChannel(website, id)){
 					consoleMsg("info", `${id} from ${website} is not checked yet`);
-					
+
 					if(!listToCheck.has(website)){
 						listToCheck.set(website, new Map())
 					}
+
 					listToCheck.get(website).set(id, streamList);
 				}
 			})
@@ -1075,7 +1091,7 @@ function checkMissing(){
 		if(listToCheck.size > 0){
 			checkLives(listToCheck)
 				.finally(result=>{
-					consoleMsg("info", result);
+					consoleMsg("info", (result!==undefined)? result : "Nothing");
 					if(typeof panelUpdateData === "function"){
 						panelUpdateData();
 					}
@@ -1088,81 +1104,68 @@ function checkMissing(){
 }
 appGlobal["checkMissing"] = checkMissing;
 
-function getPrimary(id, contentId, website, streamSetting, nextPageToken){
-	return new Promise(function(resolve, reject){
-		let current_API = websites.get(website).API((typeof contentId === "string" && contentId !== "")? contentId :  id, (typeof nextPageToken === "undefined" || nextPageToken === null)? null : nextPageToken);
+async function getPrimary(id, contentId, website, streamSetting, nextPageToken){
+	let current_API = websites.get(website).API((typeof contentId === "string" && contentId !== "")? contentId :  id, (typeof nextPageToken === "undefined" || nextPageToken === null)? null : nextPageToken);
 
-		if(current_API===null){
-			resolve(null);
-			return null;
+	if(current_API===null){
+		return null;
+	}
+
+	let getPrimary_RequestOptions = {
+		url: current_API.url,
+		overrideMimeType: current_API.overrideMimeType
+	};
+
+	if(current_API.hasOwnProperty("headers") === true){
+		getPrimary_RequestOptions.headers = current_API.headers;
+	}
+	if(current_API.hasOwnProperty("content") === true){
+		getPrimary_RequestOptions.content = current_API.content;
+	}
+	if(current_API.hasOwnProperty("contentType") === true){
+		getPrimary_RequestOptions.contentType = current_API.contentType;
+	}
+	if(current_API.hasOwnProperty("Request_documentParseToJSON") === true){
+		getPrimary_RequestOptions.Request_documentParseToJSON = current_API.Request_documentParseToJSON;
+	}
+	if(current_API.hasOwnProperty("customJSONParse") === true){
+		getPrimary_RequestOptions.customJSONParse = current_API.customJSONParse;
+	}
+
+
+	const response = await Request(getPrimary_RequestOptions).get(),
+		data = response.json
+	;
+
+
+	if(!DATAs.has(`${website}/${id}`)){
+		DATAs.set(`${website}/${id}`, new Map());
+	}
+
+	if(typeof contentId === "string" && contentId !== ""){
+		if(!DATAs.get(`${website}/${id}`).has(contentId)){
+			DATAs.get(`${website}/${id}`).set(contentId, new Map());
+		}
+		DATAs.get(`${website}/${id}`).get(contentId).set("getPrimary", {"url": response.url, "data": data});
+	} else {
+		DATAs.get(`${website}/${id}`).set("getPrimary", {"url": response.url, "data": data});
+	}
+
+	if(!(typeof contentId === "string" && contentId !== "") && website_channel_id.test(id) === true){
+		if(typeof nextPageToken !== "undefined" && nextPageToken !== null){
+			return await processChannelList(id, website, streamSetting, response, nextPageToken);
+		} else {
+			await getChannelInfo(website, id);
+
+			return await processChannelList(id, website, streamSetting, response);
+		}
+	} else {
+		if(!(typeof contentId === "string" && contentId !== "")){
+			contentId = id;
 		}
 
-		let getPrimary_RequestOptions = {
-			url: current_API.url,
-			overrideMimeType: current_API.overrideMimeType,
-			onComplete: function (response) {
-				let data = response.json;
-				
-				if(!DATAs.has(`${website}/${id}`)){
-					DATAs.set(`${website}/${id}`, new Map());
-				}
-				if(typeof contentId === "string" && contentId !== ""){
-					if(!DATAs.get(`${website}/${id}`).has(contentId)){
-						DATAs.get(`${website}/${id}`).set(contentId, new Map());
-					}
-					DATAs.get(`${website}/${id}`).get(contentId).set("getPrimary", {"url": response.url, "data": data});
-				} else {
-					DATAs.get(`${website}/${id}`).set("getPrimary", {"url": response.url, "data": data});
-				}
-				
-				if(!liveStatus.get(website).has(id)){
-					liveStatus.get(website).set(id, new Map());
-				}
-				
-				if(!(typeof contentId === "string" && contentId !== "") && website_channel_id.test(id) === true){
-					if(typeof nextPageToken !== "undefined" && nextPageToken !== null){
-						processChannelList(id, website, streamSetting, response, nextPageToken)
-							.then(resolve)
-							.catch(reject)
-					} else {
-						getChannelInfo(website, id)
-							.then(function(){
-								processChannelList(id, website, streamSetting, response)
-									.then(resolve)
-									.catch(reject)
-							})
-							.catch(reject)
-					}
-				} else {
-					if(!(typeof contentId === "string" && contentId !== "")){
-						contentId = id;
-					}
-					
-					processPrimary(id, contentId, website, streamSetting, response)
-						.then(resolve)
-						.catch(reject)
-				}
-			}
-		};
-		
-		if(current_API.hasOwnProperty("headers") === true){
-			getPrimary_RequestOptions.headers = current_API.headers;
-		}
-		if(current_API.hasOwnProperty("content") === true){
-			getPrimary_RequestOptions.content = current_API.content;
-		}
-		if(current_API.hasOwnProperty("contentType") === true){
-			getPrimary_RequestOptions.contentType = current_API.contentType;
-		}
-		if(current_API.hasOwnProperty("Request_documentParseToJSON") === true){
-			getPrimary_RequestOptions.Request_documentParseToJSON = current_API.Request_documentParseToJSON;
-		}
-		if(current_API.hasOwnProperty("customJSONParse") === true){
-			getPrimary_RequestOptions.customJSONParse = current_API.customJSONParse;
-		}
-		
-		Request(getPrimary_RequestOptions).get();
-	});
+		return await processPrimary(id, contentId, website, streamSetting, response);
+	}
 }
 appGlobal["getPrimary"] = getPrimary;
 
@@ -1171,8 +1174,8 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 
 	let data = response.json;
 
-	if(!channelInfos.get(website).has(id)){
-		channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": "", "liveList": new Map()}, "streamName": (website_channel_id.test(id) === true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+	if(!liveStore.hasChannel(website, id)){
+		liveStore.setChannel(website, id, LiveStore.getDefaultChannel(website, id));
 	}
 
 	let responseValidity = checkResponseValidity(website, response);
@@ -1180,7 +1183,10 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 		let streamListData;
 		if(typeof nextPageToken === "undefined" || nextPageToken === null){
 			// First loop
-			channelInfos.get(website).get(id).liveStatus.liveList = new Map();
+			liveStore.updateChannel(website, id, function (website, id, data) {
+				data.liveStatus.liveList = new Map();
+				return data;
+			});
 
 			streamListData = websites.get(website).channelList(id, website, data);
 		} else {
@@ -1188,33 +1194,41 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 		}
 
 		if(streamListData.hasOwnProperty("channelInfos")){
-			const streamChannelInfos = channelInfos.get(website).get(id);
-
-			for(let name in streamListData.channelInfos){
-				if(streamListData.channelInfos.hasOwnProperty(name)){
-					streamChannelInfos[name] = streamListData.channelInfos[name];
+			liveStore.updateChannel(website, id, function (website, id, data) {
+				for(let name in streamListData.channelInfos){
+					if(streamListData.channelInfos.hasOwnProperty(name)){
+						data[name] = streamListData.channelInfos[name];
+					}
 				}
-			}
+				return data;
+			});
 		}
 
 		if(!isMap(streamListData.streamList) || streamListData.streamList.size === 0){
 			return ((isMap(streamListData.streamList))? "EmptyList" : "InvalidList");
 		} else {
 			streamListData.streamList.forEach((value, contentId) => {
-				channelInfos.get(website).get(id).liveStatus.liveList.set(contentId, "");
+				liveStore.updateChannel(website, id, function (website, id, data) {
+					data.liveStatus.liveList.set(contentId, "");
+					return data;
+				});
 
 				if(streamListData.hasOwnProperty("primaryRequest") && typeof streamListData.primaryRequest === "boolean" && !streamListData.primaryRequest){
 					promises.set(contentId, processPrimary(id, contentId, website, streamSetting, {"json": value}));
 				} else {
 					if(value !== null){
-						if(!liveStatus.get(website).get(id).has(contentId)){
-							liveStatus.get(website).get(id).set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+						if(!liveStore.hasLive(website, id, contentId)){
+							liveStore.setLive(website, id, contentId, LiveStore.getDefaultLive(website, id, contentId));
 						}
-						for(let infoId in value){
-							if(value.hasOwnProperty(infoId)){
-								liveStatus.get(website).get(id).get(contentId)[infoId] = value[infoId];
+
+						liveStore.updateLive(website, id, contentId, function (website, id, contentId, liveData) {
+							for(let infoId in value){
+								if(value.hasOwnProperty(infoId)){
+									liveData[infoId] = value[infoId];
+								}
 							}
-						}
+							return liveData;
+						});
 					}
 					promises.set(contentId, getPrimary(id, contentId, website, streamSetting));
 				}
@@ -1230,35 +1244,57 @@ async function processChannelList(id, website, streamSetting, response, nextPage
 		return responseValidity;
 	}
 }
-function channelListEnd(website, id, streamSetting){
-	liveStatus.get(website).get(id).forEach((value, contentId) => {
-		if(channelInfos.get(website).get(id).liveStatus.liveList.has(contentId) === false){
-			liveStatus.get(website).get(id).get(contentId).liveStatus.API_Status = false;
-			doStreamNotif(website, id, contentId, streamSetting);
-			liveStatus.get(website).get(id).delete(contentId);
+function channelListEnd(website, id){
+	liveStore.forEachLive(website, id, (website, id, contentId)=>{
+		if(liveStore.getChannel(website, id).liveStatus.liveList.has(contentId) === false){
+			liveStore.updateLive(website, id, contentId, function (website, id, contentId, liveData) {
+				liveData.liveStatus.API_Status = false;
+				return liveData;
+			});
+
+			doStreamNotif(website, id, contentId);
+			liveStore.removeLive(website, id, contentId);
 		}
-	})
+	});
 }
 
 async function processPrimary(id, contentId, website, streamSetting, response){
 	let data = response.json;
-	if(!liveStatus.get(website).get(id).has(contentId)){
-		liveStatus.get(website).get(id).set(contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+	if(!liveStore.hasLive(website, id, contentId)){
+		liveStore.setLive(website, id, contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
 	}
 
-	let responseValidity = liveStatus.get(website).get(id).get(contentId).liveStatus.lastCheckStatus = checkResponseValidity(website, response);
+	let responseValidity = checkResponseValidity(website, response);
+	liveStore.updateLive(website, id, contentId, function (website, id, contentId, liveData) {
+		liveData.liveStatus.lastCheckStatus = responseValidity;
+		return liveData;
+	});
 	if(responseValidity === "success"){
-		let liveState = websites.get(website).checkLiveStatus(id, contentId, data, liveStatus.get(website).get(id).get(contentId), (channelInfos.has(website) && channelInfos.get(website).has(id))? channelInfos.get(website).get(id) : null);
+		let streamData = liveStore.getLive(website, id, contentId),
+			channelData = liveStore.hasChannel(website, id)? liveStore.getChannel(website, id) : null
+		;
+
+		let liveState = websites.get(website).checkLiveStatus(id, contentId, data, streamData, channelData);
+
+		liveStore.setLive(website, id, contentId, streamData);
+
+		if(channelData!==null){
+			liveStore.updateChannel(website, id, function (website, id, data) {
+				data = channelData;
+				return data;
+			});
+		}
+
 		if(liveState !== null){
 			if(typeof liveState==="string"){
 				if(websites.get(website).hasOwnProperty("website_ignore") && liveState===websites.get(website).website_ignore){
-					liveStatus.get(website).get(id).delete(contentId);
+					liveStore.removeLive(website, id, contentId);
 					return "StreamChecked";
 				} else {
 					return "liveState is unexpected";
 				}
 			} else {
-				liveStatus.get(website).get(id).set(contentId, liveState);
+				liveStore.setLive(website, id, contentId, liveState);
 			}
 
 			if(websites.get(website).hasOwnProperty("API_second") === true){
@@ -1295,20 +1331,27 @@ async function processPrimary(id, contentId, website, streamSetting, response){
 				DATAs.get(`${website}/${id}`).get(contentId).set("getSecond", {"url": response.url, "data": data_second});
 
 				let responseValidity = checkResponseValidity(website, response);
+
+
+				let currentLiveStatus = liveStore.getLive(website, id, contentId),
+					returnString
+				;
+
 				if(responseValidity === "success"){
-					let newLiveStatus = websites.get(website).seconderyInfo(id, contentId, data_second, liveStatus.get(website).get(id).get(contentId));
+					let newLiveStatus = websites.get(website).seconderyInfo(id, contentId, data_second, currentLiveStatus);
 					if(typeof newLiveStatus === "object" && newLiveStatus !== null){
-						liveStatus.get(website).get(id).set(contentId, newLiveStatus);
-						return "StreamChecked_With2ndAPI";
+						currentLiveStatus = newLiveStatus;
+						returnString = "StreamChecked_With2ndAPI";
 					} else {
-						return "StreamChecked";
+						returnString = "StreamChecked";
 					}
 				} else {
-					liveStatus.get(website).get(id).get(contentId).liveStatus.lastCheckStatus = responseValidity;
-					return responseValidity;
+					currentLiveStatus.liveStatus.lastCheckStatus = responseValidity;
+					returnString = responseValidity;
 				}
-				//doStreamNotif(website, id, contentId, streamSetting);
-				//setIcon();
+
+				liveStore.setLive(website, id, contentId, currentLiveStatus);
+				return returnString;
 			} else {
 				return "StreamChecked";
 				//doStreamNotif(website, id, contentId, streamSetting);
@@ -1328,8 +1371,8 @@ async function getChannelInfo(website, id){
 
 	let channelInfos_API = websites.get(website).API_channelInfos(id);
 
-	if(!channelInfos.get(website).has(id)){
-		channelInfos.get(website).set(id, {"liveStatus": {"API_Status": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": (website_channel_id.test(id) === true)? website_channel_id.exec(id)[1] : id, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+	if(!liveStore.hasChannel(website, id)){
+		liveStore.setChannel(website, id, LiveStore.getDefaultChannel(website, id));
 	}
 
 	if(websites.get(website).hasOwnProperty("API_channelInfos") === true){
@@ -1363,11 +1406,15 @@ async function getChannelInfo(website, id){
 		}
 		DATAs.get(`${website}/${id}`).set("getChannelInfo", {"url": response.url, "data": data_channelInfos});
 
-		let responseValidity = channelInfos.get(website).get(id).liveStatus.lastCheckStatus = checkResponseValidity(website, response);
+		let responseValidity = checkResponseValidity(website, response);
+		liveStore.updateChannel(website, id, function (website, id, data) {
+			data.liveStatus.lastCheckStatus = responseValidity;
+			return data;
+		});
 		if(responseValidity === "success"){
-			let newChannelInfos = websites.get(website).channelInfosProcess(id, data_channelInfos, channelInfos.get(website).get(id));
+			let newChannelInfos = websites.get(website).channelInfosProcess(id, data_channelInfos, liveStore.getChannel(website, id));
 			if(typeof newChannelInfos === "object" && newChannelInfos !== null){
-				channelInfos.get(website).set(id, newChannelInfos);
+				liveStore.setChannel(website, id, newChannelInfos);
 			}
 		}
 
@@ -1643,11 +1690,6 @@ function initAddon(){
 
 	/* 		----- Fin Importation/Removal des vieux paramères -----		*/
 
-	websites.forEach((websiteAPI, website) => {
-		liveStatus.set(website, new Map());
-		channelInfos.set(website, new Map());
-	});
-
 	streamListFromSetting.refresh(true);
 
 	checkLives()
@@ -1658,10 +1700,13 @@ function initAddon(){
 }
 
 // Checking if updated
-let previousVersion = "";
-let current_version = appGlobal["version"] = browser.runtime.getManifest().version;
+let previousVersion = "",
+	current_versionStr = appGlobal["versionStr"] = browser.runtime.getManifest().version,
+	current_version = appGlobal["version"] = browser.runtime.getManifest().version
+;
+
 function checkIfUpdated(details){
-	let getVersionNumbers =  /^(\d*)\.(\d*)\.(\d*)$/;
+	let getVersionNumbers =  /^(\d+)\.(\d+)\.(\d+)(?:\.(\d+))?$/;
 	
 	let installReason = details.reason;
 	consoleMsg("info", `Runtime onInstalled reason: ${installReason}`);
@@ -1671,9 +1716,9 @@ function checkIfUpdated(details){
 	if(installReason === "update" || installReason === "unknown"){
 		previousVersion = details.previousVersion;
 		let previousVersion_numbers = getVersionNumbers.exec(previousVersion);
-		let current_version_numbers = getVersionNumbers.exec(current_version);
+		let current_version_numbers = appGlobal["version"] = getVersionNumbers.exec(current_versionStr);
 		
-		if(previousVersion !== current_version){
+		if(previousVersion !== current_versionStr){
 			if(current_version_numbers.length === 4 && previousVersion_numbers.length === 4){
 				if((current_version_numbers[1] > previousVersion_numbers[1])
 					||
@@ -1682,7 +1727,7 @@ function checkIfUpdated(details){
 					((current_version_numbers[1] === previousVersion_numbers[1]) && (current_version_numbers[2] === previousVersion_numbers[2]) && (current_version_numbers[3] > previousVersion_numbers[3]))
 				){
 					doNotif({
-						"message": i18ex._("Addon_have_been_updated", {"version": current_version})
+						"message": i18ex._("Addon_have_been_updated", {"version": current_versionStr})
 					})
 						.catch(err=>{
 							consoleMsg("warn", err);
@@ -1703,7 +1748,7 @@ function checkIfUpdated(details){
 		chrome.runtime.onInstalled.removeListener(checkIfUpdated);
 	}*/
 
-	savePreference("livenotifier_version", current_version);
+	savePreference("livenotifier_version", current_versionStr);
 }
 
 (async ()=>{

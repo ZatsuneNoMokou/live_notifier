@@ -748,7 +748,7 @@ ${err}`);
 		link.setAttribute("download", `${appName}_preferences.json`);
 
 		const url = URL.createObjectURL(new Blob([
-				JSON.stringify(exportData, null, '\t')
+				JSON.stringify(exportData, null, null)
 			], {type: 'application/json'}))
 		;
 

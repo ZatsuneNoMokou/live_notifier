@@ -159,6 +159,8 @@ class StreamListFromSetting {
 
 		this.REG_EXPS = {
 			URL: /((?:http|https):\/\/.*)\s*$/,
+			PRE_CHANNEL: /^channel::/i,
+			POST_CHANNEL: /::channel$/i,
 			FILTER_ID: /(?:(\w+)::)/
 		};
 
@@ -266,16 +268,26 @@ class StreamListFromSetting {
 			}
 
 			let websiteStreams = streamListObj[website];
+
+			let idPrefix = "";
+			if(this.REG_EXPS.POST_CHANNEL.test(website)){
+				idPrefix = "channel::";
+				website = website.replace(this.REG_EXPS.POST_CHANNEL, '');
+			}
+
 			for(let id in websiteStreams){
 				if(websiteStreams.hasOwnProperty(id)){
+					let data = websiteStreams[id];
+
+					// Add channel:: to id AFTER using the websiteStreams
+					id = idPrefix + id;
+
 					let outputData;
 					if(!mapDataAll.get(website).has(id)){
 						outputData = StreamListFromSetting.getDefault();
 					} else {
 						outputData = mapDataAll.get(website).get(id);
 					}
-
-					let data = websiteStreams[id];
 
 					if(this.REG_EXPS.URL.test(data)){
 						let [,newData,url] = this.REG_EXPS.URL.exec(data);
@@ -342,6 +354,10 @@ class StreamListFromSetting {
 	}
 
 	getWebsiteList(website){
+		if(this.mapDataAll.has(website)===false){
+			consoleMsg("warn", `[StreamListFromSetting] getWebsiteList - Unknown website "${website}"`);
+			return new Map();
+		}
 		return this.mapDataAll.get(website);
 	}
 
@@ -369,8 +385,11 @@ class StreamListFromSetting {
 			if(typeof this.mapData !== "undefined"){
 				this.mapData.delete(id);
 			}
-			if(liveStatus.has(website) && liveStatus.get(website).has(id)){
-				liveStatus.get(website).delete(id);
+			if(liveStore.hasChannel(website, id)){
+				liveStore.removeChannel(website, id);
+			}
+			if(liveStore.hasLive(website, id)){
+				liveStore.removeLive(website, id);
 			}
 			consoleMsg("log", `${id} has been deleted`);
 		}
@@ -383,7 +402,7 @@ class StreamListFromSetting {
 
 		this.mapDataAll.forEach((websiteData, website) => {
 			websiteData.forEach((streamSettings, id) => {
-				let filters = "";
+				let filtersArr = [];
 				for(let prefId in streamSettings){
 					if(!streamSettings.hasOwnProperty(prefId)){ // Make sure to not loop constructors
 						continue;
@@ -403,27 +422,37 @@ class StreamListFromSetting {
 
 
 					if(this.PREF_TYPES.boolean.indexOf(prefId) !== -1){
-						filters = filters + " " + prefId + "::" + streamSettings[prefId];
+						filtersArr.push(prefId + "::" + streamSettings[prefId]);
 					} else if(this.PREF_TYPES.string.indexOf(prefId) !== -1){
-						filters = filters + " " + prefId + "::" + encodeString(streamSettings[prefId]);
+						filtersArr.push(prefId + "::" + encodeString(streamSettings[prefId]));
 					} else if(this.PREF_TYPES.list.indexOf(prefId) !== -1){
 						for(let k in streamSettings[prefId]){
 							if(streamSettings[prefId].hasOwnProperty(k)){
-								filters = filters + " " + prefId + "::" + encodeString(streamSettings[prefId][k]);
+								filtersArr.push(prefId + "::" + encodeString(streamSettings[prefId][k]));
 							}
 						}
 					} else {
 						consoleMsg("warn", `Unknown type ${prefId}`);
-						filters = filters + " " + prefId + "::" + encodeString(streamSettings[prefId]);
+						filtersArr.push(prefId + "::" + encodeString(streamSettings[prefId]));
 					}
 				}
 
 				let url = (typeof streamSettings.streamURL !== "undefined" && streamSettings.streamURL !== "")? (" " + streamSettings.streamURL) : "";
 
-				if(!newStreamPref.hasOwnProperty(website)){
-					newStreamPref[website] = {};
+
+
+				let website_suffixe = "",
+					cleanedId = id
+				;
+				if(this.REG_EXPS.PRE_CHANNEL.test(id)){
+					website_suffixe = "::channel";
+					cleanedId = id.replace(this.REG_EXPS.PRE_CHANNEL, '');
 				}
-				newStreamPref[website][id] = `${filters}${url}`;
+
+				if(!newStreamPref.hasOwnProperty(website + website_suffixe)){
+					newStreamPref[website + website_suffixe] = {};
+				}
+				newStreamPref[website + website_suffixe][cleanedId] = `${filtersArr.join(" ")}${url}`;
 			})
 		});
 

@@ -23,6 +23,7 @@
 			"/data/js/lib/i18next.js",
 			"/data/js/lib/i18nextXHRBackend.js",
 			"/data/js/lib/mustache.js",
+			"/data/js/lib/lodash.custom.js",
 
 			"/data/js/lib/xml2jsobj.js",
 
@@ -32,9 +33,11 @@
 			"/data/js/classes/i18extended.js",
 			"/data/js/classes/PromiseWaitAll.js",
 			"/data/js/classes/queue.js",
+			"/data/js/classes/data-store.js",
 
 
 			"/data/js/classes/ZDK.js",
+			"/data/js/live-store.js",
 			"init.js"
 		]
 	},

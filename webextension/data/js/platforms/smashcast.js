@@ -2,7 +2,7 @@ const smashcast = {
 	"title": "Smashcast",
 	"addStream_URLpatterns": new Map([
 		["smashcast", [
-			/^(?:http|https):\/\/www\.smashcast\.tv\/(?:embedchat\/)?([^\/\?\&]+).*$/
+			/^(?:http|https):\/\/www\.smashcast\.tv\/(?:embedchat\/)?([^\/?&]+).*$/
 		]]
 	]),
 	"API_addStream":
@@ -57,6 +57,7 @@ const smashcast = {
 				data = data["livestream"][0];
 				streamData.streamName = data["media_user_name"];
 				streamData.streamStatus = data["media_status"];
+				streamData.createdAt = data["media_live_since"];
 				if(typeof data["category_name"] === "string" && data["category_name"] !== ""){
 					streamData.streamGame = data["category_name"];
 				}
