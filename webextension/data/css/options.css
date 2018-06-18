@@ -57,6 +57,10 @@ button {
 	width: 6px !important;
 }
 
+.text-barre {
+	 text-decoration: line-through;
+}
+
 .pref_group,
 .website_pref {
 	display: block;

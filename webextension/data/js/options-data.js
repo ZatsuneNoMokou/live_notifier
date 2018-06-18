@@ -80,7 +80,7 @@ const options = {
 		"label": "Import",
 		"type": "control",
 		"group": "youtube",
-		"prefLevel": "advanced"
+		"prefLevel": "experimented"
 	},
 	"youtube_api_key": {
 		"type": "string",
@@ -98,7 +98,7 @@ const options = {
 		"type": "string",
 		"value": "",
 		"group": "youtube",
-		"prefLevel": "basic"
+		"prefLevel": "experimented"
 	},
 	/*			Check delay			*/
 	"check_delay": {
