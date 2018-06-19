@@ -13,7 +13,9 @@ const openrec_tv = {
 
 
 
-	"enabled": true,
+	"enabled": function () {
+		return getPreference("streams_document_parsing")===true;
+	},
 
 
 
