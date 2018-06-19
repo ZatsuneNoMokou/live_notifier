@@ -19,6 +19,12 @@ const youtube = {
 
 
 
+	"enabled": function () {
+		return getPreference("youtube_api_key").trim().length>0;
+	},
+
+
+
 	"API_addStream":
 		function(source_website, id){
 			const apiKey = getPreference("youtube_api_key").replace(/\s/,""),

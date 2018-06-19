@@ -464,6 +464,10 @@ function updatePanelData(doUpdateTheme=true){
 
 	let streamListSettings = new StreamListFromSetting().mapDataAll;
 	streamListSettings.forEach((streamList, website) => {
+		if(websites.has(website)===false){
+			return;
+		}
+
 		streamList.forEach((value, id) => {
 			if(!ignoreHideIgnore){
 				if(typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true){

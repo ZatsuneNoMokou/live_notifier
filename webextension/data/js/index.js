@@ -10,8 +10,15 @@ const offline_badgeData = browser.runtime.getManifest().browser_action.default_i
 ;
 let myIconURL = "/data/live_offline.svg";
 
+
+
 let websites = new Map();
 appGlobal["websites"] = websites;
+let websitesLoaded = new Map();
+appGlobal["websitesLoaded"] = websitesLoaded;
+
+
+
 let liveStore = new LiveStore();
 appGlobal["liveStore"] = liveStore;
 
@@ -835,6 +842,10 @@ function setIcon(){
 
 	streamListFromSetting.refresh();
 	liveStore.forEachLive((website, id, contentId, streamData)=>{
+		if(websites.has(website)===false){
+			return;
+		}
+
 		let streamList = streamListFromSetting.getWebsiteList(website);
 		if(streamList.has(id) && (typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true)){
 			// Ignoring stream with ignore set to true from online count
@@ -968,6 +979,12 @@ async function checkLives(idArray){
 	}
 
 	let checkQueue = new Queue(getPreference("check_limit"));
+
+
+
+	refreshEnabledWebsites();
+
+
 
 	websites.forEach((websiteAPI, website) => {
 		if(listToCheck.has(website)){
@@ -1751,6 +1768,39 @@ function checkIfUpdated(details){
 	savePreference("livenotifier_version", current_versionStr);
 }
 
+
+
+function refreshEnabledWebsites() {
+	websites.clear();
+
+	websitesLoaded.forEach((websiteObj, website)=>{
+		let state = true;
+
+		if(websiteObj.hasOwnProperty("enabled")){
+			switch(typeof websiteObj.enabled){
+				case "boolean":
+					if(websiteObj.enabled===false){
+						state = false;
+					}
+					break;
+				case "function":
+					const fnResult = websiteObj.enabled();
+					if(fnResult===false){
+						state = false;
+						return;
+					}
+					break;
+			}
+		}
+
+		if(state===true){
+			websites.set(website, websiteObj);
+		}
+	});
+}
+
+
+
 (async ()=>{
 	appGlobal.chromeSettings = chromeSettings;
 	consoleDir(chromeSettings,"Current preferences in the local storage:");
@@ -1781,6 +1831,11 @@ function checkIfUpdated(details){
 	} catch(err){
 		platformsLoad_result = err;
 	}
+
+	websites.forEach((websiteObj, website)=>{
+		Object.freeze(websiteObj);
+		websitesLoaded.set(website, websiteObj);
+	});
 
 	initAddon(platformsLoad_result);
 })();

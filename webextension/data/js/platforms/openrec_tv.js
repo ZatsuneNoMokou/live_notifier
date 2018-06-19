@@ -13,6 +13,10 @@ const openrec_tv = {
 
 
 
+	"enabled": true,
+
+
+
 	"Request_documentParseToJSON_getChannelId":
 		function(xhrResponse){
 			const responseDoc = xhrResponse.response;
