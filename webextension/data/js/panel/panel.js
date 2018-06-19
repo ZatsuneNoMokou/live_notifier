@@ -101,7 +101,8 @@ let { StreamListFromSetting,
 	getStreamURL,
 	getOfflineCount,
 	doStreamNotif,
-	checkMissing } = appGlobal;
+	checkMissing,
+	refreshEnabledWebsites } = appGlobal;
 
 
 liveEvent("click", "#refreshStreams", function(){
@@ -461,6 +462,8 @@ function updatePanelData(doUpdateTheme=true){
 	initList({"group_streams_by_websites": getPreference("group_streams_by_websites"), "show_offline_in_panel": getPreference("show_offline_in_panel")});
 
 	let show_offline_in_panel = getPreference("show_offline_in_panel");
+
+	refreshEnabledWebsites();
 
 	let streamListSettings = new StreamListFromSetting().mapDataAll;
 	streamListSettings.forEach((streamList, website) => {

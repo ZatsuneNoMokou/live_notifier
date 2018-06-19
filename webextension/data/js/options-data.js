@@ -7,7 +7,17 @@ const options = {
 		"type": "json",
 		"value": "",
 		"showPrefInPanel": false,
+		"group": "websites_global",
 		"prefLevel": "experimented"
+	},
+	"streams_document_parsing": {
+		"title": "Retrieve data by parsing document when no other method",
+		"description": "Use more ressources.",
+		"type": "bool",
+		"value": false,
+		"showPrefInPanel": false,
+		"group": "websites_global",
+		"prefLevel": "advanced"
 	},
 	/*			Dailymotion			*/
 	"dailymotion_user_id": {

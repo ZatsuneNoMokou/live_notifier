@@ -19,7 +19,9 @@ const youtube = {
 
 
 
-	"enabled": true,
+	"enabled": function () {
+		return getPreference("streams_document_parsing")===true || getPreference("youtube_api_key").trim().length>0;
+	},
 
 
 

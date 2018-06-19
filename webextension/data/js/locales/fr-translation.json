@@ -97,6 +97,9 @@
 	"stream_keys_list_title": "Clés de streams à notifier",
 	"stream_keys_list_description": "Liste des streams dans une liste séparée par des virgules",
 
+	"streams_document_parsing_title": "Données de stream en analysant les pages quand il n'y a aucune autre méthode disponible",
+	"streams_document_parsing_description": "Utilise plus de ressources.",
+
 	"dailymotion_user_id_title": "Votre id Dailymotion",
 	"dailymotion_user_id_description": "Saisir pour pouvoir importer les streameurs que vous suivez",
 	"dailymotion_import_title": "Importez les streameurs Dailymotion que vous suivez",

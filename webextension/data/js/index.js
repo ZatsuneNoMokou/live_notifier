@@ -1798,6 +1798,7 @@ function refreshEnabledWebsites() {
 		}
 	});
 }
+appGlobal["refreshEnabledWebsites"] = refreshEnabledWebsites;
 
 
 
