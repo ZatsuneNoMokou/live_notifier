@@ -283,6 +283,10 @@ class StreamListFromSetting {
 					id = idPrefix + id;
 
 					let outputData;
+					if(!mapDataAll.has(website)){
+						mapDataAll.set(website, new Map());
+					}
+
 					if(!mapDataAll.get(website).has(id)){
 						outputData = StreamListFromSetting.getDefault();
 					} else {
