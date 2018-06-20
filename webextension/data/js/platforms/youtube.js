@@ -16,6 +16,15 @@ const youtube = {
 			/(?:http|https):\/\/(?:www\.|gaming\.)?youtube\.com\/c\/([^\/?&#]+)*.*/
 		]]
 	]),
+
+
+
+	"enabled": function () {
+		return getPreference("streams_document_parsing")===true || getPreference("youtube_api_key").trim().length>0;
+	},
+
+
+
 	"Request_documentParseToJSON":
 		function(xhrResponse){
 			const responseDoc = xhrResponse.response,
@@ -76,6 +85,7 @@ const youtube = {
 			}
 			return jsonDATA;
 		},
+
 	"Request_documentParseToJSON_get_LiveInfo":
 		function (xhrResponse, isChannel=true) {
 			const responseDoc = xhrResponse.response,
@@ -130,6 +140,122 @@ const youtube = {
 
 			return null;
 		},
+
+	"Request_documentParseToJSON_get_Lives":
+		function (xhrResponse) {
+			const responseDoc = xhrResponse.response,
+				extractConfigReg = /\s*window\["ytInitialData"]\s*=\s*(.*);[\n\s]*window\["ytInitialPlayerResponse"]/i,
+				viewCountReg = /(\d+)/
+			;
+
+			let configData = null,
+				result = {"list": {}}
+			;
+
+			for(let script of responseDoc.scripts){
+				if(extractConfigReg.test(script.outerHTML)){
+					try {
+						configData = JSON.parse(extractConfigReg.exec(script.outerHTML)[1]);
+					} catch (e) {
+						consoleMsg("error", e);
+					}
+					break;
+				}
+			}
+
+			if(configData!==null){
+				let tabData = configData.contents.twoColumnBrowseResultsRenderer,
+					contentRender = null
+				;
+
+				// console.dir(configData);
+				// console.dir(tabData);
+
+				if(configData.hasOwnProperty("header") && configData.header.hasOwnProperty("c4TabbedHeaderRenderer")){
+					result.channelInfos = {
+						"streamName": configData.header.c4TabbedHeaderRenderer.title,
+						"streamOwnerLogo": configData.header.c4TabbedHeaderRenderer.avatar.thumbnails["0"].url
+					};
+				}
+
+				/**
+				 * Make sure to be on page with videos
+				 */
+				for(let item of tabData.tabs){
+					let endpointUrl;
+					try {
+						endpointUrl = item.tabRenderer.endpoint.commandMetadata.webCommandMetadata.url;
+					} catch (e) {}
+
+					if(endpointUrl!==undefined && endpointUrl.indexOf("/videos")!==-1){
+						try {
+							contentRender = item.tabRenderer.content.sectionListRenderer;
+						} catch (e) {
+							consoleMsg("error", e);
+						}
+						break;
+					}
+				}
+
+				/**
+				 * Make sure to be on the right tab of content (live tab)
+				 */
+				let tabs = null;
+				try {
+					tabs = contentRender.subMenu.channelSubMenuRenderer.contentTypeSubMenuItems;
+				} catch (e) {
+					consoleMsg("error", e);
+				}
+
+				if(tabs!==null){
+					for(let tab of tabs){
+						if(tab.selected && tab.selected===true){
+							let endpointUrl;
+							try{
+								endpointUrl = tab.endpoint.commandMetadata.webCommandMetadata.url;
+							} catch (e) {}
+
+							if(endpointUrl!==undefined && endpointUrl.indexOf("view=2")===-1){
+								contentRender=null;
+							}
+						}
+					}
+				}
+
+				if(contentRender!==null && contentRender.contents && Array.isArray(contentRender.contents) && contentRender.contents.length>0){
+					let livesItems = null;
+					try {
+						livesItems = contentRender.contents["0"].itemSectionRenderer.contents["0"].gridRenderer.items
+					} catch (e) {
+						consoleMsg("error", e);
+					}
+
+					if(livesItems!==null){
+						for(let item of livesItems){
+							if(item.hasOwnProperty("gridVideoRenderer")===true && item.gridVideoRenderer.hasOwnProperty("publishedTimeText")===false){
+								const streamData = item.gridVideoRenderer;
+								// console.dir(streamData);
+
+
+								const data = {
+									"streamName": streamData.title.simpleText,
+									"streamOwnerLogo": `https://i.ytimg.com/vi/${streamData.videoId}/hqdefault_live.jpg`
+								};
+
+								if(streamData.hasOwnProperty("viewCountText") && viewCountReg.test(streamData.viewCountText.simpleText)){
+									data.streamCurrentViewers = parseInt(viewCountReg.exec(streamData.viewCountText.simpleText)[1]);
+								}
+
+								result.list[streamData.videoId] = data;
+							}
+						}
+					}
+				}
+
+				return result;
+			}
+		},
+
 	"Request_documentParseToJSON_get_Channel":
 		function (xhrResponse) {
 			const responseDoc = xhrResponse.response,
@@ -158,6 +284,9 @@ const youtube = {
 
 			return null;
 		},
+
+
+
 	"API_addStream":
 		function(source_website, id){
 			const apiKey = getPreference("youtube_api_key").replace(/\s/,""),
@@ -179,7 +308,7 @@ const youtube = {
 					["v", id]
 				]*/
 			} else if(website_channel_id.test(source_website) === true){
-				return youtube.API_channelInfos(`channel::${id}`);
+				return youtube._API_channelInfos(`channel::${id}`, true);
 			}
 			return obj;
 		},
@@ -227,7 +356,7 @@ const youtube = {
 				}
 			} else {
 				if(website_channel_id.test(id)){
-					if(youtube_patreon_password !== ""){
+					/*if(youtube_patreon_password !== ""){
 						obj = {
 							"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLives.php",
 							"overrideMimeType":"text/plain; charset=utf-8",
@@ -242,14 +371,16 @@ const youtube = {
 								obj.content.push(["pageToken", nextPageToken]);
 							}
 						}
-					} else {
+					} else {*/
 						obj = {
-							"url": `https://www.youtube.com/channel/${website_channel_id.exec(id)[1]}/live`,
+							"url": `https://www.youtube.com/channel/${website_channel_id.exec(id)[1]}/videos?view=2&flow=grid&live_view=501`,
+							// "url": `https://www.youtube.com/channel/${website_channel_id.exec(id)[1]}/live`,
 							"contentType": "document",
 							"overrideMimeType":"text/html; charset=utf-8",
-							"Request_documentParseToJSON": youtube.Request_documentParseToJSON_get_LiveInfo
+							"Request_documentParseToJSON": youtube.Request_documentParseToJSON_get_Lives
+							// "Request_documentParseToJSON": youtube.Request_documentParseToJSON_get_LiveInfo
 						};
-					}
+					// }
 				} else {
 					obj = {
 						"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLiveInfo.php",
@@ -262,8 +393,13 @@ const youtube = {
 			}
 			return obj;
 		},
-	"API_channelInfos":
-		function(id){
+
+
+	/**
+	 * @return {Object | null}
+	 */
+	"_API_channelInfos":
+		function(id, force=false){
 			const apiKey = getPreference("youtube_api_key").replace(/\s/,""),
 				referrer = getPreference("youtube_api_referrer");
 			
@@ -293,6 +429,8 @@ const youtube = {
 					"overrideMimeType":"text/html; charset=utf-8",
 					"Request_documentParseToJSON": youtube.Request_documentParseToJSON_get_Channel
 				};
+
+
 				/*obj = {
 					"url": "https://livenotifier.zatsunenomokou.eu/youtube_getChannel.php",
 					"overrideMimeType": "text/plain; charset=utf-8",
@@ -300,9 +438,20 @@ const youtube = {
 						["id", website_channel_id.exec(id)[1]]
 					]
 				}*/
+
+				if(force!==true){
+					return null;
+				}
 			}
 			return obj;
 		},
+	"API_channelInfos":
+		function (id) {
+			return youtube._API_channelInfos(id);
+		},
+
+
+
 	"importAPI": function(id){
 		return {
 			"url": "https://www.youtube.com/subscription_manager?action_takeout=1",
@@ -488,6 +637,10 @@ const youtube = {
 					}
 				}
 				obj.primaryRequest = false;
+
+				if(data.hasOwnProperty("channelInfos")){
+					obj.channelInfos = data.channelInfos;
+				}
 				
 				return obj;
 			} else if(data.hasOwnProperty('items') === false){

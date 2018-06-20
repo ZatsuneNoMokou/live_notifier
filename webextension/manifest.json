@@ -3,7 +3,7 @@
 		"gecko": {
 			"id": "livenotifier_dev@zatsunenomokou.eu",
 			"update_url": "https://gitlab.com/ZatsuneNoMokou/live_notifier/raw/master/dist/live_notifier_dev.update.json",
-			"strict_min_version": "52.0"
+			"strict_min_version": "54.0"
 		}
 	},
 	"manifest_version": 2,
@@ -11,7 +11,7 @@
 	"short_name": "LiveNotifierDev",
 	"description": "__MSG_extShortDesc__",
 	"author": "Zatsune No Mokou",
-	"version": "11.16.2",
+	"version": "12.0.0.1",
 	"icons": {
 		"96": "/icon_96.png",
 		"128": "/icon_128.png"
@@ -23,6 +23,7 @@
 			"/data/js/lib/i18next.js",
 			"/data/js/lib/i18nextXHRBackend.js",
 			"/data/js/lib/mustache.js",
+			"/data/js/lib/lodash.custom.js",
 
 			"/data/js/lib/xml2jsobj.js",
 
@@ -32,9 +33,11 @@
 			"/data/js/classes/i18extended.js",
 			"/data/js/classes/PromiseWaitAll.js",
 			"/data/js/classes/queue.js",
+			"/data/js/classes/data-store.js",
 
 
 			"/data/js/classes/ZDK.js",
+			"/data/js/live-store.js",
 			"init.js"
 		]
 	},
@@ -66,5 +69,5 @@
 		"page": "data/options.html",
 		"open_in_tab": true
 	},
-	"minimum_chrome_version": "55.0"
+	"minimum_chrome_version": "58.0"
 }

@@ -94,16 +94,15 @@ const insertBefore = function (sel, html, doc=document) {
 	return backgroundPage.zDK.insertBefore(sel, html, doc);
 };
 
-let { streamListFromSetting,
+let { StreamListFromSetting,
 	websites,
-	liveStatus,
-	channelInfos,
+	liveStore,
 	getCleanedStreamStatus,
 	getStreamURL,
 	getOfflineCount,
 	doStreamNotif,
-	setIcon,
-	checkMissing } = appGlobal;
+	checkMissing,
+	refreshEnabledWebsites } = appGlobal;
 
 
 liveEvent("click", "#refreshStreams", function(){
@@ -195,7 +194,7 @@ function deleteStreamButtonClick(){
 	}
 
 	let ignoreStreamButtons = document.querySelectorAll(".item-stream .ignoreStreamButton");
-	let streamListSettings = new streamListFromSetting();
+	let streamListSettings = new StreamListFromSetting();
 	for(let node of ignoreStreamButtons){
 		let website = node.dataset.website;
 		let id = node.dataset.id;
@@ -224,7 +223,7 @@ function cancelChanges(){
 cancelChanges_Node.addEventListener("click", cancelChanges, false);
 function confirmChanges(){
 	if(streamChangeMode){
-		let streamListSettings = new streamListFromSetting(),
+		let streamListSettings = new StreamListFromSetting(),
 			toDelete = document.querySelectorAll(".item-stream .deleteStreamButton.active");
 		if(toDelete !== null){
 			for(let node of toDelete){
@@ -464,8 +463,14 @@ function updatePanelData(doUpdateTheme=true){
 
 	let show_offline_in_panel = getPreference("show_offline_in_panel");
 
-	let streamListSettings = new streamListFromSetting().mapDataAll;
+	refreshEnabledWebsites();
+
+	let streamListSettings = new StreamListFromSetting().mapDataAll;
 	streamListSettings.forEach((streamList, website) => {
+		if(websites.has(website)===false){
+			return;
+		}
+
 		streamList.forEach((value, id) => {
 			if(!ignoreHideIgnore){
 				if(typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true){
@@ -478,8 +483,9 @@ function updatePanelData(doUpdateTheme=true){
 				}
 			}
 
-			if(liveStatus.has(website) && liveStatus.get(website).has(id) && liveStatus.get(website).get(id).size > 0){
-				liveStatus.get(website).get(id).forEach((streamData, contentId) => {
+			const livesMap = liveStore.getLive(website, id);
+			if(livesMap.size > 0){
+				livesMap.forEach((streamData, contentId) => {
 					getCleanedStreamStatus(website, id, contentId, streamList.get(id), streamData.liveStatus.API_Status);
 
 					if(streamData.liveStatus.filteredStatus || (show_offline_in_panel && !streamData.liveStatus.filteredStatus)){
@@ -489,13 +495,13 @@ function updatePanelData(doUpdateTheme=true){
 					}
 				})
 			} else {
-				if(channelInfos.has(website) && channelInfos.get(website).has(id)){
+				if(liveStore.hasChannel(website, id)){
 					//let streamData = channelInfos.get(website).get(id);
 					//let contentId = id;
 
 					//console.info(`Using channel infos for ${id} (${website})`);
 
-					listener(website, id, /* contentId */ id, "channel", streamList.get(id), channelInfos.get(website).get(id));
+					listener(website, id, /* contentId */ id, "channel", streamList.get(id), liveStore.getChannel(website, id));
 				} else if(websites.has(website)){
 					console.info(`Currrently no data for ${id} (${website})`);
 					if((typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true) || (typeof streamList.get(id).hide === "boolean" && streamList.get(id).hide === true)){
@@ -518,17 +524,23 @@ function updatePanelData(doUpdateTheme=true){
 	});
 	scrollbar_update("streamList");
 
-	liveStatus.forEach((website_liveStatus, website) => {
-		website_liveStatus.forEach((id_liveStatus, id) => {
-			// Clean the streams already deleted but status still exist
-			if(!streamListSettings.get(website).has(id)){
-				console.info(`${id} from ${website} was already deleted but not from liveStatus ${(channelInfos.get(website).has(id))? "and channelInfos" : ""}`);
-				liveStatus.get(website).delete(id);
-				if(channelInfos.get(website).has(id)){
-					channelInfos.get(website).delete(id);
-				}
+	liveStore.forEachLive((website, id, contentId, streamData)=>{
+		// Clean the streams already deleted but status still exist
+		if(streamListSettings.has(website)===false || streamListSettings.get(website).has(id)===false){
+			console.info(`${id} from ${website} was already deleted but not from liveStatus ${(liveStore.hasChannel(website, id))? "and channelInfos" : ""}`);
+			liveStore.removeLive(website, id);
+			if(liveStore.hasChannel(website, id)){
+				liveStore.removeChannel(website, id);
 			}
-		})
+		}
+	});
+
+	liveStore.forEachChannel((website, id, data)=>{
+		// Clean the streams already deleted but status still exist
+		if(streamListSettings.has(website)===false || streamListSettings.get(website).has(id)===false){
+			console.info(`${id} from ${website} was already deleted but not from channelInfos`);
+			liveStore.removeChannel(website, id);
+		}
 	});
 
 	lazyLoading.updateStore();
@@ -550,7 +562,7 @@ function updatePanelData(doUpdateTheme=true){
 	debug_checkingLivesState_node.className = appGlobal["checkingLivesFinished"];
 
 	//Update Live notifier version displayed in the panel preferences
-	if(typeof appGlobal["version"] === "string"){
+	if(typeof appGlobal["version"] === "string" || Array.isArray(appGlobal["version"])===true){
 		current_version(appGlobal["version"]);
 	}
 }
@@ -904,7 +916,11 @@ function streamItemClick(){
 
 function current_version(version){
 	let current_version_node = document.querySelector("#current_version");
-	current_version_node.dataset.currentVersion = version;
+	if(typeof version==="string"){
+		current_version_node.dataset.currentVersion = version;
+	} else if(Array.isArray(version)){
+		current_version_node.dataset.currentVersion = `${version[1]}.${version[2]}.${version[3]}${(version.length>4 && version[4]!==undefined)? ` beta ${version[4]}` : ''}`;
+	}
 }
 
 function theme_update(){

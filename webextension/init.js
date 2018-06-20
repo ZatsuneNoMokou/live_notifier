@@ -50,5 +50,5 @@ var appGlobal = {};
 			await zDK.loadJS(document, ["backgroundTheme.js"]);
 		})
 	;
-	await zDK.loadJS(document, ["index.js"]);
+	await zDK.loadJS(document, ["StreamListFromSetting.js", "index.js"]);
 })();

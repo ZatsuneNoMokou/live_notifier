@@ -1,12 +1,13 @@
 {
 	"name": "live_notifier",
-	"version": "11.16.2",
+	"version": "12.0.0",
 	"description": "Be notified of streams from Dailymotion, Mixer, Smashcast, Twitch and Youtube.",
 	"dependencies": {
 		"dom-delegate": "^2.0.3",
 		"i18next": "^10.3.0",
 		"i18next-xhr-backend": "^1.5.1",
-		"lodash-cli": "^4.17.4",
+		"lodash-cli": "^4.17.5",
+		"lz-string": "^1.4.4",
 		"mustache": "^2.3.0",
 		"perfect-scrollbar": "^1.3.0",
 		"webextension-polyfill": "^0.2.1"

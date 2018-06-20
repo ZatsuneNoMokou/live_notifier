@@ -8,6 +8,15 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# WIP
+* \+ : Minimum version - Chrome 58 and Firefox 54
+* \+ : Panel - Use of [CSS Grid layout](https://developer.mozilla.org/fr/docs/Web/CSS/CSS_Grid_Layout)
+* \+ : \[ZDK] \[ChromePreferences] - New type : JSON
+* \+ : Reworked StreamListFromSetting class, to use less space in preferences
+* \+ : Twitch - Setting to choose to include Twitch's rediffusions (included by default)
+* \+ : YouTube - support gettings all lives wihtout YouTube API 
+* Fix : Stream notification of stream that are not in the list anymore
+
 # 11.16.0
 * \+ : YouTube data with less YouTube API, serveur can not handle load
 

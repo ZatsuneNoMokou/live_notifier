@@ -4,11 +4,20 @@ const options = {
 	"stream_keys_list": {
 		"title": "Stream keys to notify",
 		"description": "Stream list in a comma separated list.",
-		"type": "string",
-		"stringTextArea": true,
+		"type": "json",
 		"value": "",
 		"showPrefInPanel": false,
+		"group": "websites_global",
 		"prefLevel": "experimented"
+	},
+	"streams_document_parsing": {
+		"title": "Retrieve data by parsing document when no other method",
+		"description": "Use more ressources.",
+		"type": "bool",
+		"value": false,
+		"showPrefInPanel": false,
+		"group": "websites_global",
+		"prefLevel": "advanced"
 	},
 	/*			Dailymotion			*/
 	"dailymotion_user_id": {
@@ -43,6 +52,14 @@ const options = {
 		"prefLevel": "advanced"
 	},
 	/*			Twitch			*/
+	"twitch_include_rerun": {
+		"title": "Include Twitch rediffusions",
+		"description": "Included with lives when checked",
+		"type": "bool",
+		"value": true,
+		"group": "twitch",
+		"prefLevel": "advanced"
+	},
 	"twitch_user_id": {
 		"title": "Your Twitch id",
 		"description": "Enter your Twitch id to be able to import the stream(s) you follow.",
