@@ -1,6 +1,9 @@
 textarea[data-string-textarea] {
 	min-height: 64px;
 }
+textarea.preferenceInput {
+	resize: vertical;
+}
 
 input[type='text'],
 input[type='number'],
