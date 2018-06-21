@@ -592,12 +592,11 @@ class LazyLoading {
 			this.checkPictures();
 		}), 20, {
 			maxWait: 60
-		})
-		;
+		});
 	}
 	updateStore(){
-		const lazyImgs = document.querySelectorAll(".item-stream .streamPicture[data-src]");
-		for(let i in lazyImgs ){
+		const lazyImgs = document.querySelectorAll(".item-stream .streamPicture img[data-src]");
+		for(let i in lazyImgs){
 			if(lazyImgs.hasOwnProperty(i) && typeof lazyImgs[i].dataset.src==="string"){
 				this.store.set(lazyImgs[i], lazyImgs[i].dataset.src);
 				delete lazyImgs[i].dataset.src;
@@ -609,16 +608,11 @@ class LazyLoading {
 		this.store.forEach((src,node)=>{
 			const coords = node.getBoundingClientRect();
 			if((coords.top >= 0 && coords.left >= 0 && coords.top) <= 50 + (window.innerHeight || document.documentElement.clientHeight)){
-				backgroundPage.zDK.loadImage(src)
-					.then(img=>{
-						node.appendChild(img);
-						node.classList.remove("hide");
-						node.parentNode.classList.add("streamLogo");
-					})
-					.catch((err)=>{
-						appGlobal.consoleMsg("error", err);
-					})
-				;
+				node.src = src;
+				node.parentNode.classList.remove("hide");
+				node.parentNode.parentNode.classList.add("streamLogo");
+
+
 				this.store.delete(node);
 			}
 		});
@@ -864,9 +858,9 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	if(typeof streamLogo === "string" && streamLogo !== ""){
 		streamRenderData.streamLogo = streamLogo;
 	}
-	/*if(typeof backgroundPage.zDK.isFirefox==="boolean" && backgroundPage.zDK.isFirefox===false){
+	// if(typeof backgroundPage.zDK.isFirefox==="boolean" && backgroundPage.zDK.isFirefox===false){
 		streamRenderData.usePictureLazyLoading = false;
-	}*/
+	// }
 
 	if(typeof liveStatus.lastCheckStatus === "string" && liveStatus.lastCheckStatus !== "" && liveStatus.lastCheckStatus !== "success"){
 		streamRenderData.withError = true;

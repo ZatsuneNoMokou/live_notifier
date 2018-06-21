@@ -10,7 +10,10 @@
 	data-stream-type='{{streamType}}'
 	data-stream-settings='{{streamSettings}}'
 	draggable="true">
-	<figure class="streamPicture{{#usePictureLazyLoading}} hide{{/usePictureLazyLoading}}" {{#usePictureLazyLoading}}data-src="{{streamLogo}}"{{/usePictureLazyLoading}}>{{^usePictureLazyLoading}}<img src="{{streamLogo}}" />{{/usePictureLazyLoading}}</figure>
+	<figure class="streamPicture{{#usePictureLazyLoading}} hide{{/usePictureLazyLoading}}">
+		{{#usePictureLazyLoading}}<img src="" data-src="{{streamLogo}}" />{{/usePictureLazyLoading}}
+		{{^usePictureLazyLoading}}<img src="{{streamLogo}}" />{{/usePictureLazyLoading}}
+	</figure>
 	{{#online}}
 	<div>
 		{{/online}}<span class="streamTitle">{{#withError}}<span class="erroredItem-icon"></span>{{/withError}}{{streamName}}</span>{{#online}}
