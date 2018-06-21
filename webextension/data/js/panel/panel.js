@@ -864,7 +864,7 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	if(typeof streamLogo === "string" && streamLogo !== ""){
 		streamRenderData.streamLogo = streamLogo;
 	}
-	/*if(typeof backgroundPage.zDK.isFirefox==="boolean"&&backgroundPage.zDK.isFirefox===false){
+	/*if(typeof backgroundPage.zDK.isFirefox==="boolean" && backgroundPage.zDK.isFirefox===false){
 		streamRenderData.usePictureLazyLoading = false;
 	}*/
 
@@ -894,12 +894,12 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 		scrollbar_update("debugSection");
 	}
 
-	const $newNode = insertStreamNode(Mustache.render(streamTemplate, streamRenderData), website, id, contentId, type, streamData, online);
+	/*const $newNode =*/ insertStreamNode(Mustache.render(streamTemplate, streamRenderData), website, id, contentId, type, streamData, online);
 
-	if(streamRenderData.usePictureLazyLoading===false && typeof streamRenderData.streamLogo==="string" && streamRenderData.streamLogo!==""){
+	/*if(streamRenderData.usePictureLazyLoading===false && typeof streamRenderData.streamLogo==="string" && streamRenderData.streamLogo!==""){
 		const streamPicture = $newNode[0].querySelector(".streamPicture");
 		LazyLoading.loadImg(streamPicture, streamRenderData.streamLogo);
-	}
+	}*/
 }
 function streamItemClick(){
 	let node = this;
@@ -958,6 +958,10 @@ function load_scrollbar(id){
 }
 
 function scrollbar_update(nodeId){
+	if(typeof PerfectScrollbar==="undefined"){
+		return;
+	}
+
 	if(typeof nodeId === "string" && nodeId !== ""){
 		let scrollbar_node = document.querySelector(`#${nodeId}`);
 		if(scrollbar_node !== null && psList.has(nodeId)){
