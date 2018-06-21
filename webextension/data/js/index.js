@@ -1388,6 +1388,10 @@ async function getChannelInfo(website, id){
 
 	let channelInfos_API = websites.get(website).API_channelInfos(id);
 
+	if(channelInfos_API===null){
+		return "NoAPI";
+	}
+
 	if(!liveStore.hasChannel(website, id)){
 		liveStore.setChannel(website, id, LiveStore.getDefaultChannel(website, id));
 	}
