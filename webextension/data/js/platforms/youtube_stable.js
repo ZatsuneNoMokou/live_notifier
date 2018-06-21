@@ -340,9 +340,9 @@ const youtube = {
 				if(typeof data.title === "string" && data.title !== ""){
 					streamData.streamName = data.title;
 				}
-				if(typeof data.customUrl === "string" && data.customUrl !== ""){
+				/*if(typeof data.customUrl === "string" && data.customUrl !== ""){
 					streamData.streamURL = "http://www.youtube.com/c/" + data.customUrl;
-				}
+				}*/
 				
 				if(data.hasOwnProperty("thumbnails") === true){
 					if(data.thumbnails.hasOwnProperty("default") === true && data.thumbnails["default"].hasOwnProperty("url") === true && typeof data.thumbnails.high.url === "string"){
