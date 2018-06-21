@@ -116,6 +116,11 @@ label.flex_input_text {
 	display: inline-flex;
 	padding-right: 3px;
 }
+textarea.preferenceInput[data-setting-type='json'] {
+	min-height: 128px;
+	max-height: 256px;
+	resize: vertical;
+}
 .import_container .label {
 	display: block;
 }

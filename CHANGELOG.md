@@ -8,7 +8,7 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
-# WIP
+# 12.0.0.1
 * \+ : Minimum version - Chrome 58 and Firefox 54
 * \+ : Panel - Use of [CSS Grid layout](https://developer.mozilla.org/fr/docs/Web/CSS/CSS_Grid_Layout)
 * \+ : \[ZDK] \[ChromePreferences] - New type : JSON

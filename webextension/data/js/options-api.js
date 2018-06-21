@@ -160,6 +160,9 @@ function refreshSettings(event){
 			console.warn(`${prefId} node is null`);
 		} else {
 			switch(chromeSettings.options.get(prefId).type){
+				case "json":
+					prefNode.value = JSON.stringify(prefValue);
+					break;
 				case "string":
 					if(typeof chromeSettings.options.get(prefId).stringList === "boolean" && chromeSettings.options.get(prefId).stringList === true){
 						prefNode.value = backgroundPage.getFilterListFromPreference(getPreference(prefId)).join("\n");
