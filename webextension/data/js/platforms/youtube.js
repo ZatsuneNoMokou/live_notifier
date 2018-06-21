@@ -171,10 +171,19 @@ const youtube = {
 				// console.dir(configData);
 				// console.dir(tabData);
 
-				if(configData.hasOwnProperty("header") && configData.header.hasOwnProperty("c4TabbedHeaderRenderer")){
+				let channelData = null;
+				try {
+					if(configData.hasOwnProperty("header") && configData.header.hasOwnProperty("c4TabbedHeaderRenderer")){
+						channelData = configData.header.c4TabbedHeaderRenderer;
+					}
+				} catch (e) {
+					consoleMsg("error", e);
+				}
+
+				if(channelData!==null){
 					result.channelInfos = {
-						"streamName": configData.header.c4TabbedHeaderRenderer.title,
-						"streamOwnerLogo": configData.header.c4TabbedHeaderRenderer.avatar.thumbnails["0"].url
+						"streamName": channelData.title,
+						"streamOwnerLogo": channelData.avatar.thumbnails["0"].url
 					};
 				}
 
@@ -251,6 +260,21 @@ const youtube = {
 						}
 					}
 				}
+
+				if(result.hasOwnProperty("channelInfos")===true){
+					return result;
+				}
+			}
+
+			if(result.hasOwnProperty("channelInfos")===false){
+				const ogImage = responseDoc.querySelector("meta[property='og:image']"),
+					title = responseDoc.querySelector("meta[property='og:title']")
+				;
+
+				result.channelInfos = {
+					"streamName": title.getAttribute("content").replace(/\s+-\s+youtube$/i, ""),
+					"streamOwnerLogo": ogImage.getAttribute("content")
+				};
 
 				return result;
 			}
