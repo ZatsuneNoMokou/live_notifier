@@ -748,7 +748,7 @@ function doStreamNotif(website, id, contentId){
 					|| (channelData!==null && channelData.liveStatus.notifiedStatus_Vocal === false)
 				) && ((typeof streamSettings.notifyVocalOnline === "boolean")? streamSettings.notifyVocalOnline : getPreference("notify_vocal_online")) === true
 			){
-				voiceReadMessage(i18ex._("language"), `${(typeof streamSettings.vocalStreamName === "string")? streamSettings.vocalStreamName : streamName} ${i18ex._("is_online")}`);
+				voiceReadMessage(i18ex._("language"), `${(typeof streamSettings.vocalStreamName === "string" && streamSettings.vocalStreamName!=="")? streamSettings.vocalStreamName : streamName} ${i18ex._("is_online")}`);
 				if(channelData!==null){
 					channelData.liveStatus.notifiedStatus_Vocal = isStreamOnline_filtered;
 				} else {
@@ -787,7 +787,7 @@ function doStreamNotif(website, id, contentId){
 					|| (channelData!==null && channelData.liveStatus.notifiedStatus_Vocal===true)
 				) && ((typeof streamSettings.notifyVocalOffline === "boolean")? streamSettings.notifyVocalOffline : getPreference("notify_vocal_offline")) === true
 			){
-				voiceReadMessage(i18ex._("language"), `${(typeof streamSettings.vocalStreamName === "string")? streamSettings.vocalStreamName : streamName} ${i18ex._("is_offline")}`);
+				voiceReadMessage(i18ex._("language"), `${(typeof streamSettings.vocalStreamName === "string" && streamSettings.vocalStreamName!=="")? streamSettings.vocalStreamName : streamName} ${i18ex._("is_offline")}`);
 				if(channelData!==null){
 					channelData.liveStatus.notifiedStatus_Vocal = isStreamOnline_filtered;
 				} else {
