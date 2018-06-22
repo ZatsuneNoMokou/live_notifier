@@ -592,12 +592,11 @@ class LazyLoading {
 			this.checkPictures();
 		}), 20, {
 			maxWait: 60
-		})
-		;
+		});
 	}
 	updateStore(){
-		const lazyImgs = document.querySelectorAll(".item-stream .streamPicture[data-src]");
-		for(let i in lazyImgs ){
+		const lazyImgs = document.querySelectorAll(".item-stream .streamPicture img[data-src]");
+		for(let i in lazyImgs){
 			if(lazyImgs.hasOwnProperty(i) && typeof lazyImgs[i].dataset.src==="string"){
 				this.store.set(lazyImgs[i], lazyImgs[i].dataset.src);
 				delete lazyImgs[i].dataset.src;
@@ -609,16 +608,11 @@ class LazyLoading {
 		this.store.forEach((src,node)=>{
 			const coords = node.getBoundingClientRect();
 			if((coords.top >= 0 && coords.left >= 0 && coords.top) <= 50 + (window.innerHeight || document.documentElement.clientHeight)){
-				backgroundPage.zDK.loadImage(src)
-					.then(img=>{
-						node.appendChild(img);
-						node.classList.remove("hide");
-						node.parentNode.classList.add("streamLogo");
-					})
-					.catch((err)=>{
-						appGlobal.consoleMsg("error", err);
-					})
-				;
+				node.src = src;
+				node.parentNode.classList.remove("hide");
+				node.parentNode.parentNode.classList.add("streamLogo");
+
+
 				this.store.delete(node);
 			}
 		});
@@ -864,9 +858,9 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 	if(typeof streamLogo === "string" && streamLogo !== ""){
 		streamRenderData.streamLogo = streamLogo;
 	}
-	/*if(typeof backgroundPage.zDK.isFirefox==="boolean"&&backgroundPage.zDK.isFirefox===false){
+	// if(typeof backgroundPage.zDK.isFirefox==="boolean" && backgroundPage.zDK.isFirefox===false){
 		streamRenderData.usePictureLazyLoading = false;
-	}*/
+	// }
 
 	if(typeof liveStatus.lastCheckStatus === "string" && liveStatus.lastCheckStatus !== "" && liveStatus.lastCheckStatus !== "success"){
 		streamRenderData.withError = true;
@@ -894,12 +888,12 @@ function listener(website, id, contentId, type, streamSettings, streamData){
 		scrollbar_update("debugSection");
 	}
 
-	const $newNode = insertStreamNode(Mustache.render(streamTemplate, streamRenderData), website, id, contentId, type, streamData, online);
+	/*const $newNode =*/ insertStreamNode(Mustache.render(streamTemplate, streamRenderData), website, id, contentId, type, streamData, online);
 
-	if(streamRenderData.usePictureLazyLoading===false && typeof streamRenderData.streamLogo==="string" && streamRenderData.streamLogo!==""){
+	/*if(streamRenderData.usePictureLazyLoading===false && typeof streamRenderData.streamLogo==="string" && streamRenderData.streamLogo!==""){
 		const streamPicture = $newNode[0].querySelector(".streamPicture");
 		LazyLoading.loadImg(streamPicture, streamRenderData.streamLogo);
-	}
+	}*/
 }
 function streamItemClick(){
 	let node = this;
@@ -958,6 +952,10 @@ function load_scrollbar(id){
 }
 
 function scrollbar_update(nodeId){
+	if(typeof PerfectScrollbar==="undefined"){
+		return;
+	}
+
 	if(typeof nodeId === "string" && nodeId !== ""){
 		let scrollbar_node = document.querySelector(`#${nodeId}`);
 		if(scrollbar_node !== null && psList.has(nodeId)){
