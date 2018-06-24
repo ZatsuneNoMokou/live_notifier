@@ -141,7 +141,7 @@ const youtube = {
 			return null;
 		},
 
-	"Request_documentParseToJSON_get_Lives":
+	/*"Request_documentParseToJSON_get_Lives":
 		function (xhrResponse) {
 			const responseDoc = xhrResponse.response,
 				extractConfigReg = /\s*window\["ytInitialData"]\s*=\s*(.*);[\n\s]*window\["ytInitialPlayerResponse"]/i,
@@ -162,6 +162,178 @@ const youtube = {
 					break;
 				}
 			}
+
+			if(configData!==null){
+				let tabData = configData.contents.twoColumnBrowseResultsRenderer,
+					contentRender = null
+				;
+
+				// console.dir(configData);
+				// console.dir(tabData);
+
+				let channelData = null;
+				try {
+					if(configData.hasOwnProperty("header") && configData.header.hasOwnProperty("c4TabbedHeaderRenderer")){
+						channelData = configData.header.c4TabbedHeaderRenderer;
+					}
+				} catch (e) {
+					consoleMsg("error", e);
+				}
+
+				if(channelData!==null){
+					result.channelId = channelData.channelId;
+
+					result.channelInfos = {
+						"streamName": channelData.title,
+						"streamOwnerLogo": channelData.avatar.thumbnails["0"].url
+					};
+				}
+
+				/!**
+				 * Make sure to be on page with videos
+				 *!/
+				for(let item of tabData.tabs){
+					let endpointUrl;
+					try {
+						endpointUrl = item.tabRenderer.endpoint.commandMetadata.webCommandMetadata.url;
+					} catch (e) {}
+
+					if(endpointUrl!==undefined && endpointUrl.indexOf("/videos")!==-1){
+						try {
+							contentRender = item.tabRenderer.content.sectionListRenderer;
+						} catch (e) {
+							consoleMsg("error", e);
+						}
+						break;
+					}
+				}
+
+				/!**
+				 * Make sure to be on the right tab of content (live tab)
+				 *!/
+				let tabs = null;
+				try {
+					tabs = contentRender.subMenu.channelSubMenuRenderer.contentTypeSubMenuItems;
+				} catch (e) {
+					consoleMsg("error", e);
+				}
+
+				if(tabs!==null){
+					for(let tab of tabs){
+						if(tab.selected && tab.selected===true){
+							let endpointUrl;
+							try{
+								endpointUrl = tab.endpoint.commandMetadata.webCommandMetadata.url;
+							} catch (e) {}
+
+							if(endpointUrl!==undefined && endpointUrl.indexOf("view=2")===-1){
+								contentRender=null;
+							}
+						}
+					}
+				}
+
+				if(contentRender!==null && contentRender.contents && Array.isArray(contentRender.contents) && contentRender.contents.length>0){
+					let livesItems = null;
+					try {
+						livesItems = contentRender.contents["0"].itemSectionRenderer.contents["0"].gridRenderer.items
+					} catch (e) {
+						consoleMsg("error", e);
+					}
+
+					if(livesItems!==null){
+						for(let item of livesItems){
+							if(item.hasOwnProperty("gridVideoRenderer")===true && item.gridVideoRenderer.hasOwnProperty("publishedTimeText")===false){
+								const streamData = item.gridVideoRenderer;
+								// console.dir(streamData);
+
+
+								const data = {
+									"streamName": streamData.title.simpleText,
+									"streamOwnerLogo": `https://i.ytimg.com/vi/${streamData.videoId}/hqdefault_live.jpg`
+								};
+
+								if(streamData.hasOwnProperty("viewCountText") && viewCountReg.test(streamData.viewCountText.simpleText)){
+									data.streamCurrentViewers = parseInt(viewCountReg.exec(streamData.viewCountText.simpleText)[1]);
+								}
+
+								result.list[streamData.videoId] = data;
+							}
+						}
+					}
+				}
+
+				if(result.hasOwnProperty("channelInfos")===true){
+					return result;
+				}
+			}
+
+			if(result.hasOwnProperty("channelInfos")===false){
+				const ogImage = responseDoc.querySelector("meta[property='og:image']"),
+					title = responseDoc.querySelector("meta[property='og:title']")
+				;
+
+				result.channelInfos = {
+					"streamName": title.getAttribute("content").replace(/\s+-\s+youtube$/i, ""),
+					"streamOwnerLogo": ogImage.getAttribute("content")
+				};
+
+				return result;
+			}
+		},*/
+
+	"getMetaOgData":
+		function (html) {
+			const htmlGetMetaRegexp = /<meta[\s\t\n][^>]*\/?>(?:([\s\S]*?)<\/meta>)?/gm,
+				propertyReg = /property\s*=\s*["']og:([^'"]+)["']/,
+				contentReg = /content\s*=\s*["']([^'"]+)["']/,
+				data = {}
+			;
+
+			const metaHtmlData = html.match(htmlGetMetaRegexp).filter(function (element) {
+				return /property\s*=\s*["']og:[^'"]+["']/.test(element)
+			});
+
+			metaHtmlData.forEach(metaHtml=>{
+				const property = propertyReg.exec(metaHtml),
+					content = contentReg.exec(metaHtml)
+				;
+
+				if(property!==null && content!==null){
+					data[property[1]] = content[1];
+				}
+			});
+
+			return data;
+		},
+	"Request_HtmlParseToJSON_get_Lives":
+		function (xhrResponse) {
+			const html = xhrResponse.responseText,
+				extractConfigReg = /\s*window\["ytInitialData"]\s*=\s*(.*);[\n\s]*window\["ytInitialPlayerResponse"]/i,
+				htmlGetScriptsRegexp = /<script[\s\t\n][^>]*>([\s\S]*?)<\/script>/gm,
+				viewCountReg = /(\d+)/
+			;
+
+			let configData = null,
+				result = {"list": {}}
+			;
+
+			const scriptsHtml = html.match(htmlGetScriptsRegexp);
+
+
+
+			for(let scriptHtml of scriptsHtml){
+				if(extractConfigReg.test(scriptHtml)){
+					try {
+						configData = JSON.parse(extractConfigReg.exec(scriptHtml)[1]);
+					} catch (e) {
+						consoleMsg("error", e);
+					}
+					break;
+				}
+			}
+
+
 
 			if(configData!==null){
 				let tabData = configData.contents.twoColumnBrowseResultsRenderer,
@@ -269,13 +441,11 @@ const youtube = {
 			}
 
 			if(result.hasOwnProperty("channelInfos")===false){
-				const ogImage = responseDoc.querySelector("meta[property='og:image']"),
-					title = responseDoc.querySelector("meta[property='og:title']")
-				;
+				const metaOgData = youtube.getMetaOgData(html);
 
 				result.channelInfos = {
-					"streamName": title.getAttribute("content").replace(/\s+-\s+youtube$/i, ""),
-					"streamOwnerLogo": ogImage.getAttribute("content")
+					"streamName": metaOgData.title.replace(/\s+-\s+youtube$/i, ""),
+					"streamOwnerLogo": metaOgData.image.getAttribute("content")
 				};
 
 				return result;
@@ -320,9 +490,10 @@ const youtube = {
 			
 			let obj = {
 				"overrideMimeType": "text/html; charset=utf-8",
-				"contentType": "document",
-				"Request_documentParseToJSON": youtube.Request_documentParseToJSON_get_Lives
+				"contentType": "string",
+				"Request_documentParseToJSON": youtube.Request_HtmlParseToJSON_get_Lives
 			};
+
 			if(source_website === "c::youtube"){
 				obj.url = `https://www.youtube.com/c/${id}`;
 			} else if(source_website === "user::youtube"){
@@ -401,9 +572,9 @@ const youtube = {
 						obj = {
 							"url": `https://www.youtube.com/channel/${website_channel_id.exec(id)[1]}/videos?view=2&flow=grid&live_view=501`,
 							// "url": `https://www.youtube.com/channel/${website_channel_id.exec(id)[1]}/live`,
-							"contentType": "document",
+							"contentType": "string",
 							"overrideMimeType":"text/html; charset=utf-8",
-							"Request_documentParseToJSON": youtube.Request_documentParseToJSON_get_Lives
+							"customJSONParse": youtube.Request_HtmlParseToJSON_get_Lives
 							// "Request_documentParseToJSON": youtube.Request_documentParseToJSON_get_LiveInfo
 						};
 					// }
