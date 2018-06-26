@@ -1740,12 +1740,24 @@ function checkIfUpdated(details){
 		let current_version_numbers = appGlobal["version"] = getVersionNumbers.exec(current_versionStr);
 		
 		if(previousVersion !== current_versionStr){
-			if(current_version_numbers.length === 4 && previousVersion_numbers.length === 4){
+			if(
+				(current_version_numbers.length === 4 && previousVersion_numbers.length === 4)
+				||
+				(current_version_numbers.length === 5 && (previousVersion_numbers.length === 4 || previousVersion_numbers.length === 5))
+			){
 				if((current_version_numbers[1] > previousVersion_numbers[1])
 					||
 					((current_version_numbers[1] === previousVersion_numbers[1]) && (current_version_numbers[2] > previousVersion_numbers[2]))
 					||
 					((current_version_numbers[1] === previousVersion_numbers[1]) && (current_version_numbers[2] === previousVersion_numbers[2]) && (current_version_numbers[3] > previousVersion_numbers[3]))
+					||
+					(
+						current_version_numbers.length === 5
+						&&
+						current_version_numbers[1] === previousVersion_numbers[1] && current_version_numbers[2] === previousVersion_numbers[2] && current_version_numbers[3] === previousVersion_numbers[3]
+						&&
+						(previousVersion_numbers.length === 4 || current_version_numbers[4] > previousVersion_numbers[4])
+					)
 				){
 					doNotif({
 						"message": i18ex._("Addon_have_been_updated", {"version": current_versionStr})
