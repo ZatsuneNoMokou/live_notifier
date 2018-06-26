@@ -1,4 +1,4 @@
-<div id="{{streamWebsite}}/{{streamId}}/{{contentId}}" class="item-stream cursor{{#online}} onlineItem{{/online}}{{^online}} offlineItem{{/online}}{{#withError}} erroredItem{{/withError}}{{^usePictureLazyLoading}} streamLogo{{/usePictureLazyLoading}}"
+<div id="{{streamWebsite}}/{{streamId}}/{{contentId}}" class="item-stream cursor{{#online}} onlineItem{{/online}}{{^online}} offlineItem{{/online}}{{#withError}} erroredItem{{/withError}}{{^usePictureLazyLoading}}{{#streamLogo}} streamLogo{{/streamLogo}}{{/usePictureLazyLoading}}"
 	{{#streamStatus}}
 		data-stream-status='{{streamStatus}}' data-stream-status-lowercase='{{streamStatusLowercase}}'
 	{{/streamStatus}}
@@ -10,10 +10,19 @@
 	data-stream-type='{{streamType}}'
 	data-stream-settings='{{streamSettings}}'
 	draggable="true">
-	<figure class="streamPicture{{#usePictureLazyLoading}} hide{{/usePictureLazyLoading}}">
-		{{#usePictureLazyLoading}}<img src="" data-src="{{streamLogo}}" />{{/usePictureLazyLoading}}
-		{{^usePictureLazyLoading}}<img src="{{streamLogo}}" />{{/usePictureLazyLoading}}
+
+	{{#usePictureLazyLoading}}
+	<figure class="streamPicture hide">
+		<img src="" data-src="{{streamLogo}}" />
 	</figure>
+	{{/usePictureLazyLoading}}
+
+	{{^usePictureLazyLoading}}{{#streamLogo}}
+	<figure class="streamPicture">
+		<img src="{{streamLogo}}" />
+	</figure>
+	{{/streamLogo}}{{/usePictureLazyLoading}}
+
 	{{#online}}
 	<div>
 		{{/online}}<span class="streamTitle">{{#withError}}<span class="erroredItem-icon"></span>{{/withError}}{{streamName}}</span>{{#online}}
