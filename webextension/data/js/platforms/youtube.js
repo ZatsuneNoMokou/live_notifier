@@ -555,19 +555,12 @@ const youtube = {
 				if(website_channel_id.test(id)){
 					/*if(youtube_patreon_password !== ""){
 						obj = {
-							"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLives.php",
+							"url": `https://livenotifier.zatsunenomokou.eu/youtube-api/lives/${website_channel_id.exec(id)[1]}`,
 							"overrideMimeType":"text/plain; charset=utf-8",
-							"content": [
-								["id", website_channel_id.exec(id)[1]]
-							]
-						};
-						if(youtube_patreon_password !== ""){
-							obj.content.push(["password", youtube_patreon_password]);
-						} else {
-							if(typeof nextPageToken === "string"){
-								obj.content.push(["pageToken", nextPageToken]);
+							"headers": {
+								"password": youtube_patreon_password
 							}
-						}
+						};
 					} else {*/
 						obj = {
 							"url": `https://www.youtube.com/channel/${website_channel_id.exec(id)[1]}/videos?view=2&flow=grid&live_view=501`,
