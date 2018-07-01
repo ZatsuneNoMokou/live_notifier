@@ -580,6 +580,7 @@ body:not(.showAdvanced) #settings_container .streamEditor_group.whiteandblacklis
 }
 
 #streamEditor div.flex_input_text > input[type='text'],
+#streamEditor div.flex_input_text > input[type='password'],
 #streamEditor div.flex_textarea > textarea {
 	display: flex;
 	flex-grow: 5;

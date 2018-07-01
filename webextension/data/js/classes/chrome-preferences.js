@@ -567,7 +567,13 @@ ${err}`);
 					node.classList.add("stringList");
 				} else {
 					prefNode = document.createElement("input");
-					prefNode.type = "text";
+
+					if(prefObj.hasOwnProperty("password") && prefObj.password===true){
+						prefNode.type = "password";
+					} else {
+						prefNode.type = "text";
+					}
+
 					prefNode.value = this.get(id);
 				}
 				break;
