@@ -27,8 +27,11 @@
 
 			"/data/js/lib/xml2jsobj.js",
 
+			"/data/js/lib/Dropbox-sdk.js",
+
 
 			"/data/js/classes/chrome-notification-controler.js",
+			"/data/js/classes/DropboxController.js",
 			"/data/js/classes/chrome-preferences.js",
 			"/data/js/classes/i18extended.js",
 			"/data/js/classes/PromiseWaitAll.js",
@@ -58,6 +61,7 @@
 		"activeTab",
 		"clipboardWrite",
 		"contextMenus",
+		"identity",
 		"notifications",
 		"storage",
 		"unlimitedStorage",

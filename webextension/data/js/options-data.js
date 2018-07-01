@@ -326,6 +326,26 @@ const options = {
 		"group": "importexport_prefs",
 		"prefLevel": "basic"
 	},
+	"dropboxClientId": {
+		"title": "Dropbox Client Id",
+		"description": "",
+		"type": "string",
+		"group": "importexport_prefs",
+		"value": "",
+		"showPrefInPanel": false,
+		"prefLevel": "experimented"
+	},
+	"dropboxClientAuthToken": {
+		"title": "Dropbox Client AuthToken",
+		"description": "",
+		"type": "string",
+		"group": "importexport_prefs",
+		"value": "",
+		"showPrefInPanel": false,
+		"password": true,
+		"sync": false,
+		"prefLevel": "experimented"
+	},
 	/*			Settings level			*/
 	"showAdvanced": {
 		"title": "Show advanced settings",

@@ -4,6 +4,7 @@
 	"description": "Be notified of streams from Dailymotion, Mixer, Smashcast, Twitch and Youtube.",
 	"dependencies": {
 		"dom-delegate": "^2.0.3",
+		"dropbox": "^4.0.7",
 		"i18next": "^10.3.0",
 		"i18next-xhr-backend": "^1.5.1",
 		"lodash-cli": "^4.17.5",

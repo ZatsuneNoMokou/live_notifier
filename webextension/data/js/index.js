@@ -1711,6 +1711,48 @@ function initAddon(){
 
 	/* 		----- Fin Importation/Removal des vieux paramères -----		*/
 
+
+
+
+
+	let dropboxClientId = getPreference('dropboxClientId'),
+		dropboxAuthToken = getPreference('dropboxClientAuthToken'),
+
+		dropboxController = null
+	;
+
+	if(dropboxAuthToken!=='' || dropboxClientId!==''){
+		dropboxController = new DropboxController(dropboxClientId, dropboxAuthToken);
+	}
+
+	browser.storage.onChanged.addListener((changes, area) => {
+		if(area === "local"){
+			for(let prefId in changes){
+				if(changes.hasOwnProperty(prefId)){
+					switch(prefId){
+						case "dropboxClientId":
+							dropboxClientId = changes[prefId].newValue;
+							break;
+						case "dropboxClientAuthToken":
+							dropboxClientAuthToken = changes[prefId].newValue;
+							break;
+					}
+				}
+			}
+
+			if(dropboxController!==null){
+				dropboxController.dropboxClientId = dropboxClientId;
+				dropboxController.dropboxAuthToken = dropboxAuthToken;
+			} else if(dropboxAuthToken!=='' || dropboxClientId!==''){
+				dropboxController = new DropboxController(dropboxClientId, dropboxAuthToken);
+			}
+		}
+	});
+
+
+
+
+
 	streamListFromSetting.refresh(true);
 
 	checkLives()
