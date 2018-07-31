@@ -452,6 +452,9 @@ const youtube = {
 			}
 		},
 
+	/**
+	 * @return {null|Object}
+	 */
 	"Request_documentParseToJSON_get_Channel":
 		function (xhrResponse) {
 			const responseDoc = xhrResponse.response,
@@ -485,13 +488,13 @@ const youtube = {
 
 	"API_addStream":
 		function(source_website, id){
-			const apiKey = getPreference("youtube_api_key").replace(/\s/,""),
-				referrer = getPreference("youtube_api_referrer");
+			/*const apiKey = getPreference("youtube_api_key").replace(/\s/,""),
+				referrer = getPreference("youtube_api_referrer");*/
 			
 			let obj = {
 				"overrideMimeType": "text/html; charset=utf-8",
-				"contentType": "string",
-				"Request_documentParseToJSON": youtube.Request_HtmlParseToJSON_get_Lives
+				"contentType": "text",
+				"customJSONParse": youtube.Request_HtmlParseToJSON_get_Lives
 			};
 
 			if(source_website === "c::youtube"){
@@ -499,11 +502,11 @@ const youtube = {
 			} else if(source_website === "user::youtube"){
 				obj.url = `https://www.youtube.com/user/${id}`;
 			} else if(source_website === "video::youtube"){
-				return youtube.API(id);
-				/*obj.url = "https://www.youtube.com/watch";
+				// return youtube.API(id);
+				obj.url = "https://www.youtube.com/watch";
 				obj.content = [
 					["v", id]
-				]*/
+				]
 			} else if(website_channel_id.test(source_website) === true){
 				obj.url = `https://www.youtube.com/channel/${id}`;
 			}
