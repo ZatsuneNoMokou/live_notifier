@@ -9,7 +9,7 @@
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
 # 12.0.0.1
-* \+ : Minimum version - Chrome 58 and Firefox 54
+* \+ : Minimum version - Chrome 61 and Firefox 60
 * \+ : Panel - Use of [CSS Grid layout](https://developer.mozilla.org/fr/docs/Web/CSS/CSS_Grid_Layout)
 * \+ : \[ZDK] \[ChromePreferences] - New type : JSON
 * \+ : Reworked StreamListFromSetting class, to use less space in preferences
