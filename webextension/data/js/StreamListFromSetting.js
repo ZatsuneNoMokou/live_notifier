@@ -256,14 +256,7 @@ class StreamListFromSetting {
 	 * @return {Proxy}
 	 */
 	static observeStreamSetting(obj){
-		return StreamListFromSetting.observeObject(obj, {
-			/*get: function (obj, propName) {
-				if(propName === '_updated'){
-					return new Date(obj._updated)
-				} else {
-					return obj[propName];
-				}
-			},*/
+		return new Proxy(obj, {
 			set: function (obj, propName, newValue) {
 				obj._updated = new Date();
 				obj[propName] = newValue;
@@ -272,16 +265,6 @@ class StreamListFromSetting {
 				return true;
 			}
 		});
-	}
-
-	/**
-	 *
-	 * @param {Object} obj
-	 * @param {Object} handler
-	 * @return {Proxy}
-	 */
-	static observeObject(obj, handler={}){
-		return new Proxy(obj, handler);
 	}
 
 	/**
