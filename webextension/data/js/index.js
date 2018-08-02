@@ -1721,9 +1721,26 @@ function initAddon(){
 		dropboxController = null
 	;
 
-	if(dropboxAuthToken!=='' || dropboxClientId!==''){
-		dropboxController = new DropboxController(dropboxClientId, dropboxAuthToken);
-	}
+	/**
+	 *
+	 * @param {String} dropboxClientId
+	 * @param {String} dropboxAuthToken
+	 * @return {DropboxController | null}
+	 */
+	const updateDropboxController = function(dropboxClientId, dropboxAuthToken){
+		if(dropboxController!==null){
+			dropboxController.dropboxClientId = dropboxClientId;
+			dropboxController.dropboxAuthToken = dropboxAuthToken;
+		} else if(dropboxAuthToken!=='' || dropboxClientId!==''){
+			dropboxController = new DropboxController(dropboxClientId, dropboxAuthToken);
+		} else {
+			dropboxController = null;
+		}
+
+		return dropboxController;
+	};
+
+	dropboxController = updateDropboxController(dropboxClientId, dropboxAuthToken);
 
 	browser.storage.onChanged.addListener((changes, area) => {
 		if(area === "local"){
@@ -1740,12 +1757,7 @@ function initAddon(){
 				}
 			}
 
-			if(dropboxController!==null){
-				dropboxController.dropboxClientId = dropboxClientId;
-				dropboxController.dropboxAuthToken = dropboxAuthToken;
-			} else if(dropboxAuthToken!=='' || dropboxClientId!==''){
-				dropboxController = new DropboxController(dropboxClientId, dropboxAuthToken);
-			}
+			dropboxController = updateDropboxController(dropboxClientId, dropboxAuthToken);
 		}
 	});
 
