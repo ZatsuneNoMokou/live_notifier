@@ -174,6 +174,9 @@ class StreamListFromSetting {
 				"notifyOffline",
 				"notifyVocalOffline"
 			],
+			date: [
+				"_updated"
+			],
 			string: [
 				"facebook",
 				"twitter",
@@ -223,6 +226,10 @@ class StreamListFromSetting {
 
 	static getDefault(){
 		return {
+			_updated: '',
+
+
+
 			hide: false,
 			ignore: false,
 			iconIgnore: false,
@@ -241,6 +248,53 @@ class StreamListFromSetting {
 			facebook: "",
 			twitter: ""
 		}
+	}
+
+	/**
+	 *
+	 * @param {Object} obj
+	 * @return {Proxy}
+	 */
+	static observeStreamSetting(obj){
+		return StreamListFromSetting.observeObject(obj, {
+			/*get: function (obj, propName) {
+				if(propName === '_updated'){
+					return new Date(obj._updated)
+				} else {
+					return obj[propName];
+				}
+			},*/
+			set: function (obj, propName, newValue) {
+				obj._updated = new Date();
+				obj[propName] = newValue;
+
+				// Indicate success
+				return true;
+			}
+		});
+	}
+
+	/**
+	 *
+	 * @param {Object} obj
+	 * @param {Object} handler
+	 * @return {Proxy}
+	 */
+	static observeObject(obj, handler={}){
+		return new Proxy(obj, handler);
+	}
+
+	/**
+	 *
+	 * @param {*} date
+	 * @return {boolean}
+	 */
+	static isValidDate(date){
+		if(date instanceof Date){
+			return Number.isNaN(date.getTime())===false;
+		}
+
+		return false;
 	}
 
 	/**
@@ -314,6 +368,11 @@ class StreamListFromSetting {
 							outputData[prefId] = parsedData;
 						} else if(this.PREF_TYPES.string.indexOf(prefId) !== -1){
 							outputData[prefId] = decodeString(data);
+						} else if(this.PREF_TYPES.date.indexOf(prefId) !== -1){
+							const date = Date.parse(decodeString(data));
+							if(StreamListFromSetting.isValidDate(date)){
+								outputData[prefId] = date;
+							}
 						} else if(this.PREF_TYPES.list.indexOf(prefId) !== -1){
 							outputData[prefId].push(data);
 						} else {
@@ -322,7 +381,7 @@ class StreamListFromSetting {
 						}
 					});
 
-					mapDataAll.get(website).set(id, outputData);
+					mapDataAll.get(website).set(id, StreamListFromSetting.observeStreamSetting(outputData));
 				}
 			}
 		}
@@ -429,6 +488,14 @@ class StreamListFromSetting {
 						filtersArr.push(prefId + "::" + streamSettings[prefId]);
 					} else if(this.PREF_TYPES.string.indexOf(prefId) !== -1){
 						filtersArr.push(prefId + "::" + encodeString(streamSettings[prefId]));
+					} else if(this.PREF_TYPES.date.indexOf(prefId) !== -1){
+						let date = streamSettings[prefId];
+
+						if(StreamListFromSetting.isValidDate(date)){
+							date = encodeString(date.toISOString());
+						}
+
+						filtersArr.push(prefId + "::" + date);
 					} else if(this.PREF_TYPES.list.indexOf(prefId) !== -1){
 						for(let k in streamSettings[prefId]){
 							if(streamSettings[prefId].hasOwnProperty(k)){
