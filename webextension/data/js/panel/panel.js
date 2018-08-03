@@ -792,6 +792,11 @@ liveEvent("click", ".item-stream .copyStreamURL",		newCopyStreamURLButton_onClic
 liveEvent("click", ".item-stream .editStreamButton",	newEditStreamButton_onClick);
 liveEvent("click", ".item-stream .shareStreamButton",	newShareStreamButton_onClick);
 liveEvent("click", ".item-stream", streamItemClick);
+liveEvent("keypress", ".item-stream", function (e) {
+	if(e.code==="Enter" || e.code==="NumpadEnter"){
+		streamItemClick.call(this, e);
+	}
+});
 
 function listener(website, id, contentId, type, streamSettings, streamData){
 	let online = false;

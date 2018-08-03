@@ -201,6 +201,11 @@ footer * {
 	position: relative;
 }
 
+.item-stream:focus {
+	outline-style: auto;
+	outline-width: 1px;
+}
+
 .item-stream.offlineItem {
 	padding: 7px;
 	display: flex;
