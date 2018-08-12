@@ -3850,16 +3850,12 @@ function numberIsNaN (obj) {
 var buffer_1 = buffer.Buffer;
 
 function parseBodyToType$2(res) {
-  var clone = res.clone();
-  return new Promise(function (resolve) {
-    res.json().then(function (data) {
-      return resolve(data);
-    }).catch(function () {
-      return clone.text().then(function (data) {
-        return resolve(data);
-      });
+  if (res.headers.get('Content-Type') === 'application/json') {
+    return res.json().then(function (data) {
+      return [res, data];
     });
-  }).then(function (data) {
+  }
+  return res.text().then(function (data) {
     return [res, data];
   });
 }
