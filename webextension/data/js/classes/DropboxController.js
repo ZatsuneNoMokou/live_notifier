@@ -143,7 +143,13 @@ class DropboxController {
 		;
 
 		try{
-			data = await client.filesUpload({'path': '/' + this.fileName, 'contents': JSON.stringify(jsonObject)});
+			data = await client.filesUpload({
+				'path': '/' + this.fileName,
+				'contents': JSON.stringify(jsonObject),
+				'mode': {
+					'.tag': 'overwrite'
+				}
+			});
 		} catch (e) {
 			error = e;
 		}
