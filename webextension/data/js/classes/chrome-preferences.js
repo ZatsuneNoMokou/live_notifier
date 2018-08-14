@@ -91,7 +91,9 @@ function getValueFromNode(node){
 	}
 }
 
-const CHROME_PREFERENCES_UPDATED_ID = '_updated';
+const CHROME_PREFERENCES_UPDATED_ID = '_updated',
+	CHROME_PREFERENCES_SYNC_ID = '_synchronisedAt'
+;
 
 class ChromePreferences extends Map{
 	constructor(options){
@@ -103,6 +105,13 @@ class ChromePreferences extends Map{
 
 
 		options[CHROME_PREFERENCES_UPDATED_ID] = {
+			"hidden": true,
+			"prefLevel": "experimented",
+			"sync": true,
+			"type": "string",
+			"value": ""
+		};
+		options[CHROME_PREFERENCES_SYNC_ID] = {
 			"hidden": true,
 			"prefLevel": "experimented",
 			"sync": true,

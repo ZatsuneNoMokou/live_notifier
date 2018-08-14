@@ -417,10 +417,39 @@ class StreamListFromSetting {
 		return result;
 	}
 
+
+
+	get(website, id){
+		if(this.mapDataAll.has(website) && this.mapDataAll.get(website).has(id)){
+			return this.mapDataAll.get(website).get(id);
+		} else {
+			return undefined;
+		}
+	}
+
+	getExistingId(website, id){
+		let result = undefined;
+		this.mapDataAll.get(website).forEach((value, i) => {
+			if(i.toLowerCase() === id.toLowerCase()){
+				result = i;
+			}
+		});
+		return result;
+	}
+
+	set(website, id, data){
+		if(this.mapDataAll.has(website)===false){
+			this.mapDataAll.set(website, new Map());
+		}
+
+		this.mapDataAll.get(website).set(id, data);
+	}
+
+
+
 	addStream(website, id, url){
 		if(!this.streamExist(website, id)){
-			this.mapDataAll.get(website).set(id, {streamURL: url});
-			this.mapData = this.mapDataAll.get(website);
+			this.set(website, id, {streamURL: url});
 			consoleMsg("log", `${id} has been added`);
 		}
 	}
@@ -428,9 +457,7 @@ class StreamListFromSetting {
 	deleteStream(website, id){
 		if(this.streamExist(website, id)){
 			this.mapDataAll.get(website).delete(id);
-			if(typeof this.mapData !== "undefined"){
-				this.mapData.delete(id);
-			}
+
 			if(liveStore.hasChannel(website, id)){
 				liveStore.removeChannel(website, id);
 			}
@@ -517,6 +544,54 @@ class StreamListFromSetting {
 		consoleDir(getPreference(`stream_keys_list`), "Stream key list update");
 		if(checkMissing===true){
 			appGlobal["checkMissing"]();
+		}
+	}
+
+	/**
+	 *
+	 * @param {String} rawNewData
+	 * @param {Boolean} isNewer
+	 */
+	mergeData(rawNewData, isNewer){
+		const newData = this.parseSetting(rawNewData),
+			newDataKeyMapping = new Map()
+		;
+
+		newData.forEach((map, website)=>{
+			if(isNewer===true){
+				newDataKeyMapping.set(website, new Map());
+				Array.from(map.keys()).forEach(function (key){
+					newDataKeyMapping.get(website).set(key.toLowerCase(), key);
+				});
+			}
+
+			map.forEach((streamData, streamId)=>{
+				let doUpdate = false,
+					existingId = this.getExistingId(website, streamId)
+				;
+
+				if(existingId===undefined){
+					if(isNewer===true || isNewer===null){
+						doUpdate = true;
+					}
+				} else if(streamData._updated > this.get(website, existingId)._updated){
+					doUpdate = true;
+				}
+
+				if(doUpdate===true){
+					this.set(website, streamId, streamData);
+				}
+			})
+		});
+
+		if(isNewer===true){
+			this.forEach((map, website)=>{
+				map.forEach((streamData, streamId)=>{
+					if(newDataKeyMapping.has(website)===false || newDataKeyMapping.get(website).has(streamId.toLowerCase())===false){
+						this.deleteStream(website, streamId);
+					}
+				})
+			})
 		}
 	}
 }

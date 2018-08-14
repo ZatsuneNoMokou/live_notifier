@@ -1740,6 +1740,63 @@ function initAddon(){
 		return dropboxController;
 	};
 
+	const updateSyncData = async function () {
+		const currentSyncData = await dropboxController.get();
+
+		console.dir(currentSyncData)
+
+		if(currentSyncData!==null && currentSyncData.hasOwnProperty('preferences') && currentSyncData.hasOwnProperty('live_notifier_version')){
+			const data = new Map(Object.entries(currentSyncData.preferences));
+
+			if(data.has(CHROME_PREFERENCES_SYNC_ID)){
+				const currentSyncData = new Date(data.get(CHROME_PREFERENCES_SYNC_ID)),
+					date = (getPreference(CHROME_PREFERENCES_SYNC_ID))? new Date(getPreference(CHROME_PREFERENCES_SYNC_ID)) : null
+				;
+
+
+				if(currentSyncData !== date){
+					let isNewer = false;
+
+					if(date===null) {
+						isNewer = null;
+					} else if(currentSyncData > date){
+						isNewer = true;
+
+						data.forEach((value, prefId)=>{
+							if(prefId!=='stream_keys_list' && updatedPreferences.has(prefId)===false){
+								savePreference(prefId, value);
+							}
+						});
+					}
+
+					streamListFromSetting.mergeData(data.get('stream_keys_list'), isNewer);
+					streamListFromSetting.update();
+				}
+			}
+		}
+
+
+
+		updatedPreferences.clear();
+
+		savePreference(CHROME_PREFERENCES_SYNC_ID, new Date());
+		await dropboxController.set(chromeSettings.getSyncPreferences());
+	};
+
+
+
+	const updatedPreferences = new Map(),
+		uploadSyncData = _.debounce(function () {
+			updateSyncData()
+				.catch(err=>{
+					consoleMsg('error', err);
+				})
+			;
+		}, 1000, {
+			maxWait: 10000
+		})
+	;
+
 	dropboxController = updateDropboxController(dropboxClientId, dropboxAuthToken);
 
 	browser.storage.onChanged.addListener((changes, area) => {
@@ -1754,10 +1811,16 @@ function initAddon(){
 							dropboxClientAuthToken = changes[prefId].newValue;
 							break;
 					}
+
+					if(chromeSettings.defaultSettingsSync.has(prefId) && updatedPreferences.has(prefId) === false){
+						updatedPreferences.set(prefId, '');
+					}
 				}
 			}
 
 			dropboxController = updateDropboxController(dropboxClientId, dropboxAuthToken);
+
+			uploadSyncData();
 		}
 	});
 

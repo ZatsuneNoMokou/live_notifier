@@ -111,9 +111,8 @@ class DropboxController {
 		}
 
 		if(data!==null){
-			let data = null;
 			try{
-				data = JSON.parse(await zDK.loadBlob(data));
+				data = JSON.parse(await zDK.loadBlob(data.fileBlob, 'text'));
 			} catch (e) {
 				consoleMsg('error', e);
 			}
