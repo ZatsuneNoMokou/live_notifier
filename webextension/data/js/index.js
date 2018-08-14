@@ -1743,7 +1743,7 @@ function initAddon(){
 	const updateSyncData = async function () {
 		const currentSyncData = await dropboxController.get();
 
-		console.dir(currentSyncData)
+
 
 		if(currentSyncData!==null && currentSyncData.hasOwnProperty('preferences') && currentSyncData.hasOwnProperty('live_notifier_version')){
 			const data = new Map(Object.entries(currentSyncData.preferences));

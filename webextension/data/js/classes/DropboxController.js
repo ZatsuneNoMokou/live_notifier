@@ -148,14 +148,15 @@ class DropboxController {
 				'contents': JSON.stringify(jsonObject),
 				'mode': {
 					'.tag': 'overwrite'
-				}
+				},
+				'mute': true
 			});
 		} catch (e) {
 			error = e;
 		}
 
 		if(data !== null){
-			consoleMsg('info', data);
+			consoleDir(data);
 			return true;
 		} else {
 			/* user cancelled the flow */
