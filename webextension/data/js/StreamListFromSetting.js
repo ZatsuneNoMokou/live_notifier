@@ -584,14 +584,20 @@ class StreamListFromSetting {
 			})
 		});
 
-		if(isNewer===true){
-			this.forEach((map, website)=>{
-				map.forEach((streamData, streamId)=>{
-					if(newDataKeyMapping.has(website)===false || newDataKeyMapping.get(website).has(streamId.toLowerCase())===false){
-						this.deleteStream(website, streamId);
-					}
-				})
+		let updatedMissing = false;
+		this.forEach((map, website)=>{
+			map.forEach((streamData, streamId)=>{
+				if(isNewer === true && (newDataKeyMapping.has(website) === false || newDataKeyMapping.get(website).has(streamId.toLowerCase()) === false)){
+					this.deleteStream(website, streamId);
+				} else if(streamData.hasOwnProperty('_updated') === false){
+					streamData._updated = new Date();
+					updatedMissing = true;
+				}
 			})
+		});
+
+		if(updatedMissing === true){
+			this.update();
 		}
 	}
 }
