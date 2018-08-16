@@ -105,6 +105,9 @@ async function init() {
 		echo("Copying lz-string...");
 		await _cp("./node_modules/lz-string/libs/lz-string.js", jsLib);
 
+		echo("Copying moment with locales...");
+		await _cp("./node_modules/moment/min/moment-with-locales.min.js", jsLib);
+
 		success("\n✅ Done");
 		process.exit(0);
 	}

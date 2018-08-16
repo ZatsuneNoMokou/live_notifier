@@ -24,7 +24,7 @@ class ZDK{
 				writable: false
 			});
 		} else {
-			console.warn(`"ChromeNotificationControler" not found.`)
+			console.warn('"ChromeNotificationControler" not found.')
 		}
 		if(typeof ChromePreferences==="function"){
 			Object.defineProperty(this, "ChromePreferences", {
@@ -33,7 +33,7 @@ class ZDK{
 				writable: false
 			});
 		} else {
-			console.warn(`"ChromePreferences" not found.`)
+			console.warn('"ChromePreferences" not found.')
 		}
 		if(typeof i18extended==="function"){
 			Object.defineProperty(this, "i18extended", {
@@ -42,7 +42,7 @@ class ZDK{
 				writable: false
 			});
 		} else {
-			console.warn(`"i18extended" not found.`)
+			console.warn('"i18extended" not found.')
 		}
 		if(typeof Queue==="function"){
 			Object.defineProperty(this, "Queue", {
@@ -56,7 +56,7 @@ class ZDK{
 				writable: false
 			});
 		} else {
-			console.warn(`"Queue" not found.`)
+			console.warn('"Queue" not found.')
 		}
 		if(typeof DataStore==="function"){
 			Object.defineProperty(this, "DataStore", {
@@ -65,7 +65,27 @@ class ZDK{
 				writable: false
 			});
 		} else {
-			console.warn(`"DataStore" not found.`)
+			console.warn('"DataStore" not found.')
+		}
+		if(typeof ZTimer==="function"){
+			Object.defineProperty(this, "ZTimer", {
+				value: ZTimer,
+				configurable: false,
+				writable: false
+			});
+
+			Object.defineProperty(this, "setTimeout", {
+				value: ZTimer.setTimeout,
+				configurable: false,
+				writable: false
+			});
+			Object.defineProperty(this, "setInterval", {
+				value: ZTimer.setInterval,
+				configurable: false,
+				writable: false
+			});
+		} else {
+			console.warn('"ZTimer" not found.')
 		}
 	}
 

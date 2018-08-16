@@ -24,6 +24,7 @@
 			"/data/js/lib/i18nextXHRBackend.js",
 			"/data/js/lib/mustache.js",
 			"/data/js/lib/lodash.custom.js",
+			"/data/js/lib/moment-with-locales.min.js",
 
 			"/data/js/lib/xml2jsobj.js",
 
@@ -37,6 +38,7 @@
 			"/data/js/classes/PromiseWaitAll.js",
 			"/data/js/classes/queue.js",
 			"/data/js/classes/data-store.js",
+			"/data/js/classes/ztimer.js",
 
 
 			"/data/js/classes/ZDK.js",
