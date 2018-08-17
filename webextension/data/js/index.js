@@ -1715,6 +1715,29 @@ function initAddon(){
 
 
 
+	const
+		syncTrigger = async function(){
+			const zTimer = this;
+
+			await updateSyncData()
+				.catch(err=>{
+					consoleMsg('error', err);
+				})
+			;
+
+			zTimer.init(); // Reset timer to start now
+		},
+		syncInterval = ZTimer.setInterval('syncInterval', 5, 'm', function (){
+			syncTrigger()
+				.catch(err=>{
+					consoleMsg('error', err);
+				})
+			;
+		})
+	;
+
+
+
 	let dropboxClientId = getPreference('dropboxClientId'),
 		dropboxAuthToken = getPreference('dropboxClientAuthToken'),
 
@@ -1741,6 +1764,10 @@ function initAddon(){
 	};
 
 	const updateSyncData = async function () {
+		if(dropboxController===null){
+			return;
+		}
+
 		const currentSyncData = await dropboxController.get();
 
 		let needUpload = updatedPreferences.size > 0;
@@ -1790,6 +1817,14 @@ function initAddon(){
 			savePreference(CHROME_PREFERENCES_SYNC_ID, new Date());
 			await dropboxController.set(chromeSettings.getSyncPreferences());
 		}
+
+
+
+		syncInterval.init()
+			.catch(err=>{
+				consoleMsg('error', err);
+			})
+		;
 	};
 
 

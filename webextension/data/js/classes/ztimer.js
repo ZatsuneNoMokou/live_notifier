@@ -5,7 +5,7 @@ const ZTimer_ALARM_PREFIX = 'ZTimer_',
 			const zTimer = ZTimer_ALARMS.get(alarm.name);
 
 			if (typeof zTimer.onTrigger === "function") {
-				zTimer.onTrigger(alarm);
+				zTimer.onTrigger.call(zTimer, alarm);
 			}
 		}
 	}
@@ -53,6 +53,8 @@ class ZTimer {
 		this.fallbackTimer = null;
 		this.chromeTimer = null;
 
+
+
 		this.init()
 			.catch(console.error)
 		;
@@ -64,8 +66,11 @@ class ZTimer {
 	 * @return {Promise<void>}
 	 */
 	async init(){
-		// browser.alarm.create "delayInMinutes" and "when" can not be < 1
-		if(ZTimer.getDurationInMinutes(duration, type)<1){
+		/*
+		 * browser.alarms need the proper chrome permission to be used
+		 * browser.alarms.create "delayInMinutes" and "when" can not be < 1
+		 */
+		if(browser.hasOwnProperty('alarms') === false || ZTimer.getDurationInMinutes(duration, type) < 1){
 			const ms = ZTimer.getDurationInMilliseconds(duration, type);
 
 			if(repeat===false){
@@ -78,10 +83,6 @@ class ZTimer {
 				}, ms)
 			}
 		} else {
-			if(browser.hasOwnProperty('alarms') === false){
-				throw 'browser.alarm does not exist, check permissions';
-			}
-
 			if(browser.alarms.onAlarm.hasListener(ZTimer_ON_ALARM) === false){
 				browser.alarms.onAlarm.addListener(ZTimer_ON_ALARM);
 			}
@@ -163,12 +164,12 @@ class ZTimer {
 	/**
 	 *
 	 * @param {String} name
-	 * @param {Function} onTrigger
 	 * @param {Number} duration
-	 * @param {moment.unitOfTime=ms} type
+	 * @param {moment.unitOfTime} type
+	 * @param {Function} onTrigger
 	 * @return {ZTimer}
 	 */
-	static setInterval(name, onTrigger, duration, type='ms'){
+	static setInterval(name, duration, type, onTrigger){
 		return new ZTimer(name, true, onTrigger, duration, type);
 	}
 
