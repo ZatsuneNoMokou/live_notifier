@@ -1743,6 +1743,8 @@ function initAddon(){
 	const updateSyncData = async function () {
 		const currentSyncData = await dropboxController.get();
 
+		let needUpload = updatedPreferences.size > 0;
+
 
 
 		if(currentSyncData!==null && currentSyncData.hasOwnProperty('preferences') && currentSyncData.hasOwnProperty('live_notifier_version')){
@@ -1752,7 +1754,6 @@ function initAddon(){
 				const currentSyncData = new Date(data.get(CHROME_PREFERENCES_SYNC_ID)),
 					date = (getPreference(CHROME_PREFERENCES_SYNC_ID))? new Date(getPreference(CHROME_PREFERENCES_SYNC_ID)) : null
 				;
-
 
 				if(currentSyncData !== date){
 					let isNewer = false;
@@ -1769,8 +1770,14 @@ function initAddon(){
 						});
 					}
 
+					const oldStreamList = getPreference('stream_keys_list');
+
 					streamListFromSetting.mergeData(data.get('stream_keys_list'), isNewer);
 					streamListFromSetting.update();
+
+					if(needUpload === false && getPreference('stream_keys_list') !== oldStreamList){
+						needUpload = true;
+					}
 				}
 			}
 		}
@@ -1779,8 +1786,10 @@ function initAddon(){
 
 		updatedPreferences.clear();
 
-		savePreference(CHROME_PREFERENCES_SYNC_ID, new Date());
-		await dropboxController.set(chromeSettings.getSyncPreferences());
+		if(needUpload === true){
+			savePreference(CHROME_PREFERENCES_SYNC_ID, new Date());
+			await dropboxController.set(chromeSettings.getSyncPreferences());
+		}
 	};
 
 
