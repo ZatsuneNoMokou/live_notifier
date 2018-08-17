@@ -59,7 +59,10 @@ class ZTimer {
 	}
 
 
-
+	/**
+	 * Init or reset the timer
+	 * @return {Promise<void>}
+	 */
 	async init(){
 		// browser.alarm.create "delayInMinutes" and "when" can not be < 1
 		if(ZTimer.getDurationInMinutes(duration, type)<1){
@@ -149,7 +152,7 @@ class ZTimer {
 	 * @param {String} name
 	 * @param {Number} duration
 	 * @param {moment.unitOfTime=ms} type
-	 * @return {Promise<>}
+	 * @return {Promise<void|Object>}
 	 */
 	static setTimeout(name, duration, type='ms'){
 		return new Promise(resolve => {
@@ -170,7 +173,10 @@ class ZTimer {
 	}
 
 
-
+	/**
+	 * Return true if successfully cleared
+	 * @return {Promise<boolean>}
+	 */
 	async clear(){
 		if(this.fallbackTimer!==null){
 			if(this.repeat===false){
@@ -193,6 +199,11 @@ class ZTimer {
 		}
 	}
 
+	/**
+	 * Clear the ZTimer with the indicated name
+	 * @param name
+	 * @return {Promise<boolean>}
+	 */
 	static async clear(name){
 		if(ZTimer_ALARMS.has(ZTimer_ALARM_PREFIX + name)){
 			return await ZTimer_ALARMS.get(ZTimer_ALARM_PREFIX + name).clear();
