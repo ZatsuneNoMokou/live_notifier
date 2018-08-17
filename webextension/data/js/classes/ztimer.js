@@ -53,8 +53,14 @@ class ZTimer {
 		this.fallbackTimer = null;
 		this.chromeTimer = null;
 
+		this.init()
+			.catch(console.error)
+		;
+	}
 
 
+
+	async init(){
 		// browser.alarm.create "delayInMinutes" and "when" can not be < 1
 		if(ZTimer.getDurationInMinutes(duration, type)<1){
 			const ms = ZTimer.getDurationInMilliseconds(duration, type);
@@ -87,11 +93,9 @@ class ZTimer {
 
 			this.chromeTimer = ZTimer_ALARM_PREFIX + this.name;
 
-			browser.alarms.clear(this.chromeTimer)
-				.then(()=>{
-					browser.alarms.create(this.chromeTimer, opts);
-				})
-			;
+			await browser.alarms.clear(this.chromeTimer);
+
+			browser.alarms.create(this.chromeTimer, opts);
 		}
 		ZTimer_ALARMS.set(ZTimer_ALARM_PREFIX + this.name, this);
 	}
@@ -167,24 +171,31 @@ class ZTimer {
 
 
 
-	clear(){
+	async clear(){
 		if(this.fallbackTimer!==null){
 			if(this.repeat===false){
 				clearTimeout(this.fallbackTimer);
 			} else {
 				clearInterval(this.fallbackTimer);
 			}
+
+			return true;
 		}
 
 		if(this.chromeTimer!==null){
-			browser.alarms.clear(this.chromeTimer);
-			ZTimer_ALARMS.delete(this.chromeTimer);
+			const cleared = await browser.alarms.clear(this.chromeTimer);
+
+			if(cleared===true){
+				ZTimer_ALARMS.delete(this.chromeTimer);
+			}
+
+			return cleared;
 		}
 	}
 
-	static clear(name){
+	static async clear(name){
 		if(ZTimer_ALARMS.has(ZTimer_ALARM_PREFIX + name)){
-			ZTimer_ALARMS.get(ZTimer_ALARM_PREFIX + name).clear();
+			return await ZTimer_ALARMS.get(ZTimer_ALARM_PREFIX + name).clear();
 		}
 	}
 }
