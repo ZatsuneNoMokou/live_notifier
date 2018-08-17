@@ -50,6 +50,10 @@ class ZTimer {
 			configurable: false,
 			writable: false
 		});
+
+		this.duration = duration;
+		this.durationType = type;
+
 		this.fallbackTimer = null;
 		this.chromeTimer = null;
 
@@ -66,14 +70,20 @@ class ZTimer {
 	 * @return {Promise<void>}
 	 */
 	async init(){
+		await this.clear()
+			.catch(console.error)
+		;
+
+
+
 		/*
 		 * browser.alarms need the proper chrome permission to be used
 		 * browser.alarms.create "delayInMinutes" and "when" can not be < 1
 		 */
-		if(browser.hasOwnProperty('alarms') === false || ZTimer.getDurationInMinutes(duration, type) < 1){
-			const ms = ZTimer.getDurationInMilliseconds(duration, type);
+		if(browser.hasOwnProperty('alarms') === false || ZTimer.getDurationInMinutes(this.duration, this.durationType) < 1){
+			const ms = ZTimer.getDurationInMilliseconds(this.duration, this.durationType);
 
-			if(repeat===false){
+			if(this.repeat===false){
 				this.fallbackTimer = setTimeout(()=>{
 					this.onTrigger();
 				}, ms)
@@ -88,11 +98,11 @@ class ZTimer {
 			}
 
 			const opts = {
-				'when': ZTimer.getEndDate(duration, type).getTime()
+				'when': ZTimer.getEndDate(this.duration, this.durationType).getTime()
 			};
 
-			if(repeat === true){
-				opts.periodInMinutes = ZTimer.getDurationInMinutes(duration, type);
+			if(this.repeat === true){
+				opts.periodInMinutes = ZTimer.getDurationInMinutes(this.duration, this.durationType);
 			}
 
 			this.chromeTimer = ZTimer_ALARM_PREFIX + this.name;
