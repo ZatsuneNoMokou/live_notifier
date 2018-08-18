@@ -1716,19 +1716,22 @@ function initAddon(){
 
 
 	const
-		syncTrigger = async function(){
-			const zTimer = this;
-
-			await updateSyncData()
+		/**
+		 *
+		 * @param {ZTimer} zTimer
+		 * @return {Promise<void>}
+		 */
+		syncTrigger = async function(zTimer){
+			await updateSyncData(zTimer)
 				.catch(err=>{
 					consoleMsg('error', err);
 				})
 			;
-
-			zTimer.init(); // Reset timer to start now
 		},
 		syncInterval = ZTimer.setInterval('syncInterval', 5, 'm', function (){
-			syncTrigger()
+			const zTimer = this;
+
+			syncTrigger(zTimer)
 				.catch(err=>{
 					consoleMsg('error', err);
 				})
@@ -1763,7 +1766,12 @@ function initAddon(){
 		return dropboxController;
 	};
 
-	const updateSyncData = async function () {
+	/**
+	 *
+	 * @param {ZTimer=null} zTimer
+	 * @return {Promise<void>}
+	 */
+	const updateSyncData = async function (zTimer=null) {
 		if(dropboxController===null){
 			return;
 		}
@@ -1831,18 +1839,20 @@ function initAddon(){
 
 
 
-		syncInterval.init()
-			.catch(err=>{
-				consoleMsg('error', err);
-			})
-		;
+		if(zTimer!==null){
+			await zTimer.init()
+				.catch(err=>{
+					consoleMsg('error', err);
+				})
+			;
+		}
 	};
 
 
 
 	const updatedPreferences = new Map(),
 		uploadSyncData = _.debounce(function () {
-			updateSyncData()
+			updateSyncData(syncInterval)
 				.catch(err=>{
 					consoleMsg('error', err);
 				})

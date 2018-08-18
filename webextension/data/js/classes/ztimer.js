@@ -81,15 +81,17 @@ class ZTimer {
 		 * browser.alarms.create "delayInMinutes" and "when" can not be < 1
 		 */
 		if(browser.hasOwnProperty('alarms') === false || ZTimer.getDurationInMinutes(this.duration, this.durationType) < 1){
-			const ms = ZTimer.getDurationInMilliseconds(this.duration, this.durationType);
+			const ms = ZTimer.getDurationInMilliseconds(this.duration, this.durationType),
+				zTimer = this
+			;
 
 			if(this.repeat===false){
 				this.fallbackTimer = setTimeout(()=>{
-					this.onTrigger();
+					this.onTrigger.call(zTimer);
 				}, ms)
 			} else {
 				this.fallbackTimer = setInterval(()=>{
-					this.onTrigger();
+					this.onTrigger.call(zTimer);
 				}, ms)
 			}
 		} else {
