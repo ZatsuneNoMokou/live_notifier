@@ -4,12 +4,12 @@ class DropboxController {
 	 * http://dropbox.github.io/dropbox-sdk-js/tutorial-JavaScript%20SDK.html
 	 */
 
-	constructor(clientId, authToken=''){
+	constructor(fileName, clientId, authToken=''){
 		this.client = null;
 
 		this.clientId = clientId;
 		this.authToken = authToken;
-		this.fileName = 'livenotifier.json';
+		this.fileName = fileName;
 		this.API_ERROR_STATUS_FILE_NOT_FOUND = 409;
 		this.HTTP_STATUS_CANCEL = 499;
 	}
@@ -100,27 +100,58 @@ class DropboxController {
 	async get() {
 		const client = this.getClient();
 
-		let data = null,
+		let metaData = null,
+			data = null,
 			error
 		;
 
 		try{
-			data = await client.filesDownload({'path': '/' + this.fileName});
+			metaData = await client.filesDownload({'path': '/' + this.fileName});
 		} catch (e) {
 			error = e;
 		}
 
-		if(data!==null){
+		if(metaData!==null){
 			try{
-				data = JSON.parse(await zDK.loadBlob(data.fileBlob, 'text'));
+				data = JSON.parse(await zDK.loadBlob(metaData.fileBlob, 'text'));
 			} catch (e) {
 				consoleMsg('error', e);
 				throw 'InvalidJson';
 			}
 
+			return {
+				'data': data,
+				'metadata': metaData
+			};
+		} else {
+			if(error.status === this.API_ERROR_STATUS_FILE_NOT_FOUND){
+				throw 'NoFile';
+			} else if(error!==undefined){
+				throw error;
+			}
+		}
+	}
+
+	/**
+	 *
+	 * @return {Promise<Dropbox.files.FileMetadataReference>}
+	 */
+	async getMeta(){
+		const client = this.getClient();
+
+		let data = null,
+			error
+		;
+
+		try{
+			data = await client.filesGetMetadata({'path': '/' + this.fileName})
+		} catch (e) {
+			error = e;
+		}
+
+		if (data !== null && error === undefined) {
 			return data;
 		} else {
-			/* no file */
 			if(error.status === this.API_ERROR_STATUS_FILE_NOT_FOUND){
 				throw 'NoFile';
 			} else if(error!==undefined){
@@ -132,7 +163,7 @@ class DropboxController {
 	/**
 	 *
 	 * @param {JSON} jsonObject
-	 * @return {Promise<boolean>}
+	 * @return {Promise<Dropbox.files.FileMetadata | boolean>}
 	 */
 	async set(jsonObject) {
 		const client = this.getClient();
@@ -155,8 +186,7 @@ class DropboxController {
 		}
 
 		if(data !== null){
-			consoleDir(data);
-			return true;
+			return data;
 		} else {
 			/* user cancelled the flow */
 			if (error.status === this.HTTP_STATUS_CANCEL) {

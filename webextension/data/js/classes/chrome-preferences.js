@@ -114,7 +114,7 @@ class ChromePreferences extends Map{
 		options[CHROME_PREFERENCES_SYNC_ID] = {
 			"hidden": true,
 			"prefLevel": "experimented",
-			"sync": true,
+			"sync": false,
 			"type": "string",
 			"value": ""
 		};

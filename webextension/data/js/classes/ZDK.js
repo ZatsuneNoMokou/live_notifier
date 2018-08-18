@@ -473,6 +473,19 @@ class ZDK{
 	static hasTouch(win=window) {
 		return win.hasOwnProperty('ontouchstart');
 	}
+
+	/**
+	 *
+	 * @param date
+	 * @return {boolean}
+	 */
+	static isValidDate(date){
+		return date instanceof Date && !isNaN(date.getTime())
+	}
+
+	static validDateOrNull(date){
+		return ZDK.isValidDate(date)? date : null;
+	}
 }
 
 var consoleMsg = ZDK.consoleMsg;

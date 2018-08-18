@@ -1758,7 +1758,7 @@ function initAddon(){
 			dropboxController.dropboxClientId = dropboxClientId;
 			dropboxController.dropboxAuthToken = dropboxAuthToken;
 		} else if(dropboxAuthToken!=='' || dropboxClientId!==''){
-			dropboxController = new DropboxController(dropboxClientId, dropboxAuthToken);
+			dropboxController = new DropboxController('livenotifier.json', dropboxClientId, dropboxAuthToken);
 		} else {
 			dropboxController = null;
 		}
@@ -1777,53 +1777,55 @@ function initAddon(){
 		}
 
 		let needUpload = updatedPreferences.size > 0,
-			currentSyncData = null
+			currentSyncData = null,
+			currentSyncMetaData = null
 		;
+
+
 		try {
-			currentSyncData = await dropboxController.get();
+			let {data, metadata} = await dropboxController.get();
+			currentSyncData = data;
+			currentSyncMetaData = metadata;
 		} catch (e) {
 			const msg = e.toString();
-			if(msg === 'InvalidJson' || msg === 'NoFile'){
-				consoleMsg('info', `Dropbox error "${msg}" (ignoring eventual existing file)`);
+			if (msg === 'InvalidJson' || msg === 'NoFile') {
+				consoleMsg('warn', `Dropbox error "${msg}" (ignoring eventual existing file)`);
 				needUpload = true;
 			} else {
 				consoleMsg('error', e);
 			}
 		}
 
+		const date = (getPreference(CHROME_PREFERENCES_SYNC_ID)!=='')? ZDK.validDateOrNull(new Date(getPreference(CHROME_PREFERENCES_SYNC_ID))) : null,
+			currentSyncDate = (currentSyncMetaData !== null && currentSyncMetaData.hasOwnProperty('server_modified'))? ZDK.validDateOrNull(new Date(currentSyncMetaData.server_modified)) : null
+		;
 
 
-		if(currentSyncData!==null && currentSyncData.hasOwnProperty('preferences') && currentSyncData.hasOwnProperty('live_notifier_version')){
+		if (currentSyncData!==null && currentSyncData.hasOwnProperty('preferences') && currentSyncData.hasOwnProperty('live_notifier_version')) {
 			const data = new Map(Object.entries(currentSyncData.preferences));
 
-			if(data.has(CHROME_PREFERENCES_SYNC_ID)){
-				const currentSyncData = new Date(data.get(CHROME_PREFERENCES_SYNC_ID)),
-					date = (getPreference(CHROME_PREFERENCES_SYNC_ID))? new Date(getPreference(CHROME_PREFERENCES_SYNC_ID)) : null
-				;
+			if (currentSyncDate !== date) {
+				let isNewer = false;
 
-				if(currentSyncData !== date){
-					let isNewer = false;
+				if (date === null) {
+					isNewer = null;
+				} else if (currentSyncDate > date) {
+					isNewer = true;
 
-					if(date===null) {
-						isNewer = null;
-					} else if(currentSyncData > date){
-						isNewer = true;
+					data.forEach((value, prefId) => {
+						if (prefId !== 'stream_keys_list' && updatedPreferences.has(prefId) === false) {
+							savePreference(prefId, value);
+						}
+					});
+				}
 
-						data.forEach((value, prefId)=>{
-							if(prefId!=='stream_keys_list' && updatedPreferences.has(prefId)===false){
-								savePreference(prefId, value);
-							}
-						});
-					}
+				const oldStreamList = getPreference('stream_keys_list');
 
-					const oldStreamList = getPreference('stream_keys_list');
+				streamListFromSetting.mergeData(data.get('stream_keys_list'), isNewer);
+				streamListFromSetting.update();
 
-					streamListFromSetting.mergeData(data.get('stream_keys_list'), isNewer);
-					streamListFromSetting.update();
-
-					if(needUpload === false && getPreference('stream_keys_list') !== oldStreamList){
-						needUpload = true;
-					}
+				if (needUpload === false && getPreference('stream_keys_list') !== oldStreamList) {
+					needUpload = true;
 				}
 			}
 		}
@@ -1832,9 +1834,25 @@ function initAddon(){
 
 		updatedPreferences.clear();
 
-		if(needUpload === true){
-			savePreference(CHROME_PREFERENCES_SYNC_ID, new Date());
-			await dropboxController.set(chromeSettings.getSyncPreferences());
+		if (needUpload === true) {
+			let uploadDate = new Date(),
+				newMetaData = null
+			;
+
+			savePreference(CHROME_PREFERENCES_SYNC_ID, uploadDate.toISOString());
+
+			try {
+				newMetaData = await dropboxController.set(chromeSettings.getSyncPreferences());
+			} catch (e) {
+				consoleMsg('error', e);
+			}
+
+			if (newMetaData !== null && newMetaData.hasOwnProperty('server_modified')) {
+				uploadDate = new Date(newMetaData.server_modified);
+				savePreference(CHROME_PREFERENCES_SYNC_ID, uploadDate.toISOString());
+			}
+		} else {
+			savePreference(CHROME_PREFERENCES_SYNC_ID, currentSyncDate.toISOString());
 		}
 
 
@@ -1863,6 +1881,9 @@ function initAddon(){
 	;
 
 	dropboxController = updateDropboxController(dropboxClientId, dropboxAuthToken);
+	if (dropboxController !== null) {
+		uploadSyncData();
+	}
 
 	browser.storage.onChanged.addListener((changes, area) => {
 		if(area === "local"){
@@ -1877,15 +1898,19 @@ function initAddon(){
 							break;
 					}
 
-					if(prefId!==CHROME_PREFERENCES_SYNC_ID && chromeSettings.defaultSettingsSync.has(prefId) && updatedPreferences.has(prefId) === false){
+					if (prefId!==CHROME_PREFERENCES_SYNC_ID && chromeSettings.defaultSettingsSync.has(prefId) && updatedPreferences.has(prefId) === false) {
 						updatedPreferences.set(prefId, '');
 					}
 				}
 			}
 
-			dropboxController = updateDropboxController(dropboxClientId, dropboxAuthToken);
+			if (updatedPreferences.size > 0) {
+				if (updatedPreferences.has('dropboxClientId') || dropboxClientId.has('dropboxClientAuthToken')) {
+					dropboxController = updateDropboxController(dropboxClientId, dropboxAuthToken);
+				}
 
-			uploadSyncData();
+				uploadSyncData();
+			}
 		}
 	});
 
