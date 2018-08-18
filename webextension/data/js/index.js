@@ -1867,7 +1867,7 @@ function initAddon(){
 							break;
 					}
 
-					if(chromeSettings.defaultSettingsSync.has(prefId) && updatedPreferences.has(prefId) === false){
+					if(prefId!==CHROME_PREFERENCES_SYNC_ID && chromeSettings.defaultSettingsSync.has(prefId) && updatedPreferences.has(prefId) === false){
 						updatedPreferences.set(prefId, '');
 					}
 				}
