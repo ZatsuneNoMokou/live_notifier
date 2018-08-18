@@ -115,17 +115,16 @@ class DropboxController {
 				data = JSON.parse(await zDK.loadBlob(data.fileBlob, 'text'));
 			} catch (e) {
 				consoleMsg('error', e);
+				throw 'InvalidJson';
 			}
 
 			return data;
 		} else {
 			/* no file */
 			if(error.status === this.API_ERROR_STATUS_FILE_NOT_FOUND){
-				consoleMsg('warn', 'NoFile');
-				return null;
+				throw 'NoFile';
 			} else if(error!==undefined){
-				consoleMsg('error', error);
-				return null;
+				throw error;
 			}
 		}
 	}

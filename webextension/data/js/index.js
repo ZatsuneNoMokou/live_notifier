@@ -1768,9 +1768,20 @@ function initAddon(){
 			return;
 		}
 
-		const currentSyncData = await dropboxController.get();
-
-		let needUpload = updatedPreferences.size > 0;
+		let needUpload = updatedPreferences.size > 0,
+			currentSyncData = null
+		;
+		try {
+			currentSyncData = await dropboxController.get();
+		} catch (e) {
+			const msg = e.toString();
+			if(msg === 'InvalidJson' || msg === 'NoFile'){
+				consoleMsg('info', `Dropbox error "${msg}" (ignoring eventual existing file)`);
+				needUpload = true;
+			} else {
+				consoleMsg('error', e);
+			}
+		}
 
 
 
