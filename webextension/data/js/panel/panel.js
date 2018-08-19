@@ -918,7 +918,7 @@ function current_version(version){
 	if(typeof version==="string"){
 		current_version_node.dataset.currentVersion = version;
 	} else if(Array.isArray(version)){
-		current_version_node.dataset.currentVersion = `${version[1]}.${version[2]}.${version[3]}${(version.length>4 && version[4]!==undefined)? ` beta ${version[4]}` : ''}`;
+		current_version_node.dataset.currentVersion = `${version[0]}.${version[1]}.${version[2]}${(version.length>3 && version[3]!==undefined)? ` beta ${version[3]}` : ''}`;
 	}
 }
 

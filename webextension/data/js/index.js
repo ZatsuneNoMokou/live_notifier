@@ -1934,8 +1934,6 @@ let previousVersion = "",
 ;
 
 function checkIfUpdated(details){
-	let getVersionNumbers =  /^(\d+)\.(\d+)\.(\d+)(?:\.(\d+))?$/;
-	
 	let installReason = details.reason;
 	consoleMsg("info", `Runtime onInstalled reason: ${installReason}`);
 
@@ -1943,42 +1941,36 @@ function checkIfUpdated(details){
 	// Checking if updated
 	if(installReason === "update" || installReason === "unknown"){
 		previousVersion = details.previousVersion;
-		let previousVersion_numbers = getVersionNumbers.exec(previousVersion);
-		let current_version_numbers = appGlobal["version"] = getVersionNumbers.exec(current_versionStr);
-		
-		if(previousVersion !== current_versionStr){
-			if(
-				(current_version_numbers.length === 4 && previousVersion_numbers.length === 4)
-				||
-				(current_version_numbers.length === 5 && (previousVersion_numbers.length === 4 || previousVersion_numbers.length === 5))
-			){
-				if((current_version_numbers[1] > previousVersion_numbers[1])
-					||
-					((current_version_numbers[1] === previousVersion_numbers[1]) && (current_version_numbers[2] > previousVersion_numbers[2]))
-					||
-					((current_version_numbers[1] === previousVersion_numbers[1]) && (current_version_numbers[2] === previousVersion_numbers[2]) && (current_version_numbers[3] > previousVersion_numbers[3]))
-					||
-					(
-						current_version_numbers.length === 5
-						&&
-						current_version_numbers[1] === previousVersion_numbers[1] && current_version_numbers[2] === previousVersion_numbers[2] && current_version_numbers[3] === previousVersion_numbers[3]
-						&&
-						(previousVersion_numbers.length === 4 || current_version_numbers[4] > previousVersion_numbers[4])
-					)
-				){
-					doNotif({
-						"message": i18ex._("Addon_have_been_updated", {"version": current_versionStr})
-					})
-						.catch(err=>{
-							consoleMsg("warn", err);
-						})
-					;
+		let current_version_numbers = appGlobal["version"] = new Version(current_versionStr);
 
-					if(installReason==="install" || (previousVersion_numbers[1] <= 11 && previousVersion_numbers[2]<=16)){
-						ZDK.openTabIfNotExist(chrome.extension.getURL("/data/options.html#news"))
-							.catch(console.error)
-						;
-					}
+
+
+		if (previousVersion !== current_versionStr) {
+			let previousVersion_numbers = new Version(previousVersion),
+
+				previous = previousVersion_numbers.toNumber(),
+				current = current_version_numbers.toNumber()
+			;
+
+
+			if (previousVersion_numbers.length === 5 && current_version_numbers.length === 4) {
+				previous = Math.trunc(previous)
+			}
+
+
+			if (current > previous){
+				doNotif({
+					"message": i18ex._("Addon_have_been_updated", {"version": current_versionStr})
+				})
+					.catch(err=>{
+						consoleMsg("warn", err);
+					})
+				;
+
+				if(installReason==="install" || (previousVersion_numbers[0] <= 11 && previousVersion_numbers[1]<=16)){
+					ZDK.openTabIfNotExist(chrome.extension.getURL("/data/options.html#news"))
+						.catch(console.error)
+					;
 				}
 			}
 		}

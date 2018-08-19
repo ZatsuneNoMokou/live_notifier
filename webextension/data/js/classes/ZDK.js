@@ -17,76 +17,29 @@ class ZDK{
 
 
 
-		if(typeof ChromeNotificationControler==="function"){
-			Object.defineProperty(this, "ChromeNotificationControler", {
-				value: ChromeNotificationControler,
-				configurable: false,
-				writable: false
-			});
-		} else {
-			console.warn('"ChromeNotificationControler" not found.')
-		}
-		if(typeof ChromePreferences==="function"){
-			Object.defineProperty(this, "ChromePreferences", {
-				value: ChromePreferences,
-				configurable: false,
-				writable: false
-			});
-		} else {
-			console.warn('"ChromePreferences" not found.')
-		}
-		if(typeof i18extended==="function"){
-			Object.defineProperty(this, "i18extended", {
-				value: i18extended,
-				configurable: false,
-				writable: false
-			});
-		} else {
-			console.warn('"i18extended" not found.')
-		}
-		if(typeof Queue==="function"){
-			Object.defineProperty(this, "Queue", {
-				value: Queue,
-				configurable: false,
-				writable: false
-			});
-			Object.defineProperty(this, "queue", {
-				value: Queue,
-				configurable: false,
-				writable: false
-			});
-		} else {
-			console.warn('"Queue" not found.')
-		}
-		if(typeof DataStore==="function"){
-			Object.defineProperty(this, "DataStore", {
-				value: DataStore,
-				configurable: false,
-				writable: false
-			});
-		} else {
-			console.warn('"DataStore" not found.')
-		}
-		if(typeof ZTimer==="function"){
-			Object.defineProperty(this, "ZTimer", {
-				value: ZTimer,
-				configurable: false,
-				writable: false
-			});
+		const _define = (name, classFn) => {
+			if(typeof classFn==="function"){
+				Object.defineProperty(this, name, {
+					value: classFn,
+					configurable: false,
+					writable: false
+				});
+			} else {
+				console.warn(`"${name}" not found.`)
+			}
+		};
 
-			Object.defineProperty(this, "setTimeout", {
-				value: ZTimer.setTimeout,
-				configurable: false,
-				writable: false
-			});
-			Object.defineProperty(this, "setInterval", {
-				value: ZTimer.setInterval,
-				configurable: false,
-				writable: false
-			});
-		} else {
-			console.warn('"ZTimer" not found.')
+		_define('ChromeNotificationControler', ChromeNotificationControler);
+		_define('ChromePreferences', ChromePreferences);
+		_define('i18extended', i18extended);
+		_define('Queue', Queue);
+		_define('DataStore', DataStore);
+		_define('ZTimer', ZTimer);
+		if(typeof ZTimer==="function"){
+			_define('setTimeout', ZTimer.setTimeout);
+			_define('setInterval', ZTimer.setInterval);
 		}
+		_define('Version', Version);
 	}
 
 
