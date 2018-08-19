@@ -8,8 +8,14 @@ class Version extends Array {
 		} else {
 			const [, ...arr] = VERSION_NUMBERS_REG.exec(str);
 
-			if (arr.length === 4 && arr[3] === undefined) {
-				arr.splice(3, 1);
+			if (arr.length > 0) {
+				if (arr.length === 4 && arr[3] === undefined) {
+					arr.splice(3, 1);
+				}
+
+				arr.forEach((v, i)=>{
+					arr[i] = parseInt(v);
+				})
 			}
 
 			super();
