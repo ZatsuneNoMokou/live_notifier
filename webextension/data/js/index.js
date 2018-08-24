@@ -1941,24 +1941,14 @@ function checkIfUpdated(details){
 	// Checking if updated
 	if(installReason === "update" || installReason === "unknown"){
 		previousVersion = details.previousVersion;
-		let current_version_numbers = appGlobal["version"] = new Version(current_versionStr);
+		const current_version_numbers = appGlobal["version"] = new Version(current_versionStr);
 
 
 
 		if (previousVersion !== current_versionStr) {
-			let previousVersion_numbers = new Version(previousVersion),
+			const previousVersion_numbers = new Version(previousVersion);
 
-				previous = previousVersion_numbers.toNumber(),
-				current = current_version_numbers.toNumber()
-			;
-
-
-			if (previousVersion_numbers.length === 5 && current_version_numbers.length === 4) {
-				previous = Math.trunc(previous)
-			}
-
-
-			if (current > previous){
+			if (current_version_numbers.compareTo(previousVersion_numbers) === 1) {
 				doNotif({
 					"message": i18ex._("Addon_have_been_updated", {"version": current_versionStr})
 				})
