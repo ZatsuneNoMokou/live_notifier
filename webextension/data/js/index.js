@@ -77,26 +77,6 @@ function getStreamURL(website, id, contentId, usePrefUrl){
 }
 appGlobal["getStreamURL"] = getStreamURL;
 
-function refreshPanel(data){
-	let doUpdateTheme = false;
-	if(typeof data !== "undefined"){
-		if(typeof data.doUpdateTheme !== "undefined"){
-			doUpdateTheme = data.doUpdateTheme;
-		}
-	}
-	updatePanelData(doUpdateTheme);
-}
-function refreshStreamsFromPanel(){
-	let done = ()=>{
-		updatePanelData();
-	};
-	if(appGlobal["checkingLivesFinished"]){
-		checkLives()
-			.then(done)
-			.catch(done)
-	}
-}
-
 function display_id(id, displayName){
 	if(website_channel_id.test(id)){
 		return i18ex._("The_channel", {"channel": (typeof displayName === "string")? displayName : website_channel_id.exec(id)[1]});
@@ -462,7 +442,8 @@ appGlobal.sendDataToMain = function(sender, id, data){
 				;
 				break;
 			case "panel_onload":
-				handleChange(data);
+				setIcon();
+				refreshPanel(data);
 				break;
 			case "shareStream":
 				shareStream(data);
@@ -495,9 +476,26 @@ function updatePanelData(doUpdateTheme=true){
 	}
 }
 
-function handleChange() {
-	setIcon();
-	updatePanelData();
+function refreshPanel(data) {
+	let doUpdateTheme = false;
+	if (typeof data !== "undefined") {
+		if (typeof data.doUpdateTheme !== "undefined") {
+			doUpdateTheme = data.doUpdateTheme;
+		}
+	}
+
+	updatePanelData(doUpdateTheme);
+}
+function refreshStreamsFromPanel() {
+	let done = () => {
+		updatePanelData();
+	};
+
+	if (appGlobal["checkingLivesFinished"]) {
+		checkLives()
+			.then(done)
+			.catch(done)
+	}
 }
 
 const chromeNotifications = new ChromeNotificationControler(),

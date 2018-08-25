@@ -10,6 +10,7 @@
 
 # 12.0.0.6
 * \+ : Panel - Ability to navigate with keyboard and open stream with enter
+* Fix : Panel - Not showing up-to-date informations on load (probably fixed now)
 
 # 12.0.0.1
 * \+ : Minimum version - Chrome 61 and Firefox 60
