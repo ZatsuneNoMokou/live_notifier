@@ -578,7 +578,9 @@ function updatePanelData(){
 				streamRenderData = PanelStreams.streamToRenderData(website, id, contentId, "unsupported", streamList.get(id), streamData);
 			}
 
-			panelStreams.set(website, id, streamRenderData);
+			if (streamRenderData !== null) {
+				panelStreams.set(website, id, streamRenderData);
+			}
 		});
 	});
 	scrollbar_update("streamList");
