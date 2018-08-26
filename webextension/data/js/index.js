@@ -1001,6 +1001,17 @@ async function checkLives(idArray){
 		}
 	});
 
+	/**
+	 *
+	 * @type {boolean}
+	 */
+	const isFullCheck = !(typeof idArray !== "undefined" && idArray instanceof Map);
+	if (isFullCheck === true && interval === null) {
+		interval = ZTimer.setInterval("checkLivesInterval", getPreference('check_delay'), 'm', checkLives);
+	}
+
+
+
 	if(checkQueue.queue.size === 0){
 		setIcon();
 		appGlobal["checkingLivesFinished"] = true;
@@ -1067,9 +1078,9 @@ async function checkLives(idArray){
 			console.groupEnd();
 		}
 
-		if(!(typeof idArray !== "undefined" && idArray instanceof Map)){ // Only reset interval if it's a "full" check
-			clearInterval(interval);
-			interval = setInterval(checkLives, getPreference('check_delay') * 60000);
+		if (isFullCheck === true) { // Only reset interval if it's a "full" check
+			interval.duration = getPreference('check_delay');
+			interval.init();
 		}
 
 		if(needCheckMissing){
@@ -1080,9 +1091,9 @@ async function checkLives(idArray){
 		return result;
 	}
 
-	if(!(typeof idArray !== "undefined" && idArray instanceof Map)){ // Only reset interval if it's a "full" check
-		clearInterval(interval);
-		interval = setInterval(checkLives, getPreference('check_delay') * 60000);
+	if (isFullCheck === true) { // Only reset interval if it's a "full" check
+		interval.duration = getPreference('check_delay');
+		interval.init();
 	}
 }
 function checkMissing(){
@@ -1619,7 +1630,10 @@ async function getRedirectedURL(URL, maxRedirect){
 }
 
 // Begin to check lives
-let interval;
+/**
+ * @type ZTimer
+ */
+let interval = null;
 function initAddon(){
 	if (typeof browser.contextMenus !== "undefined" && typeof browser.contextMenus.create === "function") {
 		browser.contextMenus.removeAll();
@@ -1732,7 +1746,7 @@ function initAddon(){
 				})
 			;
 		},
-		syncInterval = ZTimer.setInterval('syncInterval', 5, 'm', function (){
+		syncInterval = ZTimer.setInterval('syncInterval', 10, 'm', function (){
 			const zTimer = this;
 
 			syncTrigger(zTimer)
