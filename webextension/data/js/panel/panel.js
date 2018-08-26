@@ -123,6 +123,10 @@ liveEvent("click", "#disableNotifications", ()=>{
 	}
 });
 
+
+
+
+
 function allowDrop(event){
 	event.preventDefault();
 }
@@ -179,6 +183,10 @@ dropDiv.addEventListener("dragover", allowDrop);
 document.addEventListener("dragenter", dragenter); // Event dragging something and entering a valid node
 document.addEventListener("dragleave", dragleave); // Event dragging something and leaving a valid node
 document.addEventListener("dragstart", drag); // Get dragged element data
+
+
+
+
 
 let deleteStreamButton = document.querySelector("#deleteStream");
 let streamChangeMode = false;
@@ -254,12 +262,17 @@ function confirmChanges(){
 		}
 		streamListSettings.update();
 	}
-	updatePanelData({"doUpdateTheme": false});
+	updatePanelData();
 	deleteStreamButtonClick();
 }
 confirmChanges_Node.addEventListener("click", confirmChanges, false);
 
+
+
+
+
 /*				---- Search Button ----				*/
+
 let toggle_search_button = document.querySelector("button#searchStream");
 let searchInput_onInput_Loaded = false;
 function searchContainer_Toggle(){
@@ -305,7 +318,12 @@ function searchInput_onInput(){
 	scrollbar_update("streamList");
 }
 
+
+
+
+
 /*				---- Settings ----				*/
+
 let settings_button = document.querySelector("#settings");
 let setting_Enabled = false;
 function unhideClassNode(node){
@@ -335,7 +353,7 @@ function selectSection(sectionNodeId){
 					switch(sectionNodeId){
 						case "streamList":
 							setting_Enabled = false;
-							sendDataToMain("refreshPanel", "");
+							updatePanelData();
 							break;
 						case "settings_container":
 							if(!optionsLoaded){
@@ -378,6 +396,10 @@ if(typeof browser.storage.sync === "object"){
 	save_sync_button.addEventListener("click", function(event){saveOptionsInSync(event);});
 }
 
+
+
+
+
 /*				---- Debug section ----				*/
 
 liveEvent("click", "#close_debugSection", function(){
@@ -394,11 +416,9 @@ function enableDebugSection(){
 
 /*				---- End Debug section ----				*/
 
-/*				---- Setting nodes generator ----				*/
 
-//loadPreferences("section#settings_container #preferences");
 
-/*			---- Settings end ----			*/
+
 
 /*			---- Stream Editor----			*/
 
@@ -450,14 +470,13 @@ liveEvent("click", "#saveEditedStream", function(){
 });
 
 /*			---- Stream Editor end----			*/
+
+
+
+
+
 let ignoreHideIgnore = false;
-function updatePanelData(doUpdateTheme=true){
-	console.log("Updating panel data");
-
-	if(doUpdateTheme === true){
-		theme_update();
-	}
-
+function updatePanelData(){
 	//Clear stream list in the panel
 	initList({"group_streams_by_websites": getPreference("group_streams_by_websites"), "show_offline_in_panel": getPreference("show_offline_in_panel")});
 
@@ -937,9 +956,7 @@ function theme_update(){
 	}
 }
 
-backgroundPage.panel__UpdateData = (data)=>{
-	updatePanelData(data);
-};
+
 
 let psList = new Map();
 function load_scrollbar(id){
@@ -971,7 +988,19 @@ function scrollbar_update(nodeId){
 
 loadTranslations();
 
+updatePanelData();
 sendDataToMain("panel_onload");
+
+const onLiveStoreChange = _.debounce(()=>{
+	updatePanelData();
+}, 500, {
+	maxWait: 5000
+});
+
+liveStore.onLiveChange(onLiveStoreChange, false, window);
+liveStore.onChannelChange(onLiveStoreChange, false, window);
+
+
 
 if(typeof PerfectScrollbar!=="undefined"){
 	load_scrollbar("streamList");

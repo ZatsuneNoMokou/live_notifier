@@ -237,10 +237,6 @@ function addStreamFromPanel(data){
 
 													streamListFromSetting.addStream(website, streamId, url);
 													streamListFromSetting.update();
-													// Update the panel for the new stream added
-													setTimeout(function(){
-														refreshPanel(false);
-													}, 5000);
 												})
 												.catch(err=>{
 													consoleMsg("warn", err);
@@ -256,11 +252,6 @@ function addStreamFromPanel(data){
 													consoleMsg("warn", err);
 												})
 											;
-
-											// Update the panel for the new stream added
-											setTimeout(function(){
-												refreshPanel(false);
-											}, 5000);
 										}
 									}
 								}
@@ -328,8 +319,6 @@ function deleteStreamFromPanel(data){
 							consoleMsg("warn", err);
 						})
 					;
-					// Update the panel for the new stream added
-					refreshPanel(false);
 				})
 				.catch(err=>{
 					consoleMsg("warn", err);
@@ -345,8 +334,6 @@ function deleteStreamFromPanel(data){
 					consoleMsg("warn", err);
 				})
 			;
-			// Update the panel for the new stream added
-			refreshPanel(false);
 		}
 	}
 }
@@ -411,9 +398,6 @@ function streamSetting_Update(data){
 appGlobal.sendDataToMain = function(sender, id, data){
 	if(sender === "Live_Notifier_Panel" || sender === "Live_Notifier_Embed" || sender === "Live_Notifier_Options"){
 		switch(id){
-			case "refreshPanel":
-				refreshPanel(data);
-				break;
 			case "importStreams":
 				let website = data;
 				consoleMsg("info", `Importing ${website}...`);
@@ -443,7 +427,6 @@ appGlobal.sendDataToMain = function(sender, id, data){
 				break;
 			case "panel_onload":
 				setIcon();
-				refreshPanel(data);
 				break;
 			case "shareStream":
 				shareStream(data);
@@ -469,32 +452,13 @@ chrome.runtime.onMessage.addListener(message=>{
 	appGlobal.sendDataToMain(message.sender, message.id, message.data);
 });
 
-function updatePanelData(doUpdateTheme=true){
-	// Update panel data
-	if(typeof panel__UpdateData === "function"){
-		panel__UpdateData(doUpdateTheme);
-	}
-}
-
-function refreshPanel(data) {
-	let doUpdateTheme = false;
-	if (typeof data !== "undefined") {
-		if (typeof data.doUpdateTheme !== "undefined") {
-			doUpdateTheme = data.doUpdateTheme;
-		}
-	}
-
-	updatePanelData(doUpdateTheme);
-}
 function refreshStreamsFromPanel() {
-	let done = () => {
-		updatePanelData();
-	};
-
 	if (appGlobal["checkingLivesFinished"]) {
 		checkLives()
-			.then(done)
-			.catch(done)
+			.catch(err => {
+				consoleMsg("error", err);
+			})
+		;
 	}
 }
 
@@ -1120,11 +1084,8 @@ function checkMissing(){
 		
 		if(listToCheck.size > 0){
 			checkLives(listToCheck)
-				.finally(result=>{
-					consoleMsg("info", (result!==undefined)? result : "Nothing");
-					if(typeof panelUpdateData === "function"){
-						panelUpdateData();
-					}
+				.catch(err => {
+					consoleMsg("error", err);
 				})
 			;
 		}
@@ -1480,7 +1441,6 @@ function importButton(website){
 				})
 			;
 		}
-		refreshPanel(false);
 	};
 	if(typeof websites.get(website).importAPIGetUserId === "function" && typeof websites.get(website).importGetUserId === "function"){
 		let importAPIGetUserId = websites.get(website).API(`${getPreference(`${website}_user_id`)}`);
