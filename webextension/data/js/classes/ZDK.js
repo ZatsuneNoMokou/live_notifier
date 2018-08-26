@@ -317,7 +317,7 @@ class ZDK{
 	 * @param selector
 	 * @param html
 	 * @param {HTMLDocument} doc
-	 * @returns {Element}
+	 * @returns {null | Array<HTMLElement>}
 	 */
 	insertHtml(action, selector, html, doc=document){
 		if(typeof action!=="string"||action===""){
@@ -351,7 +351,7 @@ class ZDK{
 	 * @param selector
 	 * @param html
 	 * @param {HTMLDocument} doc
-	 * @returns {Element}
+	 * @returns {null | Array<HTMLElement>}
 	 */
 	appendTo(selector, html, doc=document){
 		return this.insertHtml("appendTo",selector,html,doc);
@@ -362,10 +362,21 @@ class ZDK{
 	 * @param selector
 	 * @param html
 	 * @param {HTMLDocument} doc
-	 * @returns {Element}
+	 * @returns {null | Array<HTMLElement>}
 	 */
 	insertBefore(selector, html, doc=document){
 		return this.insertHtml("insertBefore",selector,html,doc);
+	}
+
+	/**
+	 *
+	 * @param {HTMLElement} node
+	 */
+	removeAllChildren(node){
+		// Taken from https://stackoverflow.com/questions/683366/remove-all-the-children-dom-elements-in-div
+		while (node.hasChildNodes()) {
+			node.removeChild(node.lastChild);
+		}
 	}
 
 	/**
