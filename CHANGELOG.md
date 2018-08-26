@@ -12,6 +12,8 @@
 * \+ : Panel - Ability to navigate with keyboard and open stream with enter
 * Fix : setIcon/badgeText, contextMenu are not supported on android (fixing as a WIP android support)
 * Fix : Panel - Not showing up-to-date informations on load (probably fixed now)
+* \+ : \[ZDK] \[ZTimer] setTimeout / setInterval equivalent with Alarms API
+* \+ : \[ZDK] \[Version] Version parse and compare
 
 # 12.0.0.1
 * \+ : Minimum version - Chrome 61 and Firefox 60
