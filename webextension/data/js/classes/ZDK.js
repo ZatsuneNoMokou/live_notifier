@@ -288,19 +288,23 @@ class ZDK{
 			}
 		}
 
-		const browserWindows = await browser.windows.getAll({
-			populate: false,
-			windowTypes: ["normal"]
-		});
-
-		// If the function is still running, it mean that the url isn't detected to be opened, so, we can open it
-		if(browserWindows.length===0){
-			await browser.windows.create({
-				"focused": true,
-				"type": "normal",
-				"url": url
+		if (typeof browser.windows === "undefined") {
+			const browserWindows = await browser.windows.getAll({
+				populate: false,
+				windowTypes: ["normal"]
 			});
-		} else{
+
+			// If the function is still running, it mean that the url isn't detected to be opened, so, we can open it
+			if(browserWindows.length===0){
+				await browser.windows.create({
+					"focused": true,
+					"type": "normal",
+					"url": url
+				});
+			} else{
+				await browser.tabs.create({ "url": url });
+			}
+		} else {
 			await browser.tabs.create({ "url": url });
 		}
 

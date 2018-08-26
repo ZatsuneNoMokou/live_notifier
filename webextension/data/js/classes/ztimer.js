@@ -52,9 +52,25 @@ class ZTimer {
 		});
 
 		this.duration = duration;
+
+		/**
+		 *
+		 * @type {moment.unitOfTime}
+		 */
 		this.durationType = type;
 
+
+
+		/**
+		 *
+		 * @type {null | Number} Number from setTimeout / setInterval
+		 */
 		this.fallbackTimer = null;
+
+		/**
+		 *
+		 * @type {null | String}
+		 */
 		this.chromeTimer = null;
 
 
@@ -62,6 +78,30 @@ class ZTimer {
 		this.init()
 			.catch(console.error)
 		;
+	}
+
+	/**
+	 *
+	 * @return {Number}
+	 */
+	get duration() {
+		if (typeof this._duration === "number" && !isNaN(this._duration)) {
+			return this._duration;
+		} else {
+			throw "TypeError";
+		}
+	}
+
+	/**
+	 *
+	 * @param {Number} value
+	 */
+	set duration(value) {
+		if (typeof value === "number" && !isNaN(value)) {
+			this._duration = value;
+		} else {
+			throw "TypeError";
+		}
 	}
 
 
