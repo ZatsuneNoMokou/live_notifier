@@ -8,8 +8,15 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 12.0.0.6
+* \+ : Panel - Ability to navigate with keyboard and open stream with enter
+* Fix : setIcon/badgeText, contextMenu are not supported on android (fixing as a WIP android support)
+* Fix : Panel - Not showing up-to-date informations on load (probably fixed now)
+* \+ : \[ZDK] \[ZTimer] setTimeout / setInterval equivalent with Alarms API
+* \+ : \[ZDK] \[Version] Version parse and compare
+
 # 12.0.0.1
-* \+ : Minimum version - Chrome 58 and Firefox 54
+* \+ : Minimum version - Chrome 61 and Firefox 60
 * \+ : Panel - Use of [CSS Grid layout](https://developer.mozilla.org/fr/docs/Web/CSS/CSS_Grid_Layout)
 * \+ : \[ZDK] \[ChromePreferences] - New type : JSON
 * \+ : Reworked StreamListFromSetting class, to use less space in preferences

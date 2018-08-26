@@ -91,6 +91,10 @@ function getValueFromNode(node){
 	}
 }
 
+const CHROME_PREFERENCES_UPDATED_ID = '_updated',
+	CHROME_PREFERENCES_SYNC_ID = '_synchronisedAt'
+;
+
 class ChromePreferences extends Map{
 	constructor(options){
 		super(new Map());
@@ -99,12 +103,36 @@ class ChromePreferences extends Map{
 			throw "Missing argument"
 		}
 
+
+		options[CHROME_PREFERENCES_UPDATED_ID] = {
+			"hidden": true,
+			"prefLevel": "experimented",
+			"sync": true,
+			"type": "string",
+			"value": ""
+		};
+		options[CHROME_PREFERENCES_SYNC_ID] = {
+			"hidden": true,
+			"prefLevel": "experimented",
+			"sync": false,
+			"type": "string",
+			"value": ""
+		};
+
+
 		let mapOptions = new Map();
 		for(let i in options){
 			if(options.hasOwnProperty(i)){
 				mapOptions.set(i, options[i]);
 			}
 		}
+
+		Object.defineProperty(this, "CHROME_PREFERENCES_UPDATED_ID", {
+			value: CHROME_PREFERENCES_UPDATED_ID,
+			configurable: false,
+			writable: false
+		});
+
 		Object.defineProperty(this, "options", {
 			value: mapOptions,
 			writable: false
@@ -210,6 +238,11 @@ class ChromePreferences extends Map{
 		const oldExisting = this.has(prefId);
 		oldValue = (oldValue===null)? this.has(prefId) : oldValue;
 		if(this.loadingState==="success") {
+			if(prefId!==CHROME_PREFERENCES_UPDATED_ID){
+				// Keep '_updated' value up-to-date with the last change date
+				super.set(CHROME_PREFERENCES_UPDATED_ID, new Date());
+			}
+
 			super.set(prefId, getSettableValue(value));
 			browser.storage.local.set({[prefId] : value})
 				.catch(err => {
@@ -567,7 +600,13 @@ ${err}`);
 					node.classList.add("stringList");
 				} else {
 					prefNode = document.createElement("input");
-					prefNode.type = "text";
+
+					if(prefObj.hasOwnProperty("password") && prefObj.password===true){
+						prefNode.type = "password";
+					} else {
+						prefNode.type = "text";
+					}
+
 					prefNode.value = this.get(id);
 				}
 				break;

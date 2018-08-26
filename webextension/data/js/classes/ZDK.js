@@ -17,56 +17,29 @@ class ZDK{
 
 
 
-		if(typeof ChromeNotificationControler==="function"){
-			Object.defineProperty(this, "ChromeNotificationControler", {
-				value: ChromeNotificationControler,
-				configurable: false,
-				writable: false
-			});
-		} else {
-			console.warn(`"ChromeNotificationControler" not found.`)
+		const _define = (name, classFn) => {
+			if(typeof classFn==="function"){
+				Object.defineProperty(this, name, {
+					value: classFn,
+					configurable: false,
+					writable: false
+				});
+			} else {
+				console.warn(`"${name}" not found.`)
+			}
+		};
+
+		_define('ChromeNotificationControler', ChromeNotificationControler);
+		_define('ChromePreferences', ChromePreferences);
+		_define('i18extended', i18extended);
+		_define('Queue', Queue);
+		_define('DataStore', DataStore);
+		_define('ZTimer', ZTimer);
+		if(typeof ZTimer==="function"){
+			_define('setTimeout', ZTimer.setTimeout);
+			_define('setInterval', ZTimer.setInterval);
 		}
-		if(typeof ChromePreferences==="function"){
-			Object.defineProperty(this, "ChromePreferences", {
-				value: ChromePreferences,
-				configurable: false,
-				writable: false
-			});
-		} else {
-			console.warn(`"ChromePreferences" not found.`)
-		}
-		if(typeof i18extended==="function"){
-			Object.defineProperty(this, "i18extended", {
-				value: i18extended,
-				configurable: false,
-				writable: false
-			});
-		} else {
-			console.warn(`"i18extended" not found.`)
-		}
-		if(typeof Queue==="function"){
-			Object.defineProperty(this, "Queue", {
-				value: Queue,
-				configurable: false,
-				writable: false
-			});
-			Object.defineProperty(this, "queue", {
-				value: Queue,
-				configurable: false,
-				writable: false
-			});
-		} else {
-			console.warn(`"Queue" not found.`)
-		}
-		if(typeof DataStore==="function"){
-			Object.defineProperty(this, "DataStore", {
-				value: DataStore,
-				configurable: false,
-				writable: false
-			});
-		} else {
-			console.warn(`"DataStore" not found.`)
-		}
+		_define('Version', Version);
 	}
 
 
@@ -315,19 +288,23 @@ class ZDK{
 			}
 		}
 
-		const browserWindows = await browser.windows.getAll({
-			populate: false,
-			windowTypes: ["normal"]
-		});
-
-		// If the function is still running, it mean that the url isn't detected to be opened, so, we can open it
-		if(browserWindows.length===0){
-			await browser.windows.create({
-				"focused": true,
-				"type": "normal",
-				"url": url
+		if (typeof browser.windows === "undefined") {
+			const browserWindows = await browser.windows.getAll({
+				populate: false,
+				windowTypes: ["normal"]
 			});
-		} else{
+
+			// If the function is still running, it mean that the url isn't detected to be opened, so, we can open it
+			if(browserWindows.length===0){
+				await browser.windows.create({
+					"focused": true,
+					"type": "normal",
+					"url": url
+				});
+			} else{
+				await browser.tabs.create({ "url": url });
+			}
+		} else {
 			await browser.tabs.create({ "url": url });
 		}
 
@@ -340,7 +317,7 @@ class ZDK{
 	 * @param selector
 	 * @param html
 	 * @param {HTMLDocument} doc
-	 * @returns {Element}
+	 * @returns {null | Array<HTMLElement>}
 	 */
 	insertHtml(action, selector, html, doc=document){
 		if(typeof action!=="string"||action===""){
@@ -374,7 +351,7 @@ class ZDK{
 	 * @param selector
 	 * @param html
 	 * @param {HTMLDocument} doc
-	 * @returns {Element}
+	 * @returns {null | Array<HTMLElement>}
 	 */
 	appendTo(selector, html, doc=document){
 		return this.insertHtml("appendTo",selector,html,doc);
@@ -385,10 +362,21 @@ class ZDK{
 	 * @param selector
 	 * @param html
 	 * @param {HTMLDocument} doc
-	 * @returns {Element}
+	 * @returns {null | Array<HTMLElement>}
 	 */
 	insertBefore(selector, html, doc=document){
 		return this.insertHtml("insertBefore",selector,html,doc);
+	}
+
+	/**
+	 *
+	 * @param {HTMLElement} node
+	 */
+	removeAllChildren(node){
+		// Taken from https://stackoverflow.com/questions/683366/remove-all-the-children-dom-elements-in-div
+		while (node.hasChildNodes()) {
+			node.removeChild(node.lastChild);
+		}
 	}
 
 	/**
@@ -452,6 +440,19 @@ class ZDK{
 	 */
 	static hasTouch(win=window) {
 		return win.hasOwnProperty('ontouchstart');
+	}
+
+	/**
+	 *
+	 * @param date
+	 * @return {boolean}
+	 */
+	static isValidDate(date){
+		return date instanceof Date && !isNaN(date.getTime())
+	}
+
+	static validDateOrNull(date){
+		return ZDK.isValidDate(date)? date : null;
 	}
 }
 

@@ -5,6 +5,7 @@ class DataStore {
 	 */
 	constructor(win=window){
 		this.storage = win.localStorage;
+		this.window = win;
 
 		this.types = {
 			"object": 0,
@@ -454,47 +455,98 @@ class DataStore {
 	/**
 	 *
 	 * @param {String|String[]} keys
+	 * @param {String} id
+	 * @param {Boolean=true} withData
+	 * @return {null | Array} Array like [key|keys, id, data] (with data if withData=true)
+	 */
+	getArgumentsFromStorage(keys, id, withData=true) {
+		let storageIds=null;
+		try{
+			storageIds = DataStore.extractStorageId(id);
+		} catch (e){}
+
+		if(storageIds!==null){
+			if(storageIds.hasOwnProperty("key") && storageIds.key===keys){
+				if(withData===true){
+					return [storageIds.key, storageIds.id, this.get(storageIds.key, storageIds.id)];
+				} else {
+					return [storageIds.key, storageIds.id];
+				}
+			} else if(storageIds.hasOwnProperty("keys")){
+				if(storageIds.keys.length >= keys.length){
+					let equals = true;
+
+					for(let i=0;i<keys.length;i++){
+						if(keys[i]!==storageIds.keys[i]){
+							equals = false;
+							break;
+						}
+					}
+
+					if(equals===true){
+						if(withData===true){
+							return [storageIds.keys, storageIds.id, this.get(storageIds.keys, storageIds.id)];
+						} else {
+							return [storageIds.keys, storageIds.id];
+						}
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 *
+	 * @param {String|String[]} keys
 	 * @param {Function} fn Return true to break loop
 	 * @param {Boolean=true} withData
 	 */
 	forEach(keys, fn, withData=true){
 		for(let i in this.storage){
 			if(this.storage.hasOwnProperty(i)){
-				let storageIds=null;
-				try{
-					storageIds = DataStore.extractStorageId(i);
-				} catch (e){}
+				const fnArguments = this.getArgumentsFromStorage(keys, i, withData);
 
-				if(storageIds!==null){
-					if(storageIds.hasOwnProperty("key") && storageIds.key===keys){
-						fn(storageIds.key, storageIds.id, this.get(storageIds.key, storageIds.id));
-					} else if(storageIds.hasOwnProperty("keys")){
-						if(storageIds.keys.length >= keys.length){
-							let equals = true;
+				if (fnArguments !== null && Array.isArray(fnArguments)) {
+					let breakLoop = false;
 
-							for(let i=0;i<keys.length;i++){
-								if(keys[i]!==storageIds.keys[i]){
-									equals = false;
-									break;
-								}
-							}
+					try {
+						breakLoop = fn.apply(this, fnArguments)
+					} catch (e) {
+						console.error(e);
+					}
 
-							if(equals===true){
-								let breakLoop = false;
-								if(withData===true){
-									breakLoop = fn(storageIds.keys, storageIds.id, this.get(storageIds.keys, storageIds.id));
-								} else {
-									breakLoop = fn(storageIds.keys, storageIds.id);
-								}
-
-								if(breakLoop===true){
-									break;
-								}
-							}
-						}
+					if (breakLoop === true) {
+						break;
 					}
 				}
 			}
 		}
+	}
+
+	/**
+	 *
+	 * @param {String|String[]} keys
+	 * @param {Function} fn
+	 * @param {Boolean=true} withData
+	 * @param {Window} win
+	 */
+	onChange(keys, fn, withData=true, win=this.window){
+		if(typeof fn !== "function"){
+			throw 'WrongArgument';
+		}
+
+		const _this = this;
+		win.addEventListener("storage", function (event) {
+			if (win.localStorage === event.storageArea) {
+				const fnArguments = _this.getArgumentsFromStorage(keys, event.key, withData);
+
+				if (fnArguments !== null && Array.isArray(fnArguments)){
+					fnArguments.unshift(event);
+					fn.apply(_this, fnArguments);
+				}
+			}
+		}, false);
 	}
 }

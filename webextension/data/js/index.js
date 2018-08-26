@@ -77,26 +77,6 @@ function getStreamURL(website, id, contentId, usePrefUrl){
 }
 appGlobal["getStreamURL"] = getStreamURL;
 
-function refreshPanel(data){
-	let doUpdateTheme = false;
-	if(typeof data !== "undefined"){
-		if(typeof data.doUpdateTheme !== "undefined"){
-			doUpdateTheme = data.doUpdateTheme;
-		}
-	}
-	updatePanelData(doUpdateTheme);
-}
-function refreshStreamsFromPanel(){
-	let done = ()=>{
-		updatePanelData();
-	};
-	if(appGlobal["checkingLivesFinished"]){
-		checkLives()
-			.then(done)
-			.catch(done)
-	}
-}
-
 function display_id(id, displayName){
 	if(website_channel_id.test(id)){
 		return i18ex._("The_channel", {"channel": (typeof displayName === "string")? displayName : website_channel_id.exec(id)[1]});
@@ -257,10 +237,6 @@ function addStreamFromPanel(data){
 
 													streamListFromSetting.addStream(website, streamId, url);
 													streamListFromSetting.update();
-													// Update the panel for the new stream added
-													setTimeout(function(){
-														refreshPanel(false);
-													}, 5000);
 												})
 												.catch(err=>{
 													consoleMsg("warn", err);
@@ -276,11 +252,6 @@ function addStreamFromPanel(data){
 													consoleMsg("warn", err);
 												})
 											;
-
-											// Update the panel for the new stream added
-											setTimeout(function(){
-												refreshPanel(false);
-											}, 5000);
 										}
 									}
 								}
@@ -348,8 +319,6 @@ function deleteStreamFromPanel(data){
 							consoleMsg("warn", err);
 						})
 					;
-					// Update the panel for the new stream added
-					refreshPanel(false);
 				})
 				.catch(err=>{
 					consoleMsg("warn", err);
@@ -365,8 +334,6 @@ function deleteStreamFromPanel(data){
 					consoleMsg("warn", err);
 				})
 			;
-			// Update the panel for the new stream added
-			refreshPanel(false);
 		}
 	}
 }
@@ -431,9 +398,6 @@ function streamSetting_Update(data){
 appGlobal.sendDataToMain = function(sender, id, data){
 	if(sender === "Live_Notifier_Panel" || sender === "Live_Notifier_Embed" || sender === "Live_Notifier_Options"){
 		switch(id){
-			case "refreshPanel":
-				refreshPanel(data);
-				break;
 			case "importStreams":
 				let website = data;
 				consoleMsg("info", `Importing ${website}...`);
@@ -462,7 +426,7 @@ appGlobal.sendDataToMain = function(sender, id, data){
 				;
 				break;
 			case "panel_onload":
-				handleChange(data);
+				setIcon();
 				break;
 			case "shareStream":
 				shareStream(data);
@@ -488,16 +452,14 @@ chrome.runtime.onMessage.addListener(message=>{
 	appGlobal.sendDataToMain(message.sender, message.id, message.data);
 });
 
-function updatePanelData(doUpdateTheme=true){
-	// Update panel data
-	if(typeof panel__UpdateData === "function"){
-		panel__UpdateData(doUpdateTheme);
+function refreshStreamsFromPanel() {
+	if (appGlobal["checkingLivesFinished"]) {
+		checkLives()
+			.catch(err => {
+				consoleMsg("error", err);
+			})
+		;
 	}
-}
-
-function handleChange() {
-	setIcon();
-	updatePanelData();
 }
 
 const chromeNotifications = new ChromeNotificationControler(),
@@ -868,16 +830,20 @@ function setIcon(){
 	}
 	
 	let badgeImage = (badgeOnlineCount > 0)? online_badgeData : offline_badgeData;
-	if(badgeImage !== null){
-		browser.browserAction.setIcon({
-			path: badgeImage
-		});
-	} else {
-		consoleMsg("warn", "Icon(s) is/are not loaded");
+	if (typeof browser.browserAction.setIcon === "function") {
+		if (badgeImage !== null) {
+			browser.browserAction.setIcon({
+				path: badgeImage
+			});
+		} else {
+			consoleMsg("warn", "Icon(s) is/are not loaded");
+		}
 	}
-	
-	browser.browserAction.setBadgeText({text: badgeOnlineCount.toString()});
-	browser.browserAction.setBadgeBackgroundColor({color: (badgeOnlineCount > 0)? "#FF0000" : "#424242"});
+
+	if (typeof browser.browserAction.setBadgeText === "function") {
+		browser.browserAction.setBadgeText({text: badgeOnlineCount.toString()});
+		browser.browserAction.setBadgeBackgroundColor({color: (badgeOnlineCount > 0)? "#FF0000" : "#424242"});
+	}
 }
 appGlobal["setIcon"] = setIcon;
 
@@ -999,6 +965,17 @@ async function checkLives(idArray){
 		}
 	});
 
+	/**
+	 *
+	 * @type {boolean}
+	 */
+	const isFullCheck = !(typeof idArray !== "undefined" && idArray instanceof Map);
+	if (isFullCheck === true && interval === null) {
+		interval = ZTimer.setInterval("checkLivesInterval", getPreference('check_delay'), 'm', checkLives);
+	}
+
+
+
 	if(checkQueue.queue.size === 0){
 		setIcon();
 		appGlobal["checkingLivesFinished"] = true;
@@ -1065,9 +1042,9 @@ async function checkLives(idArray){
 			console.groupEnd();
 		}
 
-		if(!(typeof idArray !== "undefined" && idArray instanceof Map)){ // Only reset interval if it's a "full" check
-			clearInterval(interval);
-			interval = setInterval(checkLives, getPreference('check_delay') * 60000);
+		if (isFullCheck === true) { // Only reset interval if it's a "full" check
+			interval.duration = getPreference('check_delay');
+			interval.init();
 		}
 
 		if(needCheckMissing){
@@ -1078,9 +1055,9 @@ async function checkLives(idArray){
 		return result;
 	}
 
-	if(!(typeof idArray !== "undefined" && idArray instanceof Map)){ // Only reset interval if it's a "full" check
-		clearInterval(interval);
-		interval = setInterval(checkLives, getPreference('check_delay') * 60000);
+	if (isFullCheck === true) { // Only reset interval if it's a "full" check
+		interval.duration = getPreference('check_delay');
+		interval.init();
 	}
 }
 function checkMissing(){
@@ -1107,11 +1084,8 @@ function checkMissing(){
 		
 		if(listToCheck.size > 0){
 			checkLives(listToCheck)
-				.finally(result=>{
-					consoleMsg("info", (result!==undefined)? result : "Nothing");
-					if(typeof panelUpdateData === "function"){
-						panelUpdateData();
-					}
+				.catch(err => {
+					consoleMsg("error", err);
 				})
 			;
 		}
@@ -1467,7 +1441,6 @@ function importButton(website){
 				})
 			;
 		}
-		refreshPanel(false);
 	};
 	if(typeof websites.get(website).importAPIGetUserId === "function" && typeof websites.get(website).importGetUserId === "function"){
 		let importAPIGetUserId = websites.get(website).API(`${getPreference(`${website}_user_id`)}`);
@@ -1617,39 +1590,44 @@ async function getRedirectedURL(URL, maxRedirect){
 }
 
 // Begin to check lives
-let interval;
+/**
+ * @type ZTimer
+ */
+let interval = null;
 function initAddon(){
-	browser.contextMenus.removeAll();
-	browser.contextMenus.create({
-		"type": "normal",
-		"id": "livenotifier_contextMenu",
-		"title": i18ex._("Add_this"),
-		"contexts": ["link"],
-		"targetUrlPatterns": ["http://*/*", "https://*/*"],
-		"onclick": function(info, tab){
-			activeTab = tab;
-			let url = info.linkUrl;
-			consoleMsg("info", `[ContextMenu] URL: ${url}`);
+	if (typeof browser.contextMenus !== "undefined" && typeof browser.contextMenus.create === "function") {
+		browser.contextMenus.removeAll();
+		browser.contextMenus.create({
+			"type": "normal",
+			"id": "livenotifier_contextMenu",
+			"title": i18ex._("Add_this"),
+			"contexts": ["link"],
+			"targetUrlPatterns": ["http://*/*", "https://*/*"],
+			"onclick": function(info, tab){
+				activeTab = tab;
+				let url = info.linkUrl;
+				consoleMsg("info", `[ContextMenu] URL: ${url}`);
 
-			getRedirectedURL(url, 5)
-				.then((result) => {
-					if((result.indexOf("http://") === 0 || result.indexOf("https://") === 0) && url !== result){
-						consoleMsg("info", `Redirected URL: ${result}`);
-						addStreamFromPanel({"ContextMenu_URL": result});
-					} else {
+				getRedirectedURL(url, 5)
+					.then((result) => {
+						if((result.indexOf("http://") === 0 || result.indexOf("https://") === 0) && url !== result){
+							consoleMsg("info", `Redirected URL: ${result}`);
+							addStreamFromPanel({"ContextMenu_URL": result});
+						} else {
+							addStreamFromPanel({"ContextMenu_URL": url});
+						}
+					})
+					.catch((error) => {
+						if(typeof error === "object"){
+							consoleDir(error);
+						} else {
+							consoleMsg("warn", error);
+						}
 						addStreamFromPanel({"ContextMenu_URL": url});
-					}
-				})
-				.catch((error) => {
-					if(typeof error === "object"){
-						consoleDir(error);
-					} else {
-						consoleMsg("warn", error);
-					}
-					addStreamFromPanel({"ContextMenu_URL": url});
-				})
-		}
-	});
+					})
+			}
+		});
+	}
 
 	let localToRemove = [];
 	/* 		----- Importation/Removal of old preferences -----		*/
@@ -1711,6 +1689,213 @@ function initAddon(){
 
 	/* 		----- Fin Importation/Removal des vieux paramères -----		*/
 
+
+
+
+
+	const
+		/**
+		 *
+		 * @param {ZTimer} zTimer
+		 * @return {Promise<void>}
+		 */
+		syncTrigger = async function(zTimer){
+			await updateSyncData(zTimer)
+				.catch(err=>{
+					consoleMsg('error', err);
+				})
+			;
+		},
+		syncInterval = ZTimer.setInterval('syncInterval', 10, 'm', function (){
+			const zTimer = this;
+
+			syncTrigger(zTimer)
+				.catch(err=>{
+					consoleMsg('error', err);
+				})
+			;
+		})
+	;
+
+
+
+	let dropboxClientId = getPreference('dropboxClientId'),
+		dropboxAuthToken = getPreference('dropboxClientAuthToken'),
+
+		dropboxController = null
+	;
+
+	/**
+	 *
+	 * @param {String} dropboxClientId
+	 * @param {String} dropboxAuthToken
+	 * @return {DropboxController | null}
+	 */
+	const updateDropboxController = function(dropboxClientId, dropboxAuthToken){
+		if(dropboxController!==null){
+			dropboxController.dropboxClientId = dropboxClientId;
+			dropboxController.dropboxAuthToken = dropboxAuthToken;
+		} else if(dropboxAuthToken!=='' || dropboxClientId!==''){
+			dropboxController = new DropboxController('livenotifier.json', dropboxClientId, dropboxAuthToken);
+		} else {
+			dropboxController = null;
+		}
+
+		return dropboxController;
+	};
+
+	/**
+	 *
+	 * @param {ZTimer=null} zTimer
+	 * @return {Promise<void>}
+	 */
+	const updateSyncData = async function (zTimer=null) {
+		if(dropboxController===null){
+			return;
+		}
+
+		let needUpload = updatedPreferences.size > 0,
+			currentSyncData = null,
+			currentSyncMetaData = null
+		;
+
+
+		try {
+			let {data, metadata} = await dropboxController.get();
+			currentSyncData = data;
+			currentSyncMetaData = metadata;
+		} catch (e) {
+			const msg = e.toString();
+			if (msg === 'InvalidJson' || msg === 'NoFile') {
+				consoleMsg('warn', `Dropbox error "${msg}" (ignoring eventual existing file)`);
+				needUpload = true;
+			} else {
+				consoleMsg('error', e);
+			}
+		}
+
+		const date = (getPreference(CHROME_PREFERENCES_SYNC_ID)!=='')? ZDK.validDateOrNull(new Date(getPreference(CHROME_PREFERENCES_SYNC_ID))) : null,
+			currentSyncDate = (currentSyncMetaData !== null && currentSyncMetaData.hasOwnProperty('server_modified'))? ZDK.validDateOrNull(new Date(currentSyncMetaData.server_modified)) : null
+		;
+
+
+		if (currentSyncData!==null && currentSyncData.hasOwnProperty('preferences') && currentSyncData.hasOwnProperty('live_notifier_version')) {
+			const data = new Map(Object.entries(currentSyncData.preferences));
+
+			if (currentSyncDate !== date) {
+				let isNewer = false;
+
+				if (date === null) {
+					isNewer = null;
+				} else if (currentSyncDate > date) {
+					isNewer = true;
+
+					data.forEach((value, prefId) => {
+						if (prefId !== 'stream_keys_list' && updatedPreferences.has(prefId) === false) {
+							savePreference(prefId, value);
+						}
+					});
+				}
+
+				const oldStreamList = getPreference('stream_keys_list');
+
+				streamListFromSetting.mergeData(data.get('stream_keys_list'), isNewer);
+				streamListFromSetting.update();
+
+				if (needUpload === false && getPreference('stream_keys_list') !== oldStreamList) {
+					needUpload = true;
+				}
+			}
+		}
+
+
+
+		updatedPreferences.clear();
+
+		if (needUpload === true) {
+			let uploadDate = new Date(),
+				newMetaData = null
+			;
+
+			savePreference(CHROME_PREFERENCES_SYNC_ID, uploadDate.toISOString());
+
+			try {
+				newMetaData = await dropboxController.set(chromeSettings.getSyncPreferences());
+			} catch (e) {
+				consoleMsg('error', e);
+			}
+
+			if (newMetaData !== null && newMetaData.hasOwnProperty('server_modified')) {
+				uploadDate = new Date(newMetaData.server_modified);
+				savePreference(CHROME_PREFERENCES_SYNC_ID, uploadDate.toISOString());
+			}
+		} else {
+			savePreference(CHROME_PREFERENCES_SYNC_ID, currentSyncDate.toISOString());
+		}
+
+
+
+		if(zTimer!==null){
+			await zTimer.init()
+				.catch(err=>{
+					consoleMsg('error', err);
+				})
+			;
+		}
+	};
+
+
+
+	const updatedPreferences = new Map(),
+		uploadSyncData = _.debounce(function () {
+			updateSyncData(syncInterval)
+				.catch(err=>{
+					consoleMsg('error', err);
+				})
+			;
+		}, 1000, {
+			maxWait: 10000
+		})
+	;
+
+	dropboxController = updateDropboxController(dropboxClientId, dropboxAuthToken);
+	if (dropboxController !== null) {
+		uploadSyncData();
+	}
+
+	browser.storage.onChanged.addListener((changes, area) => {
+		if(area === "local"){
+			for(let prefId in changes){
+				if(changes.hasOwnProperty(prefId)){
+					switch(prefId){
+						case "dropboxClientId":
+							dropboxClientId = changes[prefId].newValue;
+							break;
+						case "dropboxClientAuthToken":
+							dropboxClientAuthToken = changes[prefId].newValue;
+							break;
+					}
+
+					if (prefId!==CHROME_PREFERENCES_SYNC_ID && chromeSettings.defaultSettingsSync.has(prefId) && updatedPreferences.has(prefId) === false) {
+						updatedPreferences.set(prefId, '');
+					}
+				}
+			}
+
+			if (updatedPreferences.size > 0) {
+				if (updatedPreferences.has('dropboxClientId') || dropboxClientId.has('dropboxClientAuthToken')) {
+					dropboxController = updateDropboxController(dropboxClientId, dropboxAuthToken);
+				}
+
+				uploadSyncData();
+			}
+		}
+	});
+
+
+
+
+
 	streamListFromSetting.refresh(true);
 
 	checkLives()
@@ -1727,8 +1912,6 @@ let previousVersion = "",
 ;
 
 function checkIfUpdated(details){
-	let getVersionNumbers =  /^(\d+)\.(\d+)\.(\d+)(?:\.(\d+))?$/;
-	
 	let installReason = details.reason;
 	consoleMsg("info", `Runtime onInstalled reason: ${installReason}`);
 
@@ -1736,42 +1919,26 @@ function checkIfUpdated(details){
 	// Checking if updated
 	if(installReason === "update" || installReason === "unknown"){
 		previousVersion = details.previousVersion;
-		let previousVersion_numbers = getVersionNumbers.exec(previousVersion);
-		let current_version_numbers = appGlobal["version"] = getVersionNumbers.exec(current_versionStr);
-		
-		if(previousVersion !== current_versionStr){
-			if(
-				(current_version_numbers.length === 4 && previousVersion_numbers.length === 4)
-				||
-				(current_version_numbers.length === 5 && (previousVersion_numbers.length === 4 || previousVersion_numbers.length === 5))
-			){
-				if((current_version_numbers[1] > previousVersion_numbers[1])
-					||
-					((current_version_numbers[1] === previousVersion_numbers[1]) && (current_version_numbers[2] > previousVersion_numbers[2]))
-					||
-					((current_version_numbers[1] === previousVersion_numbers[1]) && (current_version_numbers[2] === previousVersion_numbers[2]) && (current_version_numbers[3] > previousVersion_numbers[3]))
-					||
-					(
-						current_version_numbers.length === 5
-						&&
-						current_version_numbers[1] === previousVersion_numbers[1] && current_version_numbers[2] === previousVersion_numbers[2] && current_version_numbers[3] === previousVersion_numbers[3]
-						&&
-						(previousVersion_numbers.length === 4 || current_version_numbers[4] > previousVersion_numbers[4])
-					)
-				){
-					doNotif({
-						"message": i18ex._("Addon_have_been_updated", {"version": current_versionStr})
-					})
-						.catch(err=>{
-							consoleMsg("warn", err);
-						})
-					;
+		const current_version_numbers = appGlobal["version"] = new Version(current_versionStr);
 
-					if(installReason==="install" || (previousVersion_numbers[1] <= 11 && previousVersion_numbers[2]<=16)){
-						ZDK.openTabIfNotExist(chrome.extension.getURL("/data/options.html#news"))
-							.catch(console.error)
-						;
-					}
+
+
+		if (previousVersion !== current_versionStr) {
+			const previousVersion_numbers = new Version(previousVersion);
+
+			if (current_version_numbers.compareTo(previousVersion_numbers) === 1) {
+				doNotif({
+					"message": i18ex._("Addon_have_been_updated", {"version": current_versionStr})
+				})
+					.catch(err=>{
+						consoleMsg("warn", err);
+					})
+				;
+
+				if(installReason==="install" || (previousVersion_numbers[0] <= 11 && previousVersion_numbers[1]<=16)){
+					ZDK.openTabIfNotExist(chrome.extension.getURL("/data/options.html#news"))
+						.catch(console.error)
+					;
 				}
 			}
 		}

@@ -174,6 +174,9 @@ class StreamListFromSetting {
 				"notifyOffline",
 				"notifyVocalOffline"
 			],
+			date: [
+				"_updated"
+			],
 			string: [
 				"facebook",
 				"twitter",
@@ -223,6 +226,10 @@ class StreamListFromSetting {
 
 	static getDefault(){
 		return {
+			_updated: '',
+
+
+
 			hide: false,
 			ignore: false,
 			iconIgnore: false,
@@ -241,6 +248,36 @@ class StreamListFromSetting {
 			facebook: "",
 			twitter: ""
 		}
+	}
+
+	/**
+	 *
+	 * @param {Object} obj
+	 * @return {Proxy}
+	 */
+	static observeStreamSetting(obj){
+		return new Proxy(obj, {
+			set: function (obj, propName, newValue) {
+				obj._updated = new Date();
+				obj[propName] = newValue;
+
+				// Indicate success
+				return true;
+			}
+		});
+	}
+
+	/**
+	 *
+	 * @param {*} date
+	 * @return {boolean}
+	 */
+	static isValidDate(date){
+		if(date instanceof Date){
+			return Number.isNaN(date.getTime())===false;
+		}
+
+		return false;
 	}
 
 	/**
@@ -314,6 +351,11 @@ class StreamListFromSetting {
 							outputData[prefId] = parsedData;
 						} else if(this.PREF_TYPES.string.indexOf(prefId) !== -1){
 							outputData[prefId] = decodeString(data);
+						} else if(this.PREF_TYPES.date.indexOf(prefId) !== -1){
+							const date = Date.parse(decodeString(data));
+							if(StreamListFromSetting.isValidDate(date)){
+								outputData[prefId] = date;
+							}
 						} else if(this.PREF_TYPES.list.indexOf(prefId) !== -1){
 							outputData[prefId].push(data);
 						} else {
@@ -322,7 +364,7 @@ class StreamListFromSetting {
 						}
 					});
 
-					mapDataAll.get(website).set(id, outputData);
+					mapDataAll.get(website).set(id, StreamListFromSetting.observeStreamSetting(outputData));
 				}
 			}
 		}
@@ -375,10 +417,39 @@ class StreamListFromSetting {
 		return result;
 	}
 
+
+
+	get(website, id){
+		if(this.mapDataAll.has(website) && this.mapDataAll.get(website).has(id)){
+			return this.mapDataAll.get(website).get(id);
+		} else {
+			return undefined;
+		}
+	}
+
+	getExistingId(website, id){
+		let result = undefined;
+		this.mapDataAll.get(website).forEach((value, i) => {
+			if(i.toLowerCase() === id.toLowerCase()){
+				result = i;
+			}
+		});
+		return result;
+	}
+
+	set(website, id, data){
+		if(this.mapDataAll.has(website)===false){
+			this.mapDataAll.set(website, new Map());
+		}
+
+		this.mapDataAll.get(website).set(id, data);
+	}
+
+
+
 	addStream(website, id, url){
 		if(!this.streamExist(website, id)){
-			this.mapDataAll.get(website).set(id, {streamURL: url});
-			this.mapData = this.mapDataAll.get(website);
+			this.set(website, id, {streamURL: url});
 			consoleMsg("log", `${id} has been added`);
 		}
 	}
@@ -386,9 +457,7 @@ class StreamListFromSetting {
 	deleteStream(website, id){
 		if(this.streamExist(website, id)){
 			this.mapDataAll.get(website).delete(id);
-			if(typeof this.mapData !== "undefined"){
-				this.mapData.delete(id);
-			}
+
 			if(liveStore.hasChannel(website, id)){
 				liveStore.removeChannel(website, id);
 			}
@@ -429,6 +498,14 @@ class StreamListFromSetting {
 						filtersArr.push(prefId + "::" + streamSettings[prefId]);
 					} else if(this.PREF_TYPES.string.indexOf(prefId) !== -1){
 						filtersArr.push(prefId + "::" + encodeString(streamSettings[prefId]));
+					} else if(this.PREF_TYPES.date.indexOf(prefId) !== -1){
+						let date = streamSettings[prefId];
+
+						if(StreamListFromSetting.isValidDate(date)){
+							date = encodeString(date.toISOString());
+						}
+
+						filtersArr.push(prefId + "::" + date);
 					} else if(this.PREF_TYPES.list.indexOf(prefId) !== -1){
 						for(let k in streamSettings[prefId]){
 							if(streamSettings[prefId].hasOwnProperty(k)){
@@ -467,6 +544,60 @@ class StreamListFromSetting {
 		consoleDir(getPreference(`stream_keys_list`), "Stream key list update");
 		if(checkMissing===true){
 			appGlobal["checkMissing"]();
+		}
+	}
+
+	/**
+	 *
+	 * @param {String} rawNewData
+	 * @param {Boolean} isNewer
+	 */
+	mergeData(rawNewData, isNewer){
+		const newData = this.parseSetting(rawNewData),
+			newDataKeyMapping = new Map()
+		;
+
+		newData.forEach((map, website)=>{
+			if(isNewer===true){
+				newDataKeyMapping.set(website, new Map());
+				Array.from(map.keys()).forEach(function (key){
+					newDataKeyMapping.get(website).set(key.toLowerCase(), key);
+				});
+			}
+
+			map.forEach((streamData, streamId)=>{
+				let doUpdate = false,
+					existingId = this.getExistingId(website, streamId)
+				;
+
+				if(existingId===undefined){
+					if(isNewer===true || isNewer===null){
+						doUpdate = true;
+					}
+				} else if(streamData._updated > this.get(website, existingId)._updated){
+					doUpdate = true;
+				}
+
+				if(doUpdate===true){
+					this.set(website, streamId, streamData);
+				}
+			})
+		});
+
+		let updatedMissing = false;
+		this.forEach((map, website)=>{
+			map.forEach((streamData, streamId)=>{
+				if(isNewer === true && (newDataKeyMapping.has(website) === false || newDataKeyMapping.get(website).has(streamId.toLowerCase()) === false)){
+					this.deleteStream(website, streamId);
+				} else if(streamData.hasOwnProperty('_updated') === false){
+					streamData._updated = new Date();
+					updatedMissing = true;
+				}
+			})
+		});
+
+		if(updatedMissing === true){
+			this.update();
 		}
 	}
 }

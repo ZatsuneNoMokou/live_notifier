@@ -194,6 +194,11 @@
 	"import_preferences_title": "Importer les préférences depuis un fichier",
 	"import_preferences": "Importer",
 
+	"dropboxClientId_title": "Dropbox - Identifiant client",
+	"dropboxClientId_description": "",
+	"dropboxClientAuthToken_title": "Dropbox - AuthToken client",
+	"dropboxClientAuthToken_description": "",
+
 	"showAdvanced_title": "Afficher les options avancées",
 	"showAdvanced_description": "Activé si coché",
 	"showExperimented_title": "Afficher les options pour utilisateur experimenté",

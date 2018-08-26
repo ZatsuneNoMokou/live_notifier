@@ -198,6 +198,10 @@ class LiveStore extends DataStore {
 		}
 	}
 
+
+
+
+
 	getChannel(website, id){
 		this.checkValidWebsite(website);
 		return this.get([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
@@ -218,6 +222,10 @@ class LiveStore extends DataStore {
 		}
 	}
 
+
+
+
+
 	hasChannel(website, id){
 		this.checkValidWebsite(website);
 
@@ -236,6 +244,10 @@ class LiveStore extends DataStore {
 		}
 	}
 
+
+
+
+
 	setChannel(website, id, data){
 		this.checkValidWebsite(website);
 
@@ -247,6 +259,10 @@ class LiveStore extends DataStore {
 
 		return this.set([this.CONSTANTS.live, this.CONSTANTS[website], id], ((id!==contentId)? contentId : ""), data);
 	}
+
+
+
+
 
 	updateChannel(website, id, fn){
 		this.checkValidWebsite(website);
@@ -264,6 +280,10 @@ class LiveStore extends DataStore {
 		return this.setLive(website, id, contentId, data);
 	}
 
+
+
+
+
 	removeChannel(website, id){
 		this.checkValidWebsite(website);
 
@@ -276,6 +296,10 @@ class LiveStore extends DataStore {
 		return this.remove([this.CONSTANTS.live, this.CONSTANTS[website]], id);
 	}
 
+
+
+
+
 	forEachChannelWrapper(fn){
 		const _this = this;
 		return function (keys, id, data) {
@@ -286,8 +310,8 @@ class LiveStore extends DataStore {
 
 	/**
 	 *
-	 * @param {String=} arg1
-	 * @param {Function} arg2
+	 * @param {String | Function} arg1 Website | Callback function
+	 * @param {Function=} arg2 Callback function
 	 * @param {String} arg2.website
 	 * @param {String} arg2.id
 	 * @param {Object} arg2.data
@@ -339,5 +363,46 @@ class LiveStore extends DataStore {
 		} else {
 			throw "[forEachLive] Wrong arguments";
 		}
+	}
+
+
+
+
+
+	onChannelChangeWrapper(fn){
+		const _this = this;
+		return function (e, keys, id, data) {
+			const [,website] = keys;
+			fn(e, _this.CONSTANTS[website], id, data);
+		}
+	}
+
+	/**
+	 *
+	 * @param {Function} fn
+	 * @param {Boolean=false} withData
+	 * @param {Window} win
+	 */
+	onChannelChange(fn, withData=false, win=this.window) {
+		this.onChange([this.CONSTANTS.channel], this.onChannelChangeWrapper(fn), withData, win);
+	}
+
+
+	onLiveChangeWrapper(fn){
+		const _this = this;
+		return function (e, keys, contentId, data) {
+			const [,website, id] = keys;
+			fn(e, _this.CONSTANTS[website], id, (contentId!=="")? contentId : id, data);
+		}
+	}
+
+	/**
+	 *
+	 * @param {Function} fn
+	 * @param {Boolean=false} withData
+	 * @param {Window} win
+	 */
+	onLiveChange(fn, withData=false, win=this.window) {
+		this.onChange([this.CONSTANTS.live], this.onLiveChangeWrapper(fn), withData, win);
 	}
 }

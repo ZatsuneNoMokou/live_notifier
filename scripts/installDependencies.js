@@ -99,8 +99,14 @@ async function init() {
 		echo("Copying dom-delegate...");
 		await _cp("./node_modules/dom-delegate/build/dom-delegate.js", jsLib);
 
+		echo("Copying Dropbox...");
+		await _cp("./node_modules/dropbox/dist/Dropbox-sdk.js", jsLib);
+
 		echo("Copying lz-string...");
 		await _cp("./node_modules/lz-string/libs/lz-string.js", jsLib);
+
+		echo("Copying moment with locales...");
+		await _cp("./node_modules/moment/min/moment-with-locales.min.js", jsLib);
 
 		success("\n✅ Done");
 		process.exit(0);

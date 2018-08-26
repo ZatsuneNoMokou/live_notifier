@@ -9,7 +9,7 @@
 	data-stream-website='{{streamWebsite}}' data-stream-website-lowercase='{{streamWebsiteLowercase}}'
 	data-stream-type='{{streamType}}'
 	data-stream-settings='{{streamSettings}}'
-	draggable="true">
+	draggable="true" tabindex="0">
 
 	{{#usePictureLazyLoading}}
 	<figure class="streamPicture hide">

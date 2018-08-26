@@ -94,6 +94,8 @@ const insertBefore = function (sel, html, doc=document) {
 	return backgroundPage.zDK.insertBefore(sel, html, doc);
 };
 
+const removeAllChildren = backgroundPage.zDK.removeAllChildren;
+
 let { StreamListFromSetting,
 	websites,
 	liveStore,
@@ -122,6 +124,10 @@ liveEvent("click", "#disableNotifications", ()=>{
 		document.querySelector(`#opentip-${disableNotificationsButton.dataset.opentipId} .ot-content`).textContent = i18ex._((backgroundPage.appGlobal["notificationGlobalyDisabled"])? "GloballyDisabledNotifications" : "GloballyDisableNotifications");
 	}
 });
+
+
+
+
 
 function allowDrop(event){
 	event.preventDefault();
@@ -179,6 +185,10 @@ dropDiv.addEventListener("dragover", allowDrop);
 document.addEventListener("dragenter", dragenter); // Event dragging something and entering a valid node
 document.addEventListener("dragleave", dragleave); // Event dragging something and leaving a valid node
 document.addEventListener("dragstart", drag); // Get dragged element data
+
+
+
+
 
 let deleteStreamButton = document.querySelector("#deleteStream");
 let streamChangeMode = false;
@@ -254,12 +264,17 @@ function confirmChanges(){
 		}
 		streamListSettings.update();
 	}
-	updatePanelData({"doUpdateTheme": false});
+	updatePanelData();
 	deleteStreamButtonClick();
 }
 confirmChanges_Node.addEventListener("click", confirmChanges, false);
 
+
+
+
+
 /*				---- Search Button ----				*/
+
 let toggle_search_button = document.querySelector("button#searchStream");
 let searchInput_onInput_Loaded = false;
 function searchContainer_Toggle(){
@@ -305,7 +320,12 @@ function searchInput_onInput(){
 	scrollbar_update("streamList");
 }
 
+
+
+
+
 /*				---- Settings ----				*/
+
 let settings_button = document.querySelector("#settings");
 let setting_Enabled = false;
 function unhideClassNode(node){
@@ -335,7 +355,7 @@ function selectSection(sectionNodeId){
 					switch(sectionNodeId){
 						case "streamList":
 							setting_Enabled = false;
-							sendDataToMain("refreshPanel", "");
+							updatePanelData();
 							break;
 						case "settings_container":
 							if(!optionsLoaded){
@@ -378,6 +398,10 @@ if(typeof browser.storage.sync === "object"){
 	save_sync_button.addEventListener("click", function(event){saveOptionsInSync(event);});
 }
 
+
+
+
+
 /*				---- Debug section ----				*/
 
 liveEvent("click", "#close_debugSection", function(){
@@ -394,11 +418,9 @@ function enableDebugSection(){
 
 /*				---- End Debug section ----				*/
 
-/*				---- Setting nodes generator ----				*/
 
-//loadPreferences("section#settings_container #preferences");
 
-/*			---- Settings end ----			*/
+
 
 /*			---- Stream Editor----			*/
 
@@ -450,16 +472,21 @@ liveEvent("click", "#saveEditedStream", function(){
 });
 
 /*			---- Stream Editor end----			*/
+
+
+/**
+ *
+ * @type {PanelStreams}
+ */
+const panelStreams = new PanelStreams();
+
 let ignoreHideIgnore = false;
-function updatePanelData(doUpdateTheme=true){
-	console.log("Updating panel data");
 
-	if(doUpdateTheme === true){
-		theme_update();
-	}
-
+function updatePanelData(){
 	//Clear stream list in the panel
-	initList({"group_streams_by_websites": getPreference("group_streams_by_websites"), "show_offline_in_panel": getPreference("show_offline_in_panel")});
+	panelStreams.group_streams_by_websites = getPreference("group_streams_by_websites");
+	panelStreams.show_offline_in_panel = getPreference("show_offline_in_panel");
+	panelStreams.clear();
 
 	let show_offline_in_panel = getPreference("show_offline_in_panel");
 
@@ -484,41 +511,75 @@ function updatePanelData(doUpdateTheme=true){
 			}
 
 			const livesMap = liveStore.getLive(website, id);
+
+			let streamRenderData = null;
+
 			if(livesMap.size > 0){
+				streamRenderData = [];
 				livesMap.forEach((streamData, contentId) => {
 					getCleanedStreamStatus(website, id, contentId, streamList.get(id), streamData.liveStatus.API_Status);
 
 					if(streamData.liveStatus.filteredStatus || (show_offline_in_panel && !streamData.liveStatus.filteredStatus)){
 						doStreamNotif(website, id, contentId, streamList.get(id), streamData.liveStatus.API_Status);
 
-						listener(website, id, contentId, "live", streamList.get(id), streamData);
+						streamRenderData.push(PanelStreams.streamToRenderData(website, id, contentId, "live", streamList.get(id), streamData));
 					}
-				})
-			} else {
-				if(liveStore.hasChannel(website, id)){
-					//let streamData = channelInfos.get(website).get(id);
-					//let contentId = id;
+				});
+			} else if (liveStore.hasChannel(website, id)) {
+				//let streamData = channelInfos.get(website).get(id);
+				//let contentId = id;
 
-					//console.info(`Using channel infos for ${id} (${website})`);
+				//console.info(`Using channel infos for ${id} (${website})`);
 
-					listener(website, id, /* contentId */ id, "channel", streamList.get(id), liveStore.getChannel(website, id));
-				} else if(websites.has(website)){
-					console.info(`Currrently no data for ${id} (${website})`);
-					if((typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true) || (typeof streamList.get(id).hide === "boolean" && streamList.get(id).hide === true)){
-						let contentId = id;
-						let streamData = {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
-						let website_channel_id = appGlobal["website_channel_id"];
-						if(website_channel_id.test(streamData.streamName)){
-							streamData.streamName = website_channel_id.exec(streamData.streamName)[1];
-						}
-						listener(website, id, contentId, website, streamList.get(id), streamData);
+				streamRenderData = PanelStreams.streamToRenderData(website, id, /* contentId */ id, "channel", streamList.get(id), liveStore.getChannel(website, id));
+			} else if (websites.has(website)) {
+				console.info(`Currrently no data for ${id} (${website})`);
+				if ((typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true) || (typeof streamList.get(id).hide === "boolean" && streamList.get(id).hide === true)) {
+					let contentId = id,
+						streamData = {
+							"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""},
+							"streamName": contentId,
+							"streamStatus": "",
+							"streamGame": "",
+							"streamOwnerLogo": "",
+							"streamCategoryLogo": "",
+							"streamCurrentViewers": null,
+							"streamURL": "",
+							"facebookID": "",
+							"twitterID": ""
+						},
+						website_channel_id = appGlobal["website_channel_id"]
+					;
+
+					if (website_channel_id.test(streamData.streamName)) {
+						streamData.streamName = website_channel_id.exec(streamData.streamName)[1];
 					}
-				} else {
-					let contentId = id;
-					let streamData = {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""};
-					console.warn(`The website of ${id} ("${website}") is not supported or not loaded`);
-					listener(website, id, contentId, "unsupported", streamList.get(id), streamData);
+
+					streamRenderData = PanelStreams.streamToRenderData(website, id, contentId, website, streamList.get(id), streamData);
 				}
+			} else {
+				let contentId = id,
+					streamData = {
+						"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""},
+						"streamName": contentId,
+						"streamStatus": "",
+						"streamGame": "",
+						"streamOwnerLogo": "",
+						"streamCategoryLogo": "",
+						"streamCurrentViewers": null,
+						"streamURL": "",
+						"facebookID": "",
+						"twitterID": ""
+					}
+				;
+
+				console.warn(`The website of ${id} ("${website}") is not supported or not loaded`);
+
+				streamRenderData = PanelStreams.streamToRenderData(website, id, contentId, "unsupported", streamList.get(id), streamData);
+			}
+
+			if (streamRenderData !== null) {
+				panelStreams.set(website, id, streamRenderData);
 			}
 		});
 	});
@@ -543,8 +604,6 @@ function updatePanelData(doUpdateTheme=true){
 		}
 	});
 
-	lazyLoading.updateStore();
-
 	checkMissing();
 
 	//Update online steam count in the panel
@@ -567,88 +626,9 @@ function updatePanelData(doUpdateTheme=true){
 	}
 }
 
-function removeAllChildren(node){
-	// Taken from https://stackoverflow.com/questions/683366/remove-all-the-children-dom-elements-in-div
-	while (node.hasChildNodes()) {
-		node.lastChild.removeEventListener("click", streamItemClick);
-		node.removeChild(node.lastChild);
-	}
-}
 
 
-class LazyLoading {
-	/*
-	 * From https://toddmotto.com/echo-js-simple-javascript-image-lazy-loading/
-	 * Changed:
-	 * - To turn it into ECMA6
-	 * - Use my custom image loader
-	 * - Load picture a bit under the current screen
-	 * - Debounce on the scroll event
-	 */
-	constructor(){
-		this.store = new Map();
 
-		document.querySelector("#streamList").addEventListener("scroll", _.debounce(()=>{
-			this.checkPictures();
-		}), 20, {
-			maxWait: 60
-		});
-	}
-	updateStore(){
-		const lazyImgs = document.querySelectorAll(".item-stream .streamPicture img[data-src]");
-		for(let i in lazyImgs){
-			if(lazyImgs.hasOwnProperty(i) && typeof lazyImgs[i].dataset.src==="string"){
-				this.store.set(lazyImgs[i], lazyImgs[i].dataset.src);
-				delete lazyImgs[i].dataset.src;
-			}
-		}
-		this.checkPictures();
-	}
-	checkPictures(){
-		this.store.forEach((src,node)=>{
-			const coords = node.getBoundingClientRect();
-			if((coords.top >= 0 && coords.left >= 0 && coords.top) <= 50 + (window.innerHeight || document.documentElement.clientHeight)){
-				node.src = src;
-				node.parentNode.classList.remove("hide");
-				node.parentNode.parentNode.classList.add("streamLogo");
-
-
-				this.store.delete(node);
-			}
-		});
-	}
-}
-
-
-let group_streams_by_websites = true,
-	lazyLoading = null
-;
-function initList(data){
-	let showOffline = data.show_offline_in_panel;
-	group_streams_by_websites = data.group_streams_by_websites;
-
-	if(lazyLoading===null){
-		lazyLoading=new LazyLoading();
-	}
-
-	let streamItems = document.querySelectorAll(".item-stream");
-	if(streamItems.length > 0){
-		for(let i in streamItems){
-			if(streamItems.hasOwnProperty(i)){
-				let node = streamItems[i];
-				if(typeof node.remove !== "undefined"){
-					node.removeEventListener("click", streamItemClick);
-					node.remove();
-				}
-			}
-		}
-	}
-
-	unhideClassNode(document.querySelector("#noErrorToShow"));
-	removeAllChildren(document.querySelector("#debugData"));
-
-	document.querySelector("#streamListOffline").classList.toggle("hide", !showOffline)
-}
 
 function listenerOnlineCount(data){
 	let streamOnlineCountNode = document.querySelector("#streamOnlineCountLabel");
@@ -762,29 +742,7 @@ appendTo("#streamList", Mustache.render(streamListTemplate, {
 	"websites": websitesList
 }));
 
-function insertStreamNode(newLine, website, id, contentId, type, streamData, online){
-	let statusNode = document.querySelector(`#streamList${(online)? "Online" : "Offline"}`),
-		statusStreamList = statusNode.querySelectorAll(".item-stream");
 
-	document.body.classList.toggle("groupedStreams", group_streams_by_websites);
-
-	if(group_streams_by_websites){
-		const selector = `#streamList${((online)? "Online" : "Offline")} .${(websites.has(website))? website : "unsupported"}`;
-		return appendTo(selector, newLine);
-	} else {
-		if(statusStreamList.length > 0){
-			for(let streamNode of statusStreamList){
-				if(typeof streamNode.tagName === "string"){
-					let streamNode_title = streamNode.dataset.streamName;
-					if(streamData.streamName.toLowerCase() < streamNode_title.toLowerCase()){
-						return insertBefore(streamNode, newLine);
-					}
-				}
-			}
-		}
-		return appendTo(statusNode, newLine);
-	}
-}
 
 liveEvent("click", ".item-stream .deleteStreamButton",	newDeleteStreamButton_onClick);
 liveEvent("click", ".item-stream .ignoreStreamButton",	newIgnoreStreamButton_onClick);
@@ -792,109 +750,14 @@ liveEvent("click", ".item-stream .copyStreamURL",		newCopyStreamURLButton_onClic
 liveEvent("click", ".item-stream .editStreamButton",	newEditStreamButton_onClick);
 liveEvent("click", ".item-stream .shareStreamButton",	newShareStreamButton_onClick);
 liveEvent("click", ".item-stream", streamItemClick);
-
-function listener(website, id, contentId, type, streamSettings, streamData){
-	let online = false;
-	switch(type){
-		case "live":
-			online = streamData.liveStatus.filteredStatus;
-			break;
-		case "channel":
-			online = streamData.liveStatus.API_Status;
-			break;
+liveEvent("keypress", ".item-stream", function (e) {
+	if(e.code==="Enter" || e.code==="NumpadEnter"){
+		streamItemClick.call(this, e);
 	}
-	let liveStatus = streamData.liveStatus;
-
-	let streamRenderData = {
-		"streamId": id,
-		"contentId": contentId,
-		"online": online,
-		"withError": false,
-		"streamName": streamData.streamName,
-		"streamNameLowercase": streamData.streamName.toLowerCase(),
-		"streamWebsite": website,
-		"streamWebsiteLowercase": website.toLowerCase(),
-		//"streamUrl": streamUrl,
-		"streamType": type,
-		"unsupportedType": (type === "unsupported"),
-		"streamSettings": JSON.stringify(streamSettings),
-
-		"usePictureLazyLoading": true
-	};
-
-	if(online){
-		streamRenderData.streamStatus = streamData.streamStatus;
-		streamRenderData.streamStatusLowercase = streamData.streamStatus.toLowerCase();
-		if(streamData.streamGame.length > 0){
-			streamRenderData.streamGame = streamData.streamGame;
-			streamRenderData.streamGameLowercase = streamData.streamGame.toLowerCase();
-		}
-		if(typeof streamData.streamCurrentViewers === "number"){
-			let viewer_number = (typeof streamData.streamCurrentViewers === "number")? streamData.streamCurrentViewers : parseInt(streamData.streamCurrentViewers);
-			streamRenderData.streamCurrentViewers = (viewer_number < 1000)? viewer_number : ((Math.round(viewer_number / 100)/10) + "k");
-		}
-	}
-
-	//let streamUrl = (type == "live" || type == "channel")? getStreamURL(website, id, contentId, true) : "";
-	const websiteStreamURL = getStreamURL(website, id, contentId, false);
-	if(websiteStreamURL !== "" && websiteStreamURL !== null){
-		streamRenderData.streamURL = websiteStreamURL;
-	}
-
-	if(typeof streamData.facebookID === "string" && streamData.facebookID !== ""){
-		streamRenderData.facebookId = streamData.facebookID;
-	}
-	if(typeof streamData.twitterID === "string" && streamData.twitterID !== ""){
-		streamRenderData.twitterId = streamData.twitterID;
-	}
-
-	let streamLogo = "";
-	if(online && typeof streamData.streamCategoryLogo === "string" && streamData.streamCategoryLogo !== ""){
-		streamLogo  = streamData.streamCategoryLogo;
-	} else if(typeof streamData.streamOwnerLogo === "string" && streamData.streamOwnerLogo !== ""){
-		streamLogo  = streamData.streamOwnerLogo;
-	}
-
-	if(typeof streamLogo === "string" && streamLogo !== ""){
-		streamRenderData.streamLogo = streamLogo;
-	}
-	// if(typeof backgroundPage.zDK.isFirefox==="boolean" && backgroundPage.zDK.isFirefox===false){
-		streamRenderData.usePictureLazyLoading = false;
-	// }
-
-	if(typeof liveStatus.lastCheckStatus === "string" && liveStatus.lastCheckStatus !== "" && liveStatus.lastCheckStatus !== "success"){
-		streamRenderData.withError = true;
+});
 
 
-		let debugDataNode = document.querySelector("#debugData");
-		let newDebugItem = document.createElement('div');
-		newDebugItem.classList.add("debugItem");
-		newDebugItem.dataset.streamWebsite = website;
 
-		let newDebugItem_title = document.createElement('span');
-		newDebugItem_title.classList.add("debugTitle");
-		newDebugItem_title.textContent = streamData.streamName;
-		newDebugItem.appendChild(newDebugItem_title);
-
-		let newDebugItem_status = document.createElement('span');
-		newDebugItem_status.textContent = `${liveStatus.lastCheckStatus}`;
-		newDebugItem.appendChild(newDebugItem_status);
-
-		debugDataNode.appendChild(newDebugItem);
-
-		let noErrorToShow = document.querySelector("#noErrorToShow");
-		hideClassNode(noErrorToShow);
-
-		scrollbar_update("debugSection");
-	}
-
-	/*const $newNode =*/ insertStreamNode(Mustache.render(streamTemplate, streamRenderData), website, id, contentId, type, streamData, online);
-
-	/*if(streamRenderData.usePictureLazyLoading===false && typeof streamRenderData.streamLogo==="string" && streamRenderData.streamLogo!==""){
-		const streamPicture = $newNode[0].querySelector(".streamPicture");
-		LazyLoading.loadImg(streamPicture, streamRenderData.streamLogo);
-	}*/
-}
 function streamItemClick(){
 	let node = this;
 	let id = node.dataset.streamId;
@@ -913,7 +776,7 @@ function current_version(version){
 	if(typeof version==="string"){
 		current_version_node.dataset.currentVersion = version;
 	} else if(Array.isArray(version)){
-		current_version_node.dataset.currentVersion = `${version[1]}.${version[2]}.${version[3]}${(version.length>4 && version[4]!==undefined)? ` beta ${version[4]}` : ''}`;
+		current_version_node.dataset.currentVersion = `${version[0]}.${version[1]}.${version[2]}${(version.length>3 && version[3]!==undefined)? ` beta ${version[3]}` : ''}`;
 	}
 }
 
@@ -932,9 +795,7 @@ function theme_update(){
 	}
 }
 
-backgroundPage.panel__UpdateData = (data)=>{
-	updatePanelData(data);
-};
+
 
 let psList = new Map();
 function load_scrollbar(id){
@@ -966,7 +827,19 @@ function scrollbar_update(nodeId){
 
 loadTranslations();
 
+updatePanelData();
 sendDataToMain("panel_onload");
+
+const onLiveStoreChange = _.debounce(()=>{
+	updatePanelData();
+}, 500, {
+	maxWait: 5000
+});
+
+liveStore.onLiveChange(onLiveStoreChange, false, window);
+liveStore.onChannelChange(onLiveStoreChange, false, window);
+
+
 
 if(typeof PerfectScrollbar!=="undefined"){
 	load_scrollbar("streamList");
@@ -985,4 +858,3 @@ if(typeof PerfectScrollbar!=="undefined"){
 		maxWait: 200
 	});
 }
-

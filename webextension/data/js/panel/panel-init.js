@@ -71,7 +71,7 @@ window.onload = async function () {
 	document.body.classList.toggle("isChrome", backgroundPage.zDK.isFirefox===false);
 	document.body.classList.toggle("isFirefox", backgroundPage.zDK.isFirefox===true);
 
-	jsFiles = jsFiles.concat(["options-api.js", "lib/lodash.custom.js",  "panel/panel.js"]);
+	jsFiles = jsFiles.concat(["options-api.js", "lib/lodash.custom.js",  "panel/PanelStreams.js",  "panel/LazyLoading.js",  "panel/panel.js"]);
 
 	backgroundPage.zDK.loadJS(document, jsFiles);
 };

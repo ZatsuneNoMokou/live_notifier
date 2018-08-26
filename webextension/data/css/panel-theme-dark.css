@@ -24,6 +24,7 @@ select,
 }
 
 input[type='text'],
+input[type='password'],
 input[type='number'],
 input[type='url'],
 textarea {
@@ -32,10 +33,15 @@ textarea {
 }
 
 input[type='text']:focus,
+input[type='password']:focus,
 input[type='number']:focus,
 input[type='url']:focus,
 textarea:focus {
 	border-color: var(--InvColor, hsla(0, 0%, 81%, 0.95));
+}
+
+.item-stream:focus {
+	outline-color: var(--InvColor, hsla(0, 0%, 81%, 0.95));
 }
 
 input[type='range']::-webkit-slider-thumb {

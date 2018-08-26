@@ -141,6 +141,7 @@
 
 	"timeout_delay_title": "Timeout delay of requests",
 	"timeout_delay_description": "Timeout delay of requests, in sec (between 10 and 30)",
+
 	"notify_online_title": "Show a notification when a stream start",
 	"notify_online_description": "Notification when checked",
 
@@ -192,6 +193,11 @@
 	"export_preferences": "Export",
 	"import_preferences_title": "Import preferences from a file",
 	"import_preferences": "Import",
+
+	"dropboxClientId_title": "Dropbox - Client Id",
+	"dropboxClientId_description": "",
+	"dropboxClientAuthToken_title": "Dropbox - Client AuthToken",
+	"dropboxClientAuthToken_description": "",
 
 	"showAdvanced_title": "Show advanced settings",
 	"showAdvanced_description": "Enabled when checked",
