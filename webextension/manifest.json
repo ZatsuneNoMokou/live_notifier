@@ -70,7 +70,8 @@
 		"storage",
 		"unlimitedStorage",
 		"http://*/*",
-		"https://*/*"
+		"https://*/*",
+		"alarms"
 	],
 	"options_ui": {
 		"chrome_style": false,
