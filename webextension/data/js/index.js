@@ -866,16 +866,20 @@ function setIcon(){
 	}
 	
 	let badgeImage = (badgeOnlineCount > 0)? online_badgeData : offline_badgeData;
-	if(badgeImage !== null){
-		browser.browserAction.setIcon({
-			path: badgeImage
-		});
-	} else {
-		consoleMsg("warn", "Icon(s) is/are not loaded");
+	if (typeof browser.browserAction.setIcon === "function") {
+		if (badgeImage !== null) {
+			browser.browserAction.setIcon({
+				path: badgeImage
+			});
+		} else {
+			consoleMsg("warn", "Icon(s) is/are not loaded");
+		}
 	}
-	
-	browser.browserAction.setBadgeText({text: badgeOnlineCount.toString()});
-	browser.browserAction.setBadgeBackgroundColor({color: (badgeOnlineCount > 0)? "#FF0000" : "#424242"});
+
+	if (typeof browser.browserAction.setBadgeText === "function") {
+		browser.browserAction.setBadgeText({text: badgeOnlineCount.toString()});
+		browser.browserAction.setBadgeBackgroundColor({color: (badgeOnlineCount > 0)? "#FF0000" : "#424242"});
+	}
 }
 appGlobal["setIcon"] = setIcon;
 
@@ -1617,37 +1621,39 @@ async function getRedirectedURL(URL, maxRedirect){
 // Begin to check lives
 let interval;
 function initAddon(){
-	browser.contextMenus.removeAll();
-	browser.contextMenus.create({
-		"type": "normal",
-		"id": "livenotifier_contextMenu",
-		"title": i18ex._("Add_this"),
-		"contexts": ["link"],
-		"targetUrlPatterns": ["http://*/*", "https://*/*"],
-		"onclick": function(info, tab){
-			activeTab = tab;
-			let url = info.linkUrl;
-			consoleMsg("info", `[ContextMenu] URL: ${url}`);
+	if (typeof browser.contextMenus !== "undefined" && typeof browser.contextMenus.create === "function") {
+		browser.contextMenus.removeAll();
+		browser.contextMenus.create({
+			"type": "normal",
+			"id": "livenotifier_contextMenu",
+			"title": i18ex._("Add_this"),
+			"contexts": ["link"],
+			"targetUrlPatterns": ["http://*/*", "https://*/*"],
+			"onclick": function(info, tab){
+				activeTab = tab;
+				let url = info.linkUrl;
+				consoleMsg("info", `[ContextMenu] URL: ${url}`);
 
-			getRedirectedURL(url, 5)
-				.then((result) => {
-					if((result.indexOf("http://") === 0 || result.indexOf("https://") === 0) && url !== result){
-						consoleMsg("info", `Redirected URL: ${result}`);
-						addStreamFromPanel({"ContextMenu_URL": result});
-					} else {
+				getRedirectedURL(url, 5)
+					.then((result) => {
+						if((result.indexOf("http://") === 0 || result.indexOf("https://") === 0) && url !== result){
+							consoleMsg("info", `Redirected URL: ${result}`);
+							addStreamFromPanel({"ContextMenu_URL": result});
+						} else {
+							addStreamFromPanel({"ContextMenu_URL": url});
+						}
+					})
+					.catch((error) => {
+						if(typeof error === "object"){
+							consoleDir(error);
+						} else {
+							consoleMsg("warn", error);
+						}
 						addStreamFromPanel({"ContextMenu_URL": url});
-					}
-				})
-				.catch((error) => {
-					if(typeof error === "object"){
-						consoleDir(error);
-					} else {
-						consoleMsg("warn", error);
-					}
-					addStreamFromPanel({"ContextMenu_URL": url});
-				})
-		}
-	});
+					})
+			}
+		});
+	}
 
 	let localToRemove = [];
 	/* 		----- Importation/Removal of old preferences -----		*/
