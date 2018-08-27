@@ -492,6 +492,8 @@ function updatePanelData(){
 
 	refreshEnabledWebsites();
 
+
+
 	let streamListSettings = new StreamListFromSetting().mapDataAll;
 	streamListSettings.forEach((streamList, website) => {
 		if(websites.has(website)===false){
@@ -499,91 +501,12 @@ function updatePanelData(){
 		}
 
 		streamList.forEach((value, id) => {
-			if(!ignoreHideIgnore){
-				if(typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true){
-					//console.info(`[Live notifier - Panel] Ignoring ${id}`);
-					return;
-				}
-				if(typeof streamList.get(id).hide === "boolean" && streamList.get(id).hide === true){
-					//console.info(`[Live notifier - Panel] Hiding ${id}`);
-					return;
-				}
-			}
-
-			const livesMap = liveStore.getLive(website, id);
-
-			let streamRenderData = null;
-
-			if(livesMap.size > 0){
-				streamRenderData = [];
-				livesMap.forEach((streamData, contentId) => {
-					getCleanedStreamStatus(website, id, contentId, streamList.get(id), streamData.liveStatus.API_Status);
-
-					if(streamData.liveStatus.filteredStatus || (show_offline_in_panel && !streamData.liveStatus.filteredStatus)){
-						doStreamNotif(website, id, contentId, streamList.get(id), streamData.liveStatus.API_Status);
-
-						streamRenderData.push(PanelStreams.streamToRenderData(website, id, contentId, "live", streamList.get(id), streamData));
-					}
-				});
-			} else if (liveStore.hasChannel(website, id)) {
-				//let streamData = channelInfos.get(website).get(id);
-				//let contentId = id;
-
-				//console.info(`Using channel infos for ${id} (${website})`);
-
-				streamRenderData = PanelStreams.streamToRenderData(website, id, /* contentId */ id, "channel", streamList.get(id), liveStore.getChannel(website, id));
-			} else if (websites.has(website)) {
-				console.info(`Currrently no data for ${id} (${website})`);
-				if ((typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true) || (typeof streamList.get(id).hide === "boolean" && streamList.get(id).hide === true)) {
-					let contentId = id,
-						streamData = {
-							"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""},
-							"streamName": contentId,
-							"streamStatus": "",
-							"streamGame": "",
-							"streamOwnerLogo": "",
-							"streamCategoryLogo": "",
-							"streamCurrentViewers": null,
-							"streamURL": "",
-							"facebookID": "",
-							"twitterID": ""
-						},
-						website_channel_id = appGlobal["website_channel_id"]
-					;
-
-					if (website_channel_id.test(streamData.streamName)) {
-						streamData.streamName = website_channel_id.exec(streamData.streamName)[1];
-					}
-
-					streamRenderData = PanelStreams.streamToRenderData(website, id, contentId, website, streamList.get(id), streamData);
-				}
-			} else {
-				let contentId = id,
-					streamData = {
-						"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""},
-						"streamName": contentId,
-						"streamStatus": "",
-						"streamGame": "",
-						"streamOwnerLogo": "",
-						"streamCategoryLogo": "",
-						"streamCurrentViewers": null,
-						"streamURL": "",
-						"facebookID": "",
-						"twitterID": ""
-					}
-				;
-
-				console.warn(`The website of ${id} ("${website}") is not supported or not loaded`);
-
-				streamRenderData = PanelStreams.streamToRenderData(website, id, contentId, "unsupported", streamList.get(id), streamData);
-			}
-
-			if (streamRenderData !== null) {
-				panelStreams.set(website, id, streamRenderData);
-			}
+			panelStreams.set(website, id, ignoreHideIgnore, streamList.get(id));
 		});
 	});
 	scrollbar_update("streamList");
+
+
 
 	liveStore.forEachLive((website, id, contentId, streamData)=>{
 		// Clean the streams already deleted but status still exist

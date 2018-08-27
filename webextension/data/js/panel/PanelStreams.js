@@ -69,30 +69,38 @@ class PanelStreams extends Map {
 	 *
 	 * @param {String} website
 	 * @param {String} id
-	 * @param {JSON, Array<JSON>} data StreamRenderData or Array of it
-	 * @return {Object}
+	 * @param {Boolean} ignoreHideIgnore
+	 * @param {Object=} streamSettings
+	 * @return {Object | undefined}
 	 */
-	set(website, id, data) {
+	set(website, id, ignoreHideIgnore, streamSettings=null) {
 		if (super.has(website) === false) {
 			super.set(website, new Map());
 		}
 
 		this.delete(website, id);
 
-		let output;
-		if (Array.isArray(data) === true) {
-			output = [];
+		let data = this.getStreamData(website, id, ignoreHideIgnore),
+			output
+		;
 
-			data.forEach(value => {
-				output.push(this.insertRenderData(value));
-			})
+		if (data !== null) {
+			if (Array.isArray(data) === true) {
+				output = [];
+
+				data.forEach(value => {
+					output.push(this.insertRenderData(value));
+				})
+			} else {
+				output = this.insertRenderData(data);
+			}
+
+			// lazyLoading.updateStore();
+
+			return super.get(website).set(id, output);
 		} else {
-			output = this.insertRenderData(data);
+			return undefined;
 		}
-
-		// lazyLoading.updateStore();
-
-		return super.get(website).set(id, output);
 	}
 
 	/**
@@ -124,6 +132,111 @@ class PanelStreams extends Map {
 
 
 
+
+	/**
+	 *
+	 * @param {String} website
+	 * @param {String} id
+	 * @param {Boolean} ignoreHideIgnore
+	 * @param {Object=} streamSettings
+	 * @return {JSON}
+	 */
+	getStreamData(website, id, ignoreHideIgnore, streamSettings=null) {
+		if (streamSettings === null) {
+			const streamListSettings = new StreamListFromSetting().mapDataAll;
+			if (streamListSettings.has(website) && streamListSettings.get(website).has(id)) {
+				streamSettings = streamListSettings.get(website).get(id);
+			}
+		}
+
+
+
+		if (streamSettings === null) {
+			return null;
+		}
+
+		if(!ignoreHideIgnore){
+			if(typeof streamSettings.ignore === "boolean" && streamSettings.ignore === true){
+				//console.info(`[Live notifier - Panel] Ignoring ${id}`);
+				return null;
+			}
+			if(typeof streamSettings.hide === "boolean" && streamSettings.hide === true){
+				//console.info(`[Live notifier - Panel] Hiding ${id}`);
+				return null;
+			}
+		}
+
+
+
+		let streamRenderData = null;
+
+		const livesMap = liveStore.getLive(website, id);
+
+		if(livesMap.size > 0){
+			streamRenderData = [];
+			livesMap.forEach((streamData, contentId) => {
+				getCleanedStreamStatus(website, id, contentId, streamSettings, streamData.liveStatus.API_Status);
+
+				if(streamData.liveStatus.filteredStatus || (this.show_offline_in_panel && !streamData.liveStatus.filteredStatus)){
+					doStreamNotif(website, id, contentId, streamSettings, streamData.liveStatus.API_Status);
+
+					streamRenderData.push(PanelStreams.streamToRenderData(website, id, contentId, "live", streamSettings, streamData));
+				}
+			});
+		} else if (liveStore.hasChannel(website, id)) {
+			//console.info(`Using channel infos for ${id} (${website})`);
+
+			streamRenderData = PanelStreams.streamToRenderData(website, id, /* contentId */ id, "channel", streamSettings, liveStore.getChannel(website, id));
+		} else if (websites.has(website)) {
+			console.info(`Currrently no data for ${id} (${website})`);
+			if ((typeof streamSettings.ignore === "boolean" && streamSettings.ignore === true) || (typeof streamSettings.hide === "boolean" && streamSettings.hide === true)) {
+				let contentId = id,
+					streamData = {
+						"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""},
+						"streamName": contentId,
+						"streamStatus": "",
+						"streamGame": "",
+						"streamOwnerLogo": "",
+						"streamCategoryLogo": "",
+						"streamCurrentViewers": null,
+						"streamURL": "",
+						"facebookID": "",
+						"twitterID": ""
+					},
+					website_channel_id = appGlobal["website_channel_id"]
+				;
+
+				if (website_channel_id.test(streamData.streamName)) {
+					streamData.streamName = website_channel_id.exec(streamData.streamName)[1];
+				}
+
+				streamRenderData = PanelStreams.streamToRenderData(website, id, contentId, website, streamSettings, streamData);
+			}
+		} else {
+			let contentId = id,
+				streamData = {
+					"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""},
+					"streamName": contentId,
+					"streamStatus": "",
+					"streamGame": "",
+					"streamOwnerLogo": "",
+					"streamCategoryLogo": "",
+					"streamCurrentViewers": null,
+					"streamURL": "",
+					"facebookID": "",
+					"twitterID": ""
+				}
+			;
+
+			console.warn(`The website of ${id} ("${website}") is not supported or not loaded`);
+
+			streamRenderData = PanelStreams.streamToRenderData(website, id, contentId, "unsupported", streamSettings, streamData);
+		}
+
+
+
+		return streamRenderData;
+	}
 
 	/**
 	 *
