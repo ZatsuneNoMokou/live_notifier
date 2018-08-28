@@ -753,14 +753,36 @@ loadTranslations();
 updatePanelData();
 sendDataToMain("panel_onload");
 
-const onLiveStoreChange = _.debounce(()=>{
-	updatePanelData();
-}, 500, {
-	maxWait: 5000
-});
+(function () {
+	const onLiveStoreChange_queue = new Map(),
 
-liveStore.onLiveChange(onLiveStoreChange, false, window);
-liveStore.onChannelChange(onLiveStoreChange, false, window);
+		onLiveStoreChange_debounced = _.debounce(()=>{
+			onLiveStoreChange_queue.forEach((m, website) => {
+				m.forEach((v, id) => {
+					panelStreams.set(website, id, ignoreHideIgnore);
+				})
+			});
+			onLiveStoreChange_queue.clear();
+		}, 500, {
+			maxWait: 5000
+		}),
+
+		onLiveStoreChange = function(website, id) {
+			if (onLiveStoreChange_queue.has(website) === false) {
+				onLiveStoreChange_queue.set(website, new Map());
+			}
+			onLiveStoreChange_queue.get(website).set(id, "");
+
+
+			onLiveStoreChange_debounced.apply(this, arguments);
+		}
+	;
+
+
+
+	liveStore.onLiveChange(onLiveStoreChange, false, window);
+	liveStore.onChannelChange(onLiveStoreChange, false, window);
+})();
 
 
 

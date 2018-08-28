@@ -80,7 +80,7 @@ class PanelStreams extends Map {
 
 		this.delete(website, id);
 
-		let data = this.getStreamData(website, id, ignoreHideIgnore),
+		let data = this.getStreamData(website, id, ignoreHideIgnore, streamSettings),
 			output
 		;
 
