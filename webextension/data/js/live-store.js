@@ -113,6 +113,20 @@ class LiveStore extends DataStore {
 		}
 	}
 
+	/**
+	 * 
+	 * @param {String} website
+	 * @returns {String}
+	 */
+	convertContantsWebsite(website) {
+		if (this.CONSTANTS.hasOwnProperty(website) === true) {
+			return this.CONSTANTS[website];
+		} else {
+			console.warn("UnknownWebsite");
+			return website;
+		}
+	}
+
 	compression(key, id, data){
 		let type;
 		if(key[0]===this.CONSTANTS["channel"]){
@@ -122,7 +136,7 @@ class LiveStore extends DataStore {
 		}
 
 		if(type!==undefined){
-			const website = this.CONSTANTS[key[1]];
+			const website = this.convertContantsWebsite(key[1]);
 
 			data = DataStore.cloneVariable(data);
 
@@ -167,7 +181,7 @@ class LiveStore extends DataStore {
 
 
 		if(type!==undefined){
-			const website = this.CONSTANTS[key[1]];
+			const website = this.convertContantsWebsite(key[1]);
 
 			let defaultData;
 
@@ -185,31 +199,15 @@ class LiveStore extends DataStore {
 		return result;
 	}
 
-	/**
-	 *
-	 * @param {String} website
-	 * @throws Website not in this.constants
-	 */
-	checkValidWebsite(website){
-		if(typeof this.CONSTANTS[website]!=="string"){
-			consoleMsg("warn", website);
-
-			throw "UnknownWebsite";
-		}
-	}
-
 
 
 
 
 	getChannel(website, id){
-		this.checkValidWebsite(website);
-		return this.get([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
+		return this.get([this.CONSTANTS.channel, this.convertContantsWebsite(website)], id);
 	}
 
 	getLive(website, id, contentId=null){
-		this.checkValidWebsite(website);
-
 		if(contentId===null){
 			const result = new Map();
 			this.forEachLive(website, id, function(website, id, contentId, data){
@@ -218,7 +216,7 @@ class LiveStore extends DataStore {
 
 			return result;
 		} else {
-			return this.get([this.CONSTANTS.live, this.CONSTANTS[website], id], (((id!==contentId))? contentId : ""));
+			return this.get([this.CONSTANTS.live, this.convertContantsWebsite(website), id], (((id!==contentId))? contentId : ""));
 		}
 	}
 
@@ -227,20 +225,16 @@ class LiveStore extends DataStore {
 
 
 	hasChannel(website, id){
-		this.checkValidWebsite(website);
-
-		return this.has([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
+		return this.has([this.CONSTANTS.channel, this.convertContantsWebsite(website)], id);
 	}
 
 	hasLive(website, id, contentId){
-		this.checkValidWebsite(website);
-
 		if(contentId === undefined){
-			return this.has([this.CONSTANTS.live, this.CONSTANTS[website]], id);
+			return this.has([this.CONSTANTS.live, this.convertContantsWebsite(website)], id);
 		} else if(id === contentId){
-			return this.has([this.CONSTANTS.live, this.CONSTANTS[website], id], "");
+			return this.has([this.CONSTANTS.live, this.convertContantsWebsite(website), id], "");
 		} else {
-			return this.has([this.CONSTANTS.live, this.CONSTANTS[website], id], contentId);
+			return this.has([this.CONSTANTS.live, this.convertContantsWebsite(website), id], contentId);
 		}
 	}
 
@@ -249,15 +243,11 @@ class LiveStore extends DataStore {
 
 
 	setChannel(website, id, data){
-		this.checkValidWebsite(website);
-
-		return this.set([this.CONSTANTS.channel, this.CONSTANTS[website]], id, data);
+		return this.set([this.CONSTANTS.channel, this.convertContantsWebsite(website)], id, data);
 	}
 
 	setLive(website, id, contentId, data){
-		this.checkValidWebsite(website);
-
-		return this.set([this.CONSTANTS.live, this.CONSTANTS[website], id], ((id!==contentId)? contentId : ""), data);
+		return this.set([this.CONSTANTS.live, this.convertContantsWebsite(website), id], ((id!==contentId)? contentId : ""), data);
 	}
 
 
@@ -265,16 +255,12 @@ class LiveStore extends DataStore {
 
 
 	updateChannel(website, id, fn){
-		this.checkValidWebsite(website);
-
 		let data = this.getChannel(website, id);
 		data = fn(website, id, data);
 		return this.setChannel(website, id, data);
 	}
 
 	updateLive(website, id, contentId, fn){
-		this.checkValidWebsite(website);
-
 		let data = this.getLive(website, id, contentId);
 		data = fn(website, id, contentId, data);
 		return this.setLive(website, id, contentId, data);
@@ -285,15 +271,11 @@ class LiveStore extends DataStore {
 
 
 	removeChannel(website, id){
-		this.checkValidWebsite(website);
-
-		return this.remove([this.CONSTANTS.channel, this.CONSTANTS[website]], id);
+		return this.remove([this.CONSTANTS.channel, this.convertContantsWebsite(website)], id);
 	}
 
 	removeLive(website, id){
-		this.checkValidWebsite(website);
-
-		return this.remove([this.CONSTANTS.live, this.CONSTANTS[website]], id);
+		return this.remove([this.CONSTANTS.live, this.convertContantsWebsite(website)], id);
 	}
 
 
@@ -304,7 +286,7 @@ class LiveStore extends DataStore {
 		const _this = this;
 		return function (keys, id, data) {
 			const [,website] = keys;
-			fn(_this.CONSTANTS[website], id, data);
+			fn(_this.convertContantsWebsite(website), id, data);
 		}
 	}
 
@@ -319,9 +301,8 @@ class LiveStore extends DataStore {
 	forEachChannel(arg1, arg2){
 		if(arguments.length===2 && typeof arg1==="string" && typeof arg2==="function"){
 			const [website, fn] = arguments;
-			this.checkValidWebsite(website);
 
-			this.forEach([this.CONSTANTS.channel, this.CONSTANTS[website]], this.forEachChannelWrapper(fn));
+			this.forEach([this.CONSTANTS.channel, this.convertContantsWebsite(website)], this.forEachChannelWrapper(fn));
 		} else if(arguments.length===1 && typeof arg1==="function"){
 			this.forEach([this.CONSTANTS.channel], this.forEachChannelWrapper(arg1));
 		} else {
@@ -333,7 +314,7 @@ class LiveStore extends DataStore {
 		const _this = this;
 		return function (keys, contentId, data) {
 			const [,website, id] = keys;
-			fn(_this.CONSTANTS[website], id, (contentId!=="")? contentId : id, data);
+			fn(_this.convertContantsWebsite(website), id, (contentId!=="")? contentId : id, data);
 		}
 	}
 
@@ -352,14 +333,12 @@ class LiveStore extends DataStore {
 			this.forEach([this.CONSTANTS.live], this.forEachLiveWrapper(arg1));
 		} else if(arguments.length===2 && typeof arg1==="string" && typeof arg2==="function") {
 			const [website, fn] = arguments;
-			this.checkValidWebsite(website);
 
-			this.forEach([this.CONSTANTS.live, this.CONSTANTS[website]], this.forEachLiveWrapper(fn));
+			this.forEach([this.CONSTANTS.live, this.convertContantsWebsite(website)], this.forEachLiveWrapper(fn));
 		} else if(arguments.length===3 && typeof arg1==="string" && typeof arg2==="string" && typeof arg3==="function"){
 			const [website, id, fn] = arguments;
-			this.checkValidWebsite(website);
 
-			this.forEach([this.CONSTANTS.live, this.CONSTANTS[website], id], this.forEachLiveWrapper(fn));
+			this.forEach([this.CONSTANTS.live, this.convertContantsWebsite(website), id], this.forEachLiveWrapper(fn));
 		} else {
 			throw "[forEachLive] Wrong arguments";
 		}
@@ -373,7 +352,7 @@ class LiveStore extends DataStore {
 		const _this = this;
 		return function (e, keys, id, data) {
 			const [,website] = keys;
-			fn(e, _this.CONSTANTS[website], id, data);
+			fn(e, this.convertContantsWebsite(website), id, data);
 		}
 	}
 
@@ -392,7 +371,7 @@ class LiveStore extends DataStore {
 		const _this = this;
 		return function (e, keys, contentId, data) {
 			const [,website, id] = keys;
-			fn(e, _this.CONSTANTS[website], id, (contentId!=="")? contentId : id, data);
+			fn(e, _this.convertContantsWebsite(website), id, (contentId!=="")? contentId : id, data);
 		}
 	}
 
