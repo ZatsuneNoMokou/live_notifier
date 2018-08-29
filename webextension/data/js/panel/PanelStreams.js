@@ -7,12 +7,32 @@ class PanelStreams extends Map {
 		/**
 		 * @type Boolean
 		 */
-		this.group_streams_by_websites = group_streams_by_websites;
+		this.group_streams_by_websites = (typeof group_streams_by_websites === "boolean")? group_streams_by_websites : false;
 
 		/**
 		 * @type Boolean
 		 */
-		this.show_offline_in_panel = show_offline_in_panel;
+		this.show_offline_in_panel = (typeof show_offline_in_panel === "boolean")? show_offline_in_panel : false;
+
+		this._ignoreHideIgnore = false;
+	}
+
+	/**
+	 * @returns {Boolean}
+	 */
+	get ignoreHideIgnore() {
+		return this._ignoreHideIgnore;
+	}
+
+	/**
+	 * @param {Boolean} value
+	 */
+	set ignoreHideIgnore(value) {
+		if (typeof value !== "boolean") {
+			throw 'ArgumentTypeError';
+		}
+
+		this._ignoreHideIgnore = value;
 	}
 
 
@@ -69,18 +89,17 @@ class PanelStreams extends Map {
 	 *
 	 * @param {String} website
 	 * @param {String} id
-	 * @param {Boolean} ignoreHideIgnore
 	 * @param {Object=} streamSettings
 	 * @return {Object | undefined}
 	 */
-	set(website, id, ignoreHideIgnore, streamSettings=null) {
+	set(website, id, streamSettings=null) {
 		if (super.has(website) === false) {
 			super.set(website, new Map());
 		}
 
 		this.delete(website, id);
 
-		let data = this.getStreamData(website, id, ignoreHideIgnore, streamSettings),
+		let data = this.getStreamData(website, id, streamSettings),
 			output
 		;
 
@@ -137,11 +156,10 @@ class PanelStreams extends Map {
 	 *
 	 * @param {String} website
 	 * @param {String} id
-	 * @param {Boolean} ignoreHideIgnore
 	 * @param {Object=} streamSettings
 	 * @return {JSON}
 	 */
-	getStreamData(website, id, ignoreHideIgnore, streamSettings=null) {
+	getStreamData(website, id, streamSettings=null) {
 		if (streamSettings === null) {
 			const streamListSettings = new StreamListFromSetting().mapDataAll;
 			if (streamListSettings.has(website) && streamListSettings.get(website).has(id)) {
@@ -155,7 +173,7 @@ class PanelStreams extends Map {
 			return null;
 		}
 
-		if(!ignoreHideIgnore){
+		if(this.ignoreHideIgnore === false){
 			if(typeof streamSettings.ignore === "boolean" && streamSettings.ignore === true){
 				//console.info(`[Live notifier - Panel] Ignoring ${id}`);
 				return null;

@@ -386,7 +386,7 @@ settings_button.addEventListener("click", setting_Toggle, false);
 
 liveEvent("click", "#open_optionpage", ()=>{browser.runtime.openOptionsPage()});
 
-liveEvent("click", "#ignoreHideIgnore", ()=>{ignoreHideIgnore = true;});
+liveEvent("click", "#ignoreHideIgnore", ()=>{panelStreams.ignoreHideIgnore = true;});
 
 if(typeof browser.storage.sync === "object"){
 	document.querySelector("#syncContainer").classList.remove("hide");
@@ -480,12 +480,11 @@ liveEvent("click", "#saveEditedStream", function(){
  */
 const panelStreams = new PanelStreams();
 
-let ignoreHideIgnore = false;
-
 function updatePanelData(){
 	//Clear stream list in the panel
 	panelStreams.group_streams_by_websites = getPreference("group_streams_by_websites");
 	panelStreams.show_offline_in_panel = getPreference("show_offline_in_panel");
+	panelStreams.ignoreHideIgnore = false;
 	panelStreams.clear();
 
 	let show_offline_in_panel = getPreference("show_offline_in_panel");
@@ -501,7 +500,7 @@ function updatePanelData(){
 		}
 
 		streamList.forEach((value, id) => {
-			panelStreams.set(website, id, ignoreHideIgnore, streamList.get(id));
+			panelStreams.set(website, id, streamList.get(id));
 		});
 	});
 	scrollbar_update("streamList");
@@ -759,7 +758,7 @@ sendDataToMain("panel_onload");
 		onLiveStoreChange_debounced = _.debounce(()=>{
 			onLiveStoreChange_queue.forEach((m, website) => {
 				m.forEach((v, id) => {
-					panelStreams.set(website, id, ignoreHideIgnore);
+					panelStreams.set(website, id);
 				})
 			});
 			onLiveStoreChange_queue.clear();
