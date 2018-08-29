@@ -169,11 +169,11 @@ class PanelStreams extends Map {
 
 
 
-		if (streamSettings === null) {
-			return null;
-		}
-
 		if(this.ignoreHideIgnore === false){
+			if (streamSettings === null) {
+				return null;
+			}
+
 			if(typeof streamSettings.ignore === "boolean" && streamSettings.ignore === true){
 				//console.info(`[Live notifier - Panel] Ignoring ${id}`);
 				return null;
