@@ -352,13 +352,13 @@ class LiveStore extends DataStore {
 		const _this = this;
 		return function (e, keys, id, data) {
 			const [,website] = keys;
-			fn(e, this.convertContantsWebsite(website), id, data);
+			fn(e, _this.convertContantsWebsite(website), id, data);
 		}
 	}
 
 	/**
 	 *
-	 * @param {function(String, String, Object):void} fn website, id, data
+	 * @param {function(StorageEvent, String, String, Object):void} fn website, id, data
 	 * @param {Boolean=false} withData
 	 * @param {Window} win
 	 */
@@ -377,7 +377,7 @@ class LiveStore extends DataStore {
 
 	/**
 	 *
-	 * @param {function(String, String, String, Object):void} fn website, id, contentId, data
+	 * @param {function(StorageEvent, String, String, String, Object):void} fn website, id, contentId, data
 	 * @param {Boolean=false} withData
 	 * @param {Window} win
 	 */
