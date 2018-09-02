@@ -766,7 +766,7 @@ sendDataToMain("panel_onload");
 			maxWait: 5000
 		}),
 
-		onLiveStoreChange = function(website, id) {
+		onLiveStoreChange = function(event, website, id) {
 			if (onLiveStoreChange_queue.has(website) === false) {
 				onLiveStoreChange_queue.set(website, new Map());
 			}
