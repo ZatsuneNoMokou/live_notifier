@@ -528,16 +528,7 @@ function updatePanelData(){
 
 	checkMissing();
 
-	//Update online steam count in the panel
-	let onlineCount = appGlobal["onlineCount"];
-	listenerOnlineCount((onlineCount === 0)? i18ex._("No_stream_online") :  i18ex._("count_stream_online", {count: onlineCount}));
 
-	if(show_offline_in_panel){
-		let offlineCount = getOfflineCount();
-		listenerOfflineCount((offlineCount === 0)? i18ex._("No_stream_offline") :  i18ex._("count_stream_offline", {count: offlineCount}));
-	} else {
-		listenerOfflineCount("");
-	}
 
 	let debug_checkingLivesState_node = document.querySelector("#debug_checkingLivesState");
 	debug_checkingLivesState_node.className = appGlobal["checkingLivesFinished"];
@@ -549,20 +540,6 @@ function updatePanelData(){
 }
 
 
-
-
-
-function listenerOnlineCount(data){
-	let streamOnlineCountNode = document.querySelector("#streamOnlineCountLabel");
-	removeAllChildren(streamOnlineCountNode);
-	streamOnlineCountNode.textContent = data;
-}
-
-function listenerOfflineCount(data){
-	let streamOfflineCountNode = document.querySelector("#streamOfflineCountLabel");
-	removeAllChildren(streamOfflineCountNode);
-	streamOfflineCountNode.textContent = data;
-}
 
 function newDeleteStreamButton_onClick(event){
 	event.stopPropagation();

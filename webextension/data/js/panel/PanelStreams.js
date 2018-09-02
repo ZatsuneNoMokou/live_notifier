@@ -116,6 +116,7 @@ class PanelStreams extends Map {
 
 			// lazyLoading.updateStore();
 
+			updateCounts();
 			return super.get(website).set(id, output);
 		} else {
 			return undefined;
@@ -405,3 +406,34 @@ class PanelStreams extends Map {
 		}
 	}
 }
+
+
+
+/**
+ *
+ * @type {Function}
+ */
+const updateCounts = _.debounce(function (){
+	//Update online steam count in the panel
+	let onlineCount = appGlobal["onlineCount"];
+
+	document.querySelector("#streamOnlineCountLabel").textContent = (onlineCount === 0)? i18ex._("No_stream_online") :  i18ex._("count_stream_online", {count: onlineCount});
+
+
+
+
+
+	//Update offline steam count in the panel
+	let show_offline_in_panel = getPreference("show_offline_in_panel"),
+		data = ""
+	;
+
+	if(show_offline_in_panel){
+		let offlineCount = getOfflineCount();
+		data = (offlineCount === 0)? i18ex._("No_stream_offline") :  i18ex._("count_stream_offline", {count: offlineCount});
+	}
+
+	document.querySelector("#streamOfflineCountLabel").textContent = data;
+}, 100, {
+	maxWait: 500
+});
