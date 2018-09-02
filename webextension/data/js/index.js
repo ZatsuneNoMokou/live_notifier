@@ -514,6 +514,15 @@ function doNotif(options, suffixConfirmIfNoButtons=false){
 }
 appGlobal["doNotif"] = doNotif;
 
+/**
+ *
+ * @param {String} website
+ * @param {String} id
+ * @param {String} contentId
+ * @param {Object} streamSetting
+ * @param {Boolean} isStreamOnline
+ * @return {Boolean}
+ */
 function getCleanedStreamStatus(website, id, contentId, streamSetting, isStreamOnline){
 	let getStringsCountInArray = function(someArray){
 		let count = 0;

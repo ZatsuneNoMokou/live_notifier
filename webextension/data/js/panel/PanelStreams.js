@@ -136,6 +136,8 @@ class PanelStreams extends Map {
 						nodeList.forEach(node => {
 							node.remove();
 						})
+					} else if (typeof nodeList.remove === "function") {
+						nodeList.remove();
 					}
 				});
 			});
