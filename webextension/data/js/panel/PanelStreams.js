@@ -1,3 +1,5 @@
+const _PanelStreams_cachedQuerySelector = new Map();
+
 let lazyLoading = null;
 
 class PanelStreams extends Map {
@@ -35,6 +37,30 @@ class PanelStreams extends Map {
 		this._ignoreHideIgnore = value;
 	}
 
+	static cachedQuerySelector(selector){
+		if (_PanelStreams_cachedQuerySelector.has(selector) === false || _PanelStreams_cachedQuerySelector.get(selector) === null || _PanelStreams_cachedQuerySelector.get(selector).parentNode === null) {
+			_PanelStreams_cachedQuerySelector.set(selector, document.querySelector(selector));
+		}
+
+		return _PanelStreams_cachedQuerySelector.get(selector);
+	}
+
+	get $debugData(){
+		return PanelStreams.cachedQuerySelector("#debugData");
+	}
+
+	get $noErrorToShow(){
+		return PanelStreams.cachedQuerySelector("#noErrorToShow");
+	}
+
+	get $streamListOnline(){
+		return PanelStreams.cachedQuerySelector("#streamListOnline");
+	}
+
+	get $streamListOffline(){
+		return PanelStreams.cachedQuerySelector("#streamListOffline");
+	}
+
 
 
 
@@ -57,10 +83,10 @@ class PanelStreams extends Map {
 			}
 		}
 
-		document.querySelector("#noErrorToShow").classList.remove("hide");
-		removeAllChildren(document.querySelector("#debugData"));
+		this.$noErrorToShow.classList.remove("hide");
+		removeAllChildren(this.$debugData);
 
-		document.querySelector("#streamListOffline").classList.toggle("hide", !this.show_offline_in_panel);
+		this.$streamListOffline.classList.toggle("hide", !this.show_offline_in_panel);
 	}
 
 
@@ -132,19 +158,20 @@ class PanelStreams extends Map {
 		if (this.has(website, id) === true) {
 			this.get(website, id).forEach((item) => {
 				const array = Array.isArray(item) === true? item : [item];
-				array.forEach((nodeList, index) => {
+
+				while(array.length > 0){
+					const nodeList = array.shift();
+
 					if (nodeList !== null){
 						if (Array.isArray(nodeList)) {
 							nodeList.forEach(node => {
 								node.remove();
 							});
-							array.splice(index, 1);
 						} else if (typeof nodeList.remove === "function") {
 							nodeList.remove();
-							array.splice(index, 1);
 						}
 					}
-				});
+				}
 			});
 		}
 	}
@@ -289,7 +316,6 @@ class PanelStreams extends Map {
 			"streamId": id,
 			"contentId": contentId,
 			"online": online,
-			"withError": false,
 			"streamName": streamData.streamName,
 			"streamNameLowercase": streamData.streamName.toLowerCase(),
 			"streamWebsite": website,
@@ -298,6 +324,9 @@ class PanelStreams extends Map {
 			"streamType": type,
 			"unsupportedType": (type === "unsupported"),
 			"streamSettings": JSON.stringify(streamSettings),
+
+			"lastCheckStatus": (typeof liveStatus.lastCheckStatus === "string")? liveStatus.lastCheckStatus : "",
+			"withError": (typeof liveStatus.lastCheckStatus === "string" && liveStatus.lastCheckStatus !== "" && liveStatus.lastCheckStatus !== "success"),
 
 			"usePictureLazyLoading": true
 		};
@@ -342,32 +371,6 @@ class PanelStreams extends Map {
 		streamRenderData.usePictureLazyLoading = false;
 		// }
 
-		if(typeof liveStatus.lastCheckStatus === "string" && liveStatus.lastCheckStatus !== "" && liveStatus.lastCheckStatus !== "success"){
-			streamRenderData.withError = true;
-
-
-			let debugDataNode = document.querySelector("#debugData");
-			let newDebugItem = document.createElement('div');
-			newDebugItem.classList.add("debugItem");
-			newDebugItem.dataset.streamWebsite = website;
-
-			let newDebugItem_title = document.createElement('span');
-			newDebugItem_title.classList.add("debugTitle");
-			newDebugItem_title.textContent = streamData.streamName;
-			newDebugItem.appendChild(newDebugItem_title);
-
-			let newDebugItem_status = document.createElement('span');
-			newDebugItem_status.textContent = `${liveStatus.lastCheckStatus}`;
-			newDebugItem.appendChild(newDebugItem_status);
-
-			debugDataNode.appendChild(newDebugItem);
-
-			let noErrorToShow = document.querySelector("#noErrorToShow");
-			hideClassNode(noErrorToShow);
-
-			scrollbar_update("debugSection");
-		}
-
 		return streamRenderData;
 
 		/*if(streamRenderData.usePictureLazyLoading===false && typeof streamRenderData.streamLogo==="string" && streamRenderData.streamLogo!==""){
@@ -386,13 +389,17 @@ class PanelStreams extends Map {
 
 		const html = Mustache.render(streamTemplate, streamRenderData);
 
+		let resultNodes = null;
+
+
+
 		if(this.group_streams_by_websites){
 			const website = streamRenderData.streamWebsite,
 				selector = `#streamList${((streamRenderData.online)? "Online" : "Offline")} .${(websites.has(website))? website : "unsupported"}`
 			;
-			return backgroundPage.zDK.appendTo(selector, html, document);
+			resultNodes = backgroundPage.zDK.appendTo(selector, html, document);
 		} else {
-			let statusNode = document.querySelector(`#streamList${(streamRenderData.online)? "Online" : "Offline"}`),
+			let statusNode = (streamRenderData.online)? this.$streamListOnline : this.$streamListOffline,
 				statusStreamList = statusNode.querySelectorAll(".item-stream")
 			;
 
@@ -401,13 +408,51 @@ class PanelStreams extends Map {
 					if(typeof streamNode.tagName === "string"){
 						let streamNode_title = streamNode.dataset.streamName;
 						if(streamRenderData.streamName.toLowerCase() < streamNode_title.toLowerCase()){
-							return insertBefore(streamNode, html);
+							resultNodes = insertBefore(streamNode, html);
+							break;
 						}
 					}
 				}
 			}
-			return backgroundPage.zDK.appendTo(statusNode, html, document);
+
+			if (resultNodes === null) {
+				resultNodes = backgroundPage.zDK.appendTo(statusNode, html, document);
+			}
 		}
+
+		updateStreamListScrollbar();
+
+
+
+		if(streamRenderData.withError === true){
+			let newDebugItem = document.createElement('div');
+			newDebugItem.classList.add("debugItem");
+			newDebugItem.dataset.streamWebsite = streamRenderData.streamWebsite;
+
+			let newDebugItem_title = document.createElement('span');
+			newDebugItem_title.classList.add("debugTitle");
+			newDebugItem_title.textContent = streamRenderData.streamName;
+			newDebugItem.appendChild(newDebugItem_title);
+
+			let newDebugItem_status = document.createElement('span');
+			newDebugItem_status.textContent = `${streamRenderData.lastCheckStatus}`;
+			newDebugItem.appendChild(newDebugItem_status);
+
+
+
+			this.$debugData.appendChild(newDebugItem);
+			resultNodes.push(newDebugItem);
+
+
+
+			hideClassNode(this.$noErrorToShow);
+
+			scrollbar_update("debugSection");
+		}
+
+
+
+		return resultNodes;
 	}
 }
 
@@ -421,7 +466,7 @@ const updateCounts = _.debounce(function (){
 	//Update online steam count in the panel
 	let onlineCount = appGlobal["onlineCount"];
 
-	document.querySelector("#streamOnlineCountLabel").textContent = (onlineCount === 0)? i18ex._("No_stream_online") :  i18ex._("count_stream_online", {count: onlineCount});
+	PanelStreams.cachedQuerySelector("#streamOnlineCountLabel").textContent = (onlineCount === 0)? i18ex._("No_stream_online") :  i18ex._("count_stream_online", {count: onlineCount});
 
 
 
@@ -437,7 +482,17 @@ const updateCounts = _.debounce(function (){
 		data = (offlineCount === 0)? i18ex._("No_stream_offline") :  i18ex._("count_stream_offline", {count: offlineCount});
 	}
 
-	document.querySelector("#streamOfflineCountLabel").textContent = data;
+	PanelStreams.cachedQuerySelector("#streamOfflineCountLabel").textContent = data;
 }, 100, {
 	maxWait: 500
+});
+
+/**
+ *
+ * @type {Function}
+ */
+const updateStreamListScrollbar = _.debounce(function () {
+	scrollbar_update("streamList");
+}, 50, {
+	maxWait: 200
 });

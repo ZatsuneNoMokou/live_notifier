@@ -503,7 +503,6 @@ function updatePanelData(){
 			panelStreams.set(website, id, streamList.get(id));
 		});
 	});
-	scrollbar_update("streamList");
 
 
 
