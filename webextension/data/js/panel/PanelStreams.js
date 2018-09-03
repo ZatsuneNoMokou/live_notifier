@@ -7,12 +7,32 @@ class PanelStreams extends Map {
 		/**
 		 * @type Boolean
 		 */
-		this.group_streams_by_websites = group_streams_by_websites;
+		this.group_streams_by_websites = (typeof group_streams_by_websites === "boolean")? group_streams_by_websites : false;
 
 		/**
 		 * @type Boolean
 		 */
-		this.show_offline_in_panel = show_offline_in_panel;
+		this.show_offline_in_panel = (typeof show_offline_in_panel === "boolean")? show_offline_in_panel : false;
+
+		this._ignoreHideIgnore = false;
+	}
+
+	/**
+	 * @returns {Boolean}
+	 */
+	get ignoreHideIgnore() {
+		return this._ignoreHideIgnore;
+	}
+
+	/**
+	 * @param {Boolean} value
+	 */
+	set ignoreHideIgnore(value) {
+		if (typeof value !== "boolean") {
+			throw 'ArgumentTypeError';
+		}
+
+		this._ignoreHideIgnore = value;
 	}
 
 
@@ -69,30 +89,38 @@ class PanelStreams extends Map {
 	 *
 	 * @param {String} website
 	 * @param {String} id
-	 * @param {JSON, Array<JSON>} data StreamRenderData or Array of it
-	 * @return {Object}
+	 * @param {Object=} streamSettings
+	 * @return {Object | undefined}
 	 */
-	set(website, id, data) {
+	set(website, id, streamSettings=null) {
 		if (super.has(website) === false) {
 			super.set(website, new Map());
 		}
 
 		this.delete(website, id);
 
-		let output;
-		if (Array.isArray(data) === true) {
-			output = [];
+		let data = this.getStreamData(website, id, streamSettings),
+			output
+		;
 
-			data.forEach(value => {
-				output.push(this.insertRenderData(value));
-			})
+		if (data !== null) {
+			if (Array.isArray(data) === true) {
+				output = [];
+
+				data.forEach(value => {
+					output.push(this.insertRenderData(value));
+				})
+			} else {
+				output = this.insertRenderData(data);
+			}
+
+			// lazyLoading.updateStore();
+
+			updateCounts();
+			return super.get(website).set(id, output);
 		} else {
-			output = this.insertRenderData(data);
+			return undefined;
 		}
-
-		// lazyLoading.updateStore();
-
-		return super.get(website).set(id, output);
 	}
 
 	/**
@@ -102,13 +130,19 @@ class PanelStreams extends Map {
 	 */
 	delete(website, id){
 		if (this.has(website, id) === true) {
-			this.get(website, id).forEach(item => {
+			this.get(website, id).forEach((item) => {
 				const array = Array.isArray(item) === true? item : [item];
-				array.forEach(nodeList => {
-					if (nodeList !== null && Array.isArray(nodeList)) {
-						nodeList.forEach(node => {
-							node.remove();
-						})
+				array.forEach((nodeList, index) => {
+					if (nodeList !== null){
+						if (Array.isArray(nodeList)) {
+							nodeList.forEach(node => {
+								node.remove();
+							});
+							array.splice(index, 1);
+						} else if (typeof nodeList.remove === "function") {
+							nodeList.remove();
+							array.splice(index, 1);
+						}
 					}
 				});
 			});
@@ -124,6 +158,110 @@ class PanelStreams extends Map {
 
 
 
+
+	/**
+	 *
+	 * @param {String} website
+	 * @param {String} id
+	 * @param {Object=} streamSettings
+	 * @return {JSON}
+	 */
+	getStreamData(website, id, streamSettings=null) {
+		if (streamSettings === null) {
+			const streamListSettings = new StreamListFromSetting().mapDataAll;
+			if (streamListSettings.has(website) && streamListSettings.get(website).has(id)) {
+				streamSettings = streamListSettings.get(website).get(id);
+			}
+		}
+
+
+
+		if(this.ignoreHideIgnore === false){
+			if (streamSettings === null) {
+				return null;
+			}
+
+			if(typeof streamSettings.ignore === "boolean" && streamSettings.ignore === true){
+				//console.info(`[Live notifier - Panel] Ignoring ${id}`);
+				return null;
+			}
+			if(typeof streamSettings.hide === "boolean" && streamSettings.hide === true){
+				//console.info(`[Live notifier - Panel] Hiding ${id}`);
+				return null;
+			}
+		}
+
+
+
+		let streamRenderData = null;
+
+		const livesMap = liveStore.getLive(website, id);
+
+		if(livesMap.size > 0){
+			streamRenderData = [];
+			livesMap.forEach((streamData, contentId) => {
+				getCleanedStreamStatus(website, id, contentId, streamSettings, streamData.liveStatus.API_Status);
+
+				if(streamData.liveStatus.filteredStatus || (this.show_offline_in_panel && !streamData.liveStatus.filteredStatus)){
+					doStreamNotif(website, id, contentId, streamSettings, streamData.liveStatus.API_Status);
+
+					streamRenderData.push(PanelStreams.streamToRenderData(website, id, contentId, "live", streamSettings, streamData));
+				}
+			});
+		} else if (liveStore.hasChannel(website, id)) {
+			//console.info(`Using channel infos for ${id} (${website})`);
+
+			streamRenderData = PanelStreams.streamToRenderData(website, id, /* contentId */ id, "channel", streamSettings, liveStore.getChannel(website, id));
+		} else if (websites.has(website)) {
+			console.info(`Currrently no data for ${id} (${website})`);
+			if ((typeof streamSettings.ignore === "boolean" && streamSettings.ignore === true) || (typeof streamSettings.hide === "boolean" && streamSettings.hide === true)) {
+				let contentId = id,
+					streamData = {
+						"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""},
+						"streamName": contentId,
+						"streamStatus": "",
+						"streamGame": "",
+						"streamOwnerLogo": "",
+						"streamCategoryLogo": "",
+						"streamCurrentViewers": null,
+						"streamURL": "",
+						"facebookID": "",
+						"twitterID": ""
+					},
+					website_channel_id = appGlobal["website_channel_id"]
+				;
+
+				if (website_channel_id.test(streamData.streamName)) {
+					streamData.streamName = website_channel_id.exec(streamData.streamName)[1];
+				}
+
+				streamRenderData = PanelStreams.streamToRenderData(website, id, contentId, website, streamSettings, streamData);
+			}
+		} else {
+			let contentId = id,
+				streamData = {
+					"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""},
+					"streamName": contentId,
+					"streamStatus": "",
+					"streamGame": "",
+					"streamOwnerLogo": "",
+					"streamCategoryLogo": "",
+					"streamCurrentViewers": null,
+					"streamURL": "",
+					"facebookID": "",
+					"twitterID": ""
+				}
+			;
+
+			console.warn(`The website of ${id} ("${website}") is not supported or not loaded`);
+
+			streamRenderData = PanelStreams.streamToRenderData(website, id, contentId, "unsupported", streamSettings, streamData);
+		}
+
+
+
+		return streamRenderData;
+	}
 
 	/**
 	 *
@@ -272,3 +410,34 @@ class PanelStreams extends Map {
 		}
 	}
 }
+
+
+
+/**
+ *
+ * @type {Function}
+ */
+const updateCounts = _.debounce(function (){
+	//Update online steam count in the panel
+	let onlineCount = appGlobal["onlineCount"];
+
+	document.querySelector("#streamOnlineCountLabel").textContent = (onlineCount === 0)? i18ex._("No_stream_online") :  i18ex._("count_stream_online", {count: onlineCount});
+
+
+
+
+
+	//Update offline steam count in the panel
+	let show_offline_in_panel = getPreference("show_offline_in_panel"),
+		data = ""
+	;
+
+	if(show_offline_in_panel){
+		let offlineCount = getOfflineCount();
+		data = (offlineCount === 0)? i18ex._("No_stream_offline") :  i18ex._("count_stream_offline", {count: offlineCount});
+	}
+
+	document.querySelector("#streamOfflineCountLabel").textContent = data;
+}, 100, {
+	maxWait: 500
+});

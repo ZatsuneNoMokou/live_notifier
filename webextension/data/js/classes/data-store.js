@@ -528,7 +528,7 @@ class DataStore {
 	/**
 	 *
 	 * @param {String|String[]} keys
-	 * @param {Function} fn
+	 * @param {function(StorageEvent, String[], String, Boolean):void} fn keys, id, withData
 	 * @param {Boolean=true} withData
 	 * @param {Window} win
 	 */

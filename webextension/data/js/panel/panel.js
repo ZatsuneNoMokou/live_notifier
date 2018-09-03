@@ -386,7 +386,7 @@ settings_button.addEventListener("click", setting_Toggle, false);
 
 liveEvent("click", "#open_optionpage", ()=>{browser.runtime.openOptionsPage()});
 
-liveEvent("click", "#ignoreHideIgnore", ()=>{ignoreHideIgnore = true;});
+liveEvent("click", "#ignoreHideIgnore", ()=>{panelStreams.ignoreHideIgnore = true;});
 
 if(typeof browser.storage.sync === "object"){
 	document.querySelector("#syncContainer").classList.remove("hide");
@@ -480,17 +480,18 @@ liveEvent("click", "#saveEditedStream", function(){
  */
 const panelStreams = new PanelStreams();
 
-let ignoreHideIgnore = false;
-
 function updatePanelData(){
 	//Clear stream list in the panel
 	panelStreams.group_streams_by_websites = getPreference("group_streams_by_websites");
 	panelStreams.show_offline_in_panel = getPreference("show_offline_in_panel");
+	panelStreams.ignoreHideIgnore = false;
 	panelStreams.clear();
 
 	let show_offline_in_panel = getPreference("show_offline_in_panel");
 
 	refreshEnabledWebsites();
+
+
 
 	let streamListSettings = new StreamListFromSetting().mapDataAll;
 	streamListSettings.forEach((streamList, website) => {
@@ -499,91 +500,12 @@ function updatePanelData(){
 		}
 
 		streamList.forEach((value, id) => {
-			if(!ignoreHideIgnore){
-				if(typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true){
-					//console.info(`[Live notifier - Panel] Ignoring ${id}`);
-					return;
-				}
-				if(typeof streamList.get(id).hide === "boolean" && streamList.get(id).hide === true){
-					//console.info(`[Live notifier - Panel] Hiding ${id}`);
-					return;
-				}
-			}
-
-			const livesMap = liveStore.getLive(website, id);
-
-			let streamRenderData = null;
-
-			if(livesMap.size > 0){
-				streamRenderData = [];
-				livesMap.forEach((streamData, contentId) => {
-					getCleanedStreamStatus(website, id, contentId, streamList.get(id), streamData.liveStatus.API_Status);
-
-					if(streamData.liveStatus.filteredStatus || (show_offline_in_panel && !streamData.liveStatus.filteredStatus)){
-						doStreamNotif(website, id, contentId, streamList.get(id), streamData.liveStatus.API_Status);
-
-						streamRenderData.push(PanelStreams.streamToRenderData(website, id, contentId, "live", streamList.get(id), streamData));
-					}
-				});
-			} else if (liveStore.hasChannel(website, id)) {
-				//let streamData = channelInfos.get(website).get(id);
-				//let contentId = id;
-
-				//console.info(`Using channel infos for ${id} (${website})`);
-
-				streamRenderData = PanelStreams.streamToRenderData(website, id, /* contentId */ id, "channel", streamList.get(id), liveStore.getChannel(website, id));
-			} else if (websites.has(website)) {
-				console.info(`Currrently no data for ${id} (${website})`);
-				if ((typeof streamList.get(id).ignore === "boolean" && streamList.get(id).ignore === true) || (typeof streamList.get(id).hide === "boolean" && streamList.get(id).hide === true)) {
-					let contentId = id,
-						streamData = {
-							"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""},
-							"streamName": contentId,
-							"streamStatus": "",
-							"streamGame": "",
-							"streamOwnerLogo": "",
-							"streamCategoryLogo": "",
-							"streamCurrentViewers": null,
-							"streamURL": "",
-							"facebookID": "",
-							"twitterID": ""
-						},
-						website_channel_id = appGlobal["website_channel_id"]
-					;
-
-					if (website_channel_id.test(streamData.streamName)) {
-						streamData.streamName = website_channel_id.exec(streamData.streamName)[1];
-					}
-
-					streamRenderData = PanelStreams.streamToRenderData(website, id, contentId, website, streamList.get(id), streamData);
-				}
-			} else {
-				let contentId = id,
-					streamData = {
-						"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""},
-						"streamName": contentId,
-						"streamStatus": "",
-						"streamGame": "",
-						"streamOwnerLogo": "",
-						"streamCategoryLogo": "",
-						"streamCurrentViewers": null,
-						"streamURL": "",
-						"facebookID": "",
-						"twitterID": ""
-					}
-				;
-
-				console.warn(`The website of ${id} ("${website}") is not supported or not loaded`);
-
-				streamRenderData = PanelStreams.streamToRenderData(website, id, contentId, "unsupported", streamList.get(id), streamData);
-			}
-
-			if (streamRenderData !== null) {
-				panelStreams.set(website, id, streamRenderData);
-			}
+			panelStreams.set(website, id, streamList.get(id));
 		});
 	});
 	scrollbar_update("streamList");
+
+
 
 	liveStore.forEachLive((website, id, contentId, streamData)=>{
 		// Clean the streams already deleted but status still exist
@@ -606,16 +528,7 @@ function updatePanelData(){
 
 	checkMissing();
 
-	//Update online steam count in the panel
-	let onlineCount = appGlobal["onlineCount"];
-	listenerOnlineCount((onlineCount === 0)? i18ex._("No_stream_online") :  i18ex._("count_stream_online", {count: onlineCount}));
 
-	if(show_offline_in_panel){
-		let offlineCount = getOfflineCount();
-		listenerOfflineCount((offlineCount === 0)? i18ex._("No_stream_offline") :  i18ex._("count_stream_offline", {count: offlineCount}));
-	} else {
-		listenerOfflineCount("");
-	}
 
 	let debug_checkingLivesState_node = document.querySelector("#debug_checkingLivesState");
 	debug_checkingLivesState_node.className = appGlobal["checkingLivesFinished"];
@@ -627,20 +540,6 @@ function updatePanelData(){
 }
 
 
-
-
-
-function listenerOnlineCount(data){
-	let streamOnlineCountNode = document.querySelector("#streamOnlineCountLabel");
-	removeAllChildren(streamOnlineCountNode);
-	streamOnlineCountNode.textContent = data;
-}
-
-function listenerOfflineCount(data){
-	let streamOfflineCountNode = document.querySelector("#streamOfflineCountLabel");
-	removeAllChildren(streamOfflineCountNode);
-	streamOfflineCountNode.textContent = data;
-}
 
 function newDeleteStreamButton_onClick(event){
 	event.stopPropagation();
@@ -830,14 +729,36 @@ loadTranslations();
 updatePanelData();
 sendDataToMain("panel_onload");
 
-const onLiveStoreChange = _.debounce(()=>{
-	updatePanelData();
-}, 500, {
-	maxWait: 5000
-});
+(function () {
+	const onLiveStoreChange_queue = new Map(),
 
-liveStore.onLiveChange(onLiveStoreChange, false, window);
-liveStore.onChannelChange(onLiveStoreChange, false, window);
+		onLiveStoreChange_debounced = _.debounce(()=>{
+			onLiveStoreChange_queue.forEach((m, website) => {
+				m.forEach((v, id) => {
+					panelStreams.set(website, id);
+				})
+			});
+			onLiveStoreChange_queue.clear();
+		}, 500, {
+			maxWait: 5000
+		}),
+
+		onLiveStoreChange = function(event, website, id) {
+			if (onLiveStoreChange_queue.has(website) === false) {
+				onLiveStoreChange_queue.set(website, new Map());
+			}
+			onLiveStoreChange_queue.get(website).set(id, "");
+
+
+			onLiveStoreChange_debounced.apply(this, arguments);
+		}
+	;
+
+
+
+	liveStore.onLiveChange(onLiveStoreChange, false, window);
+	liveStore.onChannelChange(onLiveStoreChange, false, window);
+})();
 
 
 
