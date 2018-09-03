@@ -132,19 +132,20 @@ class PanelStreams extends Map {
 		if (this.has(website, id) === true) {
 			this.get(website, id).forEach((item) => {
 				const array = Array.isArray(item) === true? item : [item];
-				array.forEach((nodeList, index) => {
+
+				while(array.length > 0){
+					const nodeList = array.shift();
+
 					if (nodeList !== null){
 						if (Array.isArray(nodeList)) {
 							nodeList.forEach(node => {
 								node.remove();
 							});
-							array.splice(index, 1);
 						} else if (typeof nodeList.remove === "function") {
 							nodeList.remove();
-							array.splice(index, 1);
 						}
 					}
-				});
+				}
 			});
 		}
 	}
@@ -289,7 +290,6 @@ class PanelStreams extends Map {
 			"streamId": id,
 			"contentId": contentId,
 			"online": online,
-			"withError": false,
 			"streamName": streamData.streamName,
 			"streamNameLowercase": streamData.streamName.toLowerCase(),
 			"streamWebsite": website,
@@ -298,6 +298,9 @@ class PanelStreams extends Map {
 			"streamType": type,
 			"unsupportedType": (type === "unsupported"),
 			"streamSettings": JSON.stringify(streamSettings),
+
+			"lastCheckStatus": (typeof liveStatus.lastCheckStatus === "string")? liveStatus.lastCheckStatus : "",
+			"withError": (typeof liveStatus.lastCheckStatus === "string" && liveStatus.lastCheckStatus !== "" && liveStatus.lastCheckStatus !== "success"),
 
 			"usePictureLazyLoading": true
 		};
@@ -342,32 +345,6 @@ class PanelStreams extends Map {
 		streamRenderData.usePictureLazyLoading = false;
 		// }
 
-		if(typeof liveStatus.lastCheckStatus === "string" && liveStatus.lastCheckStatus !== "" && liveStatus.lastCheckStatus !== "success"){
-			streamRenderData.withError = true;
-
-
-			let debugDataNode = document.querySelector("#debugData");
-			let newDebugItem = document.createElement('div');
-			newDebugItem.classList.add("debugItem");
-			newDebugItem.dataset.streamWebsite = website;
-
-			let newDebugItem_title = document.createElement('span');
-			newDebugItem_title.classList.add("debugTitle");
-			newDebugItem_title.textContent = streamData.streamName;
-			newDebugItem.appendChild(newDebugItem_title);
-
-			let newDebugItem_status = document.createElement('span');
-			newDebugItem_status.textContent = `${liveStatus.lastCheckStatus}`;
-			newDebugItem.appendChild(newDebugItem_status);
-
-			debugDataNode.appendChild(newDebugItem);
-
-			let noErrorToShow = document.querySelector("#noErrorToShow");
-			hideClassNode(noErrorToShow);
-
-			scrollbar_update("debugSection");
-		}
-
 		return streamRenderData;
 
 		/*if(streamRenderData.usePictureLazyLoading===false && typeof streamRenderData.streamLogo==="string" && streamRenderData.streamLogo!==""){
@@ -386,11 +363,15 @@ class PanelStreams extends Map {
 
 		const html = Mustache.render(streamTemplate, streamRenderData);
 
+		let resultNodes = null;
+
+
+
 		if(this.group_streams_by_websites){
 			const website = streamRenderData.streamWebsite,
 				selector = `#streamList${((streamRenderData.online)? "Online" : "Offline")} .${(websites.has(website))? website : "unsupported"}`
 			;
-			return backgroundPage.zDK.appendTo(selector, html, document);
+			resultNodes = backgroundPage.zDK.appendTo(selector, html, document);
 		} else {
 			let statusNode = document.querySelector(`#streamList${(streamRenderData.online)? "Online" : "Offline"}`),
 				statusStreamList = statusNode.querySelectorAll(".item-stream")
@@ -401,13 +382,51 @@ class PanelStreams extends Map {
 					if(typeof streamNode.tagName === "string"){
 						let streamNode_title = streamNode.dataset.streamName;
 						if(streamRenderData.streamName.toLowerCase() < streamNode_title.toLowerCase()){
-							return insertBefore(streamNode, html);
+							resultNodes = insertBefore(streamNode, html);
+							break;
 						}
 					}
 				}
 			}
-			return backgroundPage.zDK.appendTo(statusNode, html, document);
+
+			if (resultNodes === null) {
+				resultNodes = backgroundPage.zDK.appendTo(statusNode, html, document);
+			}
 		}
+
+
+
+		if(streamRenderData.withError === true){
+			let debugDataNode = document.querySelector("#debugData");
+			let newDebugItem = document.createElement('div');
+			newDebugItem.classList.add("debugItem");
+			newDebugItem.dataset.streamWebsite = streamRenderData.streamWebsite;
+
+			let newDebugItem_title = document.createElement('span');
+			newDebugItem_title.classList.add("debugTitle");
+			newDebugItem_title.textContent = streamRenderData.streamName;
+			newDebugItem.appendChild(newDebugItem_title);
+
+			let newDebugItem_status = document.createElement('span');
+			newDebugItem_status.textContent = `${streamRenderData.lastCheckStatus}`;
+			newDebugItem.appendChild(newDebugItem_status);
+
+
+
+			debugDataNode.appendChild(newDebugItem);
+			resultNodes.push(newDebugItem);
+
+
+
+			let noErrorToShow = document.querySelector("#noErrorToShow");
+			hideClassNode(noErrorToShow);
+
+			scrollbar_update("debugSection");
+		}
+
+
+
+		return resultNodes;
 	}
 }
 
