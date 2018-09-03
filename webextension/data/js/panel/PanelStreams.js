@@ -420,6 +420,8 @@ class PanelStreams extends Map {
 			}
 		}
 
+		updateStreamListScrollbar();
+
 
 
 		if(streamRenderData.withError === true){
@@ -483,4 +485,14 @@ const updateCounts = _.debounce(function (){
 	PanelStreams.cachedQuerySelector("#streamOfflineCountLabel").textContent = data;
 }, 100, {
 	maxWait: 500
+});
+
+/**
+ *
+ * @type {Function}
+ */
+const updateStreamListScrollbar = _.debounce(function () {
+	scrollbar_update("streamList");
+}, 50, {
+	maxWait: 200
 });
