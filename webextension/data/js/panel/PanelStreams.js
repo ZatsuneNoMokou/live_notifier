@@ -133,14 +133,16 @@ class PanelStreams extends Map {
 			this.get(website, id).forEach((item) => {
 				const array = Array.isArray(item) === true? item : [item];
 				array.forEach((nodeList, index) => {
-					if (nodeList !== null && Array.isArray(nodeList)) {
-						nodeList.forEach(node => {
-							node.remove();
-						});
-						array.splice(index, 1);
-					} else if (typeof nodeList.remove === "function") {
-						nodeList.remove();
-						array.splice(index, 1);
+					if (nodeList !== null){
+						if (Array.isArray(nodeList)) {
+							nodeList.forEach(node => {
+								node.remove();
+							});
+							array.splice(index, 1);
+						} else if (typeof nodeList.remove === "function") {
+							nodeList.remove();
+							array.splice(index, 1);
+						}
 					}
 				});
 			});
