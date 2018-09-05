@@ -74,6 +74,7 @@
 		"alarms"
 	],
 	"options_ui": {
+		"browser_style": false,
 		"chrome_style": false,
 		"page": "data/options.html",
 		"open_in_tab": true
