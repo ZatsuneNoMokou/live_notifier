@@ -1,7 +1,3 @@
-const _PanelStreams_cachedQuerySelector = new Map();
-
-let lazyLoading = null;
-
 class PanelStreams extends Map {
 	constructor(group_streams_by_websites, show_offline_in_panel) {
 		super();
@@ -17,6 +13,8 @@ class PanelStreams extends Map {
 		this.show_offline_in_panel = (typeof show_offline_in_panel === "boolean")? show_offline_in_panel : false;
 
 		this._ignoreHideIgnore = false;
+
+		// this.lazyLoading = null;
 	}
 
 	/**
@@ -37,28 +35,37 @@ class PanelStreams extends Map {
 		this._ignoreHideIgnore = value;
 	}
 
+	/**
+	 * Static lazy getter to defined a static property
+	 * @return {Map<String, Element | null>}
+	 */
+	static get cachedQuerySelectorMap(){
+		delete PanelStreams.cachedQuerySelectorMap;
+		return this.cachedQuerySelectorMap = new Map();
+	}
+
 	static cachedQuerySelector(selector){
-		if (_PanelStreams_cachedQuerySelector.has(selector) === false || _PanelStreams_cachedQuerySelector.get(selector) === null || _PanelStreams_cachedQuerySelector.get(selector).parentNode === null) {
-			_PanelStreams_cachedQuerySelector.set(selector, document.querySelector(selector));
+		if (this.cachedQuerySelectorMap.has(selector) === false || this.cachedQuerySelectorMap.get(selector) === null || this.cachedQuerySelectorMap.get(selector).parentNode === null) {
+			this.cachedQuerySelectorMap.set(selector, document.querySelector(selector));
 		}
 
-		return _PanelStreams_cachedQuerySelector.get(selector);
+		return this.cachedQuerySelectorMap.get(selector);
 	}
 
-	get $debugData(){
-		return PanelStreams.cachedQuerySelector("#debugData");
+	static get $debugData(){
+		return this.cachedQuerySelector("#debugData");
 	}
 
-	get $noErrorToShow(){
-		return PanelStreams.cachedQuerySelector("#noErrorToShow");
+	static get $noErrorToShow(){
+		return this.cachedQuerySelector("#noErrorToShow");
 	}
 
-	get $streamListOnline(){
-		return PanelStreams.cachedQuerySelector("#streamListOnline");
+	static get $streamListOnline(){
+		return this.cachedQuerySelector("#streamListOnline");
 	}
 
-	get $streamListOffline(){
-		return PanelStreams.cachedQuerySelector("#streamListOffline");
+	static get $streamListOffline(){
+		return this.cachedQuerySelector("#streamListOffline");
 	}
 
 
@@ -67,7 +74,7 @@ class PanelStreams extends Map {
 
 	init() {
 		/*if (lazyLoading === null) {
-			lazyLoading = new LazyLoading();
+			this.lazyLoading = new LazyLoading();
 		}*/
 
 		let streamItems = document.querySelectorAll(".item-stream");
@@ -83,10 +90,10 @@ class PanelStreams extends Map {
 			}
 		}
 
-		this.$noErrorToShow.classList.remove("hide");
-		removeAllChildren(this.$debugData);
+		PanelStreams.$noErrorToShow.classList.remove('hide');
+		removeAllChildren(PanelStreams.$debugData);
 
-		this.$streamListOffline.classList.toggle("hide", !this.show_offline_in_panel);
+		PanelStreams.$streamListOffline.classList.toggle('hide', !this.show_offline_in_panel);
 	}
 
 
@@ -140,7 +147,7 @@ class PanelStreams extends Map {
 				output = this.insertRenderData(data);
 			}
 
-			// lazyLoading.updateStore();
+			// this.lazyLoading.updateStore();
 
 			updateCounts();
 			return super.get(website).set(id, output);
@@ -296,7 +303,7 @@ class PanelStreams extends Map {
 	 * @param {String} id
 	 * @param {String} contentId
 	 * @param {String} type
-	 * @param {JSON} streamSettings
+	 * @param {Object} streamSettings
 	 * @param {JSON} streamData
 	 * @return {{streamId: String, contentId: String, online: boolean, withError: boolean, streamName: String, streamNameLowercase: string, streamWebsite: String, streamWebsiteLowercase: string, streamType: String, unsupportedType: boolean, streamSettings: string, usePictureLazyLoading: boolean}}
 	 */
@@ -375,14 +382,14 @@ class PanelStreams extends Map {
 
 		/*if(streamRenderData.usePictureLazyLoading===false && typeof streamRenderData.streamLogo==="string" && streamRenderData.streamLogo!==""){
 			const streamPicture = $newNode[0].querySelector(".streamPicture");
-			LazyLoading.loadImg(streamPicture, streamRenderData.streamLogo);
+			this.LazyLoading.loadImg(streamPicture, streamRenderData.streamLogo);
 		}*/
 	}
 
 	/**
 	 *
 	 * @param {JSON} streamRenderData
-	 * @return {null | Array<HTMLElement>}
+	 * @return {null | Array<Element>}
 	 */
 	insertRenderData(streamRenderData){
 		document.body.classList.toggle("groupedStreams", this.group_streams_by_websites);
@@ -399,7 +406,7 @@ class PanelStreams extends Map {
 			;
 			resultNodes = backgroundPage.zDK.appendTo(selector, html, document);
 		} else {
-			let statusNode = (streamRenderData.online)? this.$streamListOnline : this.$streamListOffline,
+			let statusNode = (streamRenderData.online)? PanelStreams.$streamListOnline : PanelStreams.$streamListOffline,
 				statusStreamList = statusNode.querySelectorAll(".item-stream")
 			;
 
@@ -440,12 +447,12 @@ class PanelStreams extends Map {
 
 
 
-			this.$debugData.appendChild(newDebugItem);
+			PanelStreams.$debugData.appendChild(newDebugItem);
 			resultNodes.push(newDebugItem);
 
 
 
-			hideClassNode(this.$noErrorToShow);
+			hideClassNode(PanelStreams.$noErrorToShow);
 
 			scrollbar_update("debugSection");
 		}

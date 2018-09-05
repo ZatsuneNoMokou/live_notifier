@@ -487,8 +487,6 @@ function updatePanelData(){
 	panelStreams.ignoreHideIgnore = false;
 	panelStreams.clear();
 
-	let show_offline_in_panel = getPreference("show_offline_in_panel");
-
 	refreshEnabledWebsites();
 
 
