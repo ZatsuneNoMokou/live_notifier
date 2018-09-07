@@ -9,49 +9,14 @@ class CommonStore extends DataStore {
 
 
 
-		this.setCompression(this.CONSTANTS.channel, CommonStore.compression, CommonStore.decompression, this);
-
-
-
 		this.COMMON_STORE_VERSION = "12.0.0.8";
 
-		if (!this.has("_", "CommonStore_version") || this.get("_", "CommonStore_version") !== this.COMMON_STORE_VERSION) {
+		if (!super.has("_", "CommonStore_version") || super.get("_", "CommonStore_version") !== this.COMMON_STORE_VERSION) {
 			consoleMsg("warn", "New version of CommonStore, clearing old data.");
-			this.clear(this.CONSTANTS.CommonStore);
+			super.clear(this.CONSTANTS.CommonStore);
 		}
 
-		this.set("_", "CommonStore_version", this.COMMON_STORE_VERSION);
-	}
-
-
-	/**
-	 *
-	 * @param {String} id
-	 * @return {*}
-	 */
-	static getDefault(id) {
-		return undefined;
-	}
-
-
-	static compression(key, id, data) {
-		data = DataStore.cloneVariable(data);
-
-		const defaultData = CommonStore.getDefault(id);
-		if (defaultData !== undefined) {
-			data = DataStore.removeDefault(defaultData, data);
-		}
-
-		return data;
-	}
-
-	static decompression(key, id, data) {
-		const defaultData = CommonStore.getDefault(id);
-		if (defaultData !== undefined) {
-			result = DataStore.extendsWithDefault(defaultData, data);
-		}
-
-		return result;
+		super.set("_", "CommonStore_version", this.COMMON_STORE_VERSION);
 	}
 
 

@@ -21,6 +21,8 @@ appGlobal["websitesLoaded"] = websitesLoaded;
 
 let liveStore = new LiveStore();
 appGlobal["liveStore"] = liveStore;
+let commonStore = new CommonStore();
+appGlobal["commonStore"] = commonStore;
 
 appGlobal["consoleMsg"] = ZDK.consoleMsg;
 const consoleDir = appGlobal["consoleDir"] = ZDK.consoleDir;
