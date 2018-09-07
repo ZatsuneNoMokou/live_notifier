@@ -9,6 +9,10 @@ class CommonStore extends DataStore {
 
 
 
+		this.setCompression(this.CONSTANTS.CommonStore, this.compression, this.decompression, this);
+
+
+
 		this.COMMON_STORE_VERSION = "12.0.0.8";
 
 		if (!super.has("_", "CommonStore_version") || super.get("_", "CommonStore_version") !== this.COMMON_STORE_VERSION) {
@@ -17,6 +21,28 @@ class CommonStore extends DataStore {
 		}
 
 		super.set("_", "CommonStore_version", this.COMMON_STORE_VERSION);
+
+
+
+		if (this.has('checkingLivesFinished') === false) {
+			this.set('checkingLivesFinished', true);
+		}
+	}
+
+	compression(key, id, data){
+		data = DataStore.cloneVariable(data);
+
+		if (this.CONSTANTS.CommonStore) {
+		}
+
+		return data;
+	}
+
+	decompression(key, id, data){
+		if (this.CONSTANTS.cs) {
+		}
+
+		return data;
 	}
 
 
