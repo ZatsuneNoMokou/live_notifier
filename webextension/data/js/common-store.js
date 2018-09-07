@@ -15,7 +15,7 @@ class CommonStore extends DataStore {
 
 		this.COMMON_STORE_VERSION = "12.0.0.8";
 
-		if(!this.has("_", "CommonStore_version") || this.get("_", "CommonStore_version")!==this.COMMON_STORE_VERSION){
+		if (!this.has("_", "CommonStore_version") || this.get("_", "CommonStore_version") !== this.COMMON_STORE_VERSION) {
 			consoleMsg("warn", "New version of CommonStore, clearing old data.");
 			this.clear(this.CONSTANTS.CommonStore);
 		}
@@ -29,12 +29,12 @@ class CommonStore extends DataStore {
 	 * @param {String} id
 	 * @return {*}
 	 */
-	static getDefault(id){
+	static getDefault(id) {
 		return undefined;
 	}
 
 
-	static compression(key, id, data){
+	static compression(key, id, data) {
 		data = DataStore.cloneVariable(data);
 
 		const defaultData = CommonStore.getDefault(id);
@@ -45,7 +45,7 @@ class CommonStore extends DataStore {
 		return data;
 	}
 
-	static decompression(key, id, data){
+	static decompression(key, id, data) {
 		const defaultData = CommonStore.getDefault(id);
 		if (defaultData !== undefined) {
 			result = DataStore.extendsWithDefault(defaultData, data);
@@ -64,7 +64,7 @@ class CommonStore extends DataStore {
 	 * @param {String} id
 	 * @return {Boolean|String|Number|JSON}
 	 */
-	get(id){
+	get(id) {
 		return super.get(this.CONSTANTS.CommonStore, id);
 	}
 
@@ -74,7 +74,7 @@ class CommonStore extends DataStore {
 	 * @param {String} id
 	 * @return {Boolean}
 	 */
-	has(id){
+	has(id) {
 		return super.has(this.CONSTANTS.CommonStore, id);
 	}
 
@@ -84,13 +84,13 @@ class CommonStore extends DataStore {
 	 * @param {String} id
 	 * @param {Boolean|String|Number|JSON} data
 	 */
-	set(id, data){
+	set(id, data) {
 		return super.set(this.CONSTANTS.CommonStore, id, data);
 	}
 
 
 
-	update(id, fn){
+	update(id, fn) {
 		let data = this.get(id);
 		data = fn(id, data);
 		return this.set(id, data);
@@ -99,13 +99,13 @@ class CommonStore extends DataStore {
 
 
 	// noinspection JSCheckFunctionSignatures
-	remove(id){
+	remove(id) {
 		return super.remove(this.CONSTANTS.CommonStore, id);
 	}
 
 
 
-	forEachWrapper(fn){
+	forEachWrapper(fn) {
 		return function (key, id, data) {
 			fn(id, data);
 		}
@@ -119,7 +119,7 @@ class CommonStore extends DataStore {
 	 * @param {*} fn.data
 	 */
 	forEach(fn){
-		if(typeof fn==="function"){
+		if (typeof fn === "function") {
 			super.forEach(this.CONSTANTS.CommonStore, this.forEachWrapper(fn));
 		} else {
 			throw "Wrong arguments";
@@ -128,9 +128,17 @@ class CommonStore extends DataStore {
 
 
 
-	onChangeWrapper(fn){
+	/**
+	 *
+	 * @param {Function} fn
+	 * @param {String} watchedId
+	 * @return {Function}
+	 */
+	onChangeWrapper(fn, watchedId=null) {
 		return function (e, key, id, data) {
-			fn(e, id, data);
+			if (watchedId === null || watchedId === id) {
+				fn(e, id, data);
+			}
 		}
 	}
 
@@ -143,5 +151,19 @@ class CommonStore extends DataStore {
 	 */
 	onChange(fn, withData=false, win=this.window) {
 		super.onChange(this.CONSTANTS.CommonStore, this.onChangeWrapper(fn), withData, win);
+	}
+
+	/**
+	 *
+	 * @param {function(StorageEvent, String, Object):void} fn event, id, data
+	 * @param {String} id
+	 * @param {Window} win
+	 */
+	onIdChange(fn, id, win=this.window) {
+		if (typeof id !== "string" || id === "") {
+			throw 'WrongArguments';
+		}
+
+		super.onChange(this.CONSTANTS.CommonStore, this.onChangeWrapper(fn, id), true, win);
 	}
 }
