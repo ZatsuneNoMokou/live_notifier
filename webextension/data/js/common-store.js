@@ -97,7 +97,7 @@ class CommonStore extends DataStore {
 	 *
 	 * @param {Function} fn
 	 * @param {String} watchedId
-	 * @return {Function}
+	 * @return {function(StorageEvent, String, String, Object):void} fn event, id, data
 	 */
 	onChangeWrapper(fn, watchedId=null) {
 		return function (e, key, id, data) {
