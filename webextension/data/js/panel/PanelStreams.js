@@ -56,6 +56,14 @@ class PanelStreams extends Map {
 		return this.cachedQuerySelector("#debugData");
 	}
 
+	static get $debug_checkingLivesState(){
+		return this.cachedQuerySelector("#debug_checkingLivesState");
+	}
+
+	static get $refreshStreams(){
+		return this.cachedQuerySelector("#refreshStreams");
+	}
+
 	static get $noErrorToShow(){
 		return this.cachedQuerySelector("#noErrorToShow");
 	}

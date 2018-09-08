@@ -45,6 +45,7 @@
 
 			"/data/js/classes/ZDK.js",
 			"/data/js/live-store.js",
+			"/data/js/common-store.js",
 			"init.js"
 		]
 	},

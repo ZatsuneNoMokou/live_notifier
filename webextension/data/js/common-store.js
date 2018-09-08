@@ -24,8 +24,8 @@ class CommonStore extends DataStore {
 
 
 
-		if (this.has('checkingLivesFinished') === false) {
-			this.set('checkingLivesFinished', true);
+		if (this.hasItem('checkingLivesFinished') === false) {
+			this.setItem('checkingLivesFinished', true);
 		}
 	}
 
@@ -49,39 +49,36 @@ class CommonStore extends DataStore {
 
 
 
-	// noinspection JSCheckFunctionSignatures
 	/**
 	 *
 	 * @param {String} id
 	 * @return {Boolean|String|Number|JSON}
 	 */
-	get(id) {
+	getItem(id) {
 		return super.get(this.CONSTANTS.CommonStore, id);
 	}
 
-	// noinspection JSCheckFunctionSignatures
 	/**
 	 *
 	 * @param {String} id
 	 * @return {Boolean}
 	 */
-	has(id) {
+	hasItem(id) {
 		return super.has(this.CONSTANTS.CommonStore, id);
 	}
 
-	// noinspection JSCheckFunctionSignatures
 	/**
 	 *
 	 * @param {String} id
 	 * @param {Boolean|String|Number|JSON} data
 	 */
-	set(id, data) {
+	setItem(id, data) {
 		return super.set(this.CONSTANTS.CommonStore, id, data);
 	}
 
 
 
-	update(id, fn) {
+	updateItem(id, fn) {
 		let data = this.get(id);
 		data = fn(id, data);
 		return this.set(id, data);
@@ -90,7 +87,7 @@ class CommonStore extends DataStore {
 
 
 	// noinspection JSCheckFunctionSignatures
-	remove(id) {
+	removeItem(id) {
 		return super.remove(this.CONSTANTS.CommonStore, id);
 	}
 
@@ -102,14 +99,13 @@ class CommonStore extends DataStore {
 		}
 	}
 
-	// noinspection JSCheckFunctionSignatures
 	/**
 	 *
 	 * @param {Function=} fn Callback function
 	 * @param {String} fn.id
 	 * @param {*} fn.data
 	 */
-	forEach(fn){
+	forEachItem(fn){
 		if (typeof fn === "function") {
 			super.forEach(this.CONSTANTS.CommonStore, this.forEachWrapper(fn));
 		} else {
@@ -133,14 +129,13 @@ class CommonStore extends DataStore {
 		}
 	}
 
-	// noinspection JSCheckFunctionSignatures
 	/**
 	 *
 	 * @param {function(StorageEvent, String, Object):void} fn event, id, data
 	 * @param {Boolean=false} withData
 	 * @param {Window} win
 	 */
-	onChange(fn, withData=false, win=this.window) {
+	onItemChange(fn, withData=false, win=this.window) {
 		super.onChange(this.CONSTANTS.CommonStore, this.onChangeWrapper(fn), withData, win);
 	}
 
@@ -155,6 +150,6 @@ class CommonStore extends DataStore {
 			throw 'WrongArguments';
 		}
 
-		super.onChange(this.CONSTANTS.CommonStore, this.onChangeWrapper(fn, id), true, win);
+		super.onChange(this.CONSTANTS.CommonStore, this.onChangeWrapper(fn, id), false, win);
 	}
 }

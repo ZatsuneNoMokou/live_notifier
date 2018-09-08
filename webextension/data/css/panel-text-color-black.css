@@ -40,7 +40,8 @@ textarea,
 }
 
 /*			---- Disabled / Hint text ----			*/
-footer {
+footer,
+button[disabled] {
 	color: #FFFFFF;
 	color: rgba(0, 0, 0, 0.4);
 }

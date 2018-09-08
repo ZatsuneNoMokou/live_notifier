@@ -99,6 +99,7 @@ const removeAllChildren = backgroundPage.zDK.removeAllChildren;
 let { StreamListFromSetting,
 	websites,
 	liveStore,
+	commonStore,
 	getCleanedStreamStatus,
 	getStreamURL,
 	getOfflineCount,
@@ -527,8 +528,7 @@ function updatePanelData(){
 
 
 
-	let debug_checkingLivesState_node = document.querySelector("#debug_checkingLivesState");
-	debug_checkingLivesState_node.className = appGlobal["checkingLivesFinished"];
+	PanelStreams.$debug_checkingLivesState.className = commonStore.getItem("checkingLivesFinished") === true;
 
 	//Update Live notifier version displayed in the panel preferences
 	if(typeof appGlobal["version"] === "string" || Array.isArray(appGlobal["version"])===true){
@@ -755,6 +755,20 @@ sendDataToMain("panel_onload");
 
 	liveStore.onLiveChange(onLiveStoreChange, false, window);
 	liveStore.onChannelChange(onLiveStoreChange, false, window);
+})();
+
+
+
+(function () {
+	const onCheckState = function () {
+		const data = commonStore.getItem('checkingLivesFinished');
+
+		PanelStreams.$refreshStreams.disabled = data !== true;
+		PanelStreams.$debug_checkingLivesState.className = data === true;
+	};
+
+	onCheckState();
+	commonStore.onIdChange(onCheckState, 'checkingLivesFinished', window);
 })();
 
 
