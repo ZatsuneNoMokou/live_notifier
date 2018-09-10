@@ -1894,7 +1894,7 @@ function initAddon(){
 			}
 
 			if (updatedPreferences.size > 0) {
-				if (updatedPreferences.has('dropboxClientId') || updatedPupdatedPreferencesreferences.has('dropboxClientAuthToken')) {
+				if (updatedPreferences.has('dropboxClientId') || updatedPreferences.has('dropboxClientAuthToken')) {
 					dropboxController = updateDropboxController(dropboxClientId, dropboxAuthToken);
 				}
 
