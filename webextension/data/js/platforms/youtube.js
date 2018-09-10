@@ -414,11 +414,15 @@ const youtube = {
 					}
 
 					if(livesItems!==null){
-						for(let item of livesItems){
-							if(item.hasOwnProperty("gridVideoRenderer")===true && item.gridVideoRenderer.hasOwnProperty("publishedTimeText")===false){
+						for(let item of livesItems) {
+							if (item.hasOwnProperty("gridVideoRenderer") === true && item.gridVideoRenderer.hasOwnProperty("publishedTimeText") === false) {
 								const streamData = item.gridVideoRenderer;
 								// console.dir(streamData);
 
+								if (streamData.hasOwnProperty('upcomingEventData') === true) {
+									// Upcoming event
+									continue;
+								}
 
 								const data = {
 									"streamName": streamData.title.simpleText,

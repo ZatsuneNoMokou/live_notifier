@@ -334,7 +334,7 @@ class DataStore {
 			}
 		}
 
-		return this.storage.setItem(DataStore.generateStorageId(keys, id), JSON.stringify(dataToStore));
+		this.storage.setItem(DataStore.generateStorageId(keys, id), JSON.stringify(dataToStore));
 	}
 
 	/**

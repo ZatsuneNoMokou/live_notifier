@@ -21,6 +21,8 @@ appGlobal["websitesLoaded"] = websitesLoaded;
 
 let liveStore = new LiveStore();
 appGlobal["liveStore"] = liveStore;
+let commonStore = new CommonStore();
+appGlobal["commonStore"] = commonStore;
 
 appGlobal["consoleMsg"] = ZDK.consoleMsg;
 const consoleDir = appGlobal["consoleDir"] = ZDK.consoleDir;
@@ -453,7 +455,7 @@ chrome.runtime.onMessage.addListener(message=>{
 });
 
 function refreshStreamsFromPanel() {
-	if (appGlobal["checkingLivesFinished"]) {
+	if (commonStore.getItem("checkingLivesFinished") === true) {
 		checkLives()
 			.catch(err => {
 				consoleMsg("error", err);
@@ -936,11 +938,11 @@ function timingEnd(id){
 }
 
 let DATAs, streamsTimings, needCheckMissing = false;
-appGlobal["checkingLivesFinished"] = true;
+commonStore.setItem("checkingLivesFinished", true);
 async function checkLives(idArray){
 	DATAs = new Map();
 	streamsTimings = new Map();
-	appGlobal["checkingLivesFinished"] = false;
+	commonStore.setItem("checkingLivesFinished", false);
 	timing("checkLives");
 
 	streamListFromSetting.refresh();
@@ -987,7 +989,7 @@ async function checkLives(idArray){
 
 	if(checkQueue.queue.size === 0){
 		setIcon();
-		appGlobal["checkingLivesFinished"] = true;
+		commonStore.setItem("checkingLivesFinished", true);
 	} else {
 		let result;
 		try{
@@ -1060,7 +1062,7 @@ async function checkLives(idArray){
 			checkMissing();
 		}
 
-		appGlobal["checkingLivesFinished"] = true;
+		commonStore.setItem("checkingLivesFinished", true);
 		return result;
 	}
 
@@ -1070,7 +1072,7 @@ async function checkLives(idArray){
 	}
 }
 function checkMissing(){
-	if(appGlobal["checkingLivesFinished"]){
+	if (commonStore.getItem("checkingLivesFinished") === true) {
 		let listToCheck = new Map();
 
 		streamListFromSetting.refresh();
@@ -1892,7 +1894,7 @@ function initAddon(){
 			}
 
 			if (updatedPreferences.size > 0) {
-				if (updatedPreferences.has('dropboxClientId') || dropboxClientId.has('dropboxClientAuthToken')) {
+				if (updatedPreferences.has('dropboxClientId') || updatedPreferences.has('dropboxClientAuthToken')) {
 					dropboxController = updateDropboxController(dropboxClientId, dropboxAuthToken);
 				}
 

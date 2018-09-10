@@ -358,7 +358,7 @@ class LiveStore extends DataStore {
 
 	/**
 	 *
-	 * @param {function(StorageEvent, String, String, Object):void} fn website, id, data
+	 * @param {function(StorageEvent, String, String, Object):void} fn event, website, id, data
 	 * @param {Boolean=false} withData
 	 * @param {Window} win
 	 */
@@ -377,7 +377,7 @@ class LiveStore extends DataStore {
 
 	/**
 	 *
-	 * @param {function(StorageEvent, String, String, String, Object):void} fn website, id, contentId, data
+	 * @param {function(StorageEvent, String, String, String, Object):void} fn event, website, id, contentId, data
 	 * @param {Boolean=false} withData
 	 * @param {Window} win
 	 */
