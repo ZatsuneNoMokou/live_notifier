@@ -8,6 +8,9 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 12.0.0.10
+* Fix : ZDK - Export preferences to file - Timeout too short
+
 # 12.0.0.9
 * \+ : CommonStore
 * \+ : Panel - Refactor of the code generating stream html

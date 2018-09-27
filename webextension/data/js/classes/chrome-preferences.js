@@ -800,7 +800,7 @@ ${err}`);
 		await ZDK.setTimeout();
 		link.dispatchEvent(new MouseEvent('click'));
 
-		await ZDK.setTimeout(1000);
+		await ZDK.setTimeout(7000);
 		URL.revokeObjectURL(url);
 		iframe.remove();
 	}
