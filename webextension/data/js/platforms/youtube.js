@@ -361,51 +361,111 @@ const youtube = {
 					};
 				}
 
-				/**
-				 * Make sure to be on page with videos
-				 */
-				for(let item of tabData.tabs){
-					let endpointUrl;
-					try {
-						endpointUrl = item.tabRenderer.endpoint.commandMetadata.webCommandMetadata.url;
-					} catch (e) {}
-
-					if(endpointUrl!==undefined && endpointUrl.indexOf("/videos")!==-1){
+				if (tabData !== undefined) {
+					/**
+					 * Make sure to be on page with videos
+					 */
+					for(let item of tabData.tabs){
+						let endpointUrl;
 						try {
-							contentRender = item.tabRenderer.content.sectionListRenderer;
-						} catch (e) {
-							consoleMsg("error", e);
+							endpointUrl = item.tabRenderer.endpoint.commandMetadata.webCommandMetadata.url;
+						} catch (e) {}
+
+						if(endpointUrl!==undefined && endpointUrl.indexOf("/videos")!==-1){
+							try {
+								contentRender = item.tabRenderer.content.sectionListRenderer;
+							} catch (e) {
+								consoleMsg("error", e);
+							}
+							break;
 						}
-						break;
 					}
-				}
 
-				/**
-				 * Make sure to be on the right tab of content (live tab)
-				 */
-				let tabs = null;
-				try {
-					tabs = contentRender.subMenu.channelSubMenuRenderer.contentTypeSubMenuItems;
-				} catch (e) {
-					consoleMsg("error", e);
-				}
+					/**
+					 * Make sure to be on the right tab of content (live tab)
+					 */
+					let tabs = null;
+					try {
+						tabs = contentRender.subMenu.channelSubMenuRenderer.contentTypeSubMenuItems;
+					} catch (e) {
+						consoleMsg("error", e);
+					}
 
-				if(tabs!==null){
-					for(let tab of tabs){
-						if(tab.selected && tab.selected===true){
-							let endpointUrl;
-							try{
-								endpointUrl = tab.endpoint.commandMetadata.webCommandMetadata.url;
-							} catch (e) {}
+					if(tabs!==null){
+						for(let tab of tabs){
+							if(tab.selected && tab.selected===true){
+								let endpointUrl;
+								try{
+									endpointUrl = tab.endpoint.commandMetadata.webCommandMetadata.url;
+								} catch (e) {}
 
-							if(endpointUrl!==undefined && endpointUrl.indexOf("view=2")===-1){
-								contentRender=null;
+								if(endpointUrl!==undefined && endpointUrl.indexOf("view=2")===-1){
+									contentRender=null;
+								}
+							}
+						}
+					}
+				} else {
+					let videoPlayerData = null;
+
+					try {
+						videoPlayerData = configData.contents.twoColumnWatchNextResults.results.results.contents
+					} catch (e) {
+						consoleMsg('error', e);
+					}
+
+					if (videoPlayerData !== null) {
+						let primaryInfo = null;
+
+						try {
+							primaryInfo = videoPlayerData["0"].videoPrimaryInfoRenderer
+						} catch (e) {
+							consoleMsg('error', e);
+						}
+
+						if (primaryInfo !== null) {
+							try {
+								const videoId = primaryInfo.updatedMetadataEndpoint.updatedMetadataEndpoint.videoId;
+								const data = {
+									"streamName": primaryInfo.title.simpleText,
+									"streamOwnerLogo": `https://i.ytimg.com/vi/${videoId}/hqdefault_live.jpg`
+								};
+
+								if (primaryInfo.hasOwnProperty("viewCount") && viewCountReg.test(primaryInfo.viewCount.videoViewCountRenderer.viewCount.simpleText)) {
+									data.streamCurrentViewers = parseInt(viewCountReg.exec(primaryInfo.viewCount.videoViewCountRenderer.viewCount.simpleText)[1]);
+								}
+
+								result.list[videoId] = data;
+							} catch (e) {
+								consoleMsg('error', e);
+							}
+						}
+
+
+
+						if (result.hasOwnProperty("channelInfos") === false) {
+							let seconderInfo = null;
+
+							try {
+								seconderInfo = videoPlayerData[1].videoSecondaryInfoRenderer.owner.videoOwnerRenderer
+							} catch (e) {
+								consoleMsg('error', e);
+							}
+
+							if (seconderInfo !== null) {
+								result.channelId = seconderInfo.navigationEndpoint.browseEndpoint.browseId;
+								result.channelInfos = {
+									"streamName": seconderInfo.title.runs["0"].text,
+									"streamOwnerLogo": seconderInfo.thumbnail.thumbnails[1].url
+								};
 							}
 						}
 					}
 				}
 
-				if(contentRender!==null && contentRender.contents && Array.isArray(contentRender.contents) && contentRender.contents.length>0){
+
+
+				if (contentRender !== null && contentRender.contents && Array.isArray(contentRender.contents) && contentRender.contents.length>0) {
 					let livesItems = null;
 					try {
 						livesItems = contentRender.contents["0"].itemSectionRenderer.contents["0"].gridRenderer.items
@@ -413,7 +473,7 @@ const youtube = {
 						consoleMsg("error", e);
 					}
 
-					if(livesItems!==null){
+					if (livesItems !== null) {
 						for(let item of livesItems) {
 							if (item.hasOwnProperty("gridVideoRenderer") === true && item.gridVideoRenderer.hasOwnProperty("publishedTimeText") === false) {
 								const streamData = item.gridVideoRenderer;
@@ -429,7 +489,7 @@ const youtube = {
 									"streamOwnerLogo": `https://i.ytimg.com/vi/${streamData.videoId}/hqdefault_live.jpg`
 								};
 
-								if(streamData.hasOwnProperty("viewCountText") && viewCountReg.test(streamData.viewCountText.simpleText)){
+								if (streamData.hasOwnProperty("viewCountText") && viewCountReg.test(streamData.viewCountText.simpleText)) {
 									data.streamCurrentViewers = parseInt(viewCountReg.exec(streamData.viewCountText.simpleText)[1]);
 								}
 
@@ -447,10 +507,12 @@ const youtube = {
 			if(result.hasOwnProperty("channelInfos")===false){
 				const metaOgData = youtube.getMetaOgData(html);
 
-				result.channelInfos = {
-					"streamName": metaOgData.title.replace(/\s+-\s+youtube$/i, ""),
-					"streamOwnerLogo": metaOgData.image.getAttribute("content")
-				};
+				if (typeof metaOgData.title === 'string' && typeof metaOgData.image === 'string') {
+					result.channelInfos = {
+						"streamName": metaOgData.title.replace(/\s+-\s+youtube$/i, ""),
+						"streamOwnerLogo": metaOgData.image.getAttribute("content")
+					};
+				}
 
 				return result;
 			}
