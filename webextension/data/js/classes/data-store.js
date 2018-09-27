@@ -129,8 +129,8 @@ class DataStore {
 	 * @return {Object}
 	 */
 	static compressWithPattern(sourceData, patternObj){
-		let data = DataStore.cloneVariable(sourceData);
-		if(typeof data==="object" && data!==null){
+		// let data = DataStore.cloneVariable(sourceData);
+		if(typeof sourceData==="object" && sourceData!==null){
 			for(let i in patternObj){
 				if(!patternObj.hasOwnProperty(i)){
 					continue;
@@ -138,11 +138,11 @@ class DataStore {
 
 				switch (typeof patternObj[i]){
 					case "string":
-						DataStore.renameProperty(data, i, patternObj[i]);
+						DataStore.renameProperty(sourceData, i, patternObj[i]);
 						break;
 					case "object":
-						if(data.hasOwnProperty(i)){
-							data[i] = DataStore.compressWithPattern(data[i], patternObj[i]);
+						if(sourceData.hasOwnProperty(i)){
+							sourceData[i] = DataStore.compressWithPattern(sourceData[i], patternObj[i]);
 						}
 						break;
 					default:
@@ -150,7 +150,7 @@ class DataStore {
 				}
 			}
 		}
-		return data;
+		return sourceData;
 	}
 
 	/**
@@ -160,8 +160,8 @@ class DataStore {
 	 * @return {Object}
 	 */
 	static decompressWithPattern(sourceData, patternObj){
-		let data = DataStore.cloneVariable(sourceData);
-		if(typeof data==="object" && data!==null){
+		// let data = DataStore.cloneVariable(sourceData);
+		if(typeof sourceData==="object" && sourceData!==null){
 			for(let i in patternObj){
 				if(!patternObj.hasOwnProperty(i)){
 					continue;
@@ -169,11 +169,11 @@ class DataStore {
 
 				switch (typeof patternObj[i]){
 					case "string":
-						DataStore.renameProperty(data, patternObj[i], i);
+						DataStore.renameProperty(sourceData, patternObj[i], i);
 						break;
 					case "object":
-						if(data.hasOwnProperty(i)){
-							data[i] = DataStore.decompressWithPattern(data[i], patternObj[i]);
+						if(sourceData.hasOwnProperty(i)){
+							sourceData[i] = DataStore.decompressWithPattern(sourceData[i], patternObj[i]);
 						}
 						break;
 					default:
@@ -181,7 +181,7 @@ class DataStore {
 				}
 			}
 		}
-		return data;
+		return sourceData;
 	}
 
 	/**
@@ -193,7 +193,7 @@ class DataStore {
 	 */
 	static renameProperty(object, oldName, newName){
 		if(object.hasOwnProperty(oldName)) {
-			object[newName] = DataStore.cloneVariable(object[oldName]);
+			object[newName] = object[oldName];
 			delete object[oldName];
 		}
 		return object;
@@ -207,7 +207,8 @@ class DataStore {
 		} else if(object===null){
 			return null;
 		} else if(typeof object==="object"){
-			return Object.assign({}, object);
+			// return Object.assign({}, object);
+			return _.cloneDeep(object);
 		} else {
 			return object;
 		}
@@ -295,7 +296,7 @@ class DataStore {
 	 * @param {Boolean|String|Number|JSON} data
 	 */
 	set(keys, id, data){
-		data = this.compressData(keys, id, data);
+		data = DataStore.cloneVariable(this.compressData(keys, id, data));
 
 		const dataToStore = [];
 
