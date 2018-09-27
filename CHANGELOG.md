@@ -13,6 +13,7 @@
 * Fix : \[ZDK] Use lodash deep clone as [Object.assign()](https://developer.mozilla.org//docs/Web/JavaScript/Reference/Global_Objects/Object/assign) does not do a **deep** one
 * Fix: \[ZDK] \[DataStore] Use less variable cloning
 * Fix : YouTube - Support of adding live from video
+* Fix : LiveStore optimization - less unnecessary writes
 
 # 12.0.0.9
 * \+ : CommonStore
