@@ -14,6 +14,9 @@
 * Fix: \[ZDK] \[DataStore] Use less variable cloning
 * Fix : YouTube - Support of adding live from video
 * Fix : LiveStore optimization - less unnecessary writes
+* Fix : Panel - Wrong panel size applied
+* Fix : Sync with Dropbox
+* i : Update dependencies (ftdomdelegate)
 
 # 12.0.0.9
 * \+ : CommonStore

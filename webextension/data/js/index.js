@@ -1754,10 +1754,14 @@ function initAddon(){
 
 
 	let dropboxClientId = getPreference('dropboxClientId'),
-		dropboxAuthToken = getPreference('dropboxClientAuthToken'),
-
-		dropboxController = null
+		dropboxAuthToken = getPreference('dropboxClientAuthToken')
 	;
+
+	/**
+	 *
+	 * @type {DropboxController}
+	 */
+	let dropboxController = null;
 
 	/**
 	 *
@@ -1813,7 +1817,7 @@ function initAddon(){
 		;
 
 
-		if (currentSyncData!==null && currentSyncData.hasOwnProperty('preferences') && currentSyncData.hasOwnProperty('live_notifier_version')) {
+		if (currentSyncData !== null && currentSyncData.hasOwnProperty('preferences') && currentSyncData.hasOwnProperty('live_notifier_version')) {
 			const data = new Map(Object.entries(currentSyncData.preferences));
 
 			if (currentSyncDate !== date) {
@@ -1854,7 +1858,10 @@ function initAddon(){
 			savePreference(CHROME_PREFERENCES_SYNC_ID, uploadDate.toISOString());
 
 			try {
-				newMetaData = await dropboxController.set(chromeSettings.getSyncPreferences());
+				newMetaData = await dropboxController.set({
+					'live_notifier_version': current_versionStr,
+					'preferences': chromeSettings.getSyncPreferences()
+				});
 			} catch (e) {
 				consoleMsg('error', e);
 			}

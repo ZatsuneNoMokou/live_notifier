@@ -765,6 +765,20 @@ sendDataToMain("panel_onload");
 
 		PanelStreams.$refreshStreams.disabled = data !== true;
 		PanelStreams.$debug_checkingLivesState.className = data === true;
+
+		if (data !== true) {
+			const i = PanelStreams.$refreshStreams.dataset.opentipId;
+			if(Opentip.tips[i-1]){
+				const openTip = Opentip.tips[i-1];
+				openTip.hide();
+			}
+		} else if (PanelStreams.$refreshStreams.classList.contains('opentip-hover')) {
+			const i = PanelStreams.$refreshStreams.dataset.opentipId;
+			if(Opentip.tips[i-1]){
+				const openTip = Opentip.tips[i-1];
+				openTip.show();
+			}
+		}
 	};
 
 	onCheckState();
