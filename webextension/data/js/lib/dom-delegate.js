@@ -1,9 +1,5 @@
-(function(e){if("function"==typeof bootstrap)bootstrap("delegate",e);else if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else if("undefined"!=typeof ses){if(!ses.ok())return;ses.makeDelegate=e}else"undefined"!=typeof window?window.Delegate=e():global.Delegate=e()})(function(){var define,ses,bootstrap,module,exports;
-return (function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
-(function(){/*jshint browser:true, node:true*/
-
-/*HACK:MA:20140428 Event currently not a browser global in JSHint - https://github.com/jshint/jshint/pull/1645 */
-/*global Event*/
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Delegate = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+/*jshint browser:true, node:true*/
 
 'use strict';
 
@@ -46,10 +42,6 @@ function Delegate(root) {
 Delegate.prototype.root = function(root) {
   var listenerMap = this.listenerMap;
   var eventType;
-
-  if (typeof root === 'string') {
-    root = document.querySelector(root);
-  }
 
   // Remove master event listeners
   if (this.rootElement) {
@@ -103,7 +95,7 @@ Delegate.prototype.root = function(root) {
  * @returns boolean
  */
 Delegate.prototype.captureForType = function(eventType) {
-  return ['error', 'blur', 'focus', 'scroll', 'resize'].indexOf(eventType) !== -1;
+  return ['blur', 'error', 'focus', 'load', 'resize', 'scroll'].indexOf(eventType) !== -1;
 };
 
 /**
@@ -128,7 +120,7 @@ Delegate.prototype.captureForType = function(eventType) {
  * @param {string} eventType Listen for these events
  * @param {string|undefined} selector Only handle events on elements matching this selector, if undefined match root element
  * @param {function()} handler Handler function - event data passed here will be in event.data
- * @param {Object} [eventData] Data to pass in event.data
+ * @param {boolean} [useCapture] see 'useCapture' in <https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener>
  * @returns {Delegate} This method is chainable
  */
 Delegate.prototype.on = function(eventType, selector, handler, useCapture) {
@@ -181,18 +173,6 @@ Delegate.prototype.on = function(eventType, selector, handler, useCapture) {
   } else if (/^#[a-z0-9\-_]+$/i.test(selector)) {
     matcherParam = selector.slice(1);
     matcher = matchesId;
-  } else if (/^\s*[>](.*)$/.test(selector)) {
-    matcherParam = RegExp.$1;
-
-    // COMPLEX - scopedDirectMatches needs to have access to
-    // this.rootElement, so bind the function to this.
-    matcher = scopedDirectMatches.bind(this);
-  } else if (/^\s*[&](.*)$/.test(selector)) {
-    matcherParam = RegExp.$1;
-
-    // COMPLEX - scopedMatches needs to have access to
-    // this.rootElement, so bind the function to this.
-    matcher = scopedMatches.bind(this);
   } else {
     matcherParam = selector;
     matcher = matches;
@@ -284,28 +264,33 @@ Delegate.prototype.off = function(eventType, selector, handler, useCapture) {
  * @param {Event} event
  */
 Delegate.prototype.handle = function(event) {
-  var i, l, type = event.type, root, listener, returned, listenerList = [], target, /** @const */ EVENTIGNORE = 'ftLabsDelegateIgnore';
+  var i, l, type = event.type, root, phase, listener, returned, listenerList = [], target, /** @const */ EVENTIGNORE = 'ftLabsDelegateIgnore';
 
   if (event[EVENTIGNORE] === true) {
     return;
   }
 
   target = event.target;
-  if (target.nodeType === Node.TEXT_NODE) {
+
+  // Hardcode value of Node.TEXT_NODE
+  // as not defined in IE8
+  if (target.nodeType === 3) {
     target = target.parentNode;
   }
 
   root = this.rootElement;
 
-  switch (event.eventPhase) {
-    case Event.CAPTURING_PHASE:
+  phase = event.eventPhase || ( event.target !== event.currentTarget ? 3 : 2 );
+  
+  switch (phase) {
+    case 1: //Event.CAPTURING_PHASE:
       listenerList = this.listenerMap[1][type];
     break;
-    case Event.AT_TARGET:
+    case 2: //Event.AT_TARGET:
       if (this.listenerMap[0] && this.listenerMap[0][type]) listenerList = listenerList.concat(this.listenerMap[0][type]);
       if (this.listenerMap[1] && this.listenerMap[1][type]) listenerList = listenerList.concat(this.listenerMap[1][type]);
     break;
-    case Event.BUBBLING_PHASE:
+    case 3: //Event.BUBBLING_PHASE:
       listenerList = this.listenerMap[0][type];
     break;
   }
@@ -332,7 +317,7 @@ Delegate.prototype.handle = function(event) {
       // the event if there's one
       //
       // TODO:MCG:20120117: Need a way
-      // to check if event#stopImmediateProgagation
+      // to check if event#stopImmediatePropagation
       // was called. If so, break both loops.
       if (listener.matcher.call(target, listener.matcherParam, target)) {
         returned = this.fire(event, target, listener);
@@ -349,7 +334,7 @@ Delegate.prototype.handle = function(event) {
     }
 
     // TODO:MCG:20120117: Need a way to
-    // check if event#stopProgagation
+    // check if event#stopPropagation
     // was called. If so, break looping
     // through the DOM. Stop if the
     // delegation root has been reached
@@ -417,16 +402,6 @@ function matchesRoot(selector, element) {
   return this.rootElement === element;
 }
 
-function scopedDirectMatches(selector, element) {
-  /*jshint validthis:true*/
-  return Array.prototype.some.call(this.rootElement.children, function(el) { return el === element; }) && matches.call(element, selector, element);
-}
-
-function scopedMatches(selector, element) {
-  /*jshint validthis:true*/
-  return this.rootElement.contains(element) && matches.call(element, selector, element);
-}
-
 /**
  * Check whether the ID of
  * the element in 'this'
@@ -454,7 +429,5 @@ Delegate.prototype.destroy = function() {
   this.root();
 };
 
-})()
 },{}]},{},[1])(1)
 });
-;

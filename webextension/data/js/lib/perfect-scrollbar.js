@@ -1,6 +1,6 @@
 /*!
- * perfect-scrollbar v1.4.0
- * (c) 2018 Hyunje Jun
+ * perfect-scrollbar v1.3.0
+ * (c) 2017 Hyunje Jun
  * @license MIT
  */
 (function (global, factory) {
@@ -34,7 +34,6 @@ var elMatches =
   typeof Element !== 'undefined' &&
   (Element.prototype.matches ||
     Element.prototype.webkitMatchesSelector ||
-    Element.prototype.mozMatchesSelector ||
     Element.prototype.msMatchesSelector);
 
 function matches(element, query) {
@@ -69,7 +68,6 @@ var cls = {
   },
   state: {
     focus: 'ps--focus',
-    clicking: 'ps--clicking',
     active: function (x) { return ("ps--active-" + x); },
     scrolling: function (x) { return ("ps--scrolling-" + x); },
   },
@@ -324,7 +322,6 @@ var env = {
 
 var updateGeometry = function(i) {
   var element = i.element;
-  var roundedScrollTop = Math.floor(element.scrollTop);
 
   i.containerWidth = element.clientWidth;
   i.containerHeight = element.clientHeight;
@@ -376,7 +373,7 @@ var updateGeometry = function(i) {
       toInt(i.railYHeight * i.containerHeight / i.contentHeight)
     );
     i.scrollbarYTop = toInt(
-      roundedScrollTop *
+      element.scrollTop *
         (i.railYHeight - i.scrollbarYHeight) /
         (i.contentHeight - i.containerHeight)
     );
@@ -423,8 +420,6 @@ function getThumbSize(i, thumbSize) {
 
 function updateCss(element, i) {
   var xRailOffset = { width: i.railXWidth };
-  var roundedScrollTop = Math.floor(element.scrollTop);
-
   if (i.isRtl) {
     xRailOffset.left =
       i.negativeScrollAdjustment +
@@ -435,13 +430,13 @@ function updateCss(element, i) {
     xRailOffset.left = element.scrollLeft;
   }
   if (i.isScrollbarXUsingBottom) {
-    xRailOffset.bottom = i.scrollbarXBottom - roundedScrollTop;
+    xRailOffset.bottom = i.scrollbarXBottom - element.scrollTop;
   } else {
-    xRailOffset.top = i.scrollbarXTop + roundedScrollTop;
+    xRailOffset.top = i.scrollbarXTop + element.scrollTop;
   }
   set(i.scrollbarXRail, xRailOffset);
 
-  var yRailOffset = { top: roundedScrollTop, height: i.railYHeight };
+  var yRailOffset = { top: element.scrollTop, height: i.railYHeight };
   if (i.isScrollbarYUsingRight) {
     if (i.isRtl) {
       yRailOffset.right =
@@ -516,8 +511,7 @@ var dragThumb = function(i) {
     'scrollbarX',
     'scrollbarXWidth',
     'scrollLeft',
-    'x',
-    'scrollbarXRail' ]);
+    'x' ]);
   bindMouseScrollHandler(i, [
     'containerHeight',
     'contentHeight',
@@ -526,8 +520,7 @@ var dragThumb = function(i) {
     'scrollbarY',
     'scrollbarYHeight',
     'scrollTop',
-    'y',
-    'scrollbarYRail' ]);
+    'y' ]);
 };
 
 function bindMouseScrollHandler(
@@ -542,7 +535,6 @@ function bindMouseScrollHandler(
   var scrollbarYHeight = ref[5];
   var scrollTop = ref[6];
   var y = ref[7];
-  var scrollbarYRail = ref[8];
 
   var element = i.element;
 
@@ -562,7 +554,6 @@ function bindMouseScrollHandler(
 
   function mouseUpHandler() {
     removeScrollingClass(i, y);
-    i[scrollbarYRail].classList.remove(cls.state.clicking);
     i.event.unbind(i.ownerDocument, 'mousemove', mouseMoveHandler);
   }
 
@@ -576,8 +567,6 @@ function bindMouseScrollHandler(
     i.event.bind(i.ownerDocument, 'mousemove', mouseMoveHandler);
     i.event.once(i.ownerDocument, 'mouseup', mouseUpHandler);
 
-    i[scrollbarYRail].classList.add(cls.state.clicking);
-
     e.stopPropagation();
     e.preventDefault();
   });
@@ -590,7 +579,7 @@ var keyboard = function(i) {
   var scrollbarFocused = function () { return matches(i.scrollbarX, ':focus') || matches(i.scrollbarY, ':focus'); };
 
   function shouldPreventDefault(deltaX, deltaY) {
-    var scrollTop = Math.floor(element.scrollTop);
+    var scrollTop = element.scrollTop;
     if (deltaX === 0) {
       if (!i.scrollbarYActive) {
         return false;
@@ -731,13 +720,12 @@ var wheel = function(i) {
   var element = i.element;
 
   function shouldPreventDefault(deltaX, deltaY) {
-    var roundedScrollTop = Math.floor(element.scrollTop);
     var isTop = element.scrollTop === 0;
     var isBottom =
-      roundedScrollTop + element.offsetHeight === element.scrollHeight;
+      element.scrollTop + element.offsetHeight === element.scrollHeight;
     var isLeft = element.scrollLeft === 0;
     var isRight =
-      element.scrollLeft + element.offsetWidth === element.scrollWidth;
+      element.scrollLeft + element.offsetWidth === element.offsetWidth;
 
     var hitsBound;
 
@@ -813,7 +801,7 @@ var wheel = function(i) {
             return true;
           }
         }
-        var maxScrollLeft = cursor.scrollWidth - cursor.clientWidth;
+        var maxScrollLeft = cursor.scrollLeft - cursor.clientWidth;
         if (maxScrollLeft > 0) {
           if (
             !(cursor.scrollLeft === 0 && deltaX < 0) &&
@@ -889,7 +877,7 @@ var touch = function(i) {
   var element = i.element;
 
   function shouldPrevent(deltaX, deltaY) {
-    var scrollTop = Math.floor(element.scrollTop);
+    var scrollTop = element.scrollTop;
     var scrollLeft = element.scrollLeft;
     var magnitudeX = Math.abs(deltaX);
     var magnitudeY = Math.abs(deltaY);
@@ -1103,7 +1091,7 @@ var defaultSettings = function () { return ({
   suppressScrollY: false,
   swipeEasing: true,
   useBothWheelAxes: false,
-  wheelPropagation: true,
+  wheelPropagation: false,
   wheelSpeed: 1,
 }); };
 
@@ -1234,7 +1222,7 @@ var PerfectScrollbar = function PerfectScrollbar(element, userSettings) {
 
   this.settings.handlers.forEach(function (handlerName) { return handlers[handlerName](this$1); });
 
-  this.lastScrollTop = Math.floor(element.scrollTop); // for onScroll only
+  this.lastScrollTop = element.scrollTop; // for onScroll only
   this.lastScrollLeft = element.scrollLeft; // for onScroll only
   this.event.bind(this.element, 'scroll', function (e) { return this$1.onScroll(e); });
   updateGeometry(this);
@@ -1286,7 +1274,7 @@ PerfectScrollbar.prototype.onScroll = function onScroll (e) {
     this.element.scrollLeft - this.lastScrollLeft
   );
 
-  this.lastScrollTop = Math.floor(this.element.scrollTop);
+  this.lastScrollTop = this.element.scrollTop;
   this.lastScrollLeft = this.element.scrollLeft;
 };
 

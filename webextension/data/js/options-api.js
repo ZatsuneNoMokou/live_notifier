@@ -27,7 +27,7 @@ function translateNodes(){
 		}
 	}
 }
-if(typeof Opentip!=="undefined"){
+if (typeof Opentip !== "undefined") {
 	Opentip.styles.myDark = {
 		// Make it look like the alert style. If you omit this, it will default to "standard"
 		extends: "dark",
@@ -35,10 +35,11 @@ if(typeof Opentip!=="undefined"){
 		borderColor: "#212121"
 	};
 	if(browser.extension.getBackgroundPage() !== null) {
-		const {appGlobal} = browser.extension.getBackgroundPage();
+		const {appGlobal} = browser.extension.getBackgroundPage(),
+			delegate = new Delegate(document.body)
+		;
 		if(appGlobal.hasTouch(window)){
-			const delegate = new Delegate(document.body);
-			delegate.on("touchstart", "[data-opentip-id]", function () {
+			delegate.on("touchstart", '[data-opentip-id]', function () {
 				const i = this.dataset.opentipId;
 				if(Opentip.tips[i-1]){
 					const openTip = Opentip.tips[i-1];
@@ -48,6 +49,12 @@ if(typeof Opentip!=="undefined"){
 				}
 			});
 		}
+		delegate.on('mouseover', '[data-opentip-id]', function () {
+			this.classList.add('opentip-hover');
+		});
+		delegate.on('mouseout', '[data-opentip-id]', function () {
+			this.classList.remove('opentip-hover');
+		});
 	}
 	Opentip.defaultStyle = "myDark"; // The default is "standard"
 }
@@ -308,7 +315,7 @@ async function importPrefsFromFile(event){
 		await backgroundPage.chromeSettings.importPrefsFromFile("live_notifier", mergePreferences, document);
 	} catch (e){
 		error=true;
-		console.warn(e);
+		console.error(e);
 	}
 
 	if(error===false){
