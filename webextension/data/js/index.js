@@ -1840,7 +1840,7 @@ function initAddon(){
 				streamListFromSetting.mergeData(data.get('stream_keys_list'), isNewer);
 				streamListFromSetting.update();
 
-				if (needUpload === false && getPreference('stream_keys_list') !== oldStreamList) {
+				if (needUpload === false && JSON.stringify(getPreference('stream_keys_list')) !== JSON.stringify(oldStreamList)) {
 					needUpload = true;
 				}
 			}
