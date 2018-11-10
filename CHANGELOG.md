@@ -9,6 +9,7 @@
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
 # 12.0.0.10
+* +: Back with YouTube API with Patreon password
 * Fix : \[ZDK] - Export preferences to file - Timeout too short
 * Fix : \[ZDK] Use lodash deep clone as [Object.assign()](https://developer.mozilla.org//docs/Web/JavaScript/Reference/Global_Objects/Object/assign) does not do a **deep** one
 * Fix: \[ZDK] \[DataStore] Use less variable cloning

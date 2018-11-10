@@ -642,11 +642,11 @@ const youtube = {
 					}
 				} else {
 					obj = {
-						"url": "https://livenotifier.zatsunenomokou.eu/youtube_getLiveInfo.php",
+						"url": `https://livenotifier.zatsunenomokou.eu/youtube-api/videos/${id}`,
 						"overrideMimeType": "text/plain; charset=utf-8",
-						"content": [
-							["id", id]
-						]
+						"headers": {
+							"password": youtube_patreon_password
+						}
 					}
 				}
 			}
