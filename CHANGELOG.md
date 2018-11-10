@@ -8,6 +8,25 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 12.0.0.10
+* +: Back with YouTube API with Patreon password
+* Fix : \[ZDK] - Export preferences to file - Timeout too short
+* Fix : \[ZDK] Use lodash deep clone as [Object.assign()](https://developer.mozilla.org//docs/Web/JavaScript/Reference/Global_Objects/Object/assign) does not do a **deep** one
+* Fix: \[ZDK] \[DataStore] Use less variable cloning
+* Fix : YouTube - Support of adding live from video
+* Fix : LiveStore optimization - less unnecessary writes
+* Fix : Panel - Wrong panel size applied
+* Fix : Sync with Dropbox
+* i : Update dependencies (ftdomdelegate)
+
+# 12.0.0.9
+* \+ : CommonStore
+* \+ : Panel - Refactor of the code generating stream html
+* Fix : Sync with Dropbox
+
+# 12.0.0.7 - 12.0.0.8
+* \+ : Panel - Refactor of the code generating stream html
+
 # 12.0.0.6
 * \+ : Panel - Ability to navigate with keyboard and open stream with enter
 * Fix : setIcon/badgeText, contextMenu are not supported on android (fixing as a WIP android support)

@@ -3,7 +3,7 @@
 let backgroundPage = chrome.extension.getBackgroundPage();
 // var getPreference = backgroundPage.getPreference;
 
-const applyPanelSize = async ()=>{
+async function applyPanelSize() {
 	const appGlobal = backgroundPage.appGlobal,
 		body = document.body
 	;
@@ -18,25 +18,25 @@ const applyPanelSize = async ()=>{
 	body.style.width = panelWidth;
 	document.documentElement.style.setProperty('--opentip-maxwidth', `${((panelWidth/2<300)? (panelWidth/2) : panelWidth)}px`);
 
+	const maxWaitStep = 150;
 	let size = null;
-	for(let maxWaitTime=0;maxWaitTime<=1000;maxWaitTime+=100){
-		if(maxWaitTime>0){
-			await appGlobal.setTimeout(100);
-		}
+	for(let maxWaitTime=0; maxWaitTime <= maxWaitStep * 10; maxWaitTime += maxWaitStep) {
+		await appGlobal.setTimeout(maxWaitStep);
+
 		size = appGlobal.getPageSize(window);
-		if(size.height>0 && size.width>0){
+		if (size.height > 0 && size.width > 0) {
 			break;
 		}
 	}
 
-	if(size.height > 0 && size.height > backgroundPage.getPreference("panel_height")){
+	if (size.height > 0 && size.height > backgroundPage.getPreference("panel_height")) {
 		body.style.height = "100vh";
 	}
-	if(size.width > 0 && size.width > backgroundPage.getPreference("panel_width")){
+	if (size.width > 0 && size.width > backgroundPage.getPreference("panel_width")) {
 		body.style.width = "100vw";
 	}
-};
-applyPanelSize();
+}
+applyPanelSize().catch(console.error);
 
 var optionColorStylesheet = backgroundPage.backgroundTheme.theme_cache_update(document.querySelector("#generated-color-stylesheet"));
 

@@ -800,7 +800,7 @@ ${err}`);
 		await ZDK.setTimeout();
 		link.dispatchEvent(new MouseEvent('click'));
 
-		await ZDK.setTimeout(1000);
+		await ZDK.setTimeout(7000);
 		URL.revokeObjectURL(url);
 		iframe.remove();
 	}
@@ -968,7 +968,7 @@ ${err}`);
 		});
 
 		if(files.length === 0 || files.length > 1){
-			throw `[Input error] ${node.files.length} file(s) loaded`;
+			throw `[Input error] ${files.length} file(s) loaded`;
 		} else {
 			let file_JSONData = null;
 			try{
@@ -980,12 +980,21 @@ ${err}`);
 					throw `An error occurred when trying to parse file (${error})`;
 				}
 			}
+
 			if(file_JSONData !== null){
-				if(file_JSONData.hasOwnProperty(`${appName}_version`) && file_JSONData.hasOwnProperty("preferences") && typeof file_JSONData.preferences === "object"){
+				let errorMsg = null;
+
+				if (!file_JSONData.hasOwnProperty(`${appName}_version`)) {
+					errorMsg = 'WrongApp';
+				} else if (!file_JSONData.hasOwnProperty("preferences") && typeof file_JSONData.preferences === "object") {
+					errorMsg = 'PreferencesProblem';
+				}
+
+				if(errorMsg === null){
 					this.importFromJSON(file_JSONData.preferences, (typeof mergePreferences==="boolean")? mergePreferences : false);
 					return true;
 				} else {
-					throw `An error occurred when trying to parse file (Check the file you have used)`;
+					throw `An error occurred when trying to parse file (Check the file you have used, "${errorMsg}")`;
 				}
 			}
 		}

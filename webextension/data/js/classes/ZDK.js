@@ -513,6 +513,9 @@ class Params extends Map {
 /**
  *
  * @param {Object} options
+ * @param {String} options.url
+ * @param {String?} options.overrideMimeType
+ * @param {Boolean?} options.anonymous
  * @returns {{get: get, post: post}}
  * @constructor
  */
@@ -591,14 +594,14 @@ function Request(options){
 						response.response = xhr.response;
 					}
 
-					if(typeof options.customJSONParse === "string"){
-						switch(options.customJSONParse){
+					if(typeof options.customJSONParse === "string") {
+						switch(options.customJSONParse) {
 							case "xmlToJSON":
-								if(typeof xhr.responseXML === "undefined" || xhr.responseXML === null){
+								if (typeof xhr.responseXML === "undefined" || xhr.responseXML === null) {
 									response.json = null;
 								} else {
-									let xmlToStringParser = new XMLSerializer();
-									let xmlText = xmlToStringParser.serializeToString(xhr.responseXML);
+									// let xmlToStringParser = new XMLSerializer();
+									// let xmlText = xmlToStringParser.serializeToString(xhr.responseXML);
 
 									try{
 										// Source: https://www.sitepoint.com/how-to-convert-xml-to-a-javascript-object/
@@ -617,8 +620,7 @@ function Request(options){
 										/**		End flatten the object a bit		**/
 
 										response.json = data;
-									}
-									catch(error){
+									} catch(error) {
 										response.json = null;
 									}
 								}
@@ -627,9 +629,10 @@ function Request(options){
 								let jsonDATA = {};
 								let splitedData = xhr.responseText.split("&");
 
-								splitedData = splitedData.map((str)=>{
+								splitedData = splitedData.map(str => {
 									return str.split("=");
 								});
+
 								for(let item of splitedData){
 									jsonDATA[decodeURIComponent(item[0])] = decodeURIComponent(item[1]);
 								}
@@ -638,7 +641,7 @@ function Request(options){
 							default:
 								consoleMsg("warn", `[Request] Unknown custom JSON parse ${options.customJSONParse}`);
 						}
-					} else if(typeof options.customJSONParse === "function"){
+					} else if (typeof options.customJSONParse === "function") {
 						let data = null;
 						try {
 							data = options.customJSONParse(xhr);
@@ -647,20 +650,23 @@ function Request(options){
 						}
 
 						response.json = data;
-					} else if(xhr.responseType === "document" && typeof options.Request_documentParseToJSON === "function"){
+					} else if (xhr.responseType === "document" && typeof options.Request_documentParseToJSON === "function") {
 						let result = options.Request_documentParseToJSON(xhr);
-						if(result instanceof Map){
+						if(result instanceof Map) {
 							response.map = result;
 							response.json = ZDK.mapToObj(result);
 						} else {
 							response.json = result;
 						}
 					} else {
-						try{response.json = JSON.parse(xhr.responseText);}
-						catch(error){response.json = null;}
+						try {
+							response.json = JSON.parse(xhr.responseText);
+						} catch(error) {
+							response.json = null;
+						}
 					}
 
-					if(typeof options.onComplete==="function"){
+					if (typeof options.onComplete === "function") {
 						options.onComplete(response);
 					}
 					resolve(response);
@@ -679,9 +685,18 @@ function Request(options){
 
 
 		return {
+			/**
+			 *
+			 * @return {Promise<Object>}
+			 */
 			'get' : function() {
 				return core('GET');
 			},
+
+			/**
+			 *
+			 * @return {Promise<Object>}
+			 */
 			'post' : function() {
 				return core('POST');
 			}
