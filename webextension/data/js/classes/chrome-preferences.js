@@ -387,21 +387,10 @@ ${err}`);
 
 					switch(prefId){
 						case "stream_keys_list":
-							let prefData = null;
-							try {
-								prefData = JSON.parse(oldPref);
-							} catch (e) {
-								consoleMsg('error', e);
-							}
-
-							if (prefData === null) {
-								prefData = oldPref;
-							}
-
 							let streamListSetting = new appGlobal.StreamListFromSetting(false);
 
-							streamListSetting.parseSetting(prefData).forEach((website, websiteMap)=>{
-								websiteMap.forEach((id, streamSetting)=>{
+							streamListSetting.parseSetting(preferences[prefId]).forEach((websiteMap, website) => {
+								websiteMap.forEach((streamSetting, id) => {
 									let newStreamSettings;
 									if(streamListSetting.streamExist(website, id)){
 										newStreamSettings = streamListSetting.streamExist(website, id);
