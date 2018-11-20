@@ -131,10 +131,11 @@ function savePreference(prefId, value){
 function settingNode_onChange(event){
 	const backgroundPage = browser.extension.getBackgroundPage(),
 		node = this,
-		settingName = (node.tagName.toLowerCase()==="input"&&typeof node.type==="string"&&node.type.toLowerCase()==="radio")? node.name : node.id;
+		settingName = (node.tagName.toLowerCase() === "input" && typeof node.type==="string" && node.type.toLowerCase() === "radio")? node.name : node.id
+	;
 
-	if(node.validity.valid){
-		if(node.dataset.settingType){
+	if (node.validity.valid) {
+		if (node.dataset.settingType) {
 			const data = backgroundPage.getValueFromNode(node);
 			if(data!==undefined){
 				savePreference(settingName, data);
@@ -314,12 +315,12 @@ async function importPrefsFromFile(event){
 	try {
 		await backgroundPage.chromeSettings.importPrefsFromFile("live_notifier", mergePreferences, document);
 	} catch (e){
-		error=true;
+		error = true;
 		console.error(e);
 	}
 
-	if(error===false){
-		if(typeof refreshStreamsFromPanel === "function"){
+	if (error === false) {
+		if (typeof refreshStreamsFromPanel === "function") {
 			refreshStreamsFromPanel();
 		} else {
 			sendDataToMain("refreshStreams","");

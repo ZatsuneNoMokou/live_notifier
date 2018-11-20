@@ -360,19 +360,19 @@ ${err}`);
 
 
 
-			if(prefId==="hitbox_user_id"){
+			if (prefId === "hitbox_user_id") {
 				preferences["smashcast_user_id"] = preferences["hitbox_user_id"];
 				delete preferences["hitbox_user_id"];
 				prefId="smashcast_user_id";
 			}
-			if(prefId==="beam_user_id"){
+			if (prefId === "beam_user_id") {
 				preferences["mixer_user_id"] = preferences["beam_user_id"];
 				delete preferences["beam_user_id"];
 				prefId="mixer_user_id";
 			}
 
-			if(this.options.has(prefId) && typeof this.options.get(prefId).type !== "undefined" && this.options.get(prefId).type !== "control" && this.options.get(prefId).type !== "file" && typeof preferences[prefId] === typeof this.defaultSettingsSync.get(prefId)){
-				if(mergePreferences){
+			if (this.options.has(prefId) && typeof this.options.get(prefId).type !== "undefined" && this.options.get(prefId).type !== "control" && this.options.get(prefId).type !== "file" && typeof preferences[prefId] === typeof this.defaultSettingsSync.get(prefId)) {
+				if (mergePreferences) {
 					let oldPref = this.get(prefId),
 						newPrefArray
 					;
@@ -380,13 +380,9 @@ ${err}`);
 					switch(prefId){
 						case "stream_keys_list":
 							let prefData = null;
-							try {
-								prefData = JSON.parse(oldPref);
-							} catch (e) {
-								consoleMsg('error', e);
-							}
 
-							if(prefData===null){
+
+							if (prefData === null) {
 								prefData = oldPref;
 							}
 
@@ -431,6 +427,10 @@ ${err}`);
 						default:
 							this.set(prefId, preferences[prefId]);
 					}
+				} else if (prefId === 'stream_keys_list' && /^{.*}$/i.test(this.get(prefId)) === false) {
+					this.set(prefId, preferences[prefId]);
+					let streamList = new appGlobal.StreamListFromSetting(true);
+					streamList.refresh(true);
 				} else {
 					this.set(prefId, preferences[prefId]);
 				}
