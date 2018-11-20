@@ -353,6 +353,8 @@ ${err}`);
 	 * @param {Boolean=false} mergePreferences
 	 */
 	importFromJSON(preferences, mergePreferences=false){
+		const simpleJSONCheck = /^{.*}$/i;
+
 		for(let prefId in preferences){
 			if(!preferences.hasOwnProperty(prefId)){
 				continue;
@@ -371,7 +373,13 @@ ${err}`);
 				prefId="mixer_user_id";
 			}
 
-			if (this.options.has(prefId) && typeof this.options.get(prefId).type !== "undefined" && this.options.get(prefId).type !== "control" && this.options.get(prefId).type !== "file" && typeof preferences[prefId] === typeof this.defaultSettingsSync.get(prefId)) {
+			if (this.options.has(prefId) && typeof this.options.get(prefId).type !== "undefined" && this.options.get(prefId).type !== "control" && this.options.get(prefId).type !== "file") {
+				if (typeof preferences[prefId] !== typeof this.defaultSettingsSync.get(prefId) && (this.options.get(prefId).type !== 'json' || typeof preferences[prefId] !== "object")) {
+					console.warn(`Error trying to import ${prefId} (Type mismatch)`);
+					continue;
+				}
+
+
 				if (mergePreferences) {
 					let oldPref = this.get(prefId),
 						newPrefArray
@@ -380,7 +388,11 @@ ${err}`);
 					switch(prefId){
 						case "stream_keys_list":
 							let prefData = null;
-
+							try {
+								prefData = JSON.parse(oldPref);
+							} catch (e) {
+								consoleMsg('error', e);
+							}
 
 							if (prefData === null) {
 								prefData = oldPref;
@@ -427,7 +439,7 @@ ${err}`);
 						default:
 							this.set(prefId, preferences[prefId]);
 					}
-				} else if (prefId === 'stream_keys_list' && /^{.*}$/i.test(this.get(prefId)) === false) {
+				} else if (prefId === 'stream_keys_list' && simpleJSONCheck.test(this.get(prefId)) === false) {
 					this.set(prefId, preferences[prefId]);
 					let streamList = new appGlobal.StreamListFromSetting(true);
 					streamList.refresh(true);
