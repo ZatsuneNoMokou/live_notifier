@@ -33,6 +33,7 @@
 
 
 			"/data/js/classes/chrome-notification-controler.js",
+			"/data/js/classes/SyncController.js",
 			"/data/js/classes/DropboxController.js",
 			"/data/js/classes/chrome-preferences.js",
 			"/data/js/classes/i18extended.js",

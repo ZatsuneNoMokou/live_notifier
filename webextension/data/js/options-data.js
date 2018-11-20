@@ -332,7 +332,7 @@ const options = {
 		"type": "string",
 		"group": "importexport_prefs",
 		"value": "",
-		"showPrefInPanel": false,
+		"hidden": true,
 		"prefLevel": "experimented"
 	},
 	"dropboxClientAuthToken": {
@@ -341,8 +341,17 @@ const options = {
 		"type": "string",
 		"group": "importexport_prefs",
 		"value": "",
-		"showPrefInPanel": false,
+		"hidden": true,
 		"password": true,
+		"sync": false,
+		"prefLevel": "experimented"
+	},
+	"automaticSync": {
+		"title": "Automatic synchronization (Beta)",
+		"description": "",
+		"type": "bool",
+		"group": "importexport_prefs",
+		"value": false,
 		"sync": false,
 		"prefLevel": "experimented"
 	},

@@ -222,7 +222,13 @@ function refreshSettings(event){
 	}
 }
 
+
+
+
+
 /*		---- Save/Restaure preferences from sync ----		*/
+
+
 
 // Saves/Restaure options from/to browser.storage
 function saveOptionsInSync(event){
@@ -250,6 +256,8 @@ function restaureOptionsFromSync(event){
 	let mergePreferences = event.shiftKey;
 	chromeSettings.restaureFromSync((typeof mergePreferences==="boolean")? mergePreferences : false);
 }
+
+
 
 /*		---- Node generation of settings ----		*/
 function loadPreferences(selector){
@@ -300,6 +308,8 @@ if(browser.extension.getBackgroundPage()!==null && typeof Delegate!=="undefined"
 	backgroundPage.zDK.appendTo(document.body, "<div id='tooltip' class='hide'></div>", document);
 }
 
+
+
 /*		---- Import/Export preferences from file ----		*/
 function exportPrefsToFile(){
 	let backgroundPage = browser.extension.getBackgroundPage();
@@ -325,5 +335,128 @@ async function importPrefsFromFile(event){
 		} else {
 			sendDataToMain("refreshStreams","");
 		}
+	}
+}
+
+
+
+/*				---- Update SyncController ----				*/
+
+/**
+ *
+ * @param {function} updateSyncData
+ */
+function initSyncControl(updateSyncData) {
+	let haveAutomaticSync = getPreference('automaticSync'),
+		dropboxClientId = getPreference('dropboxClientId'),
+		dropboxAuthToken = getPreference('dropboxClientAuthToken')
+	;
+
+	/**
+	 *
+	 * @type {?DropboxController}
+	 */
+	let dropboxController = null;
+	if (haveAutomaticSync === true) {
+		dropboxController = DropboxController.updateController(dropboxClientId, dropboxAuthToken);
+	}
+
+
+	/**
+	 *
+	 * @type {Map<String, String>}
+	 */
+	const updatedPreferences = new Map();
+
+	/**
+	 *
+	 * @type {?Promise}
+	 */
+	let logginPromise = null;
+
+	/**
+	 *
+	 * @type {Function}
+	 */
+	const uploadSyncData = _.debounce(function () {
+		if (haveAutomaticSync === true && dropboxController === null && logginPromise === null) {
+			logginPromise = new DropboxController(null, clientId).getAuthToken();
+			logginPromise
+				.then(authToken => {
+					savePreference('dropboxClientAuthToken', authToken);
+					logginPromise = null;
+				})
+				.catch(err => {
+					console.error(err);
+					logginPromise = null;
+				})
+			;
+		}
+
+		updateSyncData(syncInterval, dropboxController, updatedPreferences)
+			.catch(err=>{
+				consoleMsg('error', err);
+			})
+		;
+	}, 1000, {
+		maxWait: 10000
+	});
+
+
+
+	browser.storage.onChanged.addListener((changes, area) => {
+		if (area === "local") {
+			for(let prefId in changes) {
+				if(changes.hasOwnProperty(prefId)){
+					switch(prefId) {
+						case "dropboxClientId":
+							dropboxClientId = changes[prefId].newValue;
+							break;
+						case "dropboxClientAuthToken":
+							dropboxClientAuthToken = changes[prefId].newValue;
+							break;
+						case "automaticSync":
+							haveAutomaticSync = changes[prefId].newValue;
+							break;
+					}
+
+					if (prefId !== CHROME_PREFERENCES_SYNC_ID && chromeSettings.defaultSettingsSync.has(prefId) && updatedPreferences.has(prefId) === false) {
+						updatedPreferences.set(prefId, '');
+					}
+				}
+			}
+
+			if (updatedPreferences.size > 0) {
+				if (haveAutomaticSync === true) {
+					if (updatedPreferences.has('automaticSync') || updatedPreferences.has('dropboxClientId') || updatedPreferences.has('dropboxClientAuthToken')) {
+						dropboxController = DropboxController.updateController(dropboxClientId, dropboxAuthToken, dropboxController);
+					}
+
+					uploadSyncData();
+				} else {
+					dropboxController = null;
+				}
+			}
+		}
+	});
+
+
+
+	/**
+	 *
+	 * @type {ZTimer}
+	 */
+	const syncInterval = ZTimer.setInterval('syncInterval', 10, 'm', function (){
+		uploadSyncData()
+			.catch(err=>{
+				consoleMsg('error', err);
+			})
+		;
+	});
+
+
+
+	if (dropboxController !== null) {
+		uploadSyncData();
 	}
 }
