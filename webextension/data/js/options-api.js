@@ -376,7 +376,7 @@ function initSyncControl(updateSyncData) {
 
 	/**
 	 *
-	 * @type {Function}
+	 * @function
 	 */
 	const uploadSyncData = _.debounce(function () {
 		if (haveAutomaticSync === true && dropboxController === null && logginPromise === null) {
