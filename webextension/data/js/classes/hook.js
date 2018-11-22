@@ -3,12 +3,13 @@ class Hook {
 		let i = -1;
 		/*
 		 * ++i To change the var before using it
-		 * It is change anyway
+		 * It is changed anyway
 		 */
 		this.HOOK_TYPES = {
 			'PRE_HOOK': ++i,
 			'POST_HOOK': ++i,
 			'DEFAULT': ++i,
+			'FILTER': ++i,
 			'LISTENER': ++i
 		};
 
@@ -93,6 +94,23 @@ class Hook {
 		return this._hooks.has(this.HOOK_TYPES.PRE_HOOK + '/' + hookName) || this._hooks.has(this.HOOK_TYPES.POST_HOOK + '/' + hookName)
 	}
 
+	/**
+	 * Remove hook and return true if any element was present
+	 * @param {Number} hookType
+	 * @param {String} hookName
+	 * @returns {boolean}
+	 * @private
+	 */
+	_deleteHook(hookType, hookName) {
+		if (this._isNumber(hookType) === false || typeof hookName !== 'string') {
+			throw 'ArgumentType';
+		}
+
+		hookName = `${hookType}/${hookName}`;
+
+		return this._hooks.delete(this.HOOK_TYPES.PRE_HOOK + '/' + hookName) || this._hooks.delete(this.HOOK_TYPES.POST_HOOK + '/' + hookName)
+	}
+
 
 
 
@@ -126,6 +144,59 @@ class Hook {
 		return this._hasHook(this.HOOK_TYPES.DEFAULT, hookName)
 	}
 
+	/**
+	 *
+	 * @param {String} hookName
+	 * @returns {boolean}
+	 */
+	deleteHook(hookName) {
+		return this._deleteHook(this.HOOK_TYPES.DEFAULT, hookName);
+	}
+
+
+
+	/**
+	 *
+	 * @param {String} filterName
+	 * @param {Function} filterFn
+	 * @returns {Hook}
+	 */
+	addFilter(filterName, filterFn) {
+		return this._addHook(this.HOOK_TYPES.FILTER, filterName, filterFn, true)
+	}
+
+	/**
+	 *
+	 * @param {String} filterName
+	 * @returns {boolean}
+	 */
+	hasFilter(filterName) {
+		return this._hasHook(this.HOOK_TYPES.FILTER, filterName)
+	}
+
+	/**
+	 *
+	 * @param {String} filterName
+	 * @returns {boolean}
+	 */
+	deleteFilter(filterName) {
+		return this._deleteHook(this.HOOK_TYPES.FILTER, filterName);
+	}
+
+	/**
+	 *
+	 * @param filterName
+	 * @param {...*} args
+	 * @returns {Promise<*>}
+	 */
+	doFilter(filterName, ...args) {
+		return this.runHook(filterName, {
+			'context': null,
+			'hookType': this.HOOK_TYPES.FILTER,
+			'breakOnFalse': false
+		}, null, args)
+	}
+
 
 
 	/**
@@ -157,7 +228,8 @@ class Hook {
 	emit(eventName, context=null, ...args) {
 		return this.runHook(eventName, {
 			'context': context,
-			'hookType': this.HOOK_TYPES.LISTENER
+			'hookType': this.HOOK_TYPES.LISTENER,
+			'breakOnFalse': false
 		}, null, args);
 	}
 
@@ -179,6 +251,15 @@ class Hook {
 		return this._hooksBindableListeners.get(eventName);
 	}
 
+	/**
+	 * Delete listener and clear the function
+	 * @param {String} eventName
+	 * @returns {boolean}
+	 */
+	deleteListener(eventName) {
+		return this._deleteHook(this.HOOK_TYPES.LISTENER, eventName) || this._hooksBindableListeners.delete(eventName);
+	}
+
 
 
 
@@ -196,7 +277,7 @@ class Hook {
 	async runHook(hookName, opts={}, fn=null, ...args) {
 		opts = Object.assign({
 			'context': null,
-			'breakOnFalse': false,
+			'breakOnFalse': true,
 			'hookType': this.HOOK_TYPES.DEFAULT /* For internal use */
 		}, opts);
 		hookName = opts.hookType + '/' +  hookName;
@@ -221,7 +302,7 @@ class Hook {
 				if (err === null && result !== undefined) {
 					if (Array.isArray(result)) {
 						args = result;
-					} else if (opts.breakOnFalse === true && result === false) {
+					} else if (result === false) {
 						return false;
 					} else {
 						args = [result];
@@ -232,8 +313,9 @@ class Hook {
 
 
 
+		const haveFn = typeof fn === 'function';
 		let output;
-		if (typeof fn === 'function') {
+		if (haveFn) {
 			try {
 				output = fn.apply(opts.context, args);
 			} catch (e) {
@@ -248,17 +330,22 @@ class Hook {
 
 
 		if (this._hooks.has(this.HOOK_TYPES.POST_HOOK + '/' + hookName)) {
-			const arr = await this._hooks.get(this.HOOK_TYPES.POST_HOOK + '/' + hookName);
+			const arr = this._hooks.get(this.HOOK_TYPES.POST_HOOK + '/' + hookName);
 
 			for(let i=0; i < arr.length; i++) {
+				let result;
 				try {
-					output = arr[i].apply(opts.context, args);
+					result = await arr[i].apply(opts.context, (haveFn)? args.unshift(output) : args);
 				} catch (e) {
 					console.error(e);
 				}
 
-				if (opts.breakOnFalse === true && output === false) {
-					return false;
+				if (result !== undefined) {
+					output = result;
+
+					if (opts.breakOnFalse === true && result === false) {
+						return false;
+					}
 				}
 			}
 		}
