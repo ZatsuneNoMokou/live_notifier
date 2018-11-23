@@ -938,8 +938,6 @@ ${err}`);
 	 * @param {Boolean=false} mergePreferences
 	 */
 	async importFromJSON(preferences, mergePreferences=false){
-		const simpleJSONCheck = /^{.*}$/i;
-
 		for(let prefId in preferences){
 			if(!preferences.hasOwnProperty(prefId)){
 				continue;
@@ -954,22 +952,8 @@ ${err}`);
 
 
 
-			if (prefId === "hitbox_user_id") {
-				preferences["smashcast_user_id"] = preferences["hitbox_user_id"];
-				delete preferences["hitbox_user_id"];
-				prefId="smashcast_user_id";
-			}
-			if (prefId === "beam_user_id") {
-				preferences["mixer_user_id"] = preferences["beam_user_id"];
-				delete preferences["beam_user_id"];
-				prefId="mixer_user_id";
-			}
-
 			if (this.options.has(prefId) && typeof this.options.get(prefId).type !== "undefined" && this.options.get(prefId).type !== "control" && this.options.get(prefId).type !== "file") {
-				let importedPrefValue = await this.hook.doFilter(this.FILTERS.IMPORT_FILE_PREF_VALUE, preferences[prefId], preferences, mergePreferences, prefId);
-				if (importedPrefValue === false) {
-					continue;
-				}
+				let importedPrefValue = preferences[prefId];
 
 				if (typeof importedPrefValue !== typeof this.defaultSettingsSync.get(prefId) && (this.options.get(prefId).type !== 'json' || typeof importedPrefValue !== "object")) {
 					console.warn(`Error trying to import ${prefId} (Type mismatch)`);
@@ -978,61 +962,14 @@ ${err}`);
 
 
 
-				if (mergePreferences) {
-					let oldPref = this.get(prefId),
-						newPrefArray
-					;
-
-					switch(prefId){
-						case "stream_keys_list":
-							let streamListSetting = new appGlobal.StreamListFromSetting(false);
-
-							streamListSetting.parseSetting(importedPrefValue).forEach((websiteMap, website) => {
-								websiteMap.forEach((streamSetting, id) => {
-									let newStreamSettings;
-									if(streamListSetting.streamExist(website, id)){
-										newStreamSettings = streamListSetting.streamExist(website, id);
-									} else {
-										newStreamSettings = StreamListFromSetting.getDefault();
-									}
-
-									for(let settingName in streamSetting){
-										if(streamSetting.hasOwnProperty(settingName)){
-											newStreamSettings[settingName] = streamSetting[settingName];
-										}
-									}
-
-									streamListSetting.mapDataAll.get(website).set(id, newStreamSettings);
-								});
-							});
-
-							streamListSetting.update();
-
-							break;
-						case "statusBlacklist":
-						case "statusWhitelist":
-						case "gameBlacklist":
-						case "gameWhitelist":
-							let toLowerCase = (str)=>{return str.toLowerCase()};
-							let oldPrefArrayLowerCase = oldPref.split(/,\s*/).map(toLowerCase);
-							newPrefArray = oldPref.split(/,\s*/);
-							importedPrefValue.split(/,\s*/).forEach(value=>{
-								if(oldPrefArrayLowerCase.indexOf(value.toLowerCase()) === -1){
-									newPrefArray.push(value);
-								}
-							});
-							this.set(prefId, newPrefArray.join(","));
-							break;
-						default:
-							this.set(prefId, importedPrefValue);
-					}
-				} else if (prefId === 'stream_keys_list' && simpleJSONCheck.test(this.get(prefId)) === false) {
-					this.set(prefId, importedPrefValue);
-					let streamList = new appGlobal.StreamListFromSetting(true);
-					streamList.refresh(true);
-				} else {
-					this.set(prefId, importedPrefValue);
+				importedPrefValue = await this.hook.doFilter(this.FILTERS.IMPORT_FILE_PREF_VALUE, importedPrefValue, preferences, mergePreferences, prefId);
+				if (importedPrefValue === false) {
+					continue;
 				}
+
+
+
+				this.set(prefId, importedPrefValue);
 			} else {
 				console.warn(`Error trying to import ${prefId}`);
 			}
@@ -1074,7 +1011,7 @@ ${err}`);
 				}
 
 				if (errorMsg === null) {
-					this.importFromJSON(file_JSONData.preferences, (typeof mergePreferences==="boolean")? mergePreferences : false);
+					await this.importFromJSON(file_JSONData.preferences, (typeof mergePreferences==="boolean")? mergePreferences : false);
 					return true;
 				} else {
 					throw `An error occurred when trying to parse file (Check the file you have used, "${errorMsg}")`;

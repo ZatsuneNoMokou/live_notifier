@@ -338,6 +338,89 @@ async function importPrefsFromFile(event){
 	}
 }
 
+function chromePreferences_initHooks() {
+	const simpleJSONCheck = /^{.*}$/i;
+
+	chromeSettings.addFilter(chromeSettings.FILTERS.IMPORT_FILE_PREF_ID, function (prefId, preferences, mergePreferences) {
+		if (prefId === "hitbox_user_id") {
+			preferences["smashcast_user_id"] = preferences["hitbox_user_id"];
+			delete preferences["hitbox_user_id"];
+			prefId="smashcast_user_id";
+		}
+
+		if (prefId === "beam_user_id") {
+			preferences["mixer_user_id"] = preferences["beam_user_id"];
+			delete preferences["beam_user_id"];
+			prefId="mixer_user_id";
+		}
+
+		return prefId;
+	});
+
+	chromeSettings.addFilter(chromeSettings.FILTERS.IMPORT_FILE_PREF_VALUE, function (prefValue, preferences, mergePreferences, prefId) {
+		if (mergePreferences === true) {
+			let oldPref = getPreference(prefId),
+				newPrefArray
+			;
+
+
+
+			switch (prefId) {
+				case "stream_keys_list":
+					let streamListSetting = new appGlobal.StreamListFromSetting(false);
+
+					streamListSetting.parseSetting(importedPrefValue).forEach((websiteMap, website) => {
+						websiteMap.forEach((streamSetting, id) => {
+							let newStreamSettings;
+							if(streamListSetting.streamExist(website, id)){
+								newStreamSettings = streamListSetting.streamExist(website, id);
+							} else {
+								newStreamSettings = StreamListFromSetting.getDefault();
+							}
+
+							for(let settingName in streamSetting){
+								if(streamSetting.hasOwnProperty(settingName)){
+									newStreamSettings[settingName] = streamSetting[settingName];
+								}
+							}
+
+							streamListSetting.mapDataAll.get(website).set(id, newStreamSettings);
+						});
+					});
+
+					streamListSetting.update();
+
+					// Return false to not let ChromePreferences save the preference by itself
+					return false;
+
+				case "statusBlacklist":
+				case "statusWhitelist":
+				case "gameBlacklist":
+				case "gameWhitelist":
+					let toLowerCase = (str)=>{return str.toLowerCase()};
+					let oldPrefArrayLowerCase = oldPref.split(/,\s*/).map(toLowerCase);
+					newPrefArray = oldPref.split(/,\s*/);
+					importedPrefValue.split(/,\s*/).forEach(value=>{
+						if(oldPrefArrayLowerCase.indexOf(value.toLowerCase()) === -1){
+							newPrefArray.push(value);
+						}
+					});
+
+					return newPrefArray.join(",");
+			}
+		} else if (prefId === 'stream_keys_list' && simpleJSONCheck.test(this.get(prefId)) === false) {
+			savePreference(prefId, importedPrefValue);
+			let streamList = new appGlobal.StreamListFromSetting(true);
+			streamList.refresh(true);
+
+			// Return false to not let ChromePreferences save the preference by itself
+			return false;
+		}
+
+		return prefValue;
+	});
+}
+
 
 
 /*				---- Update SyncController ----				*/

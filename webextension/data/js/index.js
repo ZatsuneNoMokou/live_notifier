@@ -1663,6 +1663,17 @@ function initAddon(){
 		});
 	}
 
+
+
+	/*
+	 * Init Live Notifier hooks for ChromePreferences
+	 */
+	chromePreferences_initHooks();
+
+
+
+
+
 	let localToRemove = [];
 	/* 		----- Importation/Removal of old preferences -----		*/
 	if(getPreference("stream_keys_list") === ""){
