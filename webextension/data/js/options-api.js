@@ -131,10 +131,11 @@ function savePreference(prefId, value){
 function settingNode_onChange(event){
 	const backgroundPage = browser.extension.getBackgroundPage(),
 		node = this,
-		settingName = (node.tagName.toLowerCase()==="input"&&typeof node.type==="string"&&node.type.toLowerCase()==="radio")? node.name : node.id;
+		settingName = (node.tagName.toLowerCase() === "input" && typeof node.type==="string" && node.type.toLowerCase() === "radio")? node.name : node.id
+	;
 
-	if(node.validity.valid){
-		if(node.dataset.settingType){
+	if (node.validity.valid) {
+		if (node.dataset.settingType) {
 			const data = backgroundPage.getValueFromNode(node);
 			if(data!==undefined){
 				savePreference(settingName, data);
@@ -221,7 +222,13 @@ function refreshSettings(event){
 	}
 }
 
+
+
+
+
 /*		---- Save/Restaure preferences from sync ----		*/
+
+
 
 // Saves/Restaure options from/to browser.storage
 function saveOptionsInSync(event){
@@ -249,6 +256,8 @@ function restaureOptionsFromSync(event){
 	let mergePreferences = event.shiftKey;
 	chromeSettings.restaureFromSync((typeof mergePreferences==="boolean")? mergePreferences : false);
 }
+
+
 
 /*		---- Node generation of settings ----		*/
 function loadPreferences(selector){
@@ -299,6 +308,8 @@ if(browser.extension.getBackgroundPage()!==null && typeof Delegate!=="undefined"
 	backgroundPage.zDK.appendTo(document.body, "<div id='tooltip' class='hide'></div>", document);
 }
 
+
+
 /*		---- Import/Export preferences from file ----		*/
 function exportPrefsToFile(){
 	let backgroundPage = browser.extension.getBackgroundPage();
@@ -314,15 +325,243 @@ async function importPrefsFromFile(event){
 	try {
 		await backgroundPage.chromeSettings.importPrefsFromFile("live_notifier", mergePreferences, document);
 	} catch (e){
-		error=true;
+		error = true;
 		console.error(e);
 	}
 
-	if(error===false){
-		if(typeof refreshStreamsFromPanel === "function"){
+	if (error === false) {
+		if (typeof refreshStreamsFromPanel === "function") {
 			refreshStreamsFromPanel();
 		} else {
 			sendDataToMain("refreshStreams","");
 		}
+	}
+}
+
+function chromePreferences_initHooks() {
+	const simpleJSONCheck = /^{.*}$/i;
+
+	/**
+	 *
+	 * @param {String} prefId
+	 * @param {Object} preferences
+	 * @param {Boolean} mergePreferences
+	 * @returns {String}
+	 */
+	const filterPrefId = function (prefId, preferences, mergePreferences) {
+		if (prefId === "hitbox_user_id") {
+			preferences["smashcast_user_id"] = preferences["hitbox_user_id"];
+			delete preferences["hitbox_user_id"];
+			prefId="smashcast_user_id";
+		}
+
+		if (prefId === "beam_user_id") {
+			preferences["mixer_user_id"] = preferences["beam_user_id"];
+			delete preferences["beam_user_id"];
+			prefId="mixer_user_id";
+		}
+
+		return prefId;
+	};
+
+	/**
+	 *
+	 * @param {*} prefValue
+	 * @param {Object} preferences
+	 * @param {Boolean} mergePreferences
+	 * @param {String} prefId
+	 * @returns {String}
+	 */
+	const filterPrefValue = function (prefValue, preferences, mergePreferences, prefId) {
+		if (mergePreferences === true) {
+			let oldPref = getPreference(prefId),
+				newPrefArray
+			;
+
+
+
+			switch (prefId) {
+				case "stream_keys_list":
+					let streamListSetting = new appGlobal.StreamListFromSetting(false);
+
+					streamListSetting.parseSetting(importedPrefValue).forEach((websiteMap, website) => {
+						websiteMap.forEach((streamSetting, id) => {
+							let newStreamSettings;
+							if(streamListSetting.streamExist(website, id)){
+								newStreamSettings = streamListSetting.streamExist(website, id);
+							} else {
+								newStreamSettings = StreamListFromSetting.getDefault();
+							}
+
+							for(let settingName in streamSetting){
+								if(streamSetting.hasOwnProperty(settingName)){
+									newStreamSettings[settingName] = streamSetting[settingName];
+								}
+							}
+
+							streamListSetting.mapDataAll.get(website).set(id, newStreamSettings);
+						});
+					});
+
+					streamListSetting.update();
+
+					// Return null to not let ChromePreferences save the preference by itself
+					return null;
+
+				case "statusBlacklist":
+				case "statusWhitelist":
+				case "gameBlacklist":
+				case "gameWhitelist":
+					let toLowerCase = (str)=>{return str.toLowerCase()};
+					let oldPrefArrayLowerCase = oldPref.split(/,\s*/).map(toLowerCase);
+					newPrefArray = oldPref.split(/,\s*/);
+					importedPrefValue.split(/,\s*/).forEach(value=>{
+						if(oldPrefArrayLowerCase.indexOf(value.toLowerCase()) === -1){
+							newPrefArray.push(value);
+						}
+					});
+
+					return newPrefArray.join(",");
+			}
+		} else if (prefId === 'stream_keys_list' && simpleJSONCheck.test(this.get(prefId)) === false) {
+			savePreference(prefId, importedPrefValue);
+			let streamList = new appGlobal.StreamListFromSetting(true);
+			streamList.refresh(true);
+
+			// Return null to not let ChromePreferences save the preference by itself
+			return null;
+		}
+
+		return prefValue;
+	};
+
+
+
+	chromeSettings.addFilter(chromeSettings.FILTERS.IMPORT_FILE_PREF_ID, filterPrefId);
+	chromeSettings.addFilter(chromeSettings.FILTERS.IMPORT_FILE_PREF_VALUE, filterPrefValue);
+}
+
+
+
+/*				---- Update SyncController ----				*/
+
+/**
+ *
+ * @param {function} updateSyncData
+ */
+function initSyncControl(updateSyncData) {
+	let haveAutomaticSync = getPreference('automaticSync'),
+		dropboxClientId = getPreference('dropboxClientId'),
+		dropboxAuthToken = getPreference('dropboxClientAuthToken')
+	;
+
+	/**
+	 *
+	 * @type {?DropboxController}
+	 */
+	let dropboxController = null;
+	if (haveAutomaticSync === true) {
+		dropboxController = DropboxController.updateController(dropboxClientId, dropboxAuthToken);
+	}
+
+
+	/**
+	 *
+	 * @type {Map<String, String>}
+	 */
+	const updatedPreferences = new Map();
+
+	/**
+	 *
+	 * @type {?Promise}
+	 */
+	let logginPromise = null;
+
+	/**
+	 *
+	 * @function
+	 */
+	const uploadSyncData = _.debounce(function () {
+		if (haveAutomaticSync === true && dropboxController === null && logginPromise === null) {
+			logginPromise = new DropboxController(null, dropboxClientId).getAuthToken();
+			logginPromise
+				.then(authToken => {
+					console.dir(authToken);
+					savePreference('dropboxClientAuthToken', authToken);
+					logginPromise = null;
+				})
+				.catch(err => {
+					console.error(err);
+					logginPromise = null;
+					savePreference("automaticSync", false);
+				})
+			;
+		}
+
+		updateSyncData(syncInterval, dropboxController, updatedPreferences)
+			.catch(err=>{
+				consoleMsg('error', err);
+			})
+		;
+	}, 1000, {
+		maxWait: 10000
+	});
+
+
+
+	browser.storage.onChanged.addListener((changes, area) => {
+		if (area === "local") {
+			for(let prefId in changes) {
+				if(changes.hasOwnProperty(prefId)){
+					switch(prefId) {
+						case "dropboxClientId":
+							dropboxClientId = changes[prefId].newValue;
+							break;
+						case "dropboxClientAuthToken":
+							dropboxAuthToken = changes[prefId].newValue;
+							break;
+						case "automaticSync":
+							haveAutomaticSync = changes[prefId].newValue;
+							break;
+					}
+
+					if (prefId !== CHROME_PREFERENCES_SYNC_ID && (chromeSettings.defaultSettingsSync.has(prefId) || prefId === 'automaticSync') && updatedPreferences.has(prefId) === false) {
+						updatedPreferences.set(prefId, '');
+					}
+				}
+			}
+
+			if (updatedPreferences.size > 0) {
+				if (haveAutomaticSync === true) {
+					if (updatedPreferences.has('automaticSync') || updatedPreferences.has('dropboxClientId') || updatedPreferences.has('dropboxClientAuthToken')) {
+						dropboxController = DropboxController.updateController(dropboxClientId, dropboxAuthToken, dropboxController);
+					}
+
+					uploadSyncData();
+				} else {
+					dropboxController = null;
+				}
+			}
+		}
+	});
+
+
+
+	/**
+	 *
+	 * @type {ZTimer}
+	 */
+	const syncInterval = ZTimer.setInterval('syncInterval', 10, 'm', function (){
+		uploadSyncData()
+			.catch(err=>{
+				consoleMsg('error', err);
+			})
+		;
+	});
+
+
+
+	if (dropboxController !== null) {
+		uploadSyncData();
 	}
 }

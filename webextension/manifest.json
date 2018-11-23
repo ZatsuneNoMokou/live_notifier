@@ -11,7 +11,7 @@
 	"short_name": "LiveNotifierDev",
 	"description": "__MSG_extShortDesc__",
 	"author": "Zatsune No Mokou",
-	"version": "12.0.0.10",
+	"version": "12.0.0.11",
 	"icons": {
 		"96": "/icon_96.png",
 		"128": "/icon_128.png"
@@ -32,7 +32,9 @@
 			"/data/js/lib/Dropbox-sdk.js",
 
 
+			"/data/js/classes/hook.js",
 			"/data/js/classes/chrome-notification-controler.js",
+			"/data/js/classes/SyncController.js",
 			"/data/js/classes/DropboxController.js",
 			"/data/js/classes/chrome-preferences.js",
 			"/data/js/classes/i18extended.js",

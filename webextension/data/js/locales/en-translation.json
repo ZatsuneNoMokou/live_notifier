@@ -199,6 +199,9 @@
 	"dropboxClientAuthToken_title": "Dropbox - Client AuthToken",
 	"dropboxClientAuthToken_description": "",
 
+	"automaticSync_title": "Automatic synchronization (Beta)",
+	"automaticSync_description": "Enabled when checked",
+
 	"showAdvanced_title": "Show advanced settings",
 	"showAdvanced_description": "Enabled when checked",
 	"showExperimented_title": "Show setting for experimented users",
