@@ -486,6 +486,7 @@ function initSyncControl(updateSyncData) {
 			logginPromise = new DropboxController(null, clientId).getAuthToken();
 			logginPromise
 				.then(authToken => {
+					console.dir(authToken)
 					savePreference('dropboxClientAuthToken', authToken);
 					logginPromise = null;
 				})

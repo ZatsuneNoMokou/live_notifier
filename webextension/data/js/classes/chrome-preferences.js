@@ -111,11 +111,12 @@ class ChromePreferences extends Map {
 		 * @private
 		 */
 		this._hook = null;
-		let i = -1;
-		this.FILTERS = Object.freeze({
-			'IMPORT_FILE_PREF_ID': ++i,
-			'IMPORT_FILE_PREF_VALUE': ++i
+		this.FILTERS_ARRAY = Object.freeze(['IMPORT_FILE_PREF_ID', 'IMPORT_FILE_PREF_VALUE']);
+		this.FILTERS = {};
+		this.FILTERS_ARRAY.forEach((filterName, index) => {
+			this.FILTERS[filterName] = index;
 		});
+		Object.freeze(this.FILTERS);
 
 
 
@@ -257,13 +258,19 @@ class ChromePreferences extends Map {
 	addFilter(filterName, filterFn) {
 		if (typeof filterFn !== "function"
 			||
-			!(typeof filterName === 'string' && filterName.length > 0 )
+			!(
+				(typeof filterName === 'string' && filterName.length > 0)
+				||
+				(typeof filterName === 'number' && !isNaN(filterName) && typeof this.FILTERS_ARRAY[filterName] !== 'undefined')
+			)
 		) {
 			throw 'WrongArgument';
 		}
 
-		if (this.FILTERS.hasOwnProperty(filterName)) {
-			filterName = this.FILTERS[filterName];
+		if (typeof filterName === 'number' || this.FILTERS.hasOwnProperty(filterName)) {
+			if (typeof filterName === 'string') {
+				filterName = this.FILTERS[filterName];
+			}
 		} else {
 			throw 'UnknownFilter';
 		}

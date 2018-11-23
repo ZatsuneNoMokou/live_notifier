@@ -33,7 +33,7 @@ class Hook {
 	// noinspection JSMethodCanBeStatic
 	/**
 	 *
-	 * @param anyVar
+	 * @param {*} anyVar
 	 * @returns {boolean}
 	 * @private
 	 */
@@ -44,12 +44,22 @@ class Hook {
 	// noinspection JSMethodCanBeStatic
 	/**
 	 *
-	 * @param anyVar
+	 * @param {*} anyVar
 	 * @returns {boolean}
 	 * @private
 	 */
 	_isString(anyVar) {
 		return typeof anyVar === 'string' && anyVar.length > 0;
+	}
+
+	/**
+	 *
+	 * @param {*} anyVar
+	 * @return {boolean}
+	 * @private
+	 */
+	_isNumberOrString(anyVar) {
+		return this._isNumber(anyVar) || this._isString(anyVar);
 	}
 
 	/**
@@ -62,7 +72,7 @@ class Hook {
 	 * @private
 	 */
 	_addHook(hookType, hookName, hookFn, isPost=false) {
-		if (this._isNumber(hookType) === false || this._isString(hookName) === false || typeof hookFn !== 'function' || typeof isPost !== 'boolean') {
+		if (this._isNumber(hookType) === false || this._isNumberOrString(hookName) === false || typeof hookFn !== 'function' || typeof isPost !== 'boolean') {
 			throw 'WrongArgumentType';
 		}
 
@@ -85,7 +95,7 @@ class Hook {
 	 * @private
 	 */
 	_hasHook(hookType, hookName) {
-		if (this._isNumber(hookType) === false || typeof hookName !== 'string') {
+		if (this._isNumber(hookType) === false || this._isNumberOrString(hookName)) {
 			throw 'ArgumentType';
 		}
 
@@ -102,7 +112,7 @@ class Hook {
 	 * @private
 	 */
 	_deleteHook(hookType, hookName) {
-		if (this._isNumber(hookType) === false || typeof hookName !== 'string') {
+		if (this._isNumber(hookType) === false || this._isNumberOrString(hookName)) {
 			throw 'ArgumentType';
 		}
 
