@@ -95,13 +95,31 @@ const CHROME_PREFERENCES_UPDATED_ID = '_updated',
 	CHROME_PREFERENCES_SYNC_ID = '_synchronisedAt'
 ;
 
-class ChromePreferences extends Map{
+class ChromePreferences extends Map {
 	constructor(options){
 		super(new Map());
 
-		if(options===undefined){
+		if (options === undefined) {
 			throw "Missing argument"
 		}
+
+
+
+		/**
+		 *
+		 * @type {Hook}
+		 * @private
+		 */
+		this._hook = null;
+		let i = -1;
+		this.FILTERS = Object.freeze({
+			'IMPORT_FILE_PREF_ID': ++i,
+			'IMPORT_FILE_PREF_VALUE': ++i
+		});
+
+
+
+
 
 
 		options[CHROME_PREFERENCES_UPDATED_ID] = {
@@ -140,7 +158,7 @@ class ChromePreferences extends Map{
 
 		let defaultSettings = new Map();
 		let defaultSettingsSync = new Map();
-		for(let id in options){
+		for(let id in options) {
 			if(options.hasOwnProperty(id)){
 				let option = options[id];
 				if(typeof option.value !== "undefined"){
@@ -173,12 +191,12 @@ class ChromePreferences extends Map{
 				});
 			}
 
-			if(this.loadingState==="failed"){
+			if (this.loadingState === "failed") {
 				throw err;
 			} else {
-				if(currentLocalStorage!==null){
-					for(let prefId in currentLocalStorage){
-						if(currentLocalStorage.hasOwnProperty(prefId)){ // Make sure to not loop constructors
+				if (currentLocalStorage !== null) {
+					for (let prefId in currentLocalStorage) {
+						if (currentLocalStorage.hasOwnProperty(prefId)) { // Make sure to not loop constructors
 							if(this.defaultSettings.has(prefId)){
 								super.set(prefId, currentLocalStorage[prefId]);
 							} else {
@@ -214,6 +232,47 @@ class ChromePreferences extends Map{
 			value: loadPromise()
 		});
 	}
+
+
+
+
+
+	/**
+	 *
+	 * @returns {Hook}
+	 */
+	get hook() {
+		if (this._hook === null) {
+			this._hook = new Hook()
+		}
+
+		return this._hook;
+	}
+
+	/**
+	 *
+	 * @param {String} filterName
+	 * @param {Function} filterFn
+	 */
+	addFilter(filterName, filterFn) {
+		if (typeof filterFn !== "function"
+			||
+			!(typeof filterName === 'string' && filterName.length > 0 )
+		) {
+			throw 'WrongArgument';
+		}
+
+		if (this.FILTERS.hasOwnProperty(filterName)) {
+			filterName = this.FILTERS[filterName];
+		} else {
+			throw 'UnknownFilter';
+		}
+
+		this.hook.addFilter(filterName, filterFn);
+	}
+
+
+
 
 
 	get(prefId){
@@ -289,6 +348,7 @@ ${err}`);
 	}
 
 
+
 	getRealValue(prefId){
 		if(this.has(prefId)){
 			const current_pref = super.get(prefId);
@@ -347,98 +407,10 @@ ${err}`);
 		return keysArray;
 	}
 
-	/**
-	 *
-	 * @param {JSON} preferences
-	 * @param {Boolean=false} mergePreferences
-	 */
-	importFromJSON(preferences, mergePreferences=false){
-		for(let prefId in preferences){
-			if(!preferences.hasOwnProperty(prefId)){
-				continue;
-			}
 
 
 
-			if(prefId==="hitbox_user_id"){
-				preferences["smashcast_user_id"] = preferences["hitbox_user_id"];
-				delete preferences["hitbox_user_id"];
-				prefId="smashcast_user_id";
-			}
-			if(prefId==="beam_user_id"){
-				preferences["mixer_user_id"] = preferences["beam_user_id"];
-				delete preferences["beam_user_id"];
-				prefId="mixer_user_id";
-			}
 
-			if(this.options.has(prefId) && typeof this.options.get(prefId).type !== "undefined" && this.options.get(prefId).type !== "control" && this.options.get(prefId).type !== "file" && typeof preferences[prefId] === typeof this.defaultSettingsSync.get(prefId)){
-				if(mergePreferences){
-					let oldPref = this.get(prefId),
-						newPrefArray
-					;
-
-					switch(prefId){
-						case "stream_keys_list":
-							let prefData = null;
-							try {
-								prefData = JSON.parse(oldPref);
-							} catch (e) {
-								consoleMsg('error', e);
-							}
-
-							if(prefData===null){
-								prefData = oldPref;
-							}
-
-							let streamListSetting = new appGlobal.StreamListFromSetting(false);
-
-							streamListSetting.parseSetting(prefData).forEach((website, websiteMap)=>{
-								websiteMap.forEach((id, streamSetting)=>{
-									let newStreamSettings;
-									if(streamListSetting.streamExist(website, id)){
-										newStreamSettings = streamListSetting.streamExist(website, id);
-									} else {
-										newStreamSettings = StreamListFromSetting.getDefault();
-									}
-
-									for(let settingName in streamSetting){
-										if(streamSetting.hasOwnProperty(settingName)){
-											newStreamSettings[settingName] = streamSetting[settingName];
-										}
-									}
-
-									streamListSetting.mapDataAll.get(website).set(id, newStreamSettings);
-								});
-							});
-
-							streamListSetting.update();
-
-							break;
-						case "statusBlacklist":
-						case "statusWhitelist":
-						case "gameBlacklist":
-						case "gameWhitelist":
-							let toLowerCase = (str)=>{return str.toLowerCase()};
-							let oldPrefArrayLowerCase = oldPref.split(/,\s*/).map(toLowerCase);
-							newPrefArray = oldPref.split(/,\s*/);
-							preferences[prefId].split(/,\s*/).forEach(value=>{
-								if(oldPrefArrayLowerCase.indexOf(value.toLowerCase()) === -1){
-									newPrefArray.push(value);
-								}
-							});
-							this.set(prefId, newPrefArray.join(","));
-							break;
-						default:
-							this.set(prefId, preferences[prefId]);
-					}
-				} else {
-					this.set(prefId, preferences[prefId]);
-				}
-			} else {
-				console.warn(`Error trying to import ${prefId}`);
-			}
-		}
-	}
 	saveInSync(){
 		return browser.storage.sync.set(this.getSyncPreferences());
 	}
@@ -956,6 +928,54 @@ ${err}`);
 		}
 	}
 
+
+
+
+
+	/**
+	 *
+	 * @param {JSON} preferences
+	 * @param {Boolean=false} mergePreferences
+	 */
+	async importFromJSON(preferences, mergePreferences=false){
+		for(let prefId in preferences){
+			if(!preferences.hasOwnProperty(prefId)){
+				continue;
+			}
+
+
+
+			prefId = await this.hook.doFilter(this.FILTERS.IMPORT_FILE_PREF_ID, prefId, preferences, mergePreferences);
+			if (prefId === false) {
+				continue;
+			}
+
+
+
+			if (this.options.has(prefId) && typeof this.options.get(prefId).type !== "undefined" && this.options.get(prefId).type !== "control" && this.options.get(prefId).type !== "file") {
+				let importedPrefValue = preferences[prefId];
+
+				if (typeof importedPrefValue !== typeof this.defaultSettingsSync.get(prefId) && (this.options.get(prefId).type !== 'json' || typeof importedPrefValue !== "object")) {
+					console.warn(`Error trying to import ${prefId} (Type mismatch)`);
+					continue;
+				}
+
+
+
+				importedPrefValue = await this.hook.doFilter(this.FILTERS.IMPORT_FILE_PREF_VALUE, importedPrefValue, preferences, mergePreferences, prefId);
+				if (importedPrefValue === null) {
+					continue;
+				}
+
+
+
+				this.set(prefId, importedPrefValue);
+			} else {
+				console.warn(`Error trying to import ${prefId}`);
+			}
+		}
+	}
+
 	/**
 	 *
 	 * @param {String} appName
@@ -967,7 +987,7 @@ ${err}`);
 			"readType": "text"
 		});
 
-		if(files.length === 0 || files.length > 1){
+		if (files.length === 0 || files.length > 1) {
 			throw `[Input error] ${files.length} file(s) loaded`;
 		} else {
 			let file_JSONData = null;
@@ -981,7 +1001,7 @@ ${err}`);
 				}
 			}
 
-			if(file_JSONData !== null){
+			if (file_JSONData !== null) {
 				let errorMsg = null;
 
 				if (!file_JSONData.hasOwnProperty(`${appName}_version`)) {
@@ -990,8 +1010,8 @@ ${err}`);
 					errorMsg = 'PreferencesProblem';
 				}
 
-				if(errorMsg === null){
-					this.importFromJSON(file_JSONData.preferences, (typeof mergePreferences==="boolean")? mergePreferences : false);
+				if (errorMsg === null) {
+					await this.importFromJSON(file_JSONData.preferences, (typeof mergePreferences==="boolean")? mergePreferences : false);
 					return true;
 				} else {
 					throw `An error occurred when trying to parse file (Check the file you have used, "${errorMsg}")`;

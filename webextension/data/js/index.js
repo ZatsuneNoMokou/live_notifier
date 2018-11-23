@@ -1663,6 +1663,17 @@ function initAddon(){
 		});
 	}
 
+
+
+	/*
+	 * Init Live Notifier hooks for ChromePreferences
+	 */
+	chromePreferences_initHooks();
+
+
+
+
+
 	let localToRemove = [];
 	/* 		----- Importation/Removal of old preferences -----		*/
 	if(getPreference("stream_keys_list") === ""){
@@ -1727,68 +1738,34 @@ function initAddon(){
 
 
 
-	const
+	/**
+	 *
+	 * @type {ZTimer}
+	 */
+	const syncInterval = ZTimer.setInterval('syncInterval', 10, 'm', function (){
 		/**
-		 *
-		 * @param {ZTimer} zTimer
-		 * @return {Promise<void>}
+		 * @type {ZTimer}
 		 */
-		syncTrigger = async function(zTimer){
-			await updateSyncData(zTimer)
-				.catch(err=>{
-					consoleMsg('error', err);
-				})
-			;
-		},
-		syncInterval = ZTimer.setInterval('syncInterval', 10, 'm', function (){
-			const zTimer = this;
+		const zTimer = this;
 
-			syncTrigger(zTimer)
-				.catch(err=>{
-					consoleMsg('error', err);
-				})
-			;
-		})
-	;
+		updateSyncData(zTimer)
+			.catch(err=>{
+				consoleMsg('error', err);
+			})
+		;
+	});
 
 
-
-	let dropboxClientId = getPreference('dropboxClientId'),
-		dropboxAuthToken = getPreference('dropboxClientAuthToken')
-	;
-
-	/**
-	 *
-	 * @type {DropboxController}
-	 */
-	let dropboxController = null;
-
-	/**
-	 *
-	 * @param {String} dropboxClientId
-	 * @param {String} dropboxAuthToken
-	 * @return {DropboxController | null}
-	 */
-	const updateDropboxController = function(dropboxClientId, dropboxAuthToken){
-		if(dropboxController!==null){
-			dropboxController.dropboxClientId = dropboxClientId;
-			dropboxController.dropboxAuthToken = dropboxAuthToken;
-		} else if(dropboxAuthToken!=='' || dropboxClientId!==''){
-			dropboxController = new DropboxController('livenotifier.json', dropboxClientId, dropboxAuthToken);
-		} else {
-			dropboxController = null;
-		}
-
-		return dropboxController;
-	};
 
 	/**
 	 *
 	 * @param {ZTimer=null} zTimer
+	 * @param {?DropboxController} dropboxController
+	 * @param {Map<String, String>} updatedPreferences
 	 * @return {Promise<void>}
 	 */
-	const updateSyncData = async function (zTimer=null) {
-		if(dropboxController===null){
+	const updateSyncData = async function (zTimer=null, dropboxController, updatedPreferences) {
+		if (dropboxController === null) {
 			return;
 		}
 
@@ -1812,7 +1789,7 @@ function initAddon(){
 			}
 		}
 
-		const date = (getPreference(CHROME_PREFERENCES_SYNC_ID)!=='')? ZDK.validDateOrNull(new Date(getPreference(CHROME_PREFERENCES_SYNC_ID))) : null,
+		const date = (getPreference(CHROME_PREFERENCES_SYNC_ID) !== '')? ZDK.validDateOrNull(new Date(getPreference(CHROME_PREFERENCES_SYNC_ID))) : null,
 			currentSyncDate = (currentSyncMetaData !== null && currentSyncMetaData.hasOwnProperty('server_modified'))? ZDK.validDateOrNull(new Date(currentSyncMetaData.server_modified)) : null
 		;
 
@@ -1840,7 +1817,7 @@ function initAddon(){
 				streamListFromSetting.mergeData(data.get('stream_keys_list'), isNewer);
 				streamListFromSetting.update();
 
-				if (needUpload === false && getPreference('stream_keys_list') !== oldStreamList) {
+				if (needUpload === false && JSON.stringify(getPreference('stream_keys_list')) !== JSON.stringify(oldStreamList)) {
 					needUpload = true;
 				}
 			}
@@ -1876,7 +1853,7 @@ function initAddon(){
 
 
 
-		if(zTimer!==null){
+		if (zTimer !== null) {
 			await zTimer.init()
 				.catch(err=>{
 					consoleMsg('error', err);
@@ -1884,55 +1861,7 @@ function initAddon(){
 			;
 		}
 	};
-
-
-
-	const updatedPreferences = new Map(),
-		uploadSyncData = _.debounce(function () {
-			updateSyncData(syncInterval)
-				.catch(err=>{
-					consoleMsg('error', err);
-				})
-			;
-		}, 1000, {
-			maxWait: 10000
-		})
-	;
-
-	dropboxController = updateDropboxController(dropboxClientId, dropboxAuthToken);
-	if (dropboxController !== null) {
-		uploadSyncData();
-	}
-
-	browser.storage.onChanged.addListener((changes, area) => {
-		if(area === "local"){
-			for(let prefId in changes){
-				if(changes.hasOwnProperty(prefId)){
-					switch(prefId){
-						case "dropboxClientId":
-							dropboxClientId = changes[prefId].newValue;
-							break;
-						case "dropboxClientAuthToken":
-							dropboxClientAuthToken = changes[prefId].newValue;
-							break;
-					}
-
-					if (prefId!==CHROME_PREFERENCES_SYNC_ID && chromeSettings.defaultSettingsSync.has(prefId) && updatedPreferences.has(prefId) === false) {
-						updatedPreferences.set(prefId, '');
-					}
-				}
-			}
-
-			if (updatedPreferences.size > 0) {
-				if (updatedPreferences.has('dropboxClientId') || updatedPreferences.has('dropboxClientAuthToken')) {
-					dropboxController = updateDropboxController(dropboxClientId, dropboxAuthToken);
-				}
-
-				uploadSyncData();
-			}
-		}
-	});
-
+	initSyncControl(updateSyncData);
 
 
 
@@ -1945,6 +1874,10 @@ function initAddon(){
 		})
 	;
 }
+
+
+
+
 
 // Checking if updated
 let previousVersion = "",

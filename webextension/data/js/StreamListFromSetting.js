@@ -585,7 +585,7 @@ class StreamListFromSetting {
 		});
 
 		let updatedMissing = false;
-		this.forEach((map, website)=>{
+		this.mapDataAll.forEach((map, website)=>{
 			map.forEach((streamData, streamId)=>{
 				if(isNewer === true && (newDataKeyMapping.has(website) === false || newDataKeyMapping.get(website).has(streamId.toLowerCase()) === false)){
 					this.deleteStream(website, streamId);
