@@ -185,15 +185,17 @@ class Hook {
 
 	/**
 	 *
-	 * @param filterName
+	 * @param {String} filterName
+	 * @param {*} filteredVar
 	 * @param {...*} args
 	 * @returns {Promise<*>}
 	 */
-	doFilter(filterName, ...args) {
+	doFilter(filterName, filteredVar, ...args) {
 		return this.runHook(filterName, {
 			'context': null,
 			'hookType': this.HOOK_TYPES.FILTER,
-			'breakOnFalse': false
+			'breakOnFalse': false,
+			'defaultOutput': filteredVar
 		}, null, args)
 	}
 
@@ -270,6 +272,7 @@ class Hook {
 	 * @param {Object} [opts]
 	 * @property {boolean} opts.breakOnFalse
 	 * @property {*} opts.context Context that will be use on the functions
+	 * @property {*} opts.defaultOutput Context that will be use on the functions
 	 * @param {Function} [fn]
 	 * @param {...*} args
 	 * @returns {Promise<*>}
@@ -278,6 +281,7 @@ class Hook {
 		opts = Object.assign({
 			'context': null,
 			'breakOnFalse': true,
+			'defaultOutput': undefined,
 			'hookType': this.HOOK_TYPES.DEFAULT /* For internal use */
 		}, opts);
 		hookName = opts.hookType + '/' +  hookName;
@@ -315,6 +319,9 @@ class Hook {
 
 		const haveFn = typeof fn === 'function';
 		let output;
+		if (opts.defaultOutput !== undefined) {
+			output = opts.defaultOutput;
+		}
 		if (haveFn) {
 			try {
 				output = fn.apply(opts.context, args);
@@ -335,7 +342,7 @@ class Hook {
 			for(let i=0; i < arr.length; i++) {
 				let result;
 				try {
-					result = await arr[i].apply(opts.context, (haveFn)? args.unshift(output) : args);
+					result = await arr[i].apply(opts.context, (haveFn || opts.defaultOutput !== undefined)? args.unshift(output) : args);
 				} catch (e) {
 					console.error(e);
 				}

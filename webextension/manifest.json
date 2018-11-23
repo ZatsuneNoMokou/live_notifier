@@ -32,6 +32,7 @@
 			"/data/js/lib/Dropbox-sdk.js",
 
 
+			"/data/js/classes/hook.js",
 			"/data/js/classes/chrome-notification-controler.js",
 			"/data/js/classes/SyncController.js",
 			"/data/js/classes/DropboxController.js",

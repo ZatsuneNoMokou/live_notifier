@@ -29,6 +29,7 @@ class ZDK{
 			}
 		};
 
+		_define('Hook', Hook);
 		_define('ChromeNotificationControler', ChromeNotificationControler);
 		_define('ChromePreferences', ChromePreferences);
 		_define('i18extended', i18extended);
