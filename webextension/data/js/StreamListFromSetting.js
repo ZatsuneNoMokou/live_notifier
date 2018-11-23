@@ -379,7 +379,7 @@ class StreamListFromSetting {
 
 
 			this.mapDataAll = this.parseSetting(this.prefData);
-			if(typeof this.prefData==="string"){
+			if (typeof this.prefData === "string") {
 				consoleMsg("warn", "Migrating stream list format");
 				this.update(false);
 			}

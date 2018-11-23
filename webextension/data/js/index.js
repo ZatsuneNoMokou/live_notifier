@@ -1797,7 +1797,11 @@ function initAddon(){
 		if (currentSyncData !== null && currentSyncData.hasOwnProperty('preferences') && currentSyncData.hasOwnProperty('live_notifier_version')) {
 			const data = new Map(Object.entries(currentSyncData.preferences));
 
-			if (currentSyncDate !== date) {
+			const dateTimestamp = (date !== null)? date.getTime() : null,
+				currentSyncDateTimestamp = (currentSyncDate !== null)? date.getTime() : null
+			;
+
+			if (currentSyncDateTimestamp !== dateTimestamp) {
 				let isNewer = false;
 
 				if (date === null) {
