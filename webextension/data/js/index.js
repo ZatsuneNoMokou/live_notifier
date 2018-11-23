@@ -1798,7 +1798,7 @@ function initAddon(){
 			const data = new Map(Object.entries(currentSyncData.preferences));
 
 			const dateTimestamp = (date !== null)? date.getTime() : null,
-				currentSyncDateTimestamp = (currentSyncDate !== null)? date.getTime() : null
+				currentSyncDateTimestamp = (currentSyncDate !== null)? currentSyncDate.getTime() : null
 			;
 
 			if (currentSyncDateTimestamp !== dateTimestamp) {
