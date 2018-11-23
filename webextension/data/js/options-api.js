@@ -483,16 +483,17 @@ function initSyncControl(updateSyncData) {
 	 */
 	const uploadSyncData = _.debounce(function () {
 		if (haveAutomaticSync === true && dropboxController === null && logginPromise === null) {
-			logginPromise = new DropboxController(null, clientId).getAuthToken();
+			logginPromise = new DropboxController(null, dropboxClientId).getAuthToken();
 			logginPromise
 				.then(authToken => {
-					console.dir(authToken)
+					console.dir(authToken);
 					savePreference('dropboxClientAuthToken', authToken);
 					logginPromise = null;
 				})
 				.catch(err => {
 					console.error(err);
 					logginPromise = null;
+					savePreference("automaticSync", false);
 				})
 			;
 		}
@@ -524,7 +525,7 @@ function initSyncControl(updateSyncData) {
 							break;
 					}
 
-					if (prefId !== CHROME_PREFERENCES_SYNC_ID && chromeSettings.defaultSettingsSync.has(prefId) && updatedPreferences.has(prefId) === false) {
+					if (prefId !== CHROME_PREFERENCES_SYNC_ID && (chromeSettings.defaultSettingsSync.has(prefId) || prefId === 'automaticSync') && updatedPreferences.has(prefId) === false) {
 						updatedPreferences.set(prefId, '');
 					}
 				}

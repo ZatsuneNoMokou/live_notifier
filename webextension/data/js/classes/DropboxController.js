@@ -10,6 +10,9 @@ class DropboxController extends SyncController {
 		if (fileName === null || fileName === '') {
 			fileName = DropboxController_FILENAME;
 		}
+		if (clientId === '') {
+			clientId = DropboxController.d('NG93bWQyNG93bnZhZXc4');
+		}
 		super(fileName, clientId, authToken);
 
 
@@ -28,8 +31,6 @@ class DropboxController extends SyncController {
 	 * @return {?DropboxController}
 	 */
 	static updateController(clientId, authToken, oldController=null){
-		if (clientId === '') clientId = DropboxController.d('NG93bWQyNG93bnZhZXc4');
-
 		if (oldController !== null) {
 			oldController.clientId = clientId;
 			oldController.authToken = authToken;
@@ -90,7 +91,7 @@ class DropboxController extends SyncController {
 		}
 
 		if (this.clientId === '') {
-			return 'InvalidClientId';
+			throw 'InvalidClientId';
 		}
 
 		/**
@@ -105,6 +106,8 @@ class DropboxController extends SyncController {
 
 		try{
 			const authUrl = client.getAuthenticationUrl(browser.identity.getRedirectURL());
+
+			// console.warn(browser.identity.getRedirectURL());
 
 			urlReturned = await DropboxController.identityLaunchWebAuthFlow({url: authUrl, interactive: true});
 		} catch (e) {
@@ -122,9 +125,10 @@ class DropboxController extends SyncController {
 		} else {
 			if (error !== undefined) {
 				consoleMsg('error', error);
+				throw 'Error';
+			} else {
+				throw 'ErrorUnknown';
 			}
-
-			throw 'ErrorUnknown';
 		}
 	}
 

@@ -67,7 +67,7 @@ class SyncController {
 	static identityLaunchWebAuthFlow(details){
 		return new Promise((resolve, reject) => {
 			chrome.identity.launchWebAuthFlow(details, function (responseUrl) {
-				if(typeof responseUrl!=="string" && responseUrl===undefined){
+				if (typeof responseUrl !== "string" && responseUrl === undefined) {
 					reject();
 				} else{
 					resolve(responseUrl);
