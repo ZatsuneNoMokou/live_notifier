@@ -963,7 +963,7 @@ ${err}`);
 
 
 				importedPrefValue = await this.hook.doFilter(this.FILTERS.IMPORT_FILE_PREF_VALUE, importedPrefValue, preferences, mergePreferences, prefId);
-				if (importedPrefValue === false) {
+				if (importedPrefValue === null) {
 					continue;
 				}
 

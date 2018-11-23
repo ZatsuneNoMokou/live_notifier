@@ -194,7 +194,8 @@ class Hook {
 		return this.runHook(filterName, {
 			'context': null,
 			'hookType': this.HOOK_TYPES.FILTER,
-			'breakOnFalse': false,
+			'breakOnValue': true,
+			'breakValue': null,
 			'defaultOutput': filteredVar
 		}, null, args)
 	}
@@ -231,7 +232,7 @@ class Hook {
 		return this.runHook(eventName, {
 			'context': context,
 			'hookType': this.HOOK_TYPES.LISTENER,
-			'breakOnFalse': false
+			'breakOnValue': false
 		}, null, args);
 	}
 
@@ -270,9 +271,10 @@ class Hook {
 	 *
 	 * @param {String} hookName
 	 * @param {Object} [opts]
-	 * @property {boolean} opts.breakOnFalse
-	 * @property {*} opts.context Context that will be use on the functions
-	 * @property {*} opts.defaultOutput Context that will be use on the functions
+	 * @param {boolean} opts.breakOnValue Stop execution if opts.breakValue is found (fn result and postHook results)
+	 * @param {*} opts.breakValue A fnResult === breakValue will be done, so false or null works well
+	 * @param {*} opts.context Context that will be use on the functions
+	 * @param {*} opts.defaultOutput Context that will be use on the functions
 	 * @param {Function} [fn]
 	 * @param {...*} args
 	 * @returns {Promise<*>}
@@ -280,7 +282,8 @@ class Hook {
 	async runHook(hookName, opts={}, fn=null, ...args) {
 		opts = Object.assign({
 			'context': null,
-			'breakOnFalse': true,
+			'breakOnValue': true,
+			'breakValue': false,
 			'defaultOutput': undefined,
 			'hookType': this.HOOK_TYPES.DEFAULT /* For internal use */
 		}, opts);
@@ -306,8 +309,8 @@ class Hook {
 				if (err === null && result !== undefined) {
 					if (Array.isArray(result)) {
 						args = result;
-					} else if (result === false) {
-						return false;
+					} else if (result === opts.breakValue) {
+						return opts.breakValue;
 					} else {
 						args = [result];
 					}
@@ -329,8 +332,8 @@ class Hook {
 				console.error(e);
 			}
 
-			if (opts.breakOnFalse === true && output === false) {
-				return false;
+			if (opts.breakOnValue === true && output === opts.breakValue) {
+				return opts.breakValue;
 			}
 		}
 
@@ -350,8 +353,8 @@ class Hook {
 				if (result !== undefined) {
 					output = result;
 
-					if (opts.breakOnFalse === true && result === false) {
-						return false;
+					if (opts.breakOnValue === true && result === opts.breakValue) {
+						return opts.breakValue;
 					}
 				}
 			}

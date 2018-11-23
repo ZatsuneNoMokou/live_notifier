@@ -341,7 +341,14 @@ async function importPrefsFromFile(event){
 function chromePreferences_initHooks() {
 	const simpleJSONCheck = /^{.*}$/i;
 
-	chromeSettings.addFilter(chromeSettings.FILTERS.IMPORT_FILE_PREF_ID, function (prefId, preferences, mergePreferences) {
+	/**
+	 *
+	 * @param {String} prefId
+	 * @param {Object} preferences
+	 * @param {Boolean} mergePreferences
+	 * @returns {String}
+	 */
+	const filterPrefId = function (prefId, preferences, mergePreferences) {
 		if (prefId === "hitbox_user_id") {
 			preferences["smashcast_user_id"] = preferences["hitbox_user_id"];
 			delete preferences["hitbox_user_id"];
@@ -355,9 +362,17 @@ function chromePreferences_initHooks() {
 		}
 
 		return prefId;
-	});
+	};
 
-	chromeSettings.addFilter(chromeSettings.FILTERS.IMPORT_FILE_PREF_VALUE, function (prefValue, preferences, mergePreferences, prefId) {
+	/**
+	 *
+	 * @param {*} prefValue
+	 * @param {Object} preferences
+	 * @param {Boolean} mergePreferences
+	 * @param {String} prefId
+	 * @returns {String}
+	 */
+	const filterPrefValue = function (prefValue, preferences, mergePreferences, prefId) {
 		if (mergePreferences === true) {
 			let oldPref = getPreference(prefId),
 				newPrefArray
@@ -390,8 +405,8 @@ function chromePreferences_initHooks() {
 
 					streamListSetting.update();
 
-					// Return false to not let ChromePreferences save the preference by itself
-					return false;
+					// Return null to not let ChromePreferences save the preference by itself
+					return null;
 
 				case "statusBlacklist":
 				case "statusWhitelist":
@@ -413,12 +428,17 @@ function chromePreferences_initHooks() {
 			let streamList = new appGlobal.StreamListFromSetting(true);
 			streamList.refresh(true);
 
-			// Return false to not let ChromePreferences save the preference by itself
-			return false;
+			// Return null to not let ChromePreferences save the preference by itself
+			return null;
 		}
 
 		return prefValue;
-	});
+	};
+
+
+
+	chromeSettings.addFilter(chromeSettings.FILTERS.IMPORT_FILE_PREF_ID, filterPrefId);
+	chromeSettings.addFilter(chromeSettings.FILTERS.IMPORT_FILE_PREF_VALUE, filterPrefValue);
 }
 
 
