@@ -11,7 +11,7 @@
 	"short_name": "LiveNotifierDev",
 	"description": "__MSG_extShortDesc__",
 	"author": "Zatsune No Mokou",
-	"version": "12.0.0.12",
+	"version": "12.0.0.13",
 	"icons": {
 		"96": "/icon_96.png",
 		"128": "/icon_128.png"
