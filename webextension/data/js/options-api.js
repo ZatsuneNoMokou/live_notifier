@@ -413,7 +413,7 @@ function initSyncControl(updateSyncData) {
 							dropboxClientId = changes[prefId].newValue;
 							break;
 						case "dropboxClientAuthToken":
-							dropboxClientAuthToken = changes[prefId].newValue;
+							dropboxAuthToken = changes[prefId].newValue;
 							break;
 						case "automaticSync":
 							haveAutomaticSync = changes[prefId].newValue;
