@@ -97,7 +97,27 @@ async function init() {
 		*/
 
 		echo("Copying dom-delegate...");
-		await _cp("./node_modules/dom-delegate/build/dom-delegate.js", jsLib);
+		// await _cp("./node_modules/dom-delegate/build/dom-delegate.js", jsLib);
+		stdout = null;
+		try {
+			stdout = await exec(`curl -L --silent -o ${path.join(jsLib, "./" + "/dom-delegate.js")} https://wzrd.in/debug-standalone/dom-delegate@latest`);
+		} catch(err){
+			if(err){
+				error(err);
+				process.exit(1);
+			}
+		}
+		if (stdout !== null) {
+			if (stdout.hasOwnProperty('stderr') || stdout.hasOwnProperty('stdout')) {
+				if (stdout.stderr) {
+					info(stdout.stderr);
+				} else if (stdout.stdout) {
+					info(stdout.stdout);
+				}
+			} else {
+				info(stdout);
+			}
+		}
 
 		echo("Copying Dropbox...");
 		await _cp("./node_modules/dropbox/dist/Dropbox-sdk.js", jsLib);

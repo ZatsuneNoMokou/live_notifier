@@ -1291,10 +1291,15 @@ async function processPrimary(id, contentId, website, streamSetting, response){
 
 	let responseValidity = checkResponseValidity(website, response);
 	liveStore.updateLive(website, id, contentId, function (website, id, contentId, liveData) {
+		if (liveData.liveStatus.lastCheckStatus !== 'success' && responseValidity !== 'success') {
+			liveData.liveStatus.API_Status = false;
+		}
+
 		liveData.liveStatus.lastCheckStatus = responseValidity;
 		return liveData;
 	});
-	if(responseValidity === "success"){
+
+	if (responseValidity === "success") {
 		let streamData = liveStore.getLive(website, id, contentId),
 			channelData = liveStore.hasChannel(website, id)? liveStore.getChannel(website, id) : null
 		;
@@ -1303,15 +1308,15 @@ async function processPrimary(id, contentId, website, streamSetting, response){
 
 		liveStore.setLive(website, id, contentId, streamData);
 
-		if(channelData!==null){
+		if (channelData !== null) {
 			liveStore.updateChannel(website, id, function (website, id, data) {
 				data = channelData;
 				return data;
 			});
 		}
 
-		if(liveState !== null){
-			if(typeof liveState==="string"){
+		if (liveState !== null) {
+			if (typeof liveState === "string") {
 				if(websites.get(website).hasOwnProperty("website_ignore") && liveState===websites.get(website).website_ignore){
 					liveStore.removeLive(website, id, contentId);
 					return "StreamChecked";
@@ -1322,7 +1327,7 @@ async function processPrimary(id, contentId, website, streamSetting, response){
 				liveStore.setLive(website, id, contentId, liveState);
 			}
 
-			if(websites.get(website).hasOwnProperty("API_second") === true){
+			if (websites.get(website).hasOwnProperty("API_second") === true) {
 				let second_API = websites.get(website).API_second(contentId);
 
 				let second_API_RequestOptions = {
@@ -1330,19 +1335,19 @@ async function processPrimary(id, contentId, website, streamSetting, response){
 					overrideMimeType: second_API.overrideMimeType,
 				};
 
-				if(second_API.hasOwnProperty("headers") === true){
+				if (second_API.hasOwnProperty("headers") === true) {
 					second_API_RequestOptions.headers = second_API.headers;
 				}
-				if(second_API.hasOwnProperty("content")=== true){
+				if (second_API.hasOwnProperty("content")=== true) {
 					second_API_RequestOptions.content = second_API.content;
 				}
-				if(second_API.hasOwnProperty("contentType") === true){
+				if (second_API.hasOwnProperty("contentType") === true) {
 					second_API_RequestOptions.contentType = second_API.contentType;
 				}
-				if(second_API.hasOwnProperty("Request_documentParseToJSON") === true){
+				if (second_API.hasOwnProperty("Request_documentParseToJSON") === true) {
 					second_API_RequestOptions.Request_documentParseToJSON = second_API.Request_documentParseToJSON;
 				}
-				if(second_API.hasOwnProperty("customJSONParse") === true){
+				if (second_API.hasOwnProperty("customJSONParse") === true) {
 					second_API_RequestOptions.customJSONParse = second_API.customJSONParse;
 				}
 
@@ -1350,7 +1355,7 @@ async function processPrimary(id, contentId, website, streamSetting, response){
 
 				let data_second = response.json;
 
-				if(!DATAs.get(`${website}/${id}`).has(contentId)){
+				if (!DATAs.get(`${website}/${id}`).has(contentId)) {
 					DATAs.get(`${website}/${id}`).set(contentId, new Map())
 				}
 				DATAs.get(`${website}/${id}`).get(contentId).set("getSecond", {"url": response.url, "data": data_second});
@@ -1362,7 +1367,7 @@ async function processPrimary(id, contentId, website, streamSetting, response){
 					returnString
 				;
 
-				if(responseValidity === "success"){
+				if (responseValidity === "success") {
 					let newLiveStatus = websites.get(website).seconderyInfo(id, contentId, data_second, currentLiveStatus);
 					if(typeof newLiveStatus === "object" && newLiveStatus !== null){
 						currentLiveStatus = newLiveStatus;

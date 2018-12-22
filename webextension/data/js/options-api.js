@@ -36,7 +36,7 @@ if (typeof Opentip !== "undefined") {
 	};
 	if(browser.extension.getBackgroundPage() !== null) {
 		const {appGlobal} = browser.extension.getBackgroundPage(),
-			delegate = new Delegate(document.body)
+			delegate = domDelegate(document.body)
 		;
 		if(appGlobal.hasTouch(window)){
 			delegate.on("touchstart", '[data-opentip-id]', function () {
