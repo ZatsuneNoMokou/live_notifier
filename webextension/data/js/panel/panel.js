@@ -82,7 +82,8 @@ const Mustache = backgroundPage.Mustache;
 
 const delegate = (function () {
 	// const Delegate = domDelegate.Delegate;
-	return new Delegate(document.body);
+	// return new Delegate(document.body);
+	return domDelegate(document.body)
 })();
 const liveEvent = function (type, selector, handler) {
 	delegate.on(type, selector, handler);

@@ -1,14 +1,13 @@
 # Firefox Web Extension Support
 * /!\ Missing/Not working well on Firefox:
-  * Clipboard (Currently using a workaround, but [Bug 1272869](https://bugzilla.mozilla.org/show_bug.cgi?id=1272869) ~~[Bug 1197451 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1197451)~~ )
-  * ~~Permission API ( [Bug 1197420 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1197420) )~~ (Fixed in Firefox 55)
+  * ~~Clipboard (Currently using a workaround, but [Bug 1272869 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1272869) )~~  (Fixed in Firefox 63)
   * Button on notifications (Using notification without them alike Opera) ( [Bug 1190681](https://bugzilla.mozilla.org/show_bug.cgi?id=1190681) )
   * Importing from file using the panel with Firefox Web Extensions ( [Bug 1292701](https://bugzilla.mozilla.org/show_bug.cgi?id=1292701) )
-  * HTML title (tooltips) not showing (Currently using a workaround)
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
 # 12.0.0.14
+* i : Dependencies update
 * Fix : Dropbox Sync for live list
 * Fix : Change from hotfix 11.16.3
 
