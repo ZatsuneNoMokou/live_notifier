@@ -340,7 +340,7 @@ class StreamListFromSetting {
 					data.forEach(item=>{
 						const [prefId , data] = item;
 
-						if(this.PREF_TYPES.boolean.indexOf(prefId) !== -1){
+						if (this.PREF_TYPES.boolean.includes(prefId) === true) {
 							let parsedData = getBooleanFromVar(data);
 
 							if (typeof parsedData !== "boolean") {
@@ -349,14 +349,14 @@ class StreamListFromSetting {
 							}
 
 							outputData[prefId] = parsedData;
-						} else if(this.PREF_TYPES.string.indexOf(prefId) !== -1){
+						} else if (this.PREF_TYPES.string.includes(prefId) === true) {
 							outputData[prefId] = decodeString(data);
-						} else if(this.PREF_TYPES.date.indexOf(prefId) !== -1){
-							const date = Date.parse(decodeString(data));
-							if(StreamListFromSetting.isValidDate(date)){
+						} else if (this.PREF_TYPES.date.includes(prefId) === true) {
+							const date = new Date(decodeString(data));
+							if (StreamListFromSetting.isValidDate(date)) {
 								outputData[prefId] = date;
 							}
-						} else if(this.PREF_TYPES.list.indexOf(prefId) !== -1){
+						} else if (this.PREF_TYPES.list.includes(prefId) === true){
 							outputData[prefId].push(data);
 						} else {
 							consoleMsg("warn", `Unknown type ${prefId}`);
@@ -481,24 +481,24 @@ class StreamListFromSetting {
 						continue;
 					}
 
-					if(prefId === "streamURL"){
+					if (prefId === "streamURL") {
 						continue;
 					}
 
-					if(typeof streamSettings[prefId] === "object" && JSON.stringify(streamSettings[prefId]) === "[null]"){
+					if (typeof streamSettings[prefId] === "object" && JSON.stringify(streamSettings[prefId]) === "[null]") {
 						continue;
 					}
 
-					if(defaultValues.hasOwnProperty(prefId) && streamSettings[prefId]===defaultValues[prefId]){
+					if (defaultValues.hasOwnProperty(prefId) && streamSettings[prefId]===defaultValues[prefId]) {
 						continue;
 					}
 
 
-					if(this.PREF_TYPES.boolean.indexOf(prefId) !== -1){
+					if (this.PREF_TYPES.boolean.includes(prefId) === true) {
 						filtersArr.push(prefId + "::" + streamSettings[prefId]);
-					} else if(this.PREF_TYPES.string.indexOf(prefId) !== -1){
+					} else if (this.PREF_TYPES.string.includes(prefId) === true) {
 						filtersArr.push(prefId + "::" + encodeString(streamSettings[prefId]));
-					} else if(this.PREF_TYPES.date.indexOf(prefId) !== -1){
+					} else if (this.PREF_TYPES.date.includes(prefId) === true) {
 						let date = streamSettings[prefId];
 
 						if(StreamListFromSetting.isValidDate(date)){
@@ -506,7 +506,7 @@ class StreamListFromSetting {
 						}
 
 						filtersArr.push(prefId + "::" + date);
-					} else if(this.PREF_TYPES.list.indexOf(prefId) !== -1){
+					} else if (this.PREF_TYPES.list.includes(prefId) === true) {
 						for(let k in streamSettings[prefId]){
 							if(streamSettings[prefId].hasOwnProperty(k)){
 								filtersArr.push(prefId + "::" + encodeString(streamSettings[prefId][k]));
