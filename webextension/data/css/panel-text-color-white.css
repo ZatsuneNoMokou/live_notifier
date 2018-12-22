@@ -55,7 +55,3 @@ input:invalid {
 	color: red;
 	font-weight: 700;
 }
-
-#patreonlogo {
-	background-image: url("/data/images/Patreon_Logo.png");
-}
