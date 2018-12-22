@@ -51,6 +51,9 @@
 * \+ : YouTube - support gettings all lives wihtout YouTube API 
 * Fix : Stream notification of stream that are not in the list anymore
 
+# 11.16.3
+* Fix : Remove Patreon link
+
 # 11.16.0
 * \+ : YouTube data with less YouTube API, serveur can not handle load
 
