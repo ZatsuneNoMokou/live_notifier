@@ -866,12 +866,3 @@ footer > div {
 footer > div > * {
 	flex: 2;
 }
-
-footer > #patreonlogo {
-	flex: 1;
-	display: inline-block;
-	height: 28px;
-	width: 28px;
-	background-size: contain;
-	background-repeat: no-repeat;
-}
