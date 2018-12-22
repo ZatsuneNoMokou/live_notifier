@@ -10,6 +10,7 @@
 
 # 12.0.0.14
 * Fix : Dropbox Sync for live list
+* Fix : Change from hotfix 11.16.3
 
 # 12.0.0.12 - 12.0.0.13
 * Fix : Dropbox Sync on Firefox (Date comparaison)
