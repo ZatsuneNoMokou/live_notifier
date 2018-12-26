@@ -7,6 +7,7 @@
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
 # 12.0.0.15
+* Fix : Spelling in french
 * \- : Deleted ability to hide/ignore streams
 * \- : Deleted settings of settings a custom url for streams
 * \- : Remove display of settings from the panel, button now open settings directly
