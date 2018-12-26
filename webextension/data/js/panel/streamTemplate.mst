@@ -32,7 +32,6 @@
 		<span class="streamStatus">{{streamStatus}}</span>{{/online}}
 		<span class="stream_control">
 			<span class="deleteStreamButton" data-id='{{streamId}}' data-website='{{streamWebsite}}' data-translate-title="Delete">delete</span>
-			<span class="ignoreStreamButton" data-id='{{streamId}}' data-website='{{streamWebsite}}' data-translate-title="IgnoreStream">visibility_off</span>
 			{{^unsupportedType}}{{#streamURL}}
 				<span class="copyStreamURL" data-id='{{streamId}}' data-content-id='{{contentId}}' data-website='{{streamWebsite}}' data-translate-title="copyURL"></span>
 			{{/streamURL}}{{/unsupportedType}}

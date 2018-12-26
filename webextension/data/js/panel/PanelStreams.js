@@ -12,27 +12,7 @@ class PanelStreams extends Map {
 		 */
 		this.show_offline_in_panel = (typeof show_offline_in_panel === "boolean")? show_offline_in_panel : false;
 
-		this._ignoreHideIgnore = false;
-
 		// this.lazyLoading = null;
-	}
-
-	/**
-	 * @returns {Boolean}
-	 */
-	get ignoreHideIgnore() {
-		return this._ignoreHideIgnore;
-	}
-
-	/**
-	 * @param {Boolean} value
-	 */
-	set ignoreHideIgnore(value) {
-		if (typeof value !== "boolean") {
-			throw 'ArgumentTypeError';
-		}
-
-		this._ignoreHideIgnore = value;
 	}
 
 	/**
@@ -218,19 +198,8 @@ class PanelStreams extends Map {
 
 
 
-		if(this.ignoreHideIgnore === false){
-			if (streamSettings === null) {
-				return null;
-			}
-
-			if(typeof streamSettings.ignore === "boolean" && streamSettings.ignore === true){
-				//console.info(`[Live notifier - Panel] Ignoring ${id}`);
-				return null;
-			}
-			if(typeof streamSettings.hide === "boolean" && streamSettings.hide === true){
-				//console.info(`[Live notifier - Panel] Hiding ${id}`);
-				return null;
-			}
+		if (streamSettings === null) {
+			return null;
 		}
 
 
@@ -256,29 +225,28 @@ class PanelStreams extends Map {
 			streamRenderData = PanelStreams.streamToRenderData(website, id, /* contentId */ id, "channel", streamSettings, liveStore.getChannel(website, id));
 		} else if (websites.has(website)) {
 			console.info(`Currrently no data for ${id} (${website})`);
-			if ((typeof streamSettings.ignore === "boolean" && streamSettings.ignore === true) || (typeof streamSettings.hide === "boolean" && streamSettings.hide === true)) {
-				let contentId = id,
-					streamData = {
-						"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""},
-						"streamName": contentId,
-						"streamStatus": "",
-						"streamGame": "",
-						"streamOwnerLogo": "",
-						"streamCategoryLogo": "",
-						"streamCurrentViewers": null,
-						"streamURL": "",
-						"facebookID": "",
-						"twitterID": ""
-					},
-					website_channel_id = appGlobal["website_channel_id"]
-				;
 
-				if (website_channel_id.test(streamData.streamName)) {
-					streamData.streamName = website_channel_id.exec(streamData.streamName)[1];
-				}
+			let contentId = id,
+				streamData = {
+					"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "lastCheckStatus": ""},
+					"streamName": contentId,
+					"streamStatus": "",
+					"streamGame": "",
+					"streamOwnerLogo": "",
+					"streamCategoryLogo": "",
+					"streamCurrentViewers": null,
+					"streamURL": "",
+					"facebookID": "",
+					"twitterID": ""
+				},
+				website_channel_id = appGlobal["website_channel_id"]
+			;
 
-				streamRenderData = PanelStreams.streamToRenderData(website, id, contentId, website, streamSettings, streamData);
+			if (website_channel_id.test(streamData.streamName)) {
+				streamData.streamName = website_channel_id.exec(streamData.streamName)[1];
 			}
+
+			streamRenderData = PanelStreams.streamToRenderData(website, id, contentId, website, streamSettings, streamData);
 		} else {
 			let contentId = id,
 				streamData = {
@@ -359,8 +327,7 @@ class PanelStreams extends Map {
 			}
 		}
 
-		//let streamUrl = (type == "live" || type == "channel")? getStreamURL(website, id, contentId, true) : "";
-		const websiteStreamURL = getStreamURL(website, id, contentId, false);
+		const websiteStreamURL = getStreamURL(website, id, contentId);
 		if(websiteStreamURL !== "" && websiteStreamURL !== null){
 			streamRenderData.streamURL = websiteStreamURL;
 		}

@@ -145,7 +145,7 @@ function drag(event) {
 
 		dragData = {"id": id, "website": website};
 
-		let streamUrl = getStreamURL(website, id, contentId, true);
+		let streamUrl = getStreamURL(website, id, contentId);
 		if(streamChangeMode === false && streamUrl !==null && streamUrl !== ""){
 			const dt = event.dataTransfer;
 			dt.setData("text/uri-list", streamUrl);
@@ -202,16 +202,6 @@ function deleteStreamButtonClick(){
 			if(typeof node.tagName === "string"){
 				node.classList.remove("active");
 			}
-		}
-	}
-
-	let ignoreStreamButtons = document.querySelectorAll(".item-stream .ignoreStreamButton");
-	let streamListSettings = new StreamListFromSetting();
-	for(let node of ignoreStreamButtons){
-		let website = node.dataset.website;
-		let id = node.dataset.id;
-		if(streamListSettings.mapDataAll.has(website) && streamListSettings.mapDataAll.get(website) && streamListSettings.mapDataAll.get(website).has(id)){
-			node.classList.toggle("active", streamListSettings.mapDataAll.get(website).get(id).ignore);
 		}
 	}
 
@@ -328,23 +318,24 @@ function searchInput_onInput(){
 
 /*				---- Settings ----				*/
 
-let settings_button = document.querySelector("#settings");
-let setting_Enabled = false;
+
+liveEvent("click", "#settings", ()=>{browser.runtime.openOptionsPage()});
+
 function unhideClassNode(node){
 	node.classList.remove("hide");
 }
+
 function hideClassNode(node){
 	node.classList.add("hide");
 }
-let optionsLoaded = false;
+
 function selectSection(sectionNodeId){
 	let streamList = document.querySelector("#streamList");
 	let streamEditor = document.querySelector("#streamEditor");
-	let settings_node = document.querySelector("#settings_container");
 	let debugSection = document.querySelector("section#debugSection");
 
 	if(typeof sectionNodeId === "string" && sectionNodeId !== ""){
-		let sectionList = [streamList, streamEditor, settings_node, debugSection];
+		let sectionList = [streamList, streamEditor, debugSection];
 
 		let sectionEnabled = false;
 		for(let i in sectionList){
@@ -356,15 +347,7 @@ function selectSection(sectionNodeId){
 
 					switch(sectionNodeId){
 						case "streamList":
-							setting_Enabled = false;
 							updatePanelData();
-							break;
-						case "settings_container":
-							if(!optionsLoaded){
-								optionsLoaded = true;
-								loadPreferences("section#settings_container #preferences");
-							}
-							setting_Enabled = true;
 							break;
 					}
 				} else {
@@ -376,28 +359,6 @@ function selectSection(sectionNodeId){
 			unhideClassNode(streamList);
 		}
 	}
-}
-function setting_Toggle(){
-	if(setting_Enabled){
-		selectSection("streamList");
-	} else {
-		selectSection("settings_container");
-	}
-}
-settings_button.addEventListener("click", setting_Toggle, false);
-
-liveEvent("click", "#open_optionpage", ()=>{browser.runtime.openOptionsPage()});
-
-liveEvent("click", "#ignoreHideIgnore", ()=>{panelStreams.ignoreHideIgnore = true;});
-
-if(typeof browser.storage.sync === "object"){
-	document.querySelector("#syncContainer").classList.remove("hide");
-
-	let restaure_sync_button = document.querySelector("#restaure_sync");
-	restaure_sync_button.addEventListener("click", function(event){restaureOptionsFromSync(event);});
-
-	let save_sync_button = document.querySelector("#save_sync");
-	save_sync_button.addEventListener("click", function(event){saveOptionsInSync(event);});
 }
 
 
@@ -413,7 +374,7 @@ liveEvent("click", "#close_debugSection", function(){
 liveEvent("dblclick", "#current_version", enableDebugSection);
 
 function enableDebugSection(){
-	if(getPreference("showAdvanced") && getPreference("showExperimented")){
+	if(getPreference("showAdvanced") && getPreference("showExperimented")){console.warn('eeeee')
 		selectSection("debugSection");
 	}
 }
@@ -434,8 +395,8 @@ liveEvent("click", "#saveEditedStream", function(){
 	let node = this,
 		website = node.dataset.website,
 		id = node.dataset.id,
-		contentId = node.dataset.contentId,
-		customURL_node = document.querySelector("#customURL");
+		contentId = node.dataset.contentId
+	;
 
 	function removeEmplyItems(obj){
 		for(let i in obj){
@@ -447,14 +408,11 @@ liveEvent("click", "#saveEditedStream", function(){
 	}
 
 	let streamSettingsData = {
-		streamURL: (customURL_node.validity.valid === true)? customURL_node.value : "",
 		statusBlacklist: removeEmplyItems(document.querySelector("#streamEditor #status_blacklist").value.split('\n')),
 		statusWhitelist: removeEmplyItems(document.querySelector("#streamEditor #status_whitelist").value.split('\n')),
 		gameBlacklist: removeEmplyItems(document.querySelector("#streamEditor #game_blacklist").value.split('\n')),
 		gameWhitelist: removeEmplyItems(document.querySelector("#streamEditor #game_whitelist").value.split('\n')),
 		twitter: document.querySelector("#streamEditor #twitter").value,
-		hide: document.querySelector("#streamEditor #hideStream").checked,
-		ignore: document.querySelector("#streamEditor #ignoreStream").checked,
 		iconIgnore: document.querySelector("#streamEditor #iconIgnore").checked,
 		vocalStreamName: document.querySelector("#streamEditor #vocalStreamName").value,
 		notifyOnline: document.querySelector("#streamEditor #notifyOnline").checked,
@@ -543,11 +501,8 @@ function newDeleteStreamButton_onClick(event){
 	event.stopPropagation();
 
 	let node = this;
-	// let id = node.dataset.id;
-	// let website = node.dataset.website;
 
 	node.classList.toggle("active");
-	//sendDataToMain("deleteStream", {id: id, website: website});
 	return false;
 }
 function newIgnoreStreamButton_onClick(event){
@@ -584,10 +539,8 @@ function newEditStreamButton_onClick(event){
 
 	let streamList = document.querySelector("#streamList");
 	let streamEditor = document.querySelector("#streamEditor");
-	let settings_node = document.querySelector("#settings_container");
 
 	hideClassNode(streamList);
-	hideClassNode(settings_node);
 
 	let titleNode = document.querySelector("#editedStreamTitle");
 	titleNode.textContent = title;
@@ -597,14 +550,11 @@ function newEditStreamButton_onClick(event){
 	saveEditedStream.dataset.contentId = contentId;
 	saveEditedStream.dataset.website = website;
 
-	document.querySelector("#streamEditor #customURL").value = streamSettings.streamURL;
 	document.querySelector("#streamEditor #status_blacklist").value = (streamSettings.statusBlacklist)? streamSettings.statusBlacklist.join("\n") : "";
 	document.querySelector("#streamEditor #status_whitelist").value = (streamSettings.statusWhitelist)? streamSettings.statusWhitelist.join("\n") : "";
 	document.querySelector("#streamEditor #game_blacklist").value = (streamSettings.gameBlacklist)? streamSettings.gameBlacklist.join("\n") : "";
 	document.querySelector("#streamEditor #game_whitelist").value = (streamSettings.gameWhitelist)? streamSettings.gameWhitelist.join("\n") : "";
 	document.querySelector("#streamEditor #twitter").value = (streamSettings.twitter)? streamSettings.twitter : "";
-	document.querySelector("#streamEditor #hideStream").checked = (typeof streamSettings.hide === "boolean")? streamSettings.hide : false;
-	document.querySelector("#streamEditor #ignoreStream").checked = (typeof streamSettings.ignore === "boolean")? streamSettings.ignore : false;
 	document.querySelector("#streamEditor #iconIgnore").checked = (typeof streamSettings.iconIgnore === "boolean")? streamSettings.iconIgnore : false;
 	document.querySelector("#streamEditor #vocalStreamName").value = (typeof streamSettings.vocalStreamName === "string")? streamSettings.vocalStreamName : "";
 	document.querySelector("#streamEditor #notifyOnline").checked = (typeof streamSettings.notifyOnline === "boolean")? streamSettings.notifyOnline : true;
@@ -624,7 +574,7 @@ function newCopyStreamURLButton_onClick(event){
 	let contentId = node.dataset.contentId;
 	let website = node.dataset.website;
 
-	copyToClipboard(getStreamURL(website, id, contentId, false));
+	copyToClipboard(getStreamURL(website, id, contentId));
 	return false;
 }
 
@@ -662,7 +612,7 @@ function streamItemClick(){
 	//let online = node.dataset.online;
 	let website = node.dataset.streamWebsite;
 
-	let streamUrl = getStreamURL(website, id, contentId, true);
+	let streamUrl = getStreamURL(website, id, contentId);
 	if(streamChangeMode === false && streamUrl !==null && streamUrl !== ""){
 		sendDataToMain("openTab", streamUrl);
 	}
@@ -791,13 +741,11 @@ sendDataToMain("panel_onload");
 if(typeof PerfectScrollbar!=="undefined"){
 	load_scrollbar("streamList");
 	load_scrollbar("streamEditor");
-	load_scrollbar("settings_container");
 	load_scrollbar("debugSection");
 
 	window.onresize = _.debounce(()=>{
 		scrollbar_update("streamList");
 		scrollbar_update("streamEditor");
-		scrollbar_update("settings_container");
 		scrollbar_update("debugSection");
 
 		applyPanelSize();

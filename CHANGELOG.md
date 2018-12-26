@@ -6,6 +6,11 @@
   * Sync support ([Bug 1311710](https://bugzilla.mozilla.org/show_bug.cgi?id=1311710) and ~~[Bug 1220494 (RESOLVED FIXED)](https://bugzilla.mozilla.org/show_bug.cgi?id=1220494)~~ )
   * Websites CSP applied to Content Scripts, and should not happen ([Bug 1267027](https://bugzilla.mozilla.org/show_bug.cgi?id=1267027))
 
+# 12.0.0.15
+* \- : Deleted ability to hide/ignore streams
+* \- : Deleted settings of settings a custom url for streams
+* \- : Remove display of settings from the panel, button now open settings directly
+
 # 12.0.0.14
 * i : Dependencies update
 * Fix : Dropbox Sync for live list
