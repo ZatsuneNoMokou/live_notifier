@@ -236,7 +236,6 @@ class PanelStreams extends Map {
 					"streamCategoryLogo": "",
 					"streamCurrentViewers": null,
 					"streamURL": "",
-					"facebookID": "",
 					"twitterID": ""
 				},
 				website_channel_id = appGlobal["website_channel_id"]
@@ -258,7 +257,6 @@ class PanelStreams extends Map {
 					"streamCategoryLogo": "",
 					"streamCurrentViewers": null,
 					"streamURL": "",
-					"facebookID": "",
 					"twitterID": ""
 				}
 			;
@@ -332,9 +330,6 @@ class PanelStreams extends Map {
 			streamRenderData.streamURL = websiteStreamURL;
 		}
 
-		if(typeof streamData.facebookID === "string" && streamData.facebookID !== ""){
-			streamRenderData.facebookId = streamData.facebookID;
-		}
 		if(typeof streamData.twitterID === "string" && streamData.twitterID !== ""){
 			streamRenderData.twitterId = streamData.twitterID;
 		}

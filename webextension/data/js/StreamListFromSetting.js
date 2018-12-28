@@ -174,7 +174,6 @@ class StreamListFromSetting {
 				"_updated"
 			],
 			string: [
-				"facebook",
 				"twitter",
 				"vocalStreamName"
 			],
@@ -238,7 +237,6 @@ class StreamListFromSetting {
 			gameWhitelist: [],
 
 			vocalStreamName: "",
-			facebook: "",
 			twitter: ""
 		}
 	}

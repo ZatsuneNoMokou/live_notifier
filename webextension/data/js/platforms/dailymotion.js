@@ -49,11 +49,11 @@ const dailymotion = {
 		function(id){
 			id = (website_channel_id.test(id))? website_channel_id.exec(id)[1] : id;
 			return {
-				//url: `https://api.dailymotion.com/user/${id}?fields=id,username,screenname,url,avatar_720_url,facebook_url,twitter_url`,
+				//url: `https://api.dailymotion.com/user/${id}?fields=id,username,screenname,url,avatar_720_url,twitter_url`,
 				url: `https://api.dailymotion.com/user/${id}`,
 				overrideMimeType: "text/plain; charset=latin1",
 				content: [
-					["fields","id,username,screenname,url,avatar_120_url,facebook_url,twitter_url"],
+					["fields","id,username,screenname,url,avatar_120_url,twitter_url"],
 					["_", new Date().getTime()]
 				]
 			};
@@ -61,18 +61,18 @@ const dailymotion = {
 	"API_second":
 		function(id){
 			return {
-				//url: `https://api.dailymotion.com/video/${id}?fields=id,user.screenname,user.avatar_720_url,user.facebook_url,user.twitter_url`,
+				//url: `https://api.dailymotion.com/video/${id}?fields=id,user.screenname,user.avatar_720_url,user.twitter_url`,
 				url: `https://api.dailymotion.com/video/${id}`,
 				overrideMimeType: "text/plain; charset=latin1",
 				content: [
-					["fields","id,user.screenname,user.avatar_120_url,user.facebook_url,user.twitter_url"],
+					["fields","id,user.screenname,user.avatar_120_url,user.twitter_url"],
 					["_", new Date().getTime()]
 				]
 			};
 		},
 	"importAPI": function(id){
 		return {
-			url: `https://api.dailymotion.com/user/${id}/following?fields=id,username,facebook_url,twitter_url?_=${new Date().getTime()}`,
+			url: `https://api.dailymotion.com/user/${id}/following?fields=id,username,twitter_url?_=${new Date().getTime()}`,
 			overrideMimeType: "text/plain; charset=latin1"
 		};
 	},
@@ -144,11 +144,8 @@ const dailymotion = {
 				}*/
 				streamData.streamName = data["user.screenname"];
 
-				if(typeof data["user.facebook_url"] === "string" && data["user.facebook_url"] !== "" && facebookID_from_url.test(data["user.facebook_url"])){
-					streamData.facebookID = facebookID_from_url.exec(data["user.facebook_url"])[1];
-				}
 				if(typeof data["user.twitter_url"] === "string" && data["user.twitter_url"] !== "" && twitterID_from_url.test(data["user.twitter_url"])){
-					streamData.facebookID = twitterID_from_url.exec(data["user.twitter_url"])[1];
+					streamData.twitterID = twitterID_from_url.exec(data["user.twitter_url"])[1];
 				}
 			}
 			return streamData;
@@ -189,11 +186,8 @@ const dailymotion = {
 					streamData.streamOwnerLogo = data["avatar_120_url"];
 				}
 
-				if(typeof data["facebook_url"] === "string" && data["facebook_url"] !== "" && facebookID_from_url.test(data["facebook_url"])){
-					streamData.facebookID = facebookID_from_url.exec(data["facebook_url"])[1];
-				}
 				if(typeof data["twitter_url"] === "string" && data["twitter_url"] !== "" && twitterID_from_url.test(data["twitter_url"])){
-					streamData.facebookID = twitterID_from_url.exec(data["twitter_url"])[1];
+					streamData.twitterID = twitterID_from_url.exec(data["twitter_url"])[1];
 				}
 			}
 			return streamData;

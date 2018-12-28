@@ -847,7 +847,6 @@ appGlobal["setIcon"] = setIcon;
 
 let website_channel_id = /channel::(.*)/;
 appGlobal["website_channel_id"] = website_channel_id;
-let facebookID_from_url = /(?:http|https):\/\/(?:www\.)?facebook.com\/([^\/]+)(?:\/.*)?/;
 let twitterID_from_url = /(?:http|https):\/\/(?:www\.)?twitter.com\/([^\/]+)(?:\/.*)?/;
 
 function checkResponseValidity(website, response){
@@ -1250,7 +1249,7 @@ function channelListEnd(website, id){
 async function processPrimary(id, contentId, website, streamSetting, response){
 	let data = response.json;
 	if(!liveStore.hasLive(website, id, contentId)){
-		liveStore.setLive(website, id, contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+		liveStore.setLive(website, id, contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "twitterID": ""});
 	}
 
 	let responseValidity = checkResponseValidity(website, response);
