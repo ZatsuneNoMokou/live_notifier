@@ -61,6 +61,12 @@
 		},
 		"default_popup": "/data/panel.html"
 	},
+	"sidebar_action": {
+		"browser_style": false,
+		"default_title": "Live Notifier",
+		"default_panel": "/data/panel.html",
+		"open_at_install": false
+	},
 	"default_locale": "en",
 	"offline_enabled": false,
 	"permissions": [

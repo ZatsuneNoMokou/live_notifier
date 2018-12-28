@@ -832,7 +832,24 @@ function setIcon(){
 		if (badgeImage !== null) {
 			browser.browserAction.setIcon({
 				path: badgeImage
-			});
+			})
+				.catch(err => {
+					consoleMsg('error', err);
+				})
+			;
+		} else {
+			consoleMsg("warn", "Icon(s) is/are not loaded");
+		}
+	}
+	if (typeof browser.sidebarAction !== "undefined" && typeof browser.sidebarAction.setIcon === "function") {
+		if (badgeImage !== null) {
+			browser.sidebarAction.setIcon({
+				path: badgeImage
+			})
+				.catch(err => {
+					consoleMsg('error', err);
+				})
+			;
 		} else {
 			consoleMsg("warn", "Icon(s) is/are not loaded");
 		}
