@@ -627,6 +627,10 @@ function current_version(version){
 	}
 }
 
+
+
+
+
 function theme_update(){
 	let panelColorStylesheet = theme_cache_update(document.querySelector("#generated-color-stylesheet"));
 
@@ -641,6 +645,13 @@ function theme_update(){
 		document.head.appendChild(panelColorStylesheet);
 	}
 }
+browser.storage.onChanged.addListener(function (changes, area){
+	if (area === "local" && (changes.hasOwnProperty('panel_theme') || changes.hasOwnProperty('background_color'))) {
+		theme_update();
+	}
+});
+
+
 
 
 
