@@ -72,8 +72,9 @@ class DropboxController extends SyncController {
 			return this.client;
 		} else if (this.clientId !== '' && this.authToken !== '') {
 			return this.client = new Dropbox.Dropbox({
-				clientId: this.clientId,
-				accessToken: DropboxController.d(this.authToken)
+				'clientId': this.clientId,
+				'accessToken': DropboxController.d(this.authToken),
+				'fetch': fetch
 			});
 		} else {
 			throw 'MissingInfo';
@@ -98,7 +99,10 @@ class DropboxController extends SyncController {
 		 *
 		 * @type {DropboxTypes.Dropbox}
 		 */
-		const client = new Dropbox.Dropbox({"clientId": this.clientId});
+		const client = new Dropbox.Dropbox({
+			"clientId": this.clientId,
+			'fetch': fetch
+		});
 
 		let urlReturned = null,
 			error
