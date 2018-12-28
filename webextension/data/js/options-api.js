@@ -278,10 +278,11 @@ function import_onClick(){
 		website = getWebsite.exec(this.id)[1];
 	sendDataToMain("importStreams", website);
 }
-if(browser.extension.getBackgroundPage()!==null && typeof Delegate!=="undefined") {
+if (browser.extension.getBackgroundPage() !== null && typeof domDelegate !== "undefined") {
 	const delegate = (function () {
 		// const Delegate = domDelegate.Delegate;
-		return new Delegate(document.body);
+		// return new Delegate(document.body);
+		return domDelegate(document.body)
 	})();
 	const liveEvent = function (type, selector, handler) {
 		delegate.on(type, selector, handler);

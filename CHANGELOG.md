@@ -8,6 +8,7 @@
 
 # 12.0.0.15
 * Fix : Spelling in french
+* Fix : Option page, due to domDelegate update
 * \- : Deleted ability to hide/ignore streams
 * \- : Deleted settings of settings a custom url for streams
 * \- : Remove display of settings from the panel, button now open settings directly
