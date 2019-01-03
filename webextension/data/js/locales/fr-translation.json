@@ -5,7 +5,6 @@
 	"Close": "Fermer",
 	"Add": "Ajouter",
 	"Delete": "Supprimer",
-	"DeleteIgnore": "Supprimer / Ignorer",
 	"Cancel": "Annuler",
 	"Yes": "Oui",
 	"No": "Non",
@@ -169,7 +168,7 @@
 	"panel_width_title": "Largeur du panel",
 	"panel_width_description": "Taille en pixels",
 
-	"confirm_addStreamFromPanel_title": "Confirmation pour ajouter et réactiver des streams",
+	"confirm_addStreamFromPanel_title": "Confirmation pour ajouter des streams",
 	"confirm_addStreamFromPanel_description": "Affiche une notification pour confirmer lors d'un ajout ou la réactivation de stream de configuration (depuis le panel)",
 	"confirm_deleteStreamFromPanel_title": "Confirmation pour supprimer des streams",
 	"confirm_deleteStreamFromPanel_description": "Affiche une notification pour confirmer lors d'un ajout de stream de configuration (depuis le panel)",
