@@ -1,7 +1,8 @@
 section#news {
-	background: rgba(200,200,200,0.8);
+	background: rgba(200,200,200,0.7);
 	border-radius: 1px;
-	margin-bottom: 5em;
+	margin-bottom: 10em;
+	margin-top: 4em;
 	padding: 8px;
 }
 
@@ -18,6 +19,10 @@ section#news .closeButton {
 	text-decoration: none;
 	vertical-align: middle;
 	width: 30px;
+}
+
+section#news li {
+	margin: 0.8em 0;
 }
 
 section#news span {

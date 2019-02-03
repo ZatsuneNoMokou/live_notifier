@@ -17,13 +17,12 @@
 </head>
 <body>
 	<header>
-		<!--<div id="vide" class="vide"></div>-->
 		<button id="addStream" data-translate-title="Add"><i class="material-icons">add</i></button>
-		<button id="deleteStream" data-translate-title="DeleteIgnore" class="dragover"><i class="material-icons dragover deleteLogo">delete</i><i class="material-icons dragover">visibility_off</i></button>
+		<button id="deleteStream" data-translate-title="Delete" class="dragover"><i class="material-icons dragover deleteLogo">delete</i></button>
 		<button id="searchStream" data-translate-title="Search"><i class="material-icons">search</i></button>
 		<button id="disableNotifications" data-tooltip-position="bottom-right"></button>
 		<button id="refreshStreams" data-translate-title="Refresh"><i class="material-icons">refresh</i></button>
-		<button id="settings" data-translate-title="Settings"><i class="material-icons">settings</i></button>
+		<button id="settings" data-translate-title="open_optionpage"><i class="material-icons">settings</i></button>
 	</header>
 	<section id="deleteModeControles" class="scroll hide">
 		<button id="confirmChanges" data-translate-id="confirm_all_changes">Changes changes</button>
@@ -34,11 +33,8 @@
 	</section>
 	<section id="streamEditor" class="scroll hide">
 		<div id="streamEditor-firstLine"><span id="editedStreamTitle"></span><span class="vide"></span><button id="closeEditor">X</button></div>
-		<div class="flex_input_text"><label for="customURL"><span data-translate-id="customURL_title">Custom url</span></label><input id="customURL" pattern="(?:http|https):\/\/.+" type="url"></div>
 		<div class="flex_input_text"><label for="twitter" data-translate-id="twitter_title">Twitter</label><input id="twitter" type="text"></div>
 		<div class="streamEditor_group">
-			<div><label for="hideStream" data-translate-id="hideStream_title">Hide stream</label><input id="hideStream" type="checkbox"></div>
-			<div><label for="ignoreStream" data-translate-id="ignoreStream_title">Ignore stream</label><input id="ignoreStream" type="checkbox"></div>
 			<div><label for="iconIgnore" data-translate-id="iconIgnore_title">Ignored by the icon</label><input id="iconIgnore" type="checkbox"></div>
 		</div>
 		<div class="streamEditor_group">
@@ -55,20 +51,6 @@
 			<div class="flex_textarea"><label for="game_whitelist"><span data-translate-id="whitelist_title">Whitelist</span> (<span data-translate-id="Game_title">Game</span>)</label><textarea id="game_whitelist"></textarea></div>
 		</div>
 		<div><button id="saveEditedStream" data-translate-id="save">Save</button></div>
-	</section>
-	<section id="settings_container" class="scroll hide">
-		<div id="settings_topContainer">
-			<button id="open_optionpage" data-translate-title="open_optionpage"></button>
-			<button id="ignoreHideIgnore" data-translate-id="ignoreHideIgnore">Temporarily disable Ignore/Hide</button>
-		</div>
-		<div id="preferences"></div>
-		<div id="syncContainer" class="pref_sync pref_group hide">
-			<span id="sync_title" data-translate-id="sync_title">Save / Restaure preferences from/to synchronization</span>
-			<div id="sync_control_container">
-				<button id="restaure_sync" data-translate-id="restaure_sync" class="sync">Restaure</button>
-				<button id="save_sync" data-translate-id="save_sync" class="sync">Save</button>
-			</div>
-		</div>
 	</section>
 	<section id="debugSection" class="scroll hide">
 		<span><button id="close_debugSection">X</button></span>

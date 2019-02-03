@@ -11,7 +11,7 @@
 	"short_name": "LiveNotifierDev",
 	"description": "__MSG_extShortDesc__",
 	"author": "Zatsune No Mokou",
-	"version": "12.0.0.14",
+	"version": "12.0.0.15",
 	"icons": {
 		"96": "/icon_96.png",
 		"128": "/icon_128.png"
@@ -60,6 +60,12 @@
 			"128": "/icon_128.png"
 		},
 		"default_popup": "/data/panel.html"
+	},
+	"sidebar_action": {
+		"browser_style": false,
+		"default_title": "Live Notifier",
+		"default_panel": "/data/panel.html",
+		"open_at_install": false
 	},
 	"default_locale": "en",
 	"offline_enabled": false,

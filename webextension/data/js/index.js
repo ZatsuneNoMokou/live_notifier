@@ -39,41 +39,42 @@ function getStreamURL(website, id, contentId, usePrefUrl){
 	let streamList = streamListFromSetting.getWebsiteList(website);
 	
 	if(streamList.has(id)){
-		if(streamList.get(id).streamURL !== "" && usePrefUrl === true){
-			return streamList.get(id).streamURL;
-		} else {
-			if(liveStore.hasLive(website, id, contentId)){
-				let streamData = liveStore.getLive(website, id, contentId);
-				if(typeof streamData.streamURL === "string" && streamData.streamURL !== ""){
-					return streamData.streamURL;
-				}
-			}
-			if(liveStore.hasChannel(website, id)){
-				let data = liveStore.getChannel(website, id);
+		if (usePrefUrl !== undefined) {
+			consoleMsg('warn', 'Dropped parameter \'usePrefUrl\'');
+		}
 
-				if(typeof data.streamURL === "string" && data.streamURL !== ""){
-					return data.streamURL
+		if(liveStore.hasLive(website, id, contentId)){
+			let streamData = liveStore.getLive(website, id, contentId);
+			if(typeof streamData.streamURL === "string" && streamData.streamURL !== ""){
+				return streamData.streamURL;
+			}
+		}
+
+		if(liveStore.hasChannel(website, id)){
+			let data = liveStore.getChannel(website, id);
+
+			if(typeof data.streamURL === "string" && data.streamURL !== ""){
+				return data.streamURL
+			}
+		}
+
+		switch(website){
+			case "dailymotion":
+				return `http://www.dailymotion.com/video/${id}`;
+			case "smashcast":
+				return `http://www.smashcast.tv/${id}`;
+			case "twitch":
+				return `http://www.twitch.tv/${id}`;
+			case "mixer":
+				return `https://mixer.com/${id}`;
+			case "youtube":
+				if(website_channel_id.test(contentId)){
+					return `https://youtube.com/channel/${website_channel_id.exec(id)[1]}`;
+				} else {
+					return `https://www.youtube.com/watch?v=${contentId}`;
 				}
-			}
-			switch(website){
-				case "dailymotion":
-					return `http://www.dailymotion.com/video/${id}`;
-				case "smashcast":
-					return `http://www.smashcast.tv/${id}`;
-				case "twitch":
-					return `http://www.twitch.tv/${id}`;
-				case "mixer":
-					return `https://mixer.com/${id}`;
-				case "youtube":
-					if(website_channel_id.test(contentId)){
-						return `https://youtube.com/channel/${website_channel_id.exec(id)[1]}`;
-					} else {
-						return `https://www.youtube.com/watch?v=${contentId}`;
-						//return `https://youtu.be/${contentId}`;
-					}
-				default:
-					return null;
-			}
+			default:
+				return null;
 		}
 	}
 }
@@ -186,46 +187,13 @@ function addStreamFromPanel(data){
 									}
 									
 									if(streamListFromSetting.streamExist(website, streamId)){
-										const streamSettings = streamListFromSetting.mapDataAll.get(website).get(streamId);
-										if(streamSettings.hide === false && streamSettings.ignore === false){
-											doNotif({
-												"message": `${display_id(streamId, streamName)} ${i18ex._("is_already_configured")}`
+										doNotif({
+											"message": `${display_id(streamId, streamName)} ${i18ex._("is_already_configured")}`
+										})
+											.catch(err=>{
+												consoleMsg("warn", err);
 											})
-												.catch(err=>{
-													consoleMsg("warn", err);
-												})
-											;
-										} else {
-											if(getPreference("confirm_addStreamFromPanel")){
-												doNotif({
-													"message": `${display_id(streamId, streamName)} ${i18ex._("hidden_ignored_reactivate")}`,
-													"buttons": [notifButtons.yes, notifButtons.no]
-												}, true)
-													.then(()=>{
-														streamListFromSetting.refresh();
-														const streamSettings = streamListFromSetting.mapDataAll.get(website).get(streamId);
-
-														streamSettings.hide = false;
-														streamSettings.ignore = false;
-														streamListFromSetting.update();
-													})
-													.catch(err=>{
-														consoleMsg("warn", err);
-													})
-												;
-											} else {
-												streamSettings.hide = false;
-												streamSettings.ignore = false;
-												streamListFromSetting.update();
-												doNotif({
-													"message": `${display_id(streamId, streamName)} ${i18ex._("hidden_ignored_reactivated")}`
-												})
-													.catch(err=>{
-														consoleMsg("warn", err);
-													})
-												;
-											}
-										}
+										;
 									} else {
 										if(getPreference("confirm_addStreamFromPanel")){
 											doNotif({
@@ -344,37 +312,33 @@ function shareStream(data){
 	let website = data.website;
 	let id = data.id;
 	let contentId = data.contentId;
-	
+
 	streamListFromSetting.refresh();
 	let streamList = streamListFromSetting.getWebsiteList(website);
-	
+
 	let streamData = liveStore.getLive(website, id, contentId);
 	let streamName = streamData.streamName;
-	let streamURL = getStreamURL(website, id, contentId, true);
+	let streamURL = getStreamURL(website, id, contentId);
 	let streamStatus = streamData.streamStatus;
-	
-	// let facebookID = (typeof streamList.get(id).facebook === "string" && streamList.get(id).facebook !== "")? streamList.get(id).facebook : streamData.twitterID;
+
 	let twitterID = (typeof streamList.get(id).twitter === "string" && streamList.get(id).twitter !== "")? streamList.get(id).twitter : streamData.twitterID;
 	
 	let streamerAlias = streamName;
-	/*
-	if(facebookID != null && facebookID != ""){
-		
-	}*/
+
 	let reg_testTwitterId= /\s*@(.+)/;
 	if(twitterID !== null && twitterID !== ""){
 		streamerAlias = ((reg_testTwitterId.test(twitterID))? "" : "@") + twitterID;
 		consoleMsg("info", `${id}/${contentId} (${website}) twitter ID: ${twitterID}`);
 	}
-	
+
 	let shareMessage = `${i18ex._("I_am_watching_the_stream_of")} ${streamerAlias}, "${streamStatus}"`;
-	
-	//let url = `https:\/\/twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${streamURL}&hashtags=LiveNotifier${(twitterID != "")? `&related=${twitterID}` : ""}`;
-	let url = `https:\/\/twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${streamURL}${(twitterID !== "")? `&related=${twitterID}` : ""}&via=LiveNotifier`;
+
+	let url = `https:\/\/twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${streamURL}${(twitterID !== "")? `&related=${twitterID}` : ""}`;
 	browser.tabs.create({ "url": url })
 		.catch(err=>{
-			if(err){consoleMsg("error", err)}
-		});
+			consoleMsg("error", err);
+		})
+	;
 }
 
 function streamSetting_Update(data){
@@ -714,7 +678,7 @@ function doStreamNotif(website, id, contentId){
 
 				doNotif(notifOptions)
 					.then(()=>{
-						ZDK.openTabIfNotExist(getStreamURL(website, id, contentId, true))
+						ZDK.openTabIfNotExist(getStreamURL(website, id, contentId))
 							.catch(err=>{
 								consoleMsg("warn", err);
 							})
@@ -868,7 +832,24 @@ function setIcon(){
 		if (badgeImage !== null) {
 			browser.browserAction.setIcon({
 				path: badgeImage
-			});
+			})
+				.catch(err => {
+					consoleMsg('error', err);
+				})
+			;
+		} else {
+			consoleMsg("warn", "Icon(s) is/are not loaded");
+		}
+	}
+	if (typeof browser.sidebarAction !== "undefined" && typeof browser.sidebarAction.setIcon === "function") {
+		if (badgeImage !== null) {
+			browser.sidebarAction.setIcon({
+				path: badgeImage
+			})
+				.catch(err => {
+					consoleMsg('error', err);
+				})
+			;
 		} else {
 			consoleMsg("warn", "Icon(s) is/are not loaded");
 		}
@@ -883,7 +864,6 @@ appGlobal["setIcon"] = setIcon;
 
 let website_channel_id = /channel::(.*)/;
 appGlobal["website_channel_id"] = website_channel_id;
-let facebookID_from_url = /(?:http|https):\/\/(?:www\.)?facebook.com\/([^\/]+)(?:\/.*)?/;
 let twitterID_from_url = /(?:http|https):\/\/(?:www\.)?twitter.com\/([^\/]+)(?:\/.*)?/;
 
 function checkResponseValidity(website, response){
@@ -1286,7 +1266,7 @@ function channelListEnd(website, id){
 async function processPrimary(id, contentId, website, streamSetting, response){
 	let data = response.json;
 	if(!liveStore.hasLive(website, id, contentId)){
-		liveStore.setLive(website, id, contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "facebookID": "", "twitterID": ""});
+		liveStore.setLive(website, id, contentId, {"liveStatus": {"API_Status": false, "filteredStatus": false, "notifiedStatus": false, "notifiedStatus_Vocal": false, "lastCheckStatus": ""}, "streamName": contentId, "streamStatus": "", "streamGame": "", "streamOwnerLogo": "", "streamCategoryLogo": "", "streamCurrentViewers": null, "streamURL": "", "twitterID": ""});
 	}
 
 	let responseValidity = checkResponseValidity(website, response);

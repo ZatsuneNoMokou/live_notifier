@@ -67,14 +67,11 @@ function parseOldSettings(settingsStr, checkDuplicates=true){
 
 				if (!mapData.get(website).has(id)) {
 					mapData.get(website).set(id, {
-						hide: false,
-						ignore: false,
 						iconIgnore: false,
 						notifyOnline: getPreference("notify_online"),
 						notifyVocalOnline: getPreference("notify_vocal_online"),
 						notifyOffline: getPreference("notify_offline"),
-						notifyVocalOffline: getPreference("notify_vocal_offline"),
-						streamURL: ""
+						notifyVocalOffline: getPreference("notify_vocal_offline")
 					});
 				}
 
@@ -149,6 +146,7 @@ function parseOldSettings(settingsStr, checkDuplicates=true){
 }
 
 
+
 class StreamListFromSetting {
 	/**
 	 *
@@ -166,8 +164,6 @@ class StreamListFromSetting {
 
 		this.PREF_TYPES = {
 			boolean: [
-				"hide",
-				"ignore",
 				"iconIgnore",
 				"notifyOnline",
 				"notifyVocalOnline",
@@ -178,7 +174,6 @@ class StreamListFromSetting {
 				"_updated"
 			],
 			string: [
-				"facebook",
 				"twitter",
 				"vocalStreamName"
 			],
@@ -190,7 +185,7 @@ class StreamListFromSetting {
 			]
 		};
 
-		if(doLoadOnInit===true){
+		if (doLoadOnInit === true) {
 			this.prefData = getPreference("stream_keys_list");
 			this.refresh(checkDuplicates);
 		}
@@ -202,7 +197,7 @@ class StreamListFromSetting {
 		const data = [];
 		let scan_string = "" + str;
 
-		while(this.REG_EXPS.FILTER_ID.test(scan_string) === true){
+		while (this.REG_EXPS.FILTER_ID.test(scan_string) === true) {
 			const filter = scan_string.match(this.REG_EXPS.FILTER_ID),
 				dataId = filter[1]
 			;
@@ -230,14 +225,11 @@ class StreamListFromSetting {
 
 
 
-			hide: false,
-			ignore: false,
 			iconIgnore: false,
 			notifyOnline: getPreference("notify_online"),
 			notifyVocalOnline: getPreference("notify_vocal_online"),
 			notifyOffline: getPreference("notify_offline"),
 			notifyVocalOffline: getPreference("notify_vocal_offline"),
-			streamURL: "",
 
 			statusBlacklist: [],
 			statusWhitelist: [],
@@ -245,7 +237,6 @@ class StreamListFromSetting {
 			gameWhitelist: [],
 
 			vocalStreamName: "",
-			facebook: "",
 			twitter: ""
 		}
 	}
@@ -332,7 +323,8 @@ class StreamListFromSetting {
 
 					if(this.REG_EXPS.URL.test(data)){
 						let [,newData,url] = this.REG_EXPS.URL.exec(data);
-						outputData.streamURL = url;
+						outputData.__needUpdate = true; // TODO DELETE setting
+						// outputData.streamURL = url;
 						data = newData;
 					}
 
@@ -396,6 +388,37 @@ class StreamListFromSetting {
 			if(this.mapDataAll===undefined){
 				this.mapDataAll = streamListFromSetting_cache.mapDataAll;
 			}
+		}
+
+
+
+		/*
+		 * Deleted options migration
+		 */
+		let needUpdate = false;
+		this.mapDataAll.forEach(map => {
+			map.forEach(item => {
+				if (item.hasOwnProperty('__needUpdate') && item.__needUpdate === true) {
+					console.warn('needUpdate')
+					delete item.__needUpdate;
+					needUpdate = true;
+				}
+
+				if (item.hasOwnProperty('ignore')) {
+					console.warn('ignore')
+					delete item.ignore;
+					needUpdate = true;
+				}
+				if (item.hasOwnProperty('hide')) {
+					console.warn('hide')
+					delete item.hide;
+					needUpdate = true;
+				}
+			})
+		});
+
+		if (needUpdate === true) {
+			this.update();
 		}
 	}
 
@@ -518,8 +541,6 @@ class StreamListFromSetting {
 					}
 				}
 
-				let url = (typeof streamSettings.streamURL !== "undefined" && streamSettings.streamURL !== "")? (" " + streamSettings.streamURL) : "";
-
 
 
 				let website_suffixe = "",
@@ -533,7 +554,7 @@ class StreamListFromSetting {
 				if(!newStreamPref.hasOwnProperty(website + website_suffixe)){
 					newStreamPref[website + website_suffixe] = {};
 				}
-				newStreamPref[website + website_suffixe][cleanedId] = `${filtersArr.join(" ")}${url}`;
+				newStreamPref[website + website_suffixe][cleanedId] = `${filtersArr.join(" ")}`;
 			})
 		});
 

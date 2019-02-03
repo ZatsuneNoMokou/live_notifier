@@ -5,7 +5,6 @@
 	"Close": "Fermer",
 	"Add": "Ajouter",
 	"Delete": "Supprimer",
-	"DeleteIgnore": "Supprimer / Ignorer",
 	"Cancel": "Annuler",
 	"Yes": "Oui",
 	"No": "Non",
@@ -43,8 +42,6 @@
 	"Add_this": "Ajouter cela",
 
 	"is_already_configured": "est déjà configuré.",
-	"hidden_ignored_reactivate": "est actuellement caché / ignoré, le réactiver?",
-	"hidden_ignored_reactivated": "était caché / ignoré et a été réactivé",
 
 	"wasnt_configured_but_error_retrieving_data": "n'était pas configuré, mais une erreur s'est produite lors de la récupération des données.",
 	"wasnt_configured_and_have_been_added": "n'était pas configuré, et a été ajouté.",
@@ -70,18 +67,14 @@
 
 	"Addon_have_been_updated": "Extension mise à jour (version {{version}})",
 
-	"customURL_title": "URL personalisée",
-
 	"blacklist_title": "Liste noire",
 	"whitelist_title": "Liste blanche",
 
 	"Status_title": "Status",
 	"Game_title": "Jeu",
 	"twitter_title":"Twitter",
-	"hideStream_title": "Cacher le stream",
-	"ignoreStream_title": "Ignorer le stream",
 	"iconIgnore_title": "Ignorer pour l'icone",
-	"vocalStreamName_title": "Nom de stream pronouncé pour les notifications vocales",
+	"vocalStreamName_title": "Nom de stream prononcé pour les notifications vocales",
 
 	"notifyOnline_title": "Notification lorsque le stream commence",
 	"notifyVocalOnline_title": "Notification vocale lorsque le stream commence",
@@ -92,7 +85,6 @@
 	"vocal_volume_description": "En pourcent",
 
 	"open_optionpage": "Ouvrir la page d'option",
-	"ignoreHideIgnore": "Désactiver temporairement Ignorer/Cacher",
 
 	"stream_keys_list_title": "Clés de streams à notifier",
 	"stream_keys_list_description": "Liste des streams dans une liste séparée par des virgules",
@@ -176,7 +168,7 @@
 	"panel_width_title": "Largeur du panel",
 	"panel_width_description": "Taille en pixels",
 
-	"confirm_addStreamFromPanel_title": "Confirmation pour ajouter et réactiver des streams",
+	"confirm_addStreamFromPanel_title": "Confirmation pour ajouter des streams",
 	"confirm_addStreamFromPanel_description": "Affiche une notification pour confirmer lors d'un ajout ou la réactivation de stream de configuration (depuis le panel)",
 	"confirm_deleteStreamFromPanel_title": "Confirmation pour supprimer des streams",
 	"confirm_deleteStreamFromPanel_description": "Affiche une notification pour confirmer lors d'un ajout de stream de configuration (depuis le panel)",

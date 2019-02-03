@@ -46,7 +46,6 @@ class LiveStore extends DataStore {
 			"streamCategoryLogo": "cl",
 			"streamCurrentViewers": "cv",
 			"streamURL": "u",
-			"facebookID": "f",
 			"twitterID": "t"
 		};
 
@@ -85,7 +84,6 @@ class LiveStore extends DataStore {
 			"streamCategoryLogo": "",
 			"streamCurrentViewers": null,
 			"streamURL": "",
-			"facebookID": "",
 			"twitterID": ""
 		}
 	}
@@ -108,7 +106,6 @@ class LiveStore extends DataStore {
 			"streamCategoryLogo": "",
 			"streamCurrentViewers": null,
 			"streamURL": "",
-			"facebookID": "",
 			"twitterID": ""
 		}
 	}
